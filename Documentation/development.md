@@ -27,17 +27,24 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 | `npm run check` | Run the line-limit check, TypeScript check, and tests. |
 | `npm run package` | Build and create an unsigned Windows portable executable with electron-builder under `release/`. |
 
-`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, and Power; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
+`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power, Stray (roaming Yami), and Caption (the bottom caption pill); `?stage=1&screen=<name>` renders one screen on its own; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
 
 ## Source map
 
-- `src/` — React/TypeScript renderer and styles.
+- `src/` — React/TypeScript renderer and styles. `src/main.tsx` picks the component from `?window=` (main, island, lasso, effect, stray, caption).
+- `src/yami/` — the Yami character: `YamiSpirit.tsx` renders, `motion.ts` holds the tested flame and pose maths, `features.ts` the face and ears, `skins.ts` the colourways.
+- `src/Island.tsx`, `src/Utilities.tsx`, `src/Today.tsx`, `src/MediaPeek.tsx` — the island notch, drawer tabs, Today panel and now-playing card.
+- `src/Loadout.tsx`, `src/LoadoutHub.tsx` — loadout catalogue and the orbiting hub; `src/Stray.tsx`, `src/Caption.tsx` — roaming Yami and caption pill.
+- `src/migrations.ts` — saved-data upgrades run on start.
 - `src/default-settings.ts` — shared settings defaults for desktop and browser fixtures.
 - `src/preview/` — browser-only fixture state and bridge. Preview changes are temporary and are not written to desktop data.
-- `electron/main.ts` — application windows, tray, IPC, state coordination, task schedules, network helpers, and action dispatcher.
+- `electron/main.ts` — application lifetime, main and island windows, tray, IPC routing, state coordination, task schedules, network helpers, and action dispatcher.
 - `electron/requests.ts` — IPC request handler and feature action dispatch.
+- `electron/windows.ts` — sandboxed window factory (`makeWindow`).
+- `electron/overlays.ts` — roaming Yami window, caption pill window, caption notices and tool-activity events; `electron/activity.ts` labels tool calls.
+- `electron/focus-timer.ts` — Today focus countdown; `electron/controls.ts` — volume, brightness and radio controls.
 - `electron/platform.ts` — PowerShell/native-script helpers with request deduplication and short result caching.
-- `electron/metrics.ts` — local hardware and process samples.
+- `electron/metrics.ts` — instant Stats samples with background refresh of slow queries.
 - `electron/weather.ts` — optional city/IP-to-weather lookup.
 - `electron/assistant.ts` — Gemini calls, realtime session, declared model tools, Tavily research, and Wikipedia fallback.
 - `electron/policy.ts` — URL, target, and advanced-tool checks.
@@ -46,7 +53,8 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `native/Host.cs` — Windows message-line host and Win32/UI Automation actions.
 - `native/Media.ps1`, `native/Radios.ps1` — Windows helpers.
 - `tests/` — unit and integration fixtures.
-- `scripts/` — build, startup, verification, icon, and fixture commands.
+- `scripts/` — build, startup, verification, icon (`export-spirit.mjs`, `create-icon.mjs`), performance measurement and fixture commands.
+- `.claude/skills/yami/` — the Yami development skill for coding agents: stack, design language, recipes and the documentation duty.
 
 ## Validation by change type
 

@@ -1,5 +1,7 @@
 # Yami engineering guardrails
 
+**Yami skill:** before working on Yami, and whenever the user mentions "the Yami skill", read `.claude/skills/yami/SKILL.md` and the reference files it points to. It covers the stack, project map, design language, recipes, verification and the required documentation update when you finish.
+
 Yami is a Windows-first, free-first, MIT-licensed desktop companion. The GitHub repository stays private during development. Preserve user chats, settings and provider credentials.
 
 - Every repository text file must contain at most **1,000 lines**. Split by responsibility before reaching the limit. Run `npm run check:lines`. Dependencies, build output, private test artifacts and binary assets are not authored source. Keep the machine-generated lockfile compact after npm updates; do not omit it.

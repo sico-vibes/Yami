@@ -17,3 +17,4 @@ data.json
 *.webm
 *.pcm
 *.dmp
+.claude/settings.local.json
