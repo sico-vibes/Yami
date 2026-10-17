@@ -1,0 +1,89 @@
+# Development, build, and release
+
+Yami’s renderer can be developed in a browser preview, but Windows integration and package checks must run in the Windows desktop app. This project currently targets an unsigned portable Windows build.
+
+## Requirements
+
+- Windows 10/11 for the native host, shortcut hooks, UI Automation, screen capture, wallpaper, system controls, and package verification.
+- Node.js and npm compatible with the versions used by the project’s pinned lockfile.
+- Windows PowerShell and the .NET Framework C# compiler in `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe` for native compilation.
+- Microphone and network access for testing live AI features. Use your own keys entered through Settings; never add keys to an environment file, test fixture, shell history, or documentation.
+
+## Main commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm install` | Install dependencies recorded in `package-lock.json`. |
+| `npm run dev` | Build the native host, start Vite, then run Electron against the development server. |
+| `npm run preview:web` | Start the renderer in a browser with a fixture bridge for UI development; it has no Windows effects or live provider connection. |
+| `npm run build:native` | Compile `native/Host.cs` and copy the PowerShell helper scripts into `native/bin/`. |
+| `npm run docs` | Build the standalone Markdown documentation viewer at `Documentation/index.html` from `Documentation/docs-manifest.json` and its Markdown pages. |
+| `npm run notices` | Collect the installed runtime package graph, upstream license texts and asset attribution into `Documentation/assets/third-party/`. |
+| `npm run check:lines` | Check the repository’s authored-file line limit. Generated/vendor files are handled separately by the script. |
+| `npm run typecheck` | Run TypeScript without emitting output. |
+| `npm run build` | Check the source line limit, build the native host, typecheck, build the Vite renderer, and bundle Electron main/preload. |
+| `npm start` | Start the built Electron app. |
+| `npm test` | Run Node’s built-in test runner on `tests/*.test.mjs`, including policy/provider contract tests and actual native-host tests where supported. |
+| `npm run check` | Run the line-limit check, TypeScript check, and tests. |
+| `npm run package` | Build and create an unsigned Windows portable executable with electron-builder under `release/`. |
+
+`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, and Power; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
+
+## Source map
+
+- `src/` — React/TypeScript renderer and styles.
+- `src/default-settings.ts` — shared settings defaults for desktop and browser fixtures.
+- `src/preview/` — browser-only fixture state and bridge. Preview changes are temporary and are not written to desktop data.
+- `electron/main.ts` — application windows, tray, IPC, state coordination, task schedules, network helpers, and action dispatcher.
+- `electron/requests.ts` — IPC request handler and feature action dispatch.
+- `electron/platform.ts` — PowerShell/native-script helpers with request deduplication and short result caching.
+- `electron/metrics.ts` — local hardware and process samples.
+- `electron/weather.ts` — optional city/IP-to-weather lookup.
+- `electron/assistant.ts` — Gemini calls, realtime session, declared model tools, Tavily research, and Wikipedia fallback.
+- `electron/policy.ts` — URL, target, and advanced-tool checks.
+- `electron/preload.ts` — narrow renderer bridge.
+- `electron/store.ts` — local persistent state and encrypted credentials.
+- `native/Host.cs` — Windows message-line host and Win32/UI Automation actions.
+- `native/Media.ps1`, `native/Radios.ps1` — Windows helpers.
+- `tests/` — unit and integration fixtures.
+- `scripts/` — build, startup, verification, icon, and fixture commands.
+
+## Validation by change type
+
+Pick relevant checks; do not treat them as interchangeable:
+
+- For pure renderer changes, use browser preview and typecheck/build. Review keyboard navigation, focus, reduced motion, and both dark surfaces where affected.
+- For main-process policy or persistence changes, run `npm test`; inspect migration behavior against existing data formats and key preservation.
+- For native code changes, build the C# host and run the focused native check on Windows. Test against a fixture app or a disposable machine state.
+- For screenshot/lasso or shortcut changes, test hold, release, cancel, multi-display coordinates, and focus restoration.
+- For package/resource changes, run the packaged smoke check and verify required external assets resolve after packaging.
+- For provider changes, use mocked contract tests first. A live request requires a user-owned key entered in Yami and must avoid exposing that key in logs or captured evidence. Clearly separate live results from fixtures.
+- Do not run disruptive power or network operations as part of automated verification. Restore changed system state after any focused test.
+
+Verification scripts in the repository include `scripts/verify-dev.mjs`, `scripts/verify-app.mjs`, `scripts/verify-native-input.mjs`, `scripts/verify-wallpaper.mjs`, `scripts/verify-catalogue.mjs`, and `scripts/verify-packaged.mjs`. Read each script before running it: some checks can change the wallpaper, use clipboard state, or start the full app. The checks have fixture and cleanup behavior, but review it against the machine before use.
+
+## Web preview behavior
+
+The preview loads the same renderer pages and styles as Electron but supplies a browser fixture bridge. Keep fixture data stable, obviously synthetic, and separated from production app state. For each new renderer command, define a safe fixture result so the interface can be exercised without granting real local file, power, provider, microphone, or screen access. Do not make the fixture return “success” for an action the browser cannot perform; show a clear simulated result or unavailable state. `npm run preview:web` is for interface feedback, never a release validation path.
+
+## Package layout
+
+Vite output under `dist/` and Electron output under `dist-electron/` are bundled into the app. The package includes `package.json` plus those outputs and copies the compiled native executable and scripts to a `native` resource directory. User-facing wallpaper, city data, and app icons are copied to `assets`. Electron-builder’s Windows target is `portable`, product name is `Yami`, app ID is `in.yami.desktop`, and executable signing is disabled in current configuration.
+
+The resulting portable binary is not signed. A release owner must decide signing and update behavior before publishing broadly. The Yami repository is intentionally private during development even though the source is intended for MIT open-source distribution.
+
+Windows packaging copies the Electron distribution already installed under `node_modules/electron/dist`, keeping the runtime consistent with the lockfile and avoiding a second archive extraction. Build on Windows. A local output override, `--config.directories.output=release/current`, can keep a new build separate from an earlier package.
+
+## Release checklist
+
+1. Review the complete diff, especially data migrations, IPC, confirmations, and native actions.
+2. Confirm no API keys, user conversations, clipboard contents, personal screen captures, `.artifacts`, or local configuration is included.
+3. Generate a dependency and asset license inventory from the exact locked dependency graph. Include required license texts and attribution in the package; see [Asset and third-party provenance](assets-and-licenses.md).
+4. Build and typecheck on Windows, run relevant tests, and verify the portable package rather than only development mode.
+5. Verify fresh install/start, upgrade with existing conversations, settings, and API keys, tray exit/reopen, microphone denial, and missing/unsupported device paths. Model-ID fallback must not reset saved user data or credentials.
+6. Confirm bundled assets load and no reference wallpapers lacking redistribution permission remain in the release.
+7. Record version, commit, artifact digest, validation, platform, known limitations, and provider/model availability caveats in release notes.
+
+## Contribution and security
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) and [SECURITY.md](../SECURITY.md). Report security issues privately while no public advisory process is configured. Yami’s local native host is not a sandbox; terminal access acts with the current user’s privileges.

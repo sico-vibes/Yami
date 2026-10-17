@@ -1,0 +1,61 @@
+# Architecture
+
+Yami is a Windows desktop application with a web renderer and a local Windows integration process. Its architecture keeps operating-system actions and provider credentials out of the renderer.
+
+## Process map
+
+```mermaid
+flowchart LR
+  UI[React renderer] -->|narrow preload API| E[Electron main process]
+  E -->|JSON lines over stdin/stdout| N[C# Windows host]
+  E -->|@google/genai SDK| G[Gemini Developer API]
+  E -->|HTTPS fetch| T[Tavily API]
+  E -->|HTTPS fetch| W[Wikipedia / weather / M-Lab]
+  E -->|local files + DPAPI-backed safeStorage| D[Windows user-data folder]
+```
+
+The diagram shows request paths, not data ownership. Provider services receive the information needed for each feature; see [Security and provider data flow](security-and-providers.md).
+
+## Renderer
+
+`src/` contains the React and TypeScript UI: home chat, voice island, loadout, plans, settings, launcher, and utility panels. Vite serves the renderer during development and emits the production web assets. The renderer has context isolation enabled, Node.js integration disabled, Electron sandboxing enabled, and navigation locked to the app origin. New windows are denied. The app explicitly grants the media permission used for microphone capture.
+
+The renderer calls `window.yami.invoke(method, args)` and subscribes to events through `window.yami.on(callback)`. `electron/preload.ts` exposes only these wrapper functions; it does not expose Node.js objects or raw `ipcRenderer` to page code. The main process verifies that each IPC sender belongs to a registered Yami window, applies validation and permission policy, then dispatches to application logic.
+
+In a web preview, a browser-side fixture bridge substitutes for `window.yami`. It is meant for UI development and does not simulate successful OS effects or real provider behavior.
+
+## Electron main process
+
+`electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. The main process coordinates those modules with the native child process and assistant service.
+
+The assistant and provider policy live in `electron/assistant.ts` and `electron/policy.ts`. `electron/platform.ts` owns reusable PowerShell and native-script helpers; `electron/metrics.ts` samples local hardware; `electron/weather.ts` handles opt-in weather lookup. `electron/store.ts` reads and writes persistent state; it strips key metadata from `data.json`, encrypts API credentials in `credentials.bin`, and encrypts unpinned clipboard text before saving. Writes to the state file use a temporary file followed by rename.
+
+## Provider architecture and extension limits
+
+Provider calls currently live in the Electron main process, apart from the consented M-Lab browser worker. Gemini is wrapped by `@google/genai` in `Assistant`, which handles model discovery, text generation with declared functions, dictation generation, and the Live session. Tavily search/extract and usage are direct `fetch` calls in that assistant/provider flow. Wikipedia is a direct-fetch fallback for research and the optional cached public-news context. Weather and IP geolocation are handled by `electron/weather.ts`; the user-consented M-Lab test runs in the renderer through its worker scripts.
+
+There is no provider-neutral interface, model router, provider plugin API, or server-side proxy today. Provider-specific request formats and errors remain in the existing modules. A future provider adapter should centralize secret lookup, model/capability discovery, request construction, timeout and cancellation behavior, error mapping, data disclosures, usage reporting, and tests. It must preserve the main-process tool authorization boundary and avoid passing credentials or raw IPC to the renderer. Do not document a provider as supported until the adapter and UI can validate it end to end.
+
+## Native Windows host
+
+`native/Host.cs` compiles to `Yami.Native.exe` using the Windows .NET Framework C# compiler. Electron launches it as a hidden child process and speaks a JSON-lines protocol over stdin/stdout. Each request has an increasing ID; the host returns a matching result or error and can emit asynchronous events such as shortcut, foreground-window, or ability events.
+
+The host uses Windows APIs and UI Automation for global shortcuts, foreground window discovery/focus, screen capture, clipboard reads/writes, text insertion, monitor brightness, volume, theme, app settings, media key events, and power operations. `native/Media.ps1` and `native/Radios.ps1` supply media-session and radio/night-light operations. Hardware-specific calls may fail or be unavailable; code reports an error instead of treating the request as success.
+
+The host is not a hardened isolation boundary. It runs as the current Windows user. Treat native inputs as untrusted and validate new methods in the Electron main process as well as in the host.
+
+## IPC and action path
+
+For a model-requested action, `assistant.ts` sends a declared function tool to Gemini, receives a function call, and passes its name and arguments to the main-process action dispatcher. The dispatcher checks the advanced-tool settings, validates required targets and web URLs, and invokes a confirmation when a tool is sensitive. It then dispatches only known actions to the store, Electron shell, or native host. The tool result or error is returned to Gemini; the app only reports success when an operation returns successfully.
+
+Sensitive actions are enumerated in [`electron/policy.ts`](../electron/policy.ts). A pending confirmation expires after a short timeout and is rejected if the user does not approve. Scheduled tasks run with an `unattended` flag, and sensitive actions are rejected from schedules. The allowed scheduled tool set is separately validated before a plan is stored.
+
+## Background work
+
+The main process checks enabled tasks every five seconds and clipboard history every 1.8 seconds. Clipboard polling is skipped when disabled and pauses briefly after Yami writes to the clipboard. The Controls panel refreshes controls/media every six seconds, the island refreshes its media hint every eight seconds, and Stats refreshes hardware data every 2.5 seconds. Main-process hardware metrics are cached for 1.5 seconds. PowerShell/native-script work is deduplicated while in flight; media results are cached for six seconds while active and 30 seconds while inactive. These are implementation intervals, not performance measurements; see the [performance budgets](performance.md).
+
+When the next scheduled task changes, Yami asks Windows to set or cancel a waitable wake timer. This is a best-effort request: Windows policy and hardware decide whether a sleeping system wakes.
+
+## Build layout
+
+Vite builds the renderer to `dist/`. `scripts/build-electron.mjs` bundles the main and preload TypeScript as CommonJS under `dist-electron/`, with Electron provided at runtime. `scripts/build-native.ps1` builds/copies the native host and PowerShell helper scripts under `native/bin/`. `electron-builder` produces the configured unsigned Windows portable artifact and copies runtime assets to external resources.

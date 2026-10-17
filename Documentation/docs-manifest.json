@@ -1,0 +1,94 @@
+{
+  "documents": [
+    {
+      "slug": "index",
+      "title": "Documentation",
+      "group": "Start here",
+      "path": "index.md"
+    },
+    {
+      "slug": "getting-started",
+      "title": "Getting started",
+      "group": "Start here",
+      "path": "getting-started.md"
+    },
+    {
+      "slug": "features-and-settings",
+      "title": "Features and settings",
+      "group": "Using Yami",
+      "path": "features-and-settings.md"
+    },
+    {
+      "slug": "wallpapers",
+      "title": "Starter wallpapers",
+      "group": "Using Yami",
+      "path": "wallpapers.md"
+    },
+    {
+      "slug": "security-and-providers",
+      "title": "Security and provider data flow",
+      "group": "Using Yami",
+      "path": "security-and-providers.md"
+    },
+    {
+      "slug": "architecture",
+      "title": "Architecture",
+      "group": "Project",
+      "path": "architecture.md"
+    },
+    {
+      "slug": "development",
+      "title": "Development and release",
+      "group": "Project",
+      "path": "development.md"
+    },
+    {
+      "slug": "performance",
+      "title": "Performance goals",
+      "group": "Project",
+      "path": "performance.md"
+    },
+    {
+      "slug": "assets-and-licenses",
+      "title": "Asset and third-party provenance",
+      "group": "Project",
+      "path": "assets-and-licenses.md"
+    },
+    {
+      "slug": "third-party-licenses",
+      "title": "Third-party licenses",
+      "group": "Project",
+      "path": "third-party-licenses.md"
+    },
+    {
+      "slug": "roadmap",
+      "title": "Roadmap",
+      "group": "Project",
+      "path": "roadmap.md"
+    },
+    {
+      "slug": "research-and-references",
+      "title": "Research and references",
+      "group": "Project",
+      "path": "research-and-references.md"
+    },
+    {
+      "slug": "design-system",
+      "title": "Design system",
+      "group": "Reference",
+      "path": "reference/design-system.md"
+    },
+    {
+      "slug": "product-brief",
+      "title": "Product brief",
+      "group": "Reference",
+      "path": "reference/product-brief.md"
+    },
+    {
+      "slug": "verification-history",
+      "title": "Verification history",
+      "group": "Reference",
+      "path": "reference/verification-history.md"
+    }
+  ]
+}

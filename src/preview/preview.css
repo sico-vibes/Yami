@@ -1,0 +1,127 @@
+.preview-workbench {
+  min-height: 100vh;
+  background: #111513;
+  color: #e7ece8;
+  overflow: auto;
+  font:
+    14px "Rubik Variable", Rubik,
+    sans-serif;
+}
+.preview-toolbar {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  border-bottom: 1px solid #ffffff13;
+  background: #171d1a;
+  flex-wrap: wrap;
+}
+.preview-toolbar > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+.preview-toolbar b {
+  font-size: 20px;
+}
+.preview-toolbar span {
+  color: #a6b3aa;
+}
+.preview-toolbar label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #b8c6bd;
+}
+.preview-toolbar select,
+.preview-toolbar button {
+  border: 1px solid #ffffff24;
+  background: #253028;
+  color: #eff4ed;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font: inherit;
+}
+.preview-toolbar a {
+  color: #d5bf80;
+  text-decoration: none;
+}
+.preview-notice {
+  padding: 14px 24px;
+  color: #a5b4aa;
+  font-size: 12px;
+}
+.preview-notice span {
+  float: right;
+}
+.preview-stage {
+  margin: 8px auto 32px;
+  box-shadow: 0 24px 80px #0006;
+  border: 1px solid #ffffff12;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.preview-main {
+  width: min(1160px, calc(100vw - 48px));
+  height: 790px;
+  min-width: 850px;
+}
+.preview-stage .app-shell {
+  height: 100%;
+  width: 100%;
+}
+.preview-island {
+  width: 960px;
+  min-height: 650px;
+  height: 650px;
+  background:
+    linear-gradient(#1e343930, #15231d60),
+    url("/wallpapers/starter-01.jpg") center/cover;
+}
+.preview-island .island-window {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 920px;
+  height: 650px;
+}
+.preview-workbench .preview-stage .island-window:not(.expanded) {
+  height: 200px;
+}
+.preview-stage .island-toast {
+  max-width: 80%;
+}
+@media (max-width: 700px) {
+  .preview-notice span {
+    display: none;
+  }
+  .preview-toolbar {
+    padding: 12px;
+  }
+  .preview-stage {
+    margin-left: 12px;
+  }
+  .preview-toolbar a {
+    font-size: 12px;
+  }
+}
+.preview-stage iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+.preview-frame .island-window {
+  width: 100%;
+  height: 100%;
+}
+.preview-frame[data-window="island"] body {
+  background:
+    linear-gradient(#1e343930, #15231d60),
+    url("/wallpapers/starter-01.jpg") center/cover;
+  min-height: 100vh;
+}

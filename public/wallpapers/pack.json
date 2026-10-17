@@ -1,0 +1,64 @@
+{
+  "name": "Yami Starter",
+  "version": 1,
+  "dimensions": {
+    "width": 1920,
+    "height": 1280
+  },
+  "medium": "AI-generated original environmental illustrations",
+  "generation": "Built-in image_gen tool; generated at 1536x1024 and exported as 1920x1280 high-quality JPEGs with bicubic resampling.",
+  "rights": "Generated for Yami. Included with the project's MIT distribution to the extent copyright applies; no third-party artwork, characters, logos or reference images were used.",
+  "promptTemplate": "Original soothing painterly Japanese environmental desktop landscape, 3:2, no humans, characters, creatures, text, logos, borders or watermark.",
+  "wallpapers": [
+    {
+      "file": "starter-01.jpg",
+      "name": "moonlit fuji",
+      "scene": "A distant Japanese volcanic mountain above a still lake at blue hour, slender moon and a mist bank, indigo and cool silver. Sparse reeds in the near foreground, generous calm sky."
+    },
+    {
+      "file": "starter-02.jpg",
+      "name": "rainy kyoto",
+      "scene": "An empty narrow Kyoto lane after gentle rain at dusk, wooden machiya facades, muted amber paper lantern glow reflecting in stone pavement, soft blue air, no readable signs."
+    },
+    {
+      "file": "starter-03.jpg",
+      "name": "bamboo whisper",
+      "scene": "An immersive Japanese bamboo grove in morning mist, tall jade stalks and pale shafts of light, an empty moss path receding gently, hand-painted layered depth."
+    },
+    {
+      "file": "starter-04.jpg",
+      "name": "sakura river",
+      "scene": "A quiet river beneath arching cherry blossoms in the Japanese countryside at early dawn, blush petals on dark turquoise water, pale apricot horizon, a tiny distant footbridge with nobody on it."
+    },
+    {
+      "file": "starter-05.jpg",
+      "name": "snowy onsen",
+      "scene": "An empty outdoor Japanese stone hot spring in a snowy cedar valley, blue twilight, warm steam and a softly illuminated timber shelter, tranquil winter composition."
+    },
+    {
+      "file": "starter-06.jpg",
+      "name": "coastal torii",
+      "scene": "A solitary vermilion torii on a quiet rocky Japanese coast under a pastel lavender sunset, glassy tidal water and broad hazy horizon, restrained color and expansive breathing room."
+    },
+    {
+      "file": "starter-07.jpg",
+      "name": "moss garden",
+      "scene": "A peaceful Japanese moss garden after rain, rounded stones and a small stone lantern beneath deep maple shade, warm flecks of afternoon sun, fern textures, contemplative green palette."
+    },
+    {
+      "file": "starter-08.jpg",
+      "name": "autumn terraces",
+      "scene": "Rolling Japanese mountain rice terraces in late autumn, copper maples and gold grasses, distant layered violet mountains under thin cloud, an empty winding path, broad painterly scenic view."
+    },
+    {
+      "file": "starter-09.jpg",
+      "name": "starry ridge",
+      "scene": "An empty Japanese alpine ridge beneath a clear star-filled night, luminous Milky Way very softly painted, distant valley lights, silhouettes of pines and deep navy mountains, soothing dark wallpaper."
+    },
+    {
+      "file": "starter-10.jpg",
+      "name": "floating islands",
+      "scene": "Dreamlike small forested Japanese islands on a vast misty inland sea at sunrise, pale jade water and soft peach clouds, a distant wooden shrine roof partly hidden in trees, quiet atmospheric landscape."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-17T11:14:53.162Z",
+  "build": "packaged",
+  "os": "10.0.26300",
+  "cpu": "AMD Ryzen 5 5600X 6-Core Processor             ",
+  "logicalCPUs": 12,
+  "systemRAMGB": 31.9,
+  "scenario": "Hidden main window, collapsed island, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+  "method": "Windows Win32_PerfFormattedData_PerfProc_Process for the full current parent/child tree. WorkingSet includes shared pages; privateWorkingSet is resident private RAM. CPU is normalized by logical CPU count. Snapshots do not prove a peak or 15-minute stability.",
+  "samples": [
+    {
+      "at": "2026-10-17T11:14:40.546Z",
+      "workingSetMB": 535.9,
+      "privateWorkingSetMB": 165.8,
+      "cpuPercentOfMachine": 0,
+      "processCount": 8
+    },
+    {
+      "at": "2026-10-17T11:14:46.823Z",
+      "workingSetMB": 536.1,
+      "privateWorkingSetMB": 165.9,
+      "cpuPercentOfMachine": 0,
+      "processCount": 8
+    },
+    {
+      "at": "2026-10-17T11:14:53.162Z",
+      "workingSetMB": 536.2,
+      "privateWorkingSetMB": 165.9,
+      "cpuPercentOfMachine": 0,
+      "processCount": 8
+    }
+  ],
+  "runs": 1
+}

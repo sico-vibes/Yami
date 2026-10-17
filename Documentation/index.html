@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Yami — Documentation</title>
+    <link rel="icon" href="assets/brand/yami-icon.png" />
+    <link rel="stylesheet" href="viewer/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="#index"
+        ><img
+          src="assets/brand/yami-icon.png"
+          alt=""
+          width="32"
+          height="32"
+        />Yami <span>Documentation</span></a
+      ><button
+        id="menu-toggle"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+      >
+        ☰</button
+      ><button id="search-trigger">
+        Search documentation <kbd>Ctrl K</kbd></button
+      ><a
+        class="repo"
+        href="https://github.com/sico-vibes/Yami"
+        target="_blank"
+        rel="noreferrer"
+        >GitHub ↗</a
+      >
+    </header>
+    <div class="docs-layout">
+      <aside class="sidebar">
+        <div class="edition">WINDOWS COMPANION <span>v0.1</span></div>
+        <nav id="navigation" aria-label="Documentation"></nav>
+        <div class="sidebar-footer">
+          <span class="status-dot"></span>Free-first · MIT licensed
+          <p>Windows-first. Under development.</p>
+        </div>
+      </aside>
+      <main id="main" tabindex="-1">
+        <div id="breadcrumb"></div>
+        <article id="article"></article>
+        <nav
+          class="page-neighbors"
+          id="neighbors"
+          aria-label="Adjacent pages"
+        ></nav>
+        <footer class="article-footer">
+          Yami is in development. Performance targets and planned features are
+          labeled throughout.
+        </footer>
+      </main>
+      <aside class="outline">
+        <span>ON THIS PAGE</span>
+        <nav id="toc" aria-label="On this page"></nav>
+        <a href="#development" class="edit-link">Contribute to these docs ↗</a>
+      </aside>
+    </div>
+    <dialog id="search-dialog">
+      <div class="search-top">
+        <input
+          id="search"
+          type="search"
+          placeholder="Search guides, APIs, and features…"
+          aria-label="Search documentation"
+        /><button id="search-close" aria-label="Close search">Esc</button>
+      </div>
+      <div id="search-results"></div>
+      <p class="search-hint">
+        Search runs locally. No queries leave this viewer.
+      </p>
+    </dialog>
+    <script src="viewer/content.js"></script>
+    <script src="viewer/app.js"></script>
+  </body>
+</html>

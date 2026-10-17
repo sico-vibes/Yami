@@ -1,0 +1,141 @@
+.app-shell:before {
+  content: "";
+  position: absolute;
+  inset: -60px;
+  background-image: var(--wallpaper);
+  background-size: cover;
+  background-position: center;
+  filter: blur(45px) brightness(0.22) saturate(0.7);
+  opacity: 0.48;
+  pointer-events: none;
+  z-index: 0;
+}
+.titlebar,
+.main-content {
+  position: relative;
+  z-index: 1;
+}
+.loadout-page.catalogue-open {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  padding: 16px 20px 10px;
+  background: rgba(18, 16, 13, 0.88);
+  backdrop-filter: blur(30px);
+  height: 100vh;
+}
+.catalogue-open .card-stage {
+  height: calc(100% - 50px);
+  padding-bottom: 25px;
+}
+.catalogue-open .card-deck {
+  width: clamp(250px, 31.1vw, 360px);
+  height: clamp(335px, 62vh, 485px);
+}
+.catalogue-open .card-art {
+  height: 35%;
+  min-height: 110px;
+}
+.catalogue-open .loadout-card h3 {
+  font-size: clamp(23px, 2.9vw, 30px);
+}
+.catalogue-open .loadout-card p {
+  font-size: clamp(12px, 1.5vw, 15px);
+  padding: 0 5px;
+}
+.catalogue-open .loadout-card > button {
+  min-height: 45px;
+  font-size: 12px;
+}
+.catalogue-open .deck-controls {
+  bottom: 6%;
+}
+.catalogue-open .trigger-row {
+  bottom: 18px;
+}
+.catalogue-open .loadout-card:not([data-front="true"]) > * {
+  visibility: hidden;
+}
+.wallpaper-fan > button:first-child:not(:has(~ button.selected)) {
+  width: 275px;
+  min-width: 275px;
+  filter: brightness(1);
+}
+html[data-reduced="true"] *,
+html[data-reduced="true"] *:before,
+html[data-reduced="true"] *:after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+  .spirit,
+  .spirit-eyes,
+  .spirit-body {
+    animation: none !important;
+  }
+}
+@media (max-width: 950px) {
+  .settings-layout {
+    grid-template-columns: 235px minmax(0, 1fr);
+    gap: 20px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .settings-sidebar nav button {
+    font-size: 14px;
+  }
+  .setting-row {
+    gap: 12px;
+  }
+  .setting-row strong {
+    font-size: 14px;
+  }
+  .setting-row p {
+    font-size: 11px;
+  }
+  .setting-control .compact-input {
+    width: 155px;
+  }
+  .desk-grid {
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 18px;
+  }
+  .memory-page,
+  .plans-page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
+.mini-media {
+  position: absolute;
+  left: 50%;
+  top: 68px;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 26px;
+  border-radius: 7px;
+  background: #070707;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  font-size: 10px;
+  color: #c4d0d8;
+  box-shadow: 0 2px 5px #0004;
+}
+.mini-media span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.mini-media:active {
+  transform: translateX(-50%);
+}
+.app-shell:has(.catalogue-open) > .titlebar,
+.app-shell:has(.catalogue-open) > .bottom-dock {
+  visibility: hidden;
+}

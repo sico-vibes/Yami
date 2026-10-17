@@ -1,0 +1,94 @@
+{
+  "name": "yami",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A Windows voice companion",
+  "author": "Yami contributors",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build:native": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run check:lines && npm run notices && npm run build:native && npm run typecheck && vite build && node scripts/build-electron.mjs",
+    "start": "node scripts/start.mjs",
+    "test": "node --experimental-transform-types --test tests/*.test.mjs",
+    "package": "npm run build && electron-builder --win portable",
+    "preview:web": "node scripts/preview-web.mjs",
+    "docs": "node scripts/build-docs.mjs",
+    "check:lines": "node scripts/check-lines.mjs",
+    "check": "npm run check:lines && npm run typecheck && npm run build:native && npm test",
+    "notices": "node scripts/collect-notices.mjs"
+  },
+  "build": {
+    "appId": "in.yami.desktop",
+    "productName": "Yami",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "native/bin",
+        "to": "native"
+      },
+      {
+        "from": "public",
+        "to": "assets",
+        "filter": [
+          "wallpapers/**/*",
+          "cities.json",
+          "yami-icon.png"
+        ]
+      },
+      {
+        "from": "Documentation/assets/third-party",
+        "to": "licenses"
+      }
+    ],
+    "win": {
+      "icon": "public/yami.ico",
+      "target": "portable",
+      "signExecutable": false
+    },
+    "electronDist": "node_modules/electron/dist"
+  },
+  "dependencies": {
+    "@fontsource-variable/rubik": "^5.3.0",
+    "@google/genai": "^2.30.0",
+    "@m-lab/ndt7": "^0.1.5",
+    "@phosphor-icons/web": "^2.1.2",
+    "motion": "^14.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "systeminformation": "^5.33.15"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "dompurify": "^3.4.17",
+    "electron": "^44.8.0",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "marked": "^18.1.1",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sico-vibes/Yami.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sico-vibes/Yami/issues"
+  },
+  "homepage": "https://github.com/sico-vibes/Yami#readme"
+}

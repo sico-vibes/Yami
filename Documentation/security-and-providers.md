@@ -1,0 +1,116 @@
+# Security and provider data flow
+
+Yami runs locally and has no first-party telemetry, subscription server, or hosted application backend. Online features make direct requests from the Windows app to the destinations below. Provider terms, retention, training, prices, free quotas, model availability, and regional access belong to those services and can change. A free tier is account- and country-dependent and is not unlimited. The in-app disclosure notes that Google may use data submitted through the free tier to improve its products, subject to the user’s region and current Google terms.
+
+## Provider connections
+
+| Feature | Library / endpoint | Data sent | When it runs |
+| --- | --- | --- | --- |
+| Gemini chat, vision, tool calls, model discovery | `@google/genai` 2.30.0; Gemini Developer API `models.generateContent` and `models.list` | User prompt, recent conversation, optional selected image, function declarations and responses; the system prompt includes user name, time zone and behavior. If context or memory is enabled, their configured content is also included. | Chat, selected-image ask, key validation, or available-model refresh. |
+| Gemini Live voice | `@google/genai` 2.30.0; `client.live.connect(...)` against the Gemini Live API | Microphone audio, conversation/system context, tool declarations and tool results; returned speech audio and transcription go back to the app. | While the user holds the voice shortcut or starts an explicit voice turn. Audio is streamed to Google. |
+| Gemini dictation | `@google/genai` `models.generateContent` with audio inline data | Dictation recording and a fixed transcription instruction. | A dictation shortcut is released. The transcript is inserted into the original focused field. |
+| Tavily key validation and usage | `GET https://api.tavily.com/usage` with `Authorization: Bearer <key>` | API key in the HTTPS authorization header. | When saving a Tavily key, or when refreshing displayed usage. |
+| Tavily quick/deep search | `POST https://api.tavily.com/search` with JSON body (`query`, `search_depth`, `max_results: 5`, `include_raw_content: false`) | Research question and (for deep research) two Gemini-generated complementary queries. | Only when the user asks Yami for web research; deep mode only on explicit request. |
+| Tavily deep extraction | `POST https://api.tavily.com/extract` with JSON body (`urls`, `extract_depth: "basic"`) | Up to five result URLs from that research request. | After a deep search returns sources. |
+
+Yami configures the SDK with the user’s key and does not override its base URL. With the pinned `@google/genai` 2.30.0 SDK default, text/model-list calls use the Gemini Developer API host `https://generativelanguage.googleapis.com` and API version `v1beta`: generation is the SDK `models.generateContent` method on `models/{model}:generateContent`, while discovery uses `models.list` on `models`. Live voice uses a WebSocket under `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent`; the SDK handles connection and authentication. These are SDK-resolved routes from the installed source, not URLs hard-coded in Yami. Current source defaults are `gemini-3.8-flash` for text and `gemini-3.8-live` for voice. Google’s available IDs may change; key setup discovers models for the user’s own account and can select another compatible text/live model.
+
+For Tavily, current source issues one basic-depth search for a quick query and three advanced-depth searches for deep research. It counts two credits per deep search and one credit after successful extraction, for an implementation estimate of seven credits when extraction succeeds. The in-app copy currently describes 1,000 monthly free credits with no card; confirm current country eligibility, plan, and account usage directly with Tavily. The provider is authoritative for actual usage and plan rules. If extraction fails, the search may still return with fewer credits. Without a Tavily key, search goes to `https://en.wikipedia.org/w/api.php` using query parameters for Wikipedia search and returns up to five snippets. Wikipedia-derived public news context may also be loaded once per local day when AI context is enabled.
+
+## Gemini request lifecycle
+
+1. The app verifies that a Gemini key exists in the main-process store, then creates a `GoogleGenAI` client from `@google/genai` with that key. Request retry options are configured for up to three attempts.
+2. For text chat, the app stores the user turn, constructs history from recent messages, builds the system instruction (personality, user name, current date/time and time zone, safety rules, recent messages, and any enabled memory/context), and calls `models.generateContent` with the configured text model and fixed tool declarations.
+3. When Gemini returns a function call, the main process validates the action and its settings. Sensitive tools show the app’s confirmation dialog; if approved, only then does the dispatcher call the native host or local feature. The result or error is sent back as the function response and Gemini may continue. Text chat has a maximum of eight generation/tool-call rounds per user request.
+4. For live voice, the app connects with `client.live.connect` and waits for setup completion before streaming microphone frames. Audio activity start/end boundaries are explicit. The Live API may call the same tools; the main process executes them and returns `sendToolResponse` results. When the user finishes, the session closes and transcripts are saved locally.
+5. Dictation is a separate audio `models.generateContent` request with an instruction to transcribe and return only final text. It does not run recognized speech as an instruction. The app inserts the transcript into the original focused field through the native host and stores the transcript in chat history.
+
+## Exact declared Gemini tools
+
+Tool identifiers below are the function names in `electron/assistant.ts`. The policy and dispatcher on the local main process decide whether the requested operation can run; model output alone never bypasses those checks.
+
+| Function | Behavior and limits | User gate |
+| --- | --- | --- |
+| `open_app` | Launch or focus an installed Windows application. | No confirmation. |
+| `open_url` | Open a URL after HTTP/HTTPS scheme and embedded-credential checks. | No confirmation. |
+| `search_web` | Research with Tavily or Wikipedia fallback; deep mode is explicit. | No additional prompt beyond the user’s research request. |
+| `search_site` | Open search results on YouTube, Google, Amazon, Bing, or DuckDuckGo. | No confirmation. |
+| `list_windows` | Return visible windows from the native host. | No confirmation. |
+| `focus_app` | Focus a matching window title. | No confirmation; a nonempty target is required. |
+| `close_app` | Close a matching window. | Always confirms. |
+| `move_window` | Move/resize a matching window using supplied bounds. | No confirmation; a nonempty target is required. |
+| `read_screen` | Read accessible visible control names in the foreground UI; skips password and off-screen nodes and caps traversal at 350 entries. | No confirmation. |
+| `click_control` | Invoke/select/toggle an enabled accessible control by exact name. | Always confirms. |
+| `click_desktop` | Click a raw screen coordinate. | Off by default; enable Raw desktop automation and confirm every click. |
+| `insert_text` | Paste supplied text into the foreground field after capturing/restoring the original focus target. | Always confirms. The separate dictation insertion path is internal and not a model tool. |
+| `set_volume` | Set master output volume from 0 to 100. | No confirmation. |
+| `set_brightness` | Set monitor brightness from 0 to 100 and verify the observed value. | No confirmation; fails if monitor brightness is unsupported. |
+| `set_theme` | Change Windows app/system light or dark theme. | No confirmation. |
+| `media_control` | Send play/pause, next, or previous media key events. | No confirmation. |
+| `add_todo` | Add a local to-do. | No confirmation. |
+| `complete_todo` | Complete the first matching to-do title. | No confirmation. |
+| `schedule_task` | Store a future reminder or an allowlisted action with `none`, `daily`, or `weekly` repetition; time must include a zone. | Only validated scheduled actions can run unattended. |
+| `remember` | Save a requested local fact. | Requires Memory to be enabled. |
+| `list_files` | List up to 150 entries from a user folder. | Home-folder path restrictions apply. |
+| `read_file` | Read a UTF-8 text file up to 1 MiB. | Home-folder path restrictions apply. |
+| `write_file` | Create or replace a text file. | Always confirms; home-folder path restrictions apply. |
+| `move_file` | Move a file to a destination. | Always confirms; home-folder path restrictions apply. |
+| `delete_file` | Move a file to the Windows Recycle Bin. | Always confirms; home-folder path restrictions apply. |
+| `run_terminal` | Run a PowerShell command for up to 30 seconds; returns truncated stdout/stderr. | Off by default; enable Terminal commands and confirm every command. |
+
+Scheduled work is narrower than the full tool set. The accepted inner actions are `remind`, `open_app`, `open_url`, `search_site`, `set_volume`, `media_control`, or `routine` with one to ten nested allowed actions. Sensitive operations are rejected from unattended execution.
+
+## Other network destinations
+
+- **Weather:** When enabled, an explicitly entered city is resolved against bundled GeoNames data. Without a city, Yami requests approximate IP location from `https://ipwho.is/`, then calls `https://api.met.no/weatherapi/locationforecast/2.0/compact` with rounded latitude and longitude. Location and weather are disabled by default.
+- **Speed test:** The user must confirm before running the bundled `@m-lab/ndt7` client and its worker scripts. M-Lab publishes results, including the user’s IP address, in an open dataset; the test transfers real data.
+- **External links:** the app opens HTTP or HTTPS URLs in the default browser. It rejects other protocols and URLs containing embedded credentials.
+- **App shortcuts:** launcher destinations include websites such as Gmail, YouTube, and Amazon. No account login information is read by Yami.
+- **Optional location, microphone, and OS settings:** opening Windows settings is a local operation. Microphone capture requires the user to begin a voice/dictation action and is subject to Windows permission.
+
+## Local storage
+
+The data directory is Electron’s Windows `userData` path, normally under `%APPDATA%\yami`. A development override can set `YAMI_DATA_DIR` for isolated verification. The state file is `data.json`; credentials are stored separately in `credentials.bin`.
+
+When loaded data contains the retired `gemini-2.5-flash` or `gemini-2.5-flash-native-audio-preview-12-2025` setting, the current store replaces that model identifier with its supported current default. This model-setting migration does not clear conversations, other state, or provider credentials.
+
+| Data | Storage / behavior |
+| --- | --- |
+| Settings, recent apps, app favorites, loadout, conversations, tasks, memories, snippets, usage counters, wallpaper paths | `data.json`, written locally with a temp-file/rename pattern. |
+| Gemini and Tavily API keys | Encrypted with Electron `safeStorage` backed by Windows protection; stored in `credentials.bin`, never placed in renderer state or exported. Yami refuses to save keys if encryption is unavailable. |
+| Unpinned clipboard entries | Encrypted with `safeStorage` before being serialized to `data.json`. |
+| Pinned clipboard entries | Saved as readable text in `data.json` so they can remain directly usable. Pin only material you are comfortable storing unencrypted in your user profile. |
+| User-selected wallpapers | The filesystem path is stored; the selected image remains wherever the user keeps it. |
+| Exported file | Includes settings, conversations, plans, memories, and other app state as implemented; excludes credentials and clipboard history. |
+
+Yami supports export, history clearing, clipboard clearing, and a separately confirmed full local-data deletion. Clearing all data also removes the provider keys. Do not use exports as secret backups: they are not encrypted by Yami.
+
+Clipboard history is enabled by default, polls every 1.8 seconds, stores a maximum of 500 entries, and removes unpinned entries after a setting of 1, 7, 14, or 30 days. The default is 30 days. It skips empty/duplicate/oversized strings, common API-key patterns, Windows private clipboard markers, password fields, a set of known password-manager process names, and windows whose title resembles a banking product. This is best-effort application detection, not a guarantee that every sensitive window is recognized. Disable clipboard history if that protection is insufficient.
+
+## Context switches
+
+- **Memory** is enabled by default. Saved user facts stay local and are added to Gemini’s prompt when memory remains enabled. You can edit or delete individual memories or clear all memories.
+- **App context** is enabled by default. At conversation setup, Yami may send open application process names (not window titles), unfinished to-dos, and cached Wikipedia news text to Gemini. The UI setting is **Settings → Privacy → Let it see what’s going on**.
+- **Screen selection** is sent only after the user explicitly draws and submits a lasso selection to Gemini. Screen capture itself occurs locally first.
+- **Weather and approximate IP location** are opt-in and disabled by default.
+- **Speed test** has a separate per-run disclosure and consent.
+
+## Action permissions and confirmations
+
+The model cannot execute arbitrary named functions. `electron/assistant.ts` publishes a fixed Gemini function-declaration list; the Electron main process dispatches a matching allowlist and returns the result or error.
+
+Always-confirm actions are: close a window, activate a UI Automation control, click a raw screen coordinate, insert arbitrary text into a foreground field, write/replace a file, move a file, recycle a file, and run a PowerShell command. Power actions (lock, sleep, restart, shutdown) also require a separate explicit confirmation in the app. Confirmation requests expire after two minutes; declining or timing out cancels the action. Terminal and raw coordinate automation are disabled by default and each also requires its respective setting to be enabled.
+
+App launch, opening a validated HTTP/HTTPS link, supported site search, focus/move window, accessible screen read, volume, supported brightness, theme, media control, to-do changes, and user-requested memory actions do not use the confirmation dialog. Device support and actual returned results still control whether Yami reports success. Scheduled actions must be from a narrower allowlist: reminder, app launch, URL open, site search, volume, media control, or a routine containing up to ten allowed steps. File changes, arbitrary UI clicks, power, terminal, and raw desktop clicks cannot be scheduled unattended.
+
+File listing, reading, writing, moving, and recycling are restricted to paths beneath the current user’s home directory. The main process excludes the app-data, `.ssh`, `.aws`, and `.codex` top-level folders and files with `.env`, `.pem`, or `.key` extensions. This path check does not turn the native host into a filesystem sandbox.
+
+The assistant prompt instructs the model to treat web pages, files, screen text, and tool results as untrusted; not reveal secrets; clarify ambiguous actions; and not claim success without a successful result. Prompt instructions supplement, but do not replace, main-process validation and confirmation.
+
+## Practical security limits
+
+Yami acts as the current Windows user. The native host is not an OS sandbox. PowerShell access can do anything that account can do once explicitly enabled and confirmed; understand the exact command shown before approval. Window focus, UI Automation, power timers, brightness, and media features depend on the desktop session, hardware, Windows policy, and target application.
+
+API-key encryption protects the local secret at rest with Windows user-bound storage; it is not protection from malware running as the same user or from an unlocked session. Clipboard, text entry, screenshot, and app detection are feature-specific best efforts, not a general data-loss prevention system.
+
+Read the [Google Gemini API terms](https://ai.google.dev/gemini-api/terms), [Google Gemini API documentation](https://ai.google.dev/gemini-api/docs), [Tavily API reference](https://docs.tavily.com/documentation/api-reference/introduction), and [Tavily plan details](https://tavily.com/#pricing) for current provider rules. This guide is a source-derived description of Yami’s calls, not provider legal advice.
