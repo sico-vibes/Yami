@@ -119,9 +119,19 @@
   width: 100%;
   height: 100%;
 }
-.preview-frame[data-window="island"] body {
+.preview-frame[data-window="island"] body,
+.preview-frame[data-window="stray"] body,
+.preview-frame[data-window="caption"] body {
   background:
     linear-gradient(#1e343930, #15231d60),
     url("/wallpapers/starter-01.jpg") center/cover;
   min-height: 100vh;
+}
+/* Match the 240×180 desktop window so the bubble and hit area line up. */
+.preview-frame .stray-window {
+  inset: auto;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 180px;
 }

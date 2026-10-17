@@ -7,6 +7,7 @@ export function createFixture(): State {
       name: "Yami",
       location: "Kyoto",
       clipboardEnabled: false,
+      weatherEnabled: true,
     },
     todos: [
       { id: "todo-1", title: "Plan a quiet afternoon", done: false },
@@ -48,7 +49,7 @@ export function createFixture(): State {
     currentWallpaper: "/wallpapers/starter-01.jpg",
     clipboard: [],
     embers: 67,
-    owned: ["hitodama", "chad", "Charon"],
+    owned: ["yami", "chad", "Charon"],
     usage: {},
     keys: { gemini: false, tavily: false, tavilyHint: "" },
   };

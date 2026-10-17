@@ -202,7 +202,7 @@ export function Settings({
                 "Personality",
                 "Choose a personality in your loadout.",
                 <span className="muted">
-                  {s.personality === "chad" ? "True Chad" : "Custom"}
+                  {s.personality === "chad" ? "Alley Cat" : "Custom"}
                 </span>,
               )}
               {s.personality === "custom" &&
@@ -269,6 +269,11 @@ export function Settings({
                 "Reduced motion",
                 "Keep transitions and the spirit still.",
                 toggle("reducedMotion", "Reduced motion"),
+              )}
+              {row(
+                "Let Yami roam",
+                "Yami floats on your desktop, dodges the cursor and naps when left alone.",
+                toggle("roam", "Let Yami roam"),
               )}
             </div>
             <h3 className="group-title">Advanced tools</h3>

@@ -3,6 +3,7 @@ import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
 import { Empty, Icon, IconButton } from "./ui";
 import { Launcher } from "./Launcher";
+import { Today } from "./Today";
 export const utilityTabs: UtilityTab[] = [
   "Controls",
   "Today",
@@ -17,14 +18,32 @@ export function Utilities({
   tab,
   setTab,
   report,
+  onClose,
 }: {
   state: State;
   tab: UtilityTab;
   setTab: (t: UtilityTab) => void;
   report: (m: string) => void;
+  onClose?: () => void;
 }) {
+  const [hint, setHint] = useState(true);
+  useEffect(() => {
+    const id = setTimeout(() => setHint(false), 2600);
+    return () => clearTimeout(id);
+  }, []);
   return (
-    <div className="utility-shell">
+    <div
+      className="utility-shell"
+      onWheel={(e) => {
+        // Scrolling up past the top tucks the drawer back into the island.
+        const content = (e.target as HTMLElement).closest(".utility-content");
+        if (e.deltaY < -20 && (!content || content.scrollTop === 0))
+          onClose?.();
+      }}
+    >
+      {hint && onClose && (
+        <div className="scroll-hint">Scroll ↑ to tuck away</div>
+      )}
       <nav className="utility-tabs">
         {utilityTabs.map((t) => (
           <button
@@ -361,7 +380,9 @@ function Stats({ report }: { report: (m: string) => void }) {
           disabled={testing}
           onClick={async () => {
             if (import.meta.env.VITE_YAMI_PREVIEW === "true") {
-              report("Speed tests run only in the Windows app. No network test was started.");
+              report(
+                "Speed tests run only in the Windows app. No network test was started.",
+              );
               return;
             }
             if (
@@ -585,117 +606,6 @@ function Power({ report }: { report: (m: string) => void }) {
           <b>{title}</b>
         </button>
       ))}
-    </div>
-  );
-}
-function Today({
-  state,
-  report,
-}: {
-  state: State;
-  report: (m: string) => void;
-}) {
-  const [text, setText] = useState(""),
-    [weather, setWeather] = useState<any>();
-  useEffect(() => {
-    if (state.settings.weatherEnabled)
-      api("weather")
-        .then(setWeather)
-        .catch((e) => report(e.message));
-  }, [state.settings.weatherEnabled]);
-  return (
-    <div className="today-grid">
-      <div className="today-heading">
-        <span>
-          {new Date().toLocaleDateString([], {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
-        </span>
-        {weather && (
-          <b>
-            {Math.round(weather.temperature)}° · {weather.place}
-          </b>
-        )}
-      </div>
-      <section>
-        <h3>
-          To-do list{" "}
-          <small>
-            {state.todos.filter((t) => t.done).length}/{state.todos.length}
-          </small>
-        </h3>
-        <form
-          className="inline-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (text.trim())
-              void api("todo.add", { title: text.trim() }).then(() =>
-                setText(""),
-              );
-          }}
-        >
-          <input
-            placeholder="Add a to-do"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <IconButton
-            icon="plus"
-            label="Add to-do"
-            onClick={() => {
-              if (text.trim())
-                void api("todo.add", { title: text.trim() }).then(() =>
-                  setText(""),
-                );
-            }}
-          />
-        </form>
-        {state.todos.map((t) => (
-          <div className="todo-row" key={t.id}>
-            <button
-              className={`check-circle ${t.done ? "checked" : ""}`}
-              aria-label={t.done ? "Mark incomplete" : "Complete to-do"}
-              onClick={() => void api("todo.toggle", { id: t.id })}
-            >
-              {t.done && <Icon name="check" size={12} />}
-            </button>
-            <span className={t.done ? "done" : ""}>{t.title}</span>
-            <IconButton
-              icon="x"
-              label="Delete to-do"
-              onClick={() => void api("todo.delete", { id: t.id })}
-            />
-          </div>
-        ))}
-      </section>
-      <section>
-        <h3>Coming up</h3>
-        {state.tasks
-          .filter((t) => t.enabled)
-          .slice(0, 5)
-          .map((t) => (
-            <div className="agenda-row" key={t.id}>
-              <Icon name={t.repeat === "none" ? "calendar" : "repeat"} />
-              <div>
-                <b>{t.title}</b>
-                <small>
-                  {new Date(t.at).toLocaleDateString()} · {time(t.at)}
-                </small>
-              </div>
-            </div>
-          ))}
-        {!state.tasks.some((t) => t.enabled) && (
-          <p className="muted">Nothing scheduled.</p>
-        )}
-        <button
-          className="text-button"
-          onClick={() => void api("show", { tab: "desk" })}
-        >
-          Open plans <Icon name="arrow-up-right" size={14} />
-        </button>
-      </section>
     </div>
   );
 }

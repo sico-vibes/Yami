@@ -257,7 +257,7 @@ function Home({
           <h1>
             {state.settings.name
               ? `Hey, ${state.settings.name}.`
-              : "Give your computer a soul."}
+              : "Hey. I live here now."}
           </h1>
           <p>
             {state.keys.gemini

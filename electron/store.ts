@@ -4,6 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { State, Settings } from "../src/shared";
 import { defaults } from "../src/default-settings";
+import { migrateState } from "../src/migrations";
 export { defaults } from "../src/default-settings";
 export class Store {
   file = path.join(app.getPath("userData"), "data.json");
@@ -41,13 +42,14 @@ export class Store {
       wallpaperFolder: "",
       currentWallpaper: "",
       embers: 0,
-      owned: ["hitodama", "Charon", "chad"],
+      owned: ["yami", "Charon", "chad"],
       usage: {},
       ...saved,
       clipboard,
       settings: { ...defaults, ...saved.settings },
       keys: { gemini: false, tavily: false, tavilyHint: "" },
     };
+    migrateState(this.state);
     // Old model IDs can still appear in discovery but reject new accounts.
     if (this.state.settings.textModel === "gemini-2.5-flash")
       this.state.settings.textModel = defaults.textModel;

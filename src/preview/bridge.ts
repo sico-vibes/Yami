@@ -1,5 +1,6 @@
 import type { YamiEvent, State } from "../shared";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
+import { previewOverlay } from "./overlays";
 let state = createFixture();
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
@@ -86,7 +87,20 @@ export function installPreviewBridge() {
           toast("Preview only — Windows controls are unchanged.");
           return true;
         case "weather":
-          return null;
+          return state.settings.weatherEnabled
+            ? { place: "Kyoto", temperature: 21, condition: "partlycloudy_day" }
+            : null;
+        case "timer.state":
+          return { endsAt: 0, duration: 0 };
+        case "timer.start": {
+          const duration = Number(a.minutes) * 60_000,
+            timer = { endsAt: Date.now() + duration, duration };
+          emit({ type: "timer", ...timer });
+          return timer;
+        }
+        case "timer.stop":
+          emit({ type: "timer", endsAt: 0, duration: 0 });
+          return { endsAt: 0, duration: 0 };
         case "panel":
           emit({ type: "panel", open: !!a.open, tab: a.tab || "Controls" });
           return true;
@@ -200,7 +214,7 @@ export function installPreviewBridge() {
             a.id === "chad" || a.id === "custom"
               ? "personality"
               : [
-                    "hitodama",
+                    "yami",
                     "ember",
                     "wisp",
                     "amethyst",
@@ -239,6 +253,8 @@ export function installPreviewBridge() {
         case "selection.clear":
           return true;
         default:
+          if (/^(stray|caption)\./.test(method))
+            return previewOverlay(method, a, emit);
           throw new Error(`Desktop-only action: ${method}`);
       }
     },

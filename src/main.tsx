@@ -8,6 +8,8 @@ import { App } from "./App";
 import { Island } from "./Island";
 import { Lasso } from "./Lasso";
 import { Effects } from "./Effects";
+import { Stray } from "./Stray";
+import { CaptionOverlay } from "./Caption";
 const mode = new URLSearchParams(location.search).get("window") || "main";
 document.documentElement.dataset.window = mode;
 function renderDesktop() {
@@ -18,6 +20,10 @@ function renderDesktop() {
       <Lasso />
     ) : mode === "effect" ? (
       <Effects />
+    ) : mode === "stray" ? (
+      <Stray />
+    ) : mode === "caption" ? (
+      <CaptionOverlay />
     ) : (
       <App />
     ),

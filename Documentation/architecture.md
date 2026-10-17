@@ -26,7 +26,7 @@ In a web preview, a browser-side fixture bridge substitutes for `window.yami`. I
 
 ## Electron main process
 
-`electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. The main process coordinates those modules with the native child process and assistant service.
+`electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. `electron/windows.ts` creates sandboxed windows. `electron/overlays.ts` owns the roaming stray window and the caption window, and labels tool activity for the island using `electron/activity.ts`. `electron/focus-timer.ts` owns the Today focus countdown. The main process coordinates those modules with the native child process and assistant service.
 
 The assistant and provider policy live in `electron/assistant.ts` and `electron/policy.ts`. `electron/platform.ts` owns reusable PowerShell and native-script helpers; `electron/metrics.ts` samples local hardware; `electron/weather.ts` handles opt-in weather lookup. `electron/store.ts` reads and writes persistent state; it strips key metadata from `data.json`, encrypts API credentials in `credentials.bin`, and encrypts unpinned clipboard text before saving. Writes to the state file use a temporary file followed by rename.
 
@@ -52,7 +52,7 @@ Sensitive actions are enumerated in [`electron/policy.ts`](../electron/policy.ts
 
 ## Background work
 
-The main process checks enabled tasks every five seconds and clipboard history every 1.8 seconds. Clipboard polling is skipped when disabled and pauses briefly after Yami writes to the clipboard. The Controls panel refreshes controls/media every six seconds, the island refreshes its media hint every eight seconds, and Stats refreshes hardware data every 2.5 seconds. Main-process hardware metrics are cached for 1.5 seconds. PowerShell/native-script work is deduplicated while in flight; media results are cached for six seconds while active and 30 seconds while inactive. These are implementation intervals, not performance measurements; see the [performance budgets](performance.md).
+The main process checks enabled tasks every five seconds and clipboard history every 1.8 seconds. Clipboard polling is skipped when disabled and pauses briefly after Yami writes to the clipboard. The Controls panel refreshes controls/media every six seconds, the island reads its media hint on demand and polls every 15 seconds only while media is active, the focus timer arms one timeout only while running, and Stats refreshes hardware data every 2.5 seconds. Main-process hardware metrics are cached for 1.5 seconds. PowerShell/native-script work is deduplicated while in flight; media results are cached for six seconds while active and 30 seconds while inactive. These are implementation intervals, not performance measurements; see the [performance budgets](performance.md).
 
 When the next scheduled task changes, Yami asks Windows to set or cancel a waitable wake timer. This is a best-effort request: Windows policy and hardware decide whether a sleeping system wakes.
 

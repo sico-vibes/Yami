@@ -35,6 +35,8 @@ try {
     "Apps",
     "Wallpaper",
     "Power",
+    "Stray",
+    "Caption",
   ]) {
     await selector.selectOption(screen);
     await page.frameLocator("#preview-frame").locator("#root > *").waitFor();
@@ -45,6 +47,18 @@ try {
         .frameLocator("#preview-frame")
         .getByRole("button", { name: "Run speed test" })
         .click();
+    if (screen === "Stray")
+      assert.ok(
+        await page
+          .frameLocator("#preview-frame")
+          .locator(".stray-cat")
+          .isVisible(),
+      );
+    if (screen === "Caption")
+      await page
+        .frameLocator("#preview-frame")
+        .locator(".caption-pill")
+        .waitFor({ timeout: 3000 });
     if (screen === "Wallpaper")
       assert.equal(
         await page
@@ -76,14 +90,12 @@ try {
     todos.todos.length + 1,
   );
   await assert.rejects(
-    page
-      .locator("#preview-frame")
-      .evaluate((f) =>
-        f.contentWindow.yami.invoke("keys.save", {
-          provider: "gemini",
-          key: "DEMO",
-        }),
-      ),
+    page.locator("#preview-frame").evaluate((f) =>
+      f.contentWindow.yami.invoke("keys.save", {
+        provider: "gemini",
+        key: "DEMO",
+      }),
+    ),
     /never stores credentials/,
   );
   assert.equal(
@@ -132,7 +144,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      previewScreens: 13,
+      previewScreens: 15,
       documentationPages: links,
       externalPreviewRequests: external.length,
       checks: [

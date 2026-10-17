@@ -844,82 +844,10 @@ kbd {
   overflow: visible;
   display: block;
 }
-.spirit-eyes {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: none;
-}
-.spirit-listening {
-  animation: listen 0.8s ease-in-out infinite;
-}
-.spirit-speaking .spirit-body {
-  transform-origin: 50% 85%;
-  animation: talk 0.22s ease-in-out infinite alternate;
-}
-.spirit-thinking {
-  animation: think 1.4s ease-in-out infinite;
-}
 .spirit-connecting {
   opacity: 0.65;
 }
 .spirit-sleeping {
   opacity: 0.6;
 }
-.spirit-sleeping .spirit-eyes {
-  transform: scaleY(0.15);
-  animation: none;
-}
-@keyframes spirit-breathe {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-4px) scale(1.025);
-  }
-}
-@keyframes blink {
-  0%,
-  45%,
-  48%,
-  100% {
-    transform: scaleY(1);
-  }
-  46.5% {
-    transform: scaleY(0.1);
-  }
-}
-@keyframes listen {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px var(--glow));
-  }
-  50% {
-    filter: drop-shadow(0 0 7px var(--glow));
-  }
-}
-@keyframes talk {
-  from {
-    transform: scale(0.98, 1.02);
-  }
-  to {
-    transform: scale(1.03, 0.97);
-  }
-}
-@keyframes think {
-  0%,
-  100% {
-    transform: rotate(-5deg);
-  }
-  50% {
-    transform: rotate(5deg);
-  }
-}
-
-/* Idle stays still; motion is reserved for interaction and active work. */
-.spirit-idle:hover {
-  animation: spirit-breathe 4s ease-in-out 1;
-}
-.spirit-idle:hover .spirit-eyes {
-  animation: blink 5.5s 1;
-}
+/* Pose and tail motion are driven by src/yami/motion.ts only while active. */

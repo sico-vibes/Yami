@@ -14,11 +14,12 @@ type Card = {
 };
 const souls: Card[] = [
   {
-    id: "hitodama",
-    name: "Hitodama",
+    id: "yami",
+    name: "Yami",
     price: 0,
-    soul: "hitodama",
-    description: "The soul as it woke: white-hot core, cold blue halo.",
+    soul: "yami",
+    description:
+      "The cat as she first drifted in: moon-white fur, ink-dark eyes.",
     label: "Common",
     color: "#8dccff",
   },
@@ -27,7 +28,7 @@ const souls: Card[] = [
     name: "Ember",
     price: 160,
     soul: "ember",
-    description: "What it looks like the moment it wakes up angry.",
+    description: "Warm as a hearth and twice as stubborn.",
     label: "Common",
     color: "#ffa070",
   },
@@ -36,8 +37,7 @@ const souls: Card[] = [
     name: "Wisp",
     price: 160,
     soul: "wisp",
-    description:
-      "Marsh-light green, the colour of something leading you off the path.",
+    description: "Swamp-light green. Follow her at your own risk.",
     label: "Common",
     color: "#6fd79a",
   },
@@ -46,7 +46,7 @@ const souls: Card[] = [
     name: "Amethyst",
     price: 400,
     soul: "amethyst",
-    description: "Quieter than it looks. Burns slow and deep.",
+    description: "Calm, violet and quietly judging you.",
     label: "Rare",
     color: "#a97bff",
   },
@@ -55,8 +55,7 @@ const souls: Card[] = [
     name: "Gilded",
     price: 400,
     soul: "gilded",
-    description:
-      "Old temple gold, the kind left burning for someone who never came back.",
+    description: "Shrine-cat gold, polished by a thousand offerings.",
     label: "Rare",
     color: "#ffc24a",
   },
@@ -66,7 +65,7 @@ const souls: Card[] = [
     price: 1000,
     soul: "void",
     description:
-      "The dark it drifted through, carried on purpose this time. Includes the Collapse ability, free: Touch the soul while it rests, then collapse space wherever you click.",
+      "A cat-shaped hole in the night sky. Includes the Collapse ability: tap Yami while she rests, then fold space wherever you click.",
     label: "Legendary",
     color: "#a78adf",
   },
@@ -89,24 +88,24 @@ const voices: Card[] = [
   price: i ? 240 : 0,
   icon: "waveform",
   description: [
-    "The OG voice of the soul",
-    "This guy sits in front of a computer all day.. relatable isn't it?",
-    "Teenager girl with some attitude?",
-    "Older woman?",
-    "Pretty calm guy.. seems smart ig.",
-    "Used to work a 9-to-5 job. nothing special",
-    "Something about the way it talks scares me.",
-    "He sounds like a guy you can be friends with.",
-    "He is Indian and used to make tech tutorials on YouTube.",
-    "He is from China and has JUST started learning English.",
-    "It is smart, cool and kinda savage.",
+    "The default voice. Low, steady and a little mysterious.",
+    "Upbeat and quick, like it already had the coffee.",
+    "Young and bright, with opinions about everything.",
+    "Warm and unhurried, a late-night radio host.",
+    "Soft-spoken and thoughtful. Picks words carefully.",
+    "Plain-spoken and practical. Straight to the point.",
+    "Smooth and faintly eerie. Suits a ghost.",
+    "Easygoing and friendly, like an old classmate.",
+    "Indian English accent, clear and patient.",
+    "Chinese-accented English, careful and kind.",
+    "Dry wit, quick comebacks, a little savage.",
   ][i],
   color: "#5ac7e3",
 }));
 const personalities: Card[] = [
   {
     id: "chad",
-    name: "True Chad",
+    name: "Alley Cat",
     price: 0,
     icon: "smiley",
     description: "",
@@ -130,7 +129,7 @@ const abilities: Card[] = [
     price: 0,
     icon: "planet",
     description:
-      "Touch the soul while it rests, then collapse space wherever you click. Not for sale: it comes free with the Void soul, and buying that soul is the only way to have it.",
+      "Tap Yami while she rests, then fold space wherever you click. Only comes with the Void skin.",
     color: "#e6c07a",
   },
   {
@@ -139,7 +138,7 @@ const abilities: Card[] = [
     price: 400,
     icon: "crosshair",
     description:
-      "Held in the air beside the soul. Fires a round into the screen.",
+      "Yami spits a tiny spark wherever you click next. Harmless, satisfying.",
     color: "#e6c07a",
   },
 ];
@@ -213,7 +212,9 @@ export function Loadout({
             <h2>
               {picker === "ability"
                 ? "Abilities"
-                : picker[0].toUpperCase() + picker.slice(1)}
+                : picker === "soul"
+                  ? "Skins"
+                  : picker[0].toUpperCase() + picker.slice(1)}
             </h2>
             <span className="embers">
               {state.embers.toLocaleString()} embers
@@ -417,7 +418,7 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
     {
       slot: "personality",
       label: "Personality",
-      value: state.settings.personality === "chad" ? "True Chad" : "Custom",
+      value: state.settings.personality === "chad" ? "Alley Cat" : "Custom",
       icon: "smiley",
       color: "#ff994f",
     },
@@ -430,9 +431,8 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
     },
     {
       slot: "soul",
-      label: "Soul",
-      value:
-        souls.find((c) => c.id === state.settings.soul)?.name || "Hitodama",
+      label: "Skin",
+      value: souls.find((c) => c.id === state.settings.soul)?.name || "Yami",
       icon: "sparkle",
       color: "#c3aaff",
     },

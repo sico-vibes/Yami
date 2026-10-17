@@ -8,6 +8,7 @@ export type Settings = {
   startHidden: boolean;
   alwaysOnTop: boolean;
   reducedMotion: boolean;
+  roam: boolean;
   hotkeys: boolean;
   microphone: string;
   noiseSuppression: boolean;

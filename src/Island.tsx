@@ -13,6 +13,11 @@ export function Island() {
     [mode, setMode] = useState(""),
     [media, setMedia] = useState<any>(null),
     [armed, setArmed] = useState(false),
+    [activity, setActivity] = useState<{
+      id: number;
+      label: string;
+      icon: string;
+    } | null>(null),
     [effect, setEffect] = useState<{
       x: number;
       y: number;
@@ -67,6 +72,10 @@ export function Island() {
     else if (e.type === "audio-clear") audio.current?.clear();
     else if (e.type === "dictation-result") report(e.text);
     else if (e.type === "ability-disarmed") setArmed(false);
+    else if (e.type === "activity")
+      setActivity((current) =>
+        e.done ? (current?.id === e.id ? null : current) : (e as any),
+      );
     else if (e.type === "ability-click") {
       const kind = prefs.current?.ability || "";
       setEffect({ x: e.x, y: e.y, kind });
@@ -96,21 +105,34 @@ export function Island() {
       audio.current?.clear();
     };
   }, []);
+  // Media is read on demand: at start, when the foreground app changes, on
+  // hover and when the panel closes. It only polls while something plays.
+  const refreshMedia = useRef(() => {});
   useEffect(() => {
     let live = true;
-    const refresh = () =>
-      api("media")
+    refreshMedia.current = () =>
+      void api("media")
         .then((value) => {
           if (live) setMedia(value);
         })
         .catch(() => {});
-    refresh();
-    const timer = setInterval(refresh, 8000);
+    refreshMedia.current();
+    const off = window.yami.on((e) => {
+      if (e.type === "foreground") refreshMedia.current();
+    });
     return () => {
       live = false;
-      clearInterval(timer);
+      off();
     };
   }, []);
+  useEffect(() => {
+    if (!media?.active) return;
+    const timer = setInterval(() => refreshMedia.current(), 15000);
+    return () => clearInterval(timer);
+  }, [media?.active]);
+  useEffect(() => {
+    if (!open) refreshMedia.current();
+  }, [open]);
   const expand = (value: boolean, next = tab) =>
     void api("panel", { open: value, tab: next });
   if (!state) return null;
@@ -118,7 +140,10 @@ export function Island() {
     <div className={`island-window ${open ? "expanded" : ""}`}>
       <div
         className="island-notch"
-        onMouseEnter={() => void api("island.mouse", { ignore: false })}
+        onMouseEnter={() => {
+          void api("island.mouse", { ignore: false });
+          refreshMedia.current();
+        }}
         onMouseLeave={() => {
           if (!open) void api("island.mouse", { ignore: true });
         }}
@@ -170,7 +195,13 @@ export function Island() {
           />
         </div>
       </div>
-      {!open && media?.active && !toast && (
+      {!open && activity && !toast && (
+        <div className="island-activity" role="status">
+          <Icon name={activity.icon} size={12} />
+          <span>{activity.label}</span>
+        </div>
+      )}
+      {!open && media?.active && !toast && !activity && (
         <button className="mini-media" onClick={() => expand(true, "Controls")}>
           <Icon name={media.playing ? "music-notes" : "pause"} size={12} />
           <span>{media.title}</span>
@@ -181,6 +212,7 @@ export function Island() {
           state={state}
           tab={tab}
           setTab={(t) => expand(true, t)}
+          onClose={() => expand(false)}
           report={report}
         />
       )}{" "}

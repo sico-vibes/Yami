@@ -27,6 +27,9 @@ import { readWeather } from "./weather";
 import { Store } from "./store";
 import { Native } from "./native";
 import { Assistant } from "./assistant";
+import { assetRoot, makeWindow, windows } from "./windows";
+import { createOverlays } from "./overlays";
+import { createFocusTimer } from "./focus-timer";
 import {
   checkToolPermission,
   nextOccurrence,
@@ -45,6 +48,11 @@ protocol.registerSchemesAsPrivileged([
 if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
 let store: Store, native: Native, assistant: Assistant;
+let overlays: ReturnType<typeof createOverlays> | undefined;
+const focusTimer = createFocusTimer({
+  notify: (message) => notify(message),
+  broadcast: (event) => broadcast(event),
+});
 let main: BrowserWindow,
   island: BrowserWindow,
   lasso: BrowserWindow | undefined,
@@ -62,18 +70,14 @@ let capture: any,
   effectData: any,
   taskTimer: NodeJS.Timeout,
   clipboardTimer: NodeJS.Timeout;
-const windows = new Set<BrowserWindow>();
 const approvals = new Map<
   string,
   { resolve: (v: boolean) => void; timer: NodeJS.Timeout }
 >();
-const assetRoot = () =>
-  app.isPackaged
-    ? path.join(process.resourcesPath, "assets")
-    : path.join(app.getAppPath(), process.env.YAMI_DEV_URL ? "public" : "dist");
 function broadcast(event: any) {
   for (const w of windows)
     if (!w.isDestroyed()) w.webContents.send("yami:event", event);
+  overlays?.observe(event);
 }
 function changed() {
   store.save();
@@ -85,44 +89,6 @@ function changed() {
 }
 function notify(message: string) {
   broadcast({ type: "toast", message });
-}
-function makeWindow(
-  mode: string,
-  options: Electron.BrowserWindowConstructorOptions,
-) {
-  const w = new BrowserWindow({
-    ...options,
-    icon: path.join(assetRoot(), "yami-icon.png"),
-    show: false,
-    frame: false,
-    backgroundColor: mode === "main" ? "#11191e" : "#00000000",
-    webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-      backgroundThrottling: true,
-    },
-  });
-  windows.add(w);
-  w.on("closed", () => windows.delete(w));
-  w.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
-  w.webContents.on("will-navigate", (event, url) => {
-    if (
-      !url.startsWith(
-        process.env.YAMI_DEV_URL ||
-          pathToFileURL(path.join(app.getAppPath(), "dist", "index.html")).href,
-      )
-    )
-      event.preventDefault();
-  });
-  if (process.env.YAMI_DEV_URL)
-    void w.loadURL(`${process.env.YAMI_DEV_URL}/?window=${mode}`);
-  else
-    void w.loadFile(path.join(app.getAppPath(), "dist", "index.html"), {
-      query: { window: mode },
-    });
-  return w;
 }
 function showMain(tab?: string) {
   if (main.isMinimized()) main.restore();
@@ -153,7 +119,7 @@ function setPanel(open: boolean, tab = currentUtility) {
   };
   const widths: Record<string, number> = {
     Controls: 650,
-    Today: 790,
+    Today: 900,
     Stats: 900,
     Clipboard: 790,
     Apps: 730,
@@ -668,6 +634,7 @@ async function nativeEvent(e: any) {
       ].slice(0, 30);
       changed();
     }
+    broadcast({ type: "foreground" });
     return;
   }
   if (e.eventName === "launcher") {
@@ -758,7 +725,10 @@ else {
       native.start();
       assistant = new Assistant(
         store,
-        action,
+        (name, args) =>
+          overlays
+            ? overlays.track(name, args, () => action(name, args))
+            : action(name, args),
         (e) =>
           e.type === "state"
             ? broadcast({ type: "state", state: store.publicState() })
@@ -836,6 +806,8 @@ else {
       island.setAlwaysOnTop(true, "floating");
       island.setIgnoreMouseEvents(true, { forward: true });
       island.once("ready-to-show", () => island.showInactive());
+      overlays = createOverlays({ store, showMain, broadcast });
+      overlays.syncStray();
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))
         .resize({ width: 20, height: 20 });
@@ -845,6 +817,15 @@ else {
         Menu.buildFromTemplate([
           { label: "Open Yami", click: () => showMain() },
           { label: "Settings", click: () => showMain("settings") },
+          {
+            label: "Let Yami roam",
+            type: "checkbox",
+            checked: store.state.settings.roam,
+            click: (item) => {
+              store.state.settings.roam = item.checked;
+              changed();
+            },
+          },
           { type: "separator" },
           {
             label: "Quit Yami",
@@ -948,6 +929,8 @@ else {
           )
         )
           throw new Error("Untrusted renderer.");
+        if (overlays?.handles(method)) return overlays.invoke(method, args);
+        if (focusTimer.handles(method)) return focusTimer.invoke(method, args);
         return invoke(method, args, event.sender);
       });
       await native.call("configure", {
@@ -972,5 +955,7 @@ app.on("before-quit", () => {
   clearInterval(taskTimer);
   clearInterval(clipboardTimer);
   assistant?.stopLive();
+  overlays?.dispose();
+  focusTimer.dispose();
   native?.close();
 });

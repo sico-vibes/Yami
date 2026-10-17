@@ -496,7 +496,7 @@ export function createRequestHandler(ctx: RequestContext) {
           string,
           { price: number; slot: "soul" | "voice" | "personality" | "ability" }
         > = {
-          hitodama: { price: 0, slot: "soul" },
+          yami: { price: 0, slot: "soul" },
           ember: { price: 160, slot: "soul" },
           wisp: { price: 160, slot: "soul" },
           amethyst: { price: 400, slot: "soul" },

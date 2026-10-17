@@ -4,7 +4,7 @@
 
 Yami is the app name and the name used for its small spirit companion. The product remains a Windows desktop app with a transparent island above the desktop. Keep the supplied reference geometry, Rubik typography, dark translucent surfaces, bottom dock, fanned catalogue, and top-center island. Do not add a marketing site or unrelated features.
 
-The implementation lives in [`src/style.css`](../../src/style.css), which imports styles from [`src/styles/`](../../src/styles/). Loadout card geometry is in [`src/Loadout.tsx`](../../src/Loadout.tsx); spirit gradients and Phosphor icon wrappers are in [`src/ui.tsx`](../../src/ui.tsx). Product limits are in [the product brief](product-brief.md); reconstruction and verification limits are in [the verification history](verification-history.md) and [README](../../README.md).
+The implementation lives in [`src/style.css`](../../src/style.css), which imports styles from [`src/styles/`](../../src/styles/). Loadout card geometry is in [`src/Loadout.tsx`](../../src/Loadout.tsx); the cat-ghost artwork, motion and skins are in [`src/yami/`](../../src/yami/); Phosphor icon wrappers are in [`src/ui.tsx`](../../src/ui.tsx). Product limits are in [the product brief](product-brief.md); reconstruction and verification limits are in [the verification history](verification-history.md) and [README](../../README.md).
 
 ## Core tokens
 
@@ -19,10 +19,10 @@ The implementation lives in [`src/style.css`](../../src/style.css), which import
 | Hairline | `rgba(255, 255, 255, 0.075)` |
 | Field fill | `rgba(255, 255, 255, 0.045)` |
 | Focus field fill | `rgba(255, 255, 255, 0.065)` |
-| Soul tones | Ember `#ffa070`, Wisp `#6fd79a`, Amethyst `#a97bff`, Gilded `#ffc24a`, Void `#a78adf` |
+| Skin glows | Yami `#b8c6ff`, Ember `#ff8a55`, Wisp `#6fd79a`, Amethyst `#a97bff`, Gilded `#ffc24a`, Void `#7b5cd6` |
 | Catalogue voice/personality/ability | `#5ac7e3` / `#ff994f` / `#e6c07a` |
 
-Neutral surfaces layer translucent white over dark gradients. The main shell uses blue-green and blue radial washes over a dark linear gradient; a blurred, dimmed wallpaper sits behind it. The island notch is near-black and the utility drawer fades from charcoal to black. Catalogue cards blend item tints with translucent layers over a warm base. Spirit colors are defined in `src/ui.tsx`; Hitodama uses white and pale blue, while Void has a separate pale-purple core and dark-purple halo.
+Neutral surfaces layer translucent white over dark gradients. The main shell uses blue-green and blue radial washes over a dark linear gradient; a blurred, dimmed wallpaper sits behind it. The island notch is near-black and the utility drawer fades from charcoal to black. Catalogue cards blend item tints with translucent layers over a warm base. Skin colours are defined in `src/yami/skins.ts`; the default Yami skin is white with near-black features and a pale moon-blue glow, while Void inverts to a dark body with pale eyes and lines.
 
 ## Type and shape
 
@@ -57,6 +57,7 @@ Depth combines dark tonal layering, backdrop blur, inset highlights, and restrai
 - **Navigation:** the dock uses an inset translucent selected pill. Settings uses rounded rows with blue selected fill and lighter text. Keep accessible labels for icon-only actions.
 - **Settings groups:** shallow translucent fill, 19px horizontal inset, and hairline row separators. Controls stay beside row copy within a 46% maximum-width area.
 - **Catalogue:** tinted layered cards center the art, name, rarity, copy, and bottom action. Active and locked labels follow the owned state; wheel and arrow controls move the front card.
-- **Spirit:** the idle breathing and blink loops are removed. A short one-cycle hover animation remains. Listening glow uses an 0.8s loop, speaking deformation a 0.22s alternating loop, and thinking sway a 1.4s loop. Connecting and sleeping dim the character. Reduced-motion settings and the operating-system reduced-motion preference suppress animation.
+- **Yami (cat-ghost):** an SVG cat with a bean-shaped body, two pointed ears, oval eyes, whiskers, a raised paw and a tapered wavy tail. One `requestAnimationFrame` loop per instance runs only while active (hover plus a 2.5s linger, a non-idle state, or roaming/dragging): a travelling wave runs down the tail, the body bobs and squashes, the far ear twitches, eyes blink every 4.6s, listening pulses the glow and speaking opens the mouth. When activity ends the pose eases to rest and the loop is cancelled. Connecting and sleeping dim the character; sleeping closes the eyes. Reduced-motion settings and the operating-system preference show a static pose.
+- **Overlays:** the caption pill is 22px-radius, light for the user transcript and near-black for Yami's reply, with 9px-radius key chips above it. The roaming speech bubble is 12px-radius near-black with a small tail. The island activity card reuses the 200x26px mini-media pill geometry.
 
 These timings and color values describe Yami’s implementation. They are not recovered original Hitodama source values and do not establish exact behavior parity.

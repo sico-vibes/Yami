@@ -684,39 +684,6 @@
 .power-grid > button:last-child:hover {
   background: #a948402b;
 }
-.today-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 18px;
-}
-.today-heading {
-  grid-column: span 2;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #a9b5c0;
-  margin: 4px 0 6px;
-}
-.today-heading b {
-  font-size: 12px;
-  color: #d6c17d;
-  font-weight: 400;
-}
-.today-grid > section {
-  background: #ffffff04;
-  border-radius: 16px;
-  padding: 15px;
-  min-width: 0;
-}
-.today-grid h3 {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-.today-grid h3 small {
-  font-size: 10px;
-}
 .agenda-row {
   display: flex;
   align-items: center;

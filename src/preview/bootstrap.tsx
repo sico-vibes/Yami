@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../App";
 import { Island } from "../Island";
+import { Stray } from "../Stray";
+import { CaptionOverlay } from "../Caption";
 import { Spirit } from "../ui";
 import { emit, installPreviewBridge } from "./bridge";
 import "./preview.css";
@@ -19,7 +21,10 @@ const screens = [
   "Apps",
   "Wallpaper",
   "Power",
+  "Stray",
+  "Caption",
 ];
+const overlays = ["Stray", "Caption"];
 function Preview() {
   const requested =
     new URLSearchParams(location.search).get("screen") || "Home";
@@ -81,26 +86,43 @@ export function startPreview() {
   const params = new URLSearchParams(location.search);
   if (params.get("stage") === "1") {
     const screen = params.get("screen") || "Home",
-      utility = screens.indexOf(screen) >= 6,
+      overlay = overlays.includes(screen),
+      utility = !overlay && screens.indexOf(screen) >= 6,
       island = utility || screen === "Island";
-    document.documentElement.dataset.window = island ? "island" : "main";
+    document.documentElement.dataset.window = overlay
+      ? screen.toLowerCase()
+      : island
+        ? "island"
+        : "main";
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
     createRoot(document.getElementById("root")!).render(
-      island ? <Island /> : <App />,
+      screen === "Stray" ? (
+        <Stray />
+      ) : screen === "Caption" ? (
+        <CaptionOverlay />
+      ) : island ? (
+        <Island />
+      ) : (
+        <App />
+      ),
     );
-    setTimeout(
-      () =>
-        emit(
-          island
-            ? {
-                type: "panel",
-                open: utility,
-                tab: utility ? screen : "Controls",
-              }
-            : { type: "navigate", tab: screen.toLowerCase() },
-        ),
-      100,
-    );
+    // Place the stray layer at its starting spot on the demo desktop.
+    if (screen === "Stray")
+      setTimeout(() => window.yami.invoke("stray.drag", { dx: 0, dy: 0 }), 50);
+    if (!overlay)
+      setTimeout(
+        () =>
+          emit(
+            island
+              ? {
+                  type: "panel",
+                  open: utility,
+                  tab: utility ? screen : "Controls",
+                }
+              : { type: "navigate", tab: screen.toLowerCase() },
+          ),
+        100,
+      );
   } else createRoot(document.getElementById("root")!).render(<Preview />);
 }

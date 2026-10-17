@@ -4,7 +4,13 @@ This guide describes features currently represented in the source. Hardware-depe
 
 ## Companion and conversation
 
-**Spirit island.** A small top-center transparent island can open the main app and utility panel, display listening/thinking/speaking state, and accept the configured ability trigger. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
+**Yami, the cat-ghost.** Yami is drawn as a white cat-ghost with a wispy tail (`src/yami/`). Her tail, ears, eyes and body move while she is hovered, listening, thinking, speaking or being carried, then settle to a still pose and stop requesting animation frames. Reduced motion shows static poses.
+
+**Spirit island.** A small top-center transparent island can open the main app and utility panel, display listening/thinking/speaking state, and accept the configured ability trigger. While Yami runs a tool, a small card under the island names the action (for example "Opening Spotify"). Scrolling down on the island opens the drawer; scrolling up at the top of the drawer tucks it away. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
+
+**Roaming.** With **Let Yami roam** on (Settings > Behavior, or the tray menu), Yami floats in a small click-through window on the desktop. She dodges the cursor twice with a quip, then lets you catch her: click opens Yami, drag moves her. She drifts to a nearby spot every few minutes (skipped on battery), naps after a minute alone, and flies into the island during voice and dictation turns.
+
+**Captions.** During a voice or dictation turn a pill at the bottom of the screen shows the held shortcut keys, your live transcript (`You`), then Yami's reply (`Yami`). The caption window exists only for the turn and closes a few seconds after it ends.
 
 **Text chat.** Home sends text to Gemini’s text model. Up to the latest eight messages are included in the system prompt and up to 16 messages are used to construct request history. The turn can invoke declared tools, with a maximum of eight tool-call rounds. If no Gemini key is configured, chat is unavailable while local utilities remain available.
 
@@ -12,20 +18,20 @@ This guide describes features currently represented in the source. Hardware-depe
 
 **Dictation.** Hold the dictation shortcut. Yami remembers the foreground window handle, captures speech, asks Gemini to transcribe and resolve spoken corrections, then inserts the final text into that original field using clipboard-preserving paste. Password fields are rejected by the native host. Dictation text is also retained in conversation history.
 
-**Circle to ask.** Hold the lasso shortcut, draw a rectangle around a screen region, and complete the selection. Capture occurs locally. With Gemini connected, the selected image can be sent with a voice turn; without a key, the image appears in the console selection. Cancel with Escape.
+**Circle to ask.** Hold the lasso shortcut, draw a loop around anything on screen, and complete the selection. Capture occurs locally. With Gemini connected, the selected image can be sent with a voice turn; without a key, the image appears in the console selection. Cancel with Escape.
 
-**Embers, souls, voices, personalities, and abilities.** The loadout presents cosmetic options and unlock prices for Yami’s spirit. The current implementation awards an ember per completed voice turn or dictation. Soul, voice, personality, and ability choices are saved locally; they do not represent provider billing or a verified recreation of an original reward system. Paid voice cards use Gemini prebuilt voices and delivery prompts; they are not separately trained voices. The custom personality editor appears after that option is owned.
+**Embers, skins, voices, personalities, and abilities.** The loadout presents cosmetic options and unlock prices for Yami. The current implementation awards an ember per completed voice turn or dictation. Soul, voice, personality, and ability choices are saved locally; they do not represent provider billing or a verified recreation of an original reward system. Paid voice cards use Gemini prebuilt voices and delivery prompts; they are not separately trained voices. The custom personality editor appears after that option is owned.
 
 | Slot | Shipped choices and ember costs |
 | --- | --- |
-| Soul | Hitodama free; Ember 160; Wisp 160; Amethyst 400; Gilded 400; Void 1,000. |
+| Skin | Yami free; Ember 160; Wisp 160; Amethyst 400; Gilded 400; Void 1,000. Each is the same cat-ghost in a different colourway. Saved `hitodama` selections from earlier builds migrate to `yami` on start. |
 | Voice | Charon free; Puck, Leda, Aoede, Enceladus, Algenib, Laomedeia, Jack, Ankit, Cheng, and Linda cost 240 each. Several named personas map to Gemini prebuilt voices plus delivery instructions. |
-| Personality | True Chad free; New/custom personality 100. |
+| Personality | Alley Cat free; New/custom personality 100. |
 | Ability | Collapse is included with Void; Sidearm costs 400. The ability is armed by tapping the island and triggered by its configured mouse or keyboard binding. |
 
 The visible price/catalogue system is a local product feature, not a provider subscription or proof of the original application’s unlock economics.
 
-When an ability is equipped, the loadout’s **Trigger button** row captures a keyboard key or one of the primary mouse buttons. Escape cancels capture. Click the spirit while idle to arm the ability; the next captured trigger fires it and disarms it.
+When an ability is equipped, the loadout’s **Trigger button** row captures a keyboard key or one of the primary mouse buttons. Escape cancels capture. Click Yami in the island while idle to arm the ability; the next captured trigger fires it and disarms it.
 
 ## Research and action tools
 
@@ -35,7 +41,7 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 ## Productivity and organization
 
-**Today.** View local date, public news context if cached, weather if enabled, and to-dos. Add, complete, and delete to-dos.
+**Today.** A clock card, a weather card when weather is enabled, a week strip with dots on days that have scheduled plans (pick a day to list them), a focus timer, and the to-do list. The focus timer offers 1, 5, 10, 15 and 30 minute presets; the main process owns the countdown, so it finishes with a Windows notification even when the panel is closed.
 
 **Plans.** Save a one-off or repeating reminder, app launch, URL open, site search, or routine of several app launches. Repeat options are once, daily, and weekly. Routines can have one to ten allowlisted actions. Yami checks due work while running, including while minimized to the tray, and checks missed work when it resumes. A waitable timer requests that Windows wake a sleeping PC for the next due time. This is subject to Windows policy, firmware, hardware, and session availability.
 
@@ -65,7 +71,7 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | --- | --- | --- | --- |
 | Yami | Your name | Empty | Included in the Gemini system prompt. |
 | Yami | Your location | Empty | City or `latitude,longitude`; used for weather. |
-| Yami | Personality | True Chad (`chad`) | Choose in loadout; `custom` reveals its editable prompt text. |
+| Yami | Personality | Alley Cat (`chad`) | Choose in loadout; `custom` reveals its editable prompt text. |
 | Shortcuts | Enable shortcuts | On | Controls global voice/dictation/lasso shortcuts. |
 | Shortcuts | Voice | `Win+Alt` | Hold to speak; release to finish. |
 | Shortcuts | Dictation | `Ctrl+Win` | Hold to dictate. |
@@ -73,6 +79,7 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Behavior | Memory | On | Includes saved facts in Gemini context; stored facts remain until deleted. |
 | Behavior | Noise suppression | On | Requests noise suppression from the renderer audio capture chain. |
 | Behavior | Reduced motion | Off | Reduces UI animation. |
+| Behavior | Let Yami roam | On | Shows the roaming cat-ghost window on the desktop. |
 | Behavior | Terminal commands | Off | Required before a model terminal tool is available; each command still asks confirmation. |
 | Behavior | Raw desktop automation | Off | Required before coordinate clicks are available; each click still asks confirmation. |
 | System | Start with Windows | Off | Uses Electron login-item settings. |
