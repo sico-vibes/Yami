@@ -237,7 +237,20 @@ export function createOverlays({
       captionData = emptyCaption();
     }, ms);
   }
+  // A short message in the caption pill, used where the collapsed island has
+  // no room (for example a missing API key).
+  function notice(message: string, ms = 4500) {
+    openCaption();
+    pushCaption({ mode: "notice", keys: [], you: "", yami: message });
+    if (!busy) closeCaption(ms);
+  }
   function begin(mode: "voice" | "dictation") {
+    if (!store.key("gemini")) {
+      notice(
+        "Connect your Gemini API key in Settings > API keys to talk to Yami.",
+      );
+      return;
+    }
     busy = true;
     dock();
     openCaption();
@@ -314,6 +327,9 @@ export function createOverlays({
       switch (method) {
         case "caption.data":
           return captionData;
+        case "caption.notice":
+          notice(String(a.message || "").slice(0, 240));
+          return true;
         case "stray.mouse":
           if (alive(stray))
             stray.setIgnoreMouseEvents(!!a.ignore, { forward: true });

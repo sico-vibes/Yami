@@ -18,7 +18,12 @@
   padding: 0 12px;
   gap: 7px;
   pointer-events: auto;
+  cursor: pointer;
   box-shadow: 0 4px 10px #0005;
+  transition:
+    height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s;
 }
 .island-notch:before,
 .island-notch:after {
@@ -41,33 +46,18 @@
   box-shadow: -6px -6px 0 6px #050505;
 }
 .island-spirit {
-  padding: 0;
   width: 60px;
   height: 60px;
   display: grid;
   place-items: center;
+  transition:
+    opacity 0.22s,
+    transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-.island-spirit:hover {
-  background: none !important;
-}
-.island-hover-actions {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  opacity: 0;
-  pointer-events: none;
-  padding: 0 4px;
-}
-.island-notch:hover .island-hover-actions {
-  opacity: 1;
-}
-.island-hover-actions button {
-  pointer-events: auto;
-  width: 26px;
-  height: 26px;
-  color: #8da4b4;
+.island-spirit .spirit {
+  transition:
+    width 0.25s ease,
+    height 0.25s ease;
 }
 .island-wave {
   display: flex;
@@ -82,25 +72,71 @@
   border-radius: 2px;
   transition: transform 0.08s;
 }
+/* Quiet for a while: the notch slims to a bar and Yami tucks away. */
+.island-window.asleep .island-notch {
+  height: 12px;
+  width: 190px;
+  border-radius: 0 0 10px 10px;
+}
+.island-window.asleep .island-spirit {
+  opacity: 0;
+  transform: translateY(-14px) scale(0.6);
+}
+.island-window.armed .island-notch {
+  box-shadow:
+    0 4px 10px #0005,
+    0 0 0 1px #e6c07a66;
+}
+/* Open: the drawer takes over the notch; Yami is not shown. */
 .island-window.expanded .island-notch {
-  height: 40px;
-  width: 150px;
-}
-.island-window.expanded .island-notch .spirit {
-  width: 30px !important;
-  height: 30px !important;
-}
-.island-window.expanded .island-spirit {
-  height: 36px;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 .utility-shell {
   margin: 0 8px;
-  background: linear-gradient(#0d0d10, #050505);
-  border-radius: 20px;
-  padding: 14px 16px 15px;
+  background: linear-gradient(#050505, #0d0d10 40%, #050505);
+  border-radius: 0 0 22px 22px;
+  padding: 16px 16px 15px;
   overflow: hidden;
-  height: calc(100vh - 60px);
-  box-shadow: 0 5px 14px #0004;
+  height: calc(100vh - 14px);
+  box-shadow: 0 6px 16px #0005;
+  animation: drawer-open 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.utility-shell > * {
+  animation: drawer-content 0.32s ease-out;
+}
+/* Grow out of the notch's footprint, then reverse on close. */
+@keyframes drawer-open {
+  from {
+    clip-path: inset(
+      0 calc(50% - 90px) calc(100% - 66px) calc(50% - 90px) round 0 0 18px 18px
+    );
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0 0 22px 22px);
+  }
+}
+@keyframes drawer-content {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.island-window.closing .utility-shell {
+  animation: drawer-close 0.19s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes drawer-close {
+  to {
+    clip-path: inset(
+      0 calc(50% - 90px) calc(100% - 66px) calc(50% - 90px) round 0 0 18px 18px
+    );
+    opacity: 0.6;
+  }
 }
 .utility-tabs {
   display: flex;
@@ -587,9 +623,11 @@
   height: 145px;
   width: 63px;
   min-width: 63px;
-  border-radius: 13px;
+  border-radius: 20px;
   padding: 0;
   overflow: hidden;
+  /* Clip explicitly: a transformed image can escape border-radius alone. */
+  clip-path: inset(0 round 20px);
   transform: skewX(-11deg);
   transition:
     width 0.6s var(--ease),

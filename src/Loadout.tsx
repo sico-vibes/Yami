@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { State } from "./shared";
 import { api } from "./api";
 import { Icon, IconButton, Spirit } from "./ui";
+import { LoadoutHub, type HubSlot } from "./LoadoutHub";
+import { skinFor } from "./yami/skins";
 type Card = {
   id: string;
   name: string;
@@ -65,7 +67,7 @@ const souls: Card[] = [
     price: 1000,
     soul: "void",
     description:
-      "A cat-shaped hole in the night sky. Includes the Collapse ability: tap Yami while she rests, then fold space wherever you click.",
+      "A cat-shaped hole in the night sky. Includes the Collapse ability: right-click Yami in the island, then fold space wherever you click.",
     label: "Legendary",
     color: "#a78adf",
   },
@@ -129,7 +131,7 @@ const abilities: Card[] = [
     price: 0,
     icon: "planet",
     description:
-      "Tap Yami while she rests, then fold space wherever you click. Only comes with the Void skin.",
+      "Right-click Yami in the island, then fold space wherever you click. Only comes with the Void skin.",
     color: "#e6c07a",
   },
   {
@@ -203,7 +205,19 @@ export function Loadout({
     <section className={"loadout-page " + (picker ? "catalogue-open" : "")}>
       {!picker ? (
         <>
-          <h2>Loadout</h2>
+          <div
+            className="loadout-veil"
+            aria-hidden="true"
+            style={
+              {
+                "--soul": skinFor(state.settings.soul).glow,
+              } as React.CSSProperties
+            }
+          />
+          <h2>
+            Loadout
+            <small>Shape your spirit</small>
+          </h2>
           <Hub state={state} open={open} />
         </>
       ) : (
@@ -365,81 +379,8 @@ export function Loadout({
     </section>
   );
 }
-// Slot cards drift slowly around Yami on a flattened orbit. Hovering or
-// dragging a card pauses the drift so it is easy to click.
-const ORBIT_SQUASH = 0.6,
-  ORBIT_SPEED = 0.05; // radians per second
 function Hub({ state, open }: { state: State; open: (s: string) => void }) {
-  const canvas = useRef<HTMLCanvasElement>(null),
-    root = useRef<HTMLDivElement>(null),
-    buttons = useRef<(HTMLButtonElement | null)[]>([]);
-  const nodes = useRef([
-    { x: -150, y: -90 },
-    { x: 155, y: -85 },
-    { x: -150, y: 95 },
-    { x: 150, y: 100 },
-  ]);
-  const angle = useRef(0),
-    paused = useRef(false),
-    dragging = useRef(-1);
-  const place = (p: { x: number; y: number }) => {
-    const r = Math.hypot(p.x, p.y / ORBIT_SQUASH),
-      a = Math.atan2(p.y / ORBIT_SQUASH, p.x) + angle.current;
-    return { x: r * Math.cos(a), y: r * Math.sin(a) * ORBIT_SQUASH };
-  };
-  useEffect(() => {
-    let frame = 0,
-      last = 0;
-    const c = canvas.current!,
-      r = root.current!,
-      ctx = c.getContext("2d")!;
-    const still = () =>
-      document.documentElement.dataset.reduced === "true" ||
-      matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const draw = (t: number) => {
-      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
-      last = t;
-      if (!paused.current && dragging.current < 0 && !still())
-        angle.current += dt * ORBIT_SPEED;
-      const w = r.clientWidth,
-        h = r.clientHeight;
-      c.width = w * devicePixelRatio;
-      c.height = h * devicePixelRatio;
-      ctx.scale(devicePixelRatio, devicePixelRatio);
-      const cx = w / 2,
-        cy = h / 2;
-      nodes.current.forEach((n, i) => {
-        const p = place(n),
-          x = cx + p.x,
-          y = cy + p.y;
-        const b = buttons.current[i];
-        if (b) {
-          b.style.left = `calc(50% + ${p.x.toFixed(1)}px)`;
-          b.style.top = `calc(50% + ${p.y.toFixed(1)}px)`;
-        }
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.bezierCurveTo(cx + p.x * 0.9, cy, x - p.x * 0.2, y + 35, x, y);
-        ctx.strokeStyle = "#c4d3db";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        const phase = (t / 3000 + i * 0.2) % 1,
-          px = (1 - phase) * cx + phase * x,
-          py = (1 - phase) * cy + phase * y;
-        ctx.beginPath();
-        ctx.arc(px, py, 2, 0, Math.PI * 2);
-        ctx.fillStyle = "#9ed9ff";
-        ctx.shadowColor = "#8dccff";
-        ctx.shadowBlur = 8;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      });
-      frame = requestAnimationFrame(draw);
-    };
-    frame = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(frame);
-  }, []);
-  const labels = [
+  const slots: HubSlot[] = [
     {
       slot: "personality",
       label: "Personality",
@@ -470,64 +411,5 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
       color: "#6fd579",
     },
   ];
-  return (
-    <div
-      className="loadout-hub"
-      ref={root}
-      onPointerMove={(e) => {
-        const i = dragging.current;
-        if (i < 0) return;
-        const rect = e.currentTarget.getBoundingClientRect(),
-          x = e.clientX - rect.left - rect.width / 2,
-          y = e.clientY - rect.top - rect.height / 2;
-        // Store the card unrotated so it keeps orbiting from where it was dropped.
-        const r = Math.hypot(x, y / ORBIT_SQUASH),
-          a = Math.atan2(y / ORBIT_SQUASH, x) - angle.current;
-        nodes.current[i] = {
-          x: r * Math.cos(a),
-          y: r * Math.sin(a) * ORBIT_SQUASH,
-        };
-      }}
-      onPointerUp={() => {
-        dragging.current = -1;
-      }}
-    >
-      <canvas ref={canvas} />
-      <div className="soul-orbit">
-        <Spirit soul={state.settings.soul} size={70} />
-      </div>
-      {labels.map((l, i) => (
-        <button
-          key={l.slot}
-          ref={(el) => {
-            buttons.current[i] = el;
-          }}
-          className="loadout-node"
-          style={{
-            left: `calc(50% + ${place(nodes.current[i]).x}px)`,
-            top: `calc(50% + ${place(nodes.current[i]).y}px)`,
-          }}
-          onPointerEnter={() => {
-            paused.current = true;
-          }}
-          onPointerLeave={() => {
-            paused.current = false;
-          }}
-          onPointerDown={(e) => {
-            dragging.current = i;
-            e.currentTarget.setPointerCapture(e.pointerId);
-          }}
-          onClick={() => open(l.slot)}
-        >
-          <span style={{ color: l.color }}>
-            <Icon name={l.icon} size={17} />
-          </span>
-          <span>
-            <b>{l.value}</b>
-            <small>{l.label}</small>
-          </span>
-        </button>
-      ))}
-    </div>
-  );
+  return <LoadoutHub state={state} slots={slots} open={open} />;
 }

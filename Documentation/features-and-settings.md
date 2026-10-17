@@ -6,7 +6,7 @@ This guide describes features currently represented in the source. Hardware-depe
 
 **Yami, the cat spirit.** Yami is a floating, armless spirit with cat ears and a round, front-facing face whose lower half burns downward as a layered flame: a pale outer flame, a lighter middle and a white-hot core (`src/yami/`). While she is hovered, listening, thinking, speaking or being carried, the flame tongues flicker and curl, embers drift off and fade, and a soft glow under her shows she is floating. Afterwards she settles to a still pose and stops requesting animation frames. Turn on **Living flame** to keep a gentle flicker at idle. Reduced motion shows static poses.
 
-**Spirit island.** A small top-center transparent island can open the main app and utility panel, display listening/thinking/speaking state, and accept the configured ability trigger. While Yami runs a tool, a small card under the island names the action (for example "Opening Spotify"). When media is playing, hovering the small now-playing pill grows it into a card with progress and previous/play/next controls. Hovering the island otherwise hints that scrolling opens more. Scrolling down on the island opens the drawer; scrolling up at the top of the drawer tucks it away. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
+**Spirit island.** A small top-center transparent island shows Yami and her listening/thinking/speaking state. Click anywhere on the notch (or scroll down on it) to open the drawer, double-click to open the full app, and right-click to arm an equipped ability. After about eight quiet seconds the notch slims to a thin bar and Yami tucks away; hovering it, a voice turn or any activity brings her back. Opening the drawer grows it out of the notch and hides Yami; closing plays the reverse. Messages that do not fit the collapsed island, such as a missing API key, appear in the caption pill at the bottom of the screen. While Yami runs a tool, a small card under the island names the action (for example "Opening Spotify"). When media is playing, hovering the small now-playing pill grows it into a card with progress and previous/play/next controls. Hovering the island otherwise hints that scrolling opens more. Scrolling down on the island opens the drawer; scrolling up at the top of the drawer tucks it away. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
 
 **Roaming.** With **Let Yami roam** on (Settings > Behavior, or the tray menu), Yami floats in a small click-through window on the desktop. She dodges the cursor twice with a quip, then lets you catch her: click opens Yami, drag moves her. She drifts to a nearby spot every few minutes (skipped on battery or while a fullscreen app is in front), hides while a fullscreen game, video or presentation is in front, naps after a minute alone, and flies into the island during voice and dictation turns. The tray checkbox follows the Settings toggle.
 
@@ -31,7 +31,7 @@ This guide describes features currently represented in the source. Hardware-depe
 
 The visible price/catalogue system is a local product feature, not a provider subscription or proof of the original application’s unlock economics.
 
-When an ability is equipped, the loadout’s **Trigger button** row captures a keyboard key or one of the primary mouse buttons. Escape cancels capture. Click Yami in the island while idle to arm the ability; the next captured trigger fires it and disarms it.
+When an ability is equipped, the loadout’s **Trigger button** row captures a keyboard key or one of the primary mouse buttons. Escape cancels capture. Right-click Yami in the island while idle to arm the ability (a notice confirms it); the next captured trigger fires it and disarms it.
 
 ## Research and action tools
 
@@ -41,7 +41,7 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 ## Productivity and organization
 
-**Today.** A clock card, a weather card when weather is enabled, a week strip with dots on days that have scheduled plans (pick a day to list them), a focus timer, and the to-do list. The focus timer offers 1, 5, 10, 15 and 30 minute presets; the main process owns the countdown, so it finishes with a Windows notification even when the panel is closed.
+**Today.** A clock card, a weather card (its **Turn on weather** button enables weather right there), a week strip with dots on days that have scheduled plans (pick a day to list them), a focus timer, and the to-do list. The focus timer offers 1, 5, 10, 15 and 30 minute presets; the main process owns the countdown, so it finishes with a Windows notification even when the panel is closed.
 
 **Plans.** Save a one-off or repeating reminder, app launch, URL open, site search, or routine of several app launches. Repeat options are once, daily, and weekly. Routines can have one to ten allowlisted actions. Yami checks due work while running, including while minimized to the tray, and checks missed work when it resumes. A waitable timer requests that Windows wake a sleeping PC for the next due time. This is subject to Windows policy, firmware, hardware, and session availability.
 

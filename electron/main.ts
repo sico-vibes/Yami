@@ -114,6 +114,8 @@ function islandBounds(width: number, height: number) {
 }
 function setPanel(open: boolean, tab = currentUtility) {
   panelOpen = open;
+  // Start the slow hardware queries so Stats has data the moment it opens.
+  if (open) metrics.warm();
   currentUtility = tab;
   const heights: Record<string, number> = {
     Controls: 390,
@@ -137,7 +139,7 @@ function setPanel(open: boolean, tab = currentUtility) {
   island.setBounds(
     islandBounds(
       open ? Math.min(widths[tab] || 730, display.width - 30) : 220,
-      open ? Math.min((heights[tab] || 400) + 64, display.height - 20) : 96,
+      open ? Math.min((heights[tab] || 400) + 34, display.height - 20) : 96,
     ),
   );
   island.setFocusable(open);

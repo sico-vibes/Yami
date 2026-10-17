@@ -120,13 +120,21 @@ export function Today({
             </>
           ) : (
             <button
-              className="text-button"
-              onClick={() => void api("show", { tab: "settings" })}
+              className="weather-enable"
+              onClick={() =>
+                state.settings.weatherEnabled
+                  ? void api("weather")
+                      .then(setWeather)
+                      .catch((e) => report(e.message))
+                  : void api("settings", { weatherEnabled: true }).catch((e) =>
+                      report(e.message),
+                    )
+              }
             >
               <Icon name="cloud-sun" size={22} />
               <small>
                 {state.settings.weatherEnabled
-                  ? "Weather unavailable"
+                  ? "Weather unavailable · retry"
                   : "Turn on weather"}
               </small>
             </button>

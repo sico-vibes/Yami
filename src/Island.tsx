@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import type { State, UtilityTab, YamiEvent } from "./shared";
-import { Icon, IconButton, Spirit, useYami } from "./ui";
+import { Icon, Spirit, useYami } from "./ui";
 import { AudioEngine } from "./audio";
 import { Utilities } from "./Utilities";
 import { MediaPeek } from "./MediaPeek";
@@ -16,6 +16,8 @@ export function Island() {
     [armed, setArmed] = useState(false),
     [peek, setPeek] = useState(false),
     [notchHover, setNotchHover] = useState(false),
+    [asleep, setAsleep] = useState(false),
+    [closing, setClosing] = useState(false),
     [activity, setActivity] = useState<{
       id: number;
       label: string;
@@ -28,9 +30,17 @@ export function Island() {
     } | null>(null);
   const prefs = useRef<State["settings"] | null>(null),
     audio = useRef<AudioEngine | null>(null),
-    toastTimer = useRef<any>(null);
+    toastTimer = useRef<any>(null),
+    clickTimer = useRef<any>(null),
+    openRef = useRef(false);
   const keyReady = useRef(false);
+  // The collapsed island is too small for messages, so they go to the
+  // caption pill at the bottom of the screen; the open drawer shows its own.
   function report(message: string) {
+    if (!openRef.current) {
+      void api("caption.notice", { message });
+      return;
+    }
     setToast(message);
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(""), 6000);
@@ -38,7 +48,8 @@ export function Island() {
   const start = (kind: "voice" | "dictation", target = 0, oneShot = false) => {
     if (!prefs.current) return;
     if (!keyReady.current) {
-      report("Connect your Gemini API key in Settings.");
+      // The main process shows the missing-key notice in the caption pill.
+      if (openRef.current) report("Connect your Gemini API key in Settings.");
       void api("show", { tab: "settings" });
       return;
     }
@@ -51,7 +62,9 @@ export function Island() {
   };
   const event = (e: YamiEvent) => {
     if (e.type === "panel") {
+      openRef.current = e.open;
       setOpen(e.open);
+      setClosing(false);
       setTab(e.tab);
     } else if (e.type === "status") setStatus(e.status);
     else if (e.type === "toast" || e.type === "error") report(e.message);
@@ -73,8 +86,10 @@ export function Island() {
       void api("ability.arm", { armed: false });
     } else if (e.type === "audio") audio.current?.play(e.data);
     else if (e.type === "audio-clear") audio.current?.clear();
-    else if (e.type === "dictation-result") report(e.text);
-    else if (e.type === "ability-disarmed") setArmed(false);
+    else if (e.type === "dictation-result") {
+      // The caption pill already shows the dictated text.
+      if (openRef.current) report(e.text);
+    } else if (e.type === "ability-disarmed") setArmed(false);
     else if (e.type === "activity")
       setActivity((current) =>
         e.done ? (current?.id === e.id ? null : current) : (e as any),
@@ -136,13 +151,56 @@ export function Island() {
   useEffect(() => {
     if (!open) refreshMedia.current();
   }, [open]);
-  const expand = (value: boolean, next = tab) =>
-    void api("panel", { open: value, tab: next });
+  // Opening grows the drawer out of the notch; closing plays the reverse
+  // before the window shrinks back.
+  const expand = (value: boolean, next = tab) => {
+    if (value || !openRef.current) {
+      void api("panel", { open: value, tab: next });
+      return;
+    }
+    if (closing) return;
+    setClosing(true);
+    setTimeout(() => void api("panel", { open: false, tab: next }), 190);
+  };
+  // After a quiet spell the notch slims down to a bar; any activity or a
+  // hover brings Yami back. One timeout per change, no polling.
+  const quiet =
+    !open &&
+    !mode &&
+    status === "idle" &&
+    !activity &&
+    !toast &&
+    !peek &&
+    !notchHover &&
+    !armed;
+  useEffect(() => {
+    if (!quiet) {
+      setAsleep(false);
+      return;
+    }
+    const id = setTimeout(() => setAsleep(true), 8000);
+    return () => clearTimeout(id);
+  }, [quiet]);
+  const arm = () => {
+    if (!state?.settings.ability || status !== "idle" || mode) return;
+    const next = !armed;
+    setArmed(next);
+    void api("ability.arm", { armed: next });
+    if (next)
+      void api("caption.notice", {
+        message: `${state.settings.ability === "collapse" ? "Collapse" : "Sidearm"} ready · ${state.settings.abilityButton}`,
+      });
+  };
   if (!state) return null;
   return (
-    <div className={`island-window ${open ? "expanded" : ""}`}>
+    <div
+      className={`island-window ${open ? "expanded" : ""} ${closing ? "closing" : ""} ${asleep ? "asleep" : ""} ${armed ? "armed" : ""}`}
+    >
       <div
         className="island-notch"
+        role="button"
+        tabIndex={0}
+        aria-label="Yami. Click to open the drawer, double-click to open the app."
         onMouseEnter={() => {
           void api("island.mouse", { ignore: false });
           setNotchHover(true);
@@ -156,25 +214,32 @@ export function Island() {
           if (e.deltaY > 0) expand(true);
           else if (open) expand(false);
         }}
-        onDoubleClick={() => void api("show")}
+        onClick={(e) => {
+          clearTimeout(clickTimer.current);
+          if (e.detail >= 2) {
+            void api("show");
+            return;
+          }
+          clickTimer.current = setTimeout(() => expand(!open), 220);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            expand(!open);
+          }
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          arm();
+        }}
       >
-        <button
-          className="island-spirit"
-          aria-label="Open Yami"
-          onClick={() => {
-            if (state.settings.ability && status === "idle" && !mode) {
-              const next = !armed;
-              setArmed(next);
-              void api("ability.arm", { armed: next });
-            } else expand(!open);
-          }}
-        >
+        <span className="island-spirit">
           <Spirit
             size={mode || status === "speaking" ? 36 : 49}
             soul={state.settings.soul}
             state={mode === "dictation" ? "listening" : status}
           />
-        </button>
+        </span>
         {(mode || status !== "idle") && (
           <div className="island-wave" aria-label={mode || status}>
             {Array.from({ length: 9 }, (_, i) => (
@@ -187,18 +252,6 @@ export function Island() {
             ))}
           </div>
         )}
-        <div className="island-hover-actions">
-          <IconButton
-            icon="house"
-            label="Open Yami"
-            onClick={() => void api("show")}
-          />
-          <IconButton
-            icon={open ? "caret-up" : "caret-down"}
-            label={open ? "Collapse panel" : "Expand panel"}
-            onClick={() => expand(!open)}
-          />
-        </div>
       </div>
       {!open && activity && !toast && (
         <div className="island-activity" role="status">
@@ -230,7 +283,7 @@ export function Island() {
             <Icon name="caret-double-down" size={11} /> Scroll for more
           </div>
         )}
-      {!open && !peek && media?.active && !toast && !activity && (
+      {!open && !asleep && !peek && media?.active && !toast && !activity && (
         <button
           className="mini-media"
           onClick={() => expand(true, "Controls")}
@@ -251,14 +304,8 @@ export function Island() {
           onClose={() => expand(false)}
           report={report}
         />
-      )}{" "}
-      {armed && (
-        <div className="island-toast">
-          {state.settings.ability === "collapse" ? "Collapse" : "Sidearm"} ready
-          · {state.settings.abilityButton}
-        </div>
       )}
-      {toast && <div className="island-toast">{toast}</div>}
+      {toast && open && <div className="island-toast">{toast}</div>}
       {effect && (
         <div className={"ability-effect " + effect.kind}>
           <span />

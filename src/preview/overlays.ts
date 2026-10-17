@@ -85,6 +85,7 @@ export function previewOverlay(
       return true;
     case "stray.mouse":
     case "stray.open":
+    case "caption.notice":
       return true;
     case "caption.data":
       if (!captionStarted) {
