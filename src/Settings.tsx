@@ -275,6 +275,11 @@ export function Settings({
                 "Yami floats on your desktop, dodges the cursor and naps when left alone.",
                 toggle("roam", "Let Yami roam"),
               )}
+              {row(
+                "Living flame",
+                "Keep Yami's flame flickering even when nothing is happening. Uses a little more power.",
+                toggle("livingFlame", "Living flame"),
+              )}
             </div>
             <h3 className="group-title">Advanced tools</h3>
             <div className="setting-group">

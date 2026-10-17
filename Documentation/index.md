@@ -2,7 +2,7 @@
 
 Yami is a Windows-first desktop companion. Set up voice and desktop tools, explore the application, and learn how to develop it.
 
-Yami is both the application and the name of its cat-ghost companion. She lives in a persistent Windows island above the desktop and can roam the desktop; users can change her skin, voice, personality, and ability in the local loadout. AI inference runs through user-owned provider accounts rather than a Yami-hosted account.
+Yami is both the application and the name of its cat-spirit companion. She lives in a persistent Windows island above the desktop and can roam the desktop; users can change her skin, voice, personality, and ability in the local loadout. AI inference runs through user-owned provider accounts rather than a Yami-hosted account.
 
 ![Yami desktop companion](assets/screenshots/home.png)
 

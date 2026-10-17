@@ -82,7 +82,14 @@ export function installPreviewBridge() {
             bluetooth: false,
           };
         case "media":
-          return { active: false };
+          return {
+            active: true,
+            title: "Demo beats to relax to",
+            artist: "Preview Radio",
+            playing: true,
+            position: 42,
+            duration: 184,
+          };
         case "control":
           toast("Preview only — Windows controls are unchanged.");
           return true;
@@ -250,6 +257,7 @@ export function installPreviewBridge() {
         case "ability.arm":
         case "shortcuts.capture":
         case "island.mouse":
+        case "island.peek":
         case "selection.clear":
           return true;
         default:

@@ -2,7 +2,7 @@
 
 ## Identity
 
-Yami is a Windows desktop voice companion represented by a white cat-ghost who lives in a small island at the top of the screen and can roam the desktop. Her skin, voice, personality, and ability can be changed in the local loadout. Gemini and Tavily connections use keys supplied by the user; Yami does not include a hosted AI account or shared provider credentials.
+Yami is a Windows desktop voice companion represented by a floating cat spirit with a downward-burning flame who lives in a small island at the top of the screen and can roam the desktop. Her skin, voice, personality, and ability can be changed in the local loadout. Gemini and Tavily connections use keys supplied by the user; Yami does not include a hosted AI account or shared provider credentials.
 
 Yami is a community reconstruction informed by supplied Hitodama references. It is not affiliated with the original project, and it does not claim exact parity with undocumented behavior or hidden screens.
 
@@ -12,12 +12,12 @@ Make a compact Windows companion that combines explicit voice and dictation sess
 
 ## Current capabilities
 
-Cat-ghost companion with roaming mode; spirit island with action card; on-screen voice captions; focus timer; Gemini text and Live voice; dictation; explicit screen lasso; quick/deep web research; routines and reminders; to-dos; editable local memories; clipboard history; app/file/snippet launcher; media; Windows controls; system metrics; speed test; wallpaper; power actions; loadout; and settings.
+Cat-spirit companion with roaming mode; spirit island with action card; on-screen voice captions; focus timer; Gemini text and Live voice; dictation; explicit screen lasso; quick/deep web research; routines and reminders; to-dos; editable local memories; clipboard history; app/file/snippet launcher; media; Windows controls; system metrics; speed test; wallpaper; power actions; loadout; and settings.
 
 ## Product commitments
 
 - Preserve the reference’s Rubik typography, dark translucent surfaces, dock, fanned catalogue, and top-center island.
-- Use Phosphor web icons; the cat-ghost is a project-authored SVG with Yami’s own names and copy.
+- Use Phosphor web icons; the cat spirit is a project-authored SVG with Yami’s own names and copy.
 - Keep operating-system actions in the Windows integration boundary and ask for confirmation on sensitive actions.
 - Never invent system readings or claim an action succeeded without a successful result.
 - Keep local conversations, settings, plans, memories, and provider keys intact across ordinary updates.

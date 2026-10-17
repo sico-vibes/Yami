@@ -1,0 +1,80 @@
+import { useEffect, useState } from "react";
+import { api } from "./api";
+import { Icon, IconButton } from "./ui";
+
+const clock = (s: number) =>
+  `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+// Now-playing card that grows out of the collapsed island while hovered.
+// Progress ticks locally once a second and re-reads Windows every few
+// seconds, only while the card is open.
+export function MediaPeek({
+  media,
+  onMedia,
+  onLeave,
+  onOpen,
+}: {
+  media: any;
+  onMedia: (m: any) => void;
+  onLeave: () => void;
+  onOpen: () => void;
+}) {
+  const [position, setPosition] = useState(media.position || 0);
+  useEffect(() => setPosition(media.position || 0), [media.position]);
+  useEffect(() => {
+    let n = 0;
+    const id = setInterval(() => {
+      if (++n % 5 === 0)
+        void api("media")
+          .then(onMedia)
+          .catch(() => {});
+      else if (media.playing)
+        setPosition((p: number) => Math.min(media.duration || p + 1, p + 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [media.playing, media.duration]);
+  const key = (action: string) =>
+    void api("control", { method: "mediaKey", args: { action } })
+      .then(() => api("media"))
+      .then(onMedia)
+      .catch(() => {});
+  return (
+    <div className="media-peek" onMouseLeave={onLeave}>
+      <button
+        className="media-peek-art"
+        aria-label="Open controls"
+        onClick={onOpen}
+      >
+        <Icon name="music-notes" size={22} />
+      </button>
+      <div className="media-peek-body">
+        <b>{media.title}</b>
+        <span>{media.artist || "Now playing"}</span>
+        <div className="media-peek-progress">
+          <small>{clock(position)}</small>
+          <progress max={Math.max(1, media.duration || 1)} value={position} />
+          <small>{clock(media.duration || 0)}</small>
+        </div>
+      </div>
+      <div className="media-peek-keys">
+        <IconButton
+          icon="skip-back"
+          label="Previous track"
+          onClick={() => key("previous")}
+        />
+        <button
+          className="play-button"
+          aria-label={media.playing ? "Pause" : "Play"}
+          onClick={() => key("play_pause")}
+        >
+          <Icon name={media.playing ? "pause" : "play"} fill size={16} />
+        </button>
+        <IconButton
+          icon="skip-forward"
+          label="Next track"
+          onClick={() => key("next")}
+        />
+      </div>
+    </div>
+  );
+}

@@ -201,3 +201,110 @@ html[data-reduced="true"] .island-activity {
     opacity: 0;
   }
 }
+.media-peek {
+  position: absolute;
+  left: 50%;
+  top: 70px;
+  transform: translateX(-50%);
+  width: 380px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(#0d0d10, #050505);
+  box-shadow: 0 6px 18px #0006;
+  animation: peek-grow 0.2s ease-out;
+  transform-origin: 50% 0;
+}
+@keyframes peek-grow {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.92, 0.6);
+  }
+}
+.media-peek-art {
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #f4f4f4;
+  background: linear-gradient(135deg, #6b4b7a, #c27d8f);
+}
+.media-peek-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.media-peek-body b,
+.media-peek-body > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.media-peek-body b {
+  font-size: 12px;
+  font-weight: 600;
+}
+.media-peek-body > span {
+  font-size: 10px;
+  color: #8f8b94;
+}
+.media-peek-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 9px;
+  color: #8f8b94;
+}
+.media-peek-progress progress {
+  appearance: none;
+  flex: 1;
+  height: 3px;
+  border: 0;
+}
+.media-peek-progress progress::-webkit-progress-bar {
+  background: #29292c;
+  border-radius: 4px;
+}
+.media-peek-progress progress::-webkit-progress-value {
+  background: #c9ad5c;
+  border-radius: 4px;
+}
+.media-peek-keys {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.media-peek-keys .icon-button {
+  width: 28px;
+  height: 28px;
+}
+.media-peek-keys .play-button {
+  width: 32px;
+  height: 32px;
+}
+.island-scroll-hint {
+  position: absolute;
+  left: 50%;
+  top: 70px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: #070707;
+  color: #8da4b4;
+  font-size: 9px;
+  pointer-events: none;
+  animation: bubble-in-up 0.18s ease-out;
+}
+html[data-reduced="true"] .media-peek,
+html[data-reduced="true"] .island-scroll-hint {
+  animation: none;
+}

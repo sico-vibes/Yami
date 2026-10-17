@@ -7,6 +7,7 @@ export const defaults: Settings = {
   alwaysOnTop: false,
   reducedMotion: false,
   roam: true,
+  livingFlame: false,
   hotkeys: true,
   microphone: "",
   noiseSuppression: true,

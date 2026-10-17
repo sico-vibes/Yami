@@ -48,19 +48,32 @@ export function IconButton({
   );
 }
 export { YamiSpirit as Spirit } from "./yami/YamiSpirit";
+// Mirrors the Living flame setting onto the document so every Yami in this
+// window can read it, and wakes them when it changes.
+function syncFlame(state: State) {
+  const value = state.settings.livingFlame ? "on" : "off",
+    root = document.documentElement;
+  if (root.dataset.flame === value) return;
+  root.dataset.flame = value;
+  dispatchEvent(new Event("yami-flame"));
+}
 export function useYami(callback?: (e: YamiEvent) => void) {
   const latest = useRef(callback);
   latest.current = callback;
   const [state, setState] = useState<State | null>(null);
   const [error, setError] = useState("");
+  const track = (next: State) => {
+    syncFlame(next);
+    setState(next);
+  };
   useEffect(() => {
     api("state")
-      .then(setState)
+      .then(track)
       .catch((e) => setError(e.message));
     return window.yami.on((e) => {
       if (e.type === "state") {
-        if (e.state) setState(e.state);
-        else api("state").then(setState);
+        if (e.state) track(e.state);
+        else api("state").then(track);
       }
       if (e.type === "error") setError(e.message);
       latest.current?.(e);

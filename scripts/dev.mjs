@@ -23,15 +23,11 @@ await import("./build-electron.mjs");
 const server = await createServer();
 await server.listen();
 const electron = (await import("electron")).default;
-const child = spawn(electron, ["."], {
-  cwd: root,
-  stdio: "inherit",
-  env: {
-    ...process.env,
-    YAMI_DEV_URL: "http://127.0.0.1:5173",
-    ELECTRON_RUN_AS_NODE: "",
-  },
-});
+// An empty ELECTRON_RUN_AS_NODE still counts as set on Windows (terminals
+// hosted inside Electron apps export it), so remove it entirely.
+const env = { ...process.env, YAMI_DEV_URL: "http://127.0.0.1:5173" };
+delete env.ELECTRON_RUN_AS_NODE;
+const child = spawn(electron, ["."], { cwd: root, stdio: "inherit", env });
 child.on("exit", async (c) => {
   await server.close();
   process.exit(c || 0);

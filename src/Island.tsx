@@ -4,6 +4,7 @@ import type { State, UtilityTab, YamiEvent } from "./shared";
 import { Icon, IconButton, Spirit, useYami } from "./ui";
 import { AudioEngine } from "./audio";
 import { Utilities } from "./Utilities";
+import { MediaPeek } from "./MediaPeek";
 export function Island() {
   const [open, setOpen] = useState(false),
     [tab, setTab] = useState<UtilityTab>("Controls"),
@@ -13,6 +14,8 @@ export function Island() {
     [mode, setMode] = useState(""),
     [media, setMedia] = useState<any>(null),
     [armed, setArmed] = useState(false),
+    [peek, setPeek] = useState(false),
+    [notchHover, setNotchHover] = useState(false),
     [activity, setActivity] = useState<{
       id: number;
       label: string;
@@ -142,9 +145,11 @@ export function Island() {
         className="island-notch"
         onMouseEnter={() => {
           void api("island.mouse", { ignore: false });
+          setNotchHover(true);
           refreshMedia.current();
         }}
         onMouseLeave={() => {
+          setNotchHover(false);
           if (!open) void api("island.mouse", { ignore: true });
         }}
         onWheel={(e) => {
@@ -201,8 +206,39 @@ export function Island() {
           <span>{activity.label}</span>
         </div>
       )}
-      {!open && media?.active && !toast && !activity && (
-        <button className="mini-media" onClick={() => expand(true, "Controls")}>
+      {!open && peek && media?.active && (
+        <MediaPeek
+          media={media}
+          onMedia={setMedia}
+          onOpen={() => {
+            setPeek(false);
+            expand(true, "Controls");
+          }}
+          onLeave={() => {
+            setPeek(false);
+            void api("island.peek", { open: false });
+          }}
+        />
+      )}
+      {!open &&
+        notchHover &&
+        !peek &&
+        !activity &&
+        !toast &&
+        !media?.active && (
+          <div className="island-scroll-hint" aria-hidden="true">
+            <Icon name="caret-double-down" size={11} /> Scroll for more
+          </div>
+        )}
+      {!open && !peek && media?.active && !toast && !activity && (
+        <button
+          className="mini-media"
+          onClick={() => expand(true, "Controls")}
+          onMouseEnter={() => {
+            setPeek(true);
+            void api("island.peek", { open: true });
+          }}
+        >
           <Icon name={media.playing ? "music-notes" : "pause"} size={12} />
           <span>{media.title}</span>
         </button>

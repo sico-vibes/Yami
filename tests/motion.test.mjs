@@ -5,14 +5,46 @@ import {
   REST,
   settle,
   stateEnergy,
-  tailPath,
-  tailSpine,
+  CENTER,
+  LAYER_COUNT,
+  layerPath,
+  layerPoints,
+  stepParticles,
 } from "../src/yami/motion.ts";
 import { migrateState } from "../src/migrations.ts";
-test("the tail is deterministic and still when there is no energy", () => {
-  assert.equal(tailPath(tailSpine(1.3, 0.6)), tailPath(tailSpine(1.3, 0.6)));
-  assert.equal(tailPath(tailSpine(0, 0)), tailPath(tailSpine(9, 0)));
-  assert.notEqual(tailPath(tailSpine(0, 0)), tailPath(tailSpine(0.8, 1)));
+test("the flame is deterministic and still when there is no energy", () => {
+  for (let layer = 0; layer < LAYER_COUNT; layer++) {
+    assert.equal(layerPath(layer, 1.3, 0.6), layerPath(layer, 1.3, 0.6));
+    assert.equal(layerPath(layer, 0, 0), layerPath(layer, 9, 0));
+    assert.notEqual(layerPath(layer, 0, 0), layerPath(layer, 0.8, 1));
+  }
+});
+test("Yami has a round head and burns downward only, with no limbs", () => {
+  for (let layer = 0; layer < LAYER_COUNT; layer++) {
+    const points = layerPoints(layer, 2.4, 1);
+    const head = points.filter((p) => p.y < CENTER.y - 0.5);
+    const radius = Math.hypot(head[0].x - CENTER.x, head[0].y - CENTER.y);
+    for (const p of head)
+      assert.ok(
+        Math.abs(Math.hypot(p.x - CENTER.x, p.y - CENTER.y) - radius) < 0.5,
+        "the head stays round",
+      );
+    for (const p of points)
+      assert.ok(
+        Math.abs(p.x - CENTER.x) <= radius + 0.5,
+        "nothing sticks out sideways",
+      );
+    assert.ok(Math.max(...points.map((p) => p.y)) > CENTER.y + radius + 5);
+  }
+});
+test("embers spawn, drift and fade out", () => {
+  let seed = 1;
+  const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let list = [];
+  for (let i = 0; i < 120; i++) list = stepParticles(list, 1 / 60, 6, rand);
+  assert.ok(list.length > 0 && list.length <= 10);
+  for (let i = 0; i < 240; i++) list = stepParticles(list, 1 / 60, 0, rand);
+  assert.equal(list.length, 0);
 });
 test("idle needs no animation and every pose settles to rest", () => {
   assert.equal(stateEnergy("idle"), 0);

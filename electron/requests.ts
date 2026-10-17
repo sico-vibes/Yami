@@ -26,6 +26,7 @@ export type RequestContext = {
   broadcast: (event: any) => void;
   showMain: (tab?: string) => void;
   setPanel: (open: boolean, tab?: string) => void;
+  peekIsland: (open: boolean) => void;
   confirm: (title: string, detail: string) => Promise<boolean>;
   discoverApps: () => Promise<any>;
   launchApp: (name: string) => Promise<any>;
@@ -242,6 +243,9 @@ export function createRequestHandler(ctx: RequestContext) {
         return true;
       case "panel":
         setPanel(!!a.open, a.tab);
+        return true;
+      case "island.peek":
+        ctx.peekIsland(!!a.open);
         return true;
       case "island.mouse":
         if (!ctx.panelOpen)

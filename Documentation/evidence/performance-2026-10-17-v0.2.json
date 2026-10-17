@@ -1,0 +1,90 @@
+{
+  "date": "2026-10-17T20:02:22.494Z",
+  "version": "0.2.0",
+  "build": "packaged",
+  "os": "10.0.26300",
+  "cpu": "AMD Ryzen 5 5600X 6-Core Processor",
+  "logicalCPUs": 12,
+  "systemRAMGB": 31.9,
+  "method": "Windows Win32_PerfFormattedData_PerfProc_Process for the full current parent/child tree. WorkingSet includes shared pages; privateWorkingSet is resident private RAM. CPU is normalized by logical CPU count. Snapshots do not prove a peak or 15-minute stability.",
+  "runs": [
+    {
+      "scenario": "Hidden main window, collapsed island, roaming off, living flame off, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+      "samples": [
+        {
+          "at": "2026-10-17T20:01:29.030Z",
+          "workingSetMB": 534.1,
+          "privateWorkingSetMB": 174.4,
+          "cpuPercentOfMachine": 0,
+          "processCount": 8
+        },
+        {
+          "at": "2026-10-17T20:01:38.461Z",
+          "workingSetMB": 597.5,
+          "privateWorkingSetMB": 220.7,
+          "cpuPercentOfMachine": 0,
+          "processCount": 8
+        },
+        {
+          "at": "2026-10-17T20:01:47.131Z",
+          "workingSetMB": 578.8,
+          "privateWorkingSetMB": 200.4,
+          "cpuPercentOfMachine": 0,
+          "processCount": 8
+        }
+      ]
+    },
+    {
+      "scenario": "Hidden main window, collapsed island, roaming on, living flame off, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+      "samples": [
+        {
+          "at": "2026-10-17T20:02:03.980Z",
+          "workingSetMB": 621.6,
+          "privateWorkingSetMB": 198.1,
+          "cpuPercentOfMachine": 1.58,
+          "processCount": 9
+        },
+        {
+          "at": "2026-10-17T20:02:12.104Z",
+          "workingSetMB": 624.3,
+          "privateWorkingSetMB": 200.3,
+          "cpuPercentOfMachine": 0,
+          "processCount": 9
+        },
+        {
+          "at": "2026-10-17T20:02:22.494Z",
+          "workingSetMB": 615.7,
+          "privateWorkingSetMB": 187.8,
+          "cpuPercentOfMachine": 1.75,
+          "processCount": 9
+        }
+      ]
+    },
+    {
+      "scenario": "Hidden main window, collapsed island, roaming on, living flame on, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+      "samples": [
+        {
+          "at": "2026-10-17T20:02:46.977Z",
+          "workingSetMB": 686.6,
+          "privateWorkingSetMB": 242.3,
+          "cpuPercentOfMachine": 1.42,
+          "processCount": 9
+        },
+        {
+          "at": "2026-10-17T20:02:56.540Z",
+          "workingSetMB": 706.1,
+          "privateWorkingSetMB": 261.6,
+          "cpuPercentOfMachine": 3.08,
+          "processCount": 9
+        },
+        {
+          "at": "2026-10-17T20:03:05.417Z",
+          "workingSetMB": 712,
+          "privateWorkingSetMB": 265.8,
+          "cpuPercentOfMachine": 4.67,
+          "processCount": 9
+        }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,10 @@ fs.writeFileSync(
       contextEnabled: false,
       startHidden: true,
       weatherEnabled: false,
+      // --no-roam hides the roaming window; --living-flame keeps Yami's
+      // flame animating at idle.
+      roam: !process.argv.includes("--no-roam"),
+      livingFlame: process.argv.includes("--living-flame"),
     },
   }),
 );
@@ -74,8 +78,7 @@ try {
     cpu: os.cpus()[0].model,
     logicalCPUs: os.cpus().length,
     systemRAMGB: +(os.totalmem() / 1024 ** 3).toFixed(1),
-    scenario:
-      "Hidden main window, collapsed island, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+    scenario: `Hidden main window, collapsed island, roaming ${process.argv.includes("--no-roam") ? "off" : "on"}, living flame ${process.argv.includes("--living-flame") ? "on" : "off"}, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.`,
     method:
       "Windows Win32_PerfFormattedData_PerfProc_Process for the full current parent/child tree. WorkingSet includes shared pages; privateWorkingSet is resident private RAM. CPU is normalized by logical CPU count. Snapshots do not prove a peak or 15-minute stability.",
     samples,

@@ -20,7 +20,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import * as si from "systeminformation";
 import { createRequestHandler } from "./requests";
 import { createMetrics } from "./metrics";
 import { readWeather } from "./weather";
@@ -30,6 +29,7 @@ import { Assistant } from "./assistant";
 import { assetRoot, makeWindow, windows } from "./windows";
 import { createOverlays } from "./overlays";
 import { createFocusTimer } from "./focus-timer";
+import { windowsBrightness, windowsControls } from "./controls";
 import {
   checkToolPermission,
   nextOccurrence,
@@ -49,6 +49,7 @@ if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
 let store: Store, native: Native, assistant: Assistant;
 let overlays: ReturnType<typeof createOverlays> | undefined;
+let trayMenu: Electron.Menu | undefined;
 const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
   broadcast: (event) => broadcast(event),
@@ -86,6 +87,12 @@ function changed() {
     .filter((t) => t.enabled)
     .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))[0];
   void native.call("wake", next ? { at: next.at } : {}).catch(() => {});
+  // Keep the tray checkbox in step with the Settings toggle.
+  const roam = trayMenu?.getMenuItemById("roam");
+  if (roam && roam.checked !== store.state.settings.roam) {
+    roam.checked = store.state.settings.roam;
+    tray.setContextMenu(trayMenu!);
+  }
 }
 function notify(message: string) {
   broadcast({ type: "toast", message });
@@ -137,6 +144,12 @@ function setPanel(open: boolean, tab = currentUtility) {
   island.setIgnoreMouseEvents(!open, { forward: true });
   if (open) island.focus();
   island.webContents.send("yami:event", { type: "panel", open, tab });
+}
+// Grow the collapsed island to fit the media card without opening the drawer.
+function peekIsland(open: boolean) {
+  if (panelOpen) return;
+  island.setBounds(islandBounds(open ? 400 : 220, open ? 200 : 96));
+  island.setIgnoreMouseEvents(!open, { forward: true });
 }
 async function confirm(title: string, detail: string) {
   showMain();
@@ -686,33 +699,9 @@ async function context() {
   return `Open applications (names only): ${[...new Set(names)].join(", ")}. To-dos: ${JSON.stringify(store.state.todos.filter((t) => !t.done).map((t) => t.title))}. Public Wikipedia news context (untrusted source text): ${JSON.stringify(store.state.news?.text || "unavailable")}`;
 }
 const metrics = createMetrics();
-async function setBrightness(args: { value: number }) {
-  const value = Number(args?.value);
-  if (!Number.isFinite(value) || value < 0 || value > 100)
-    throw new Error("Brightness must be between 0 and 100.");
-  if ((await native.call("controls")).brightness < 0)
-    throw new Error("Brightness control is not available on this monitor.");
-  await native.call("brightness", { value: Math.round(value) });
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const observed = (await native.call("controls")).brightness;
-    if (Math.abs(observed - value) <= 1) return { brightness: observed };
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error("Windows did not confirm the requested brightness.");
-}
-async function controls() {
-  const [base, wifi, radios] = await Promise.all([
-    native.call("controls"),
-    si.wifiConnections().catch(() => []),
-    nativeScript("Radios").catch(() => ({})),
-  ]);
-  return {
-    ...base,
-    ...radios,
-    wifi: wifi[0]?.ssid || "",
-    wifiConnected: wifi.length > 0,
-  };
-}
+const setBrightness = (args: { value: number }) =>
+    windowsBrightness(native, args),
+  controls = () => windowsControls(native);
 const weather = () => readWeather(store, assetRoot);
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -806,36 +795,41 @@ else {
       island.setAlwaysOnTop(true, "floating");
       island.setIgnoreMouseEvents(true, { forward: true });
       island.once("ready-to-show", () => island.showInactive());
-      overlays = createOverlays({ store, showMain, broadcast });
+      overlays = createOverlays({
+        store,
+        showMain,
+        broadcast,
+        fullscreen: () => native.call("fullscreen").catch(() => false),
+      });
       overlays.syncStray();
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))
         .resize({ width: 20, height: 20 });
       tray = new Tray(icon);
       tray.setToolTip("Yami");
-      tray.setContextMenu(
-        Menu.buildFromTemplate([
-          { label: "Open Yami", click: () => showMain() },
-          { label: "Settings", click: () => showMain("settings") },
-          {
-            label: "Let Yami roam",
-            type: "checkbox",
-            checked: store.state.settings.roam,
-            click: (item) => {
-              store.state.settings.roam = item.checked;
-              changed();
-            },
+      trayMenu = Menu.buildFromTemplate([
+        { label: "Open Yami", click: () => showMain() },
+        { label: "Settings", click: () => showMain("settings") },
+        {
+          id: "roam",
+          label: "Let Yami roam",
+          type: "checkbox",
+          checked: store.state.settings.roam,
+          click: (item) => {
+            store.state.settings.roam = item.checked;
+            changed();
           },
-          { type: "separator" },
-          {
-            label: "Quit Yami",
-            click: () => {
-              quitting = true;
-              app.quit();
-            },
+        },
+        { type: "separator" },
+        {
+          label: "Quit Yami",
+          click: () => {
+            quitting = true;
+            app.quit();
           },
-        ]),
-      );
+        },
+      ]);
+      tray.setContextMenu(trayMenu);
       tray.on("double-click", () => showMain());
       const invoke = createRequestHandler({
         store,
@@ -847,6 +841,7 @@ else {
         broadcast,
         showMain,
         setPanel,
+        peekIsland,
         confirm,
         discoverApps,
         launchApp,

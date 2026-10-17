@@ -32,6 +32,7 @@ class Host {
     [DllImport("user32.dll")] static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr w, IntPtr l);
     [DllImport("kernel32.dll")] static extern IntPtr GetModuleHandle(string name);
     [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
+    [DllImport("shell32.dll")] static extern int SHQueryUserNotificationState(out int state);
     [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr h);
     [DllImport("kernel32.dll")]static extern uint GetCurrentThreadId();
     [DllImport("user32.dll")]static extern bool AttachThreadInput(uint from,uint to,bool attach);
@@ -149,6 +150,7 @@ class Host {
             case "uiaRead": return ReadUI();
             case "uiaClick": return ClickUI(Str(a,"name"));
             case "click": SetCursorPos(Num(a,"x"),Num(a,"y"));mouse_event(2,0,0,0,UIntPtr.Zero);mouse_event(4,0,0,0,UIntPtr.Zero);return true;
+            case "fullscreen": { int state; return SHQueryUserNotificationState(out state)==0&&(state==2||state==3||state==4); }
             case "backdrop": { int value=3;return DwmSetWindowAttribute(new IntPtr(Convert.ToInt64(a["handle"])),38,ref value,4)==0; }
             default: throw new Exception("Unknown native method: "+method);
         }

@@ -365,23 +365,42 @@ export function Loadout({
     </section>
   );
 }
+// Slot cards drift slowly around Yami on a flattened orbit. Hovering or
+// dragging a card pauses the drift so it is easy to click.
+const ORBIT_SQUASH = 0.6,
+  ORBIT_SPEED = 0.05; // radians per second
 function Hub({ state, open }: { state: State; open: (s: string) => void }) {
   const canvas = useRef<HTMLCanvasElement>(null),
-    root = useRef<HTMLDivElement>(null);
+    root = useRef<HTMLDivElement>(null),
+    buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const nodes = useRef([
     { x: -150, y: -90 },
     { x: 155, y: -85 },
     { x: -150, y: 95 },
     { x: 150, y: 100 },
   ]);
-  const [revision, setRevision] = useState(0);
-  const dragging = useRef(-1);
+  const angle = useRef(0),
+    paused = useRef(false),
+    dragging = useRef(-1);
+  const place = (p: { x: number; y: number }) => {
+    const r = Math.hypot(p.x, p.y / ORBIT_SQUASH),
+      a = Math.atan2(p.y / ORBIT_SQUASH, p.x) + angle.current;
+    return { x: r * Math.cos(a), y: r * Math.sin(a) * ORBIT_SQUASH };
+  };
   useEffect(() => {
-    let frame = 0;
+    let frame = 0,
+      last = 0;
     const c = canvas.current!,
       r = root.current!,
       ctx = c.getContext("2d")!;
+    const still = () =>
+      document.documentElement.dataset.reduced === "true" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
     const draw = (t: number) => {
+      const dt = last ? Math.min(0.05, (t - last) / 1000) : 0;
+      last = t;
+      if (!paused.current && dragging.current < 0 && !still())
+        angle.current += dt * ORBIT_SPEED;
       const w = r.clientWidth,
         h = r.clientHeight;
       c.width = w * devicePixelRatio;
@@ -389,9 +408,15 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
       ctx.scale(devicePixelRatio, devicePixelRatio);
       const cx = w / 2,
         cy = h / 2;
-      nodes.current.forEach((p, i) => {
-        const x = cx + p.x,
+      nodes.current.forEach((n, i) => {
+        const p = place(n),
+          x = cx + p.x,
           y = cy + p.y;
+        const b = buttons.current[i];
+        if (b) {
+          b.style.left = `calc(50% + ${p.x.toFixed(1)}px)`;
+          b.style.top = `calc(50% + ${p.y.toFixed(1)}px)`;
+        }
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.bezierCurveTo(cx + p.x * 0.9, cy, x - p.x * 0.2, y + 35, x, y);
@@ -449,16 +474,19 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
     <div
       className="loadout-hub"
       ref={root}
-      data-revision={revision}
       onPointerMove={(e) => {
         const i = dragging.current;
         if (i < 0) return;
-        const rect = e.currentTarget.getBoundingClientRect();
+        const rect = e.currentTarget.getBoundingClientRect(),
+          x = e.clientX - rect.left - rect.width / 2,
+          y = e.clientY - rect.top - rect.height / 2;
+        // Store the card unrotated so it keeps orbiting from where it was dropped.
+        const r = Math.hypot(x, y / ORBIT_SQUASH),
+          a = Math.atan2(y / ORBIT_SQUASH, x) - angle.current;
         nodes.current[i] = {
-          x: e.clientX - rect.left - rect.width / 2,
-          y: e.clientY - rect.top - rect.height / 2,
+          x: r * Math.cos(a),
+          y: r * Math.sin(a) * ORBIT_SQUASH,
         };
-        setRevision((v) => v + 1);
       }}
       onPointerUp={() => {
         dragging.current = -1;
@@ -471,10 +499,19 @@ function Hub({ state, open }: { state: State; open: (s: string) => void }) {
       {labels.map((l, i) => (
         <button
           key={l.slot}
+          ref={(el) => {
+            buttons.current[i] = el;
+          }}
           className="loadout-node"
           style={{
-            left: `calc(50% + ${nodes.current[i].x}px)`,
-            top: `calc(50% + ${nodes.current[i].y}px)`,
+            left: `calc(50% + ${place(nodes.current[i]).x}px)`,
+            top: `calc(50% + ${place(nodes.current[i]).y}px)`,
+          }}
+          onPointerEnter={() => {
+            paused.current = true;
+          }}
+          onPointerLeave={() => {
+            paused.current = false;
           }}
           onPointerDown={(e) => {
             dragging.current = i;

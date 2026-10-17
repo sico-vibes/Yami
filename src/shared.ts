@@ -9,6 +9,7 @@ export type Settings = {
   alwaysOnTop: boolean;
   reducedMotion: boolean;
   roam: boolean;
+  livingFlame: boolean;
   hotkeys: boolean;
   microphone: string;
   noiseSuppression: boolean;

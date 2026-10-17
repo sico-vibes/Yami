@@ -3,7 +3,7 @@ import type { Store } from "./store";
 import { makeWindow } from "./windows";
 import { toolActivity } from "./activity";
 
-// The roaming cat-ghost ("stray") and the bottom-of-screen caption pill.
+// The roaming Yami window ("stray") and the bottom-of-screen caption pill.
 // Neither runs a timer at idle: the stray only moves after a hover, a drag,
 // a voice turn or a lazy drift minutes apart, and the caption window exists
 // only during a voice or dictation turn.
@@ -17,10 +17,13 @@ export function createOverlays({
   store,
   showMain,
   broadcast,
+  fullscreen,
 }: {
   store: Store;
   showMain: () => void;
   broadcast: (event: any) => void;
+  // True while a fullscreen app, game or presentation is in front.
+  fullscreen: () => Promise<boolean>;
 }) {
   let stray: BrowserWindow | undefined,
     caption: BrowserWindow | undefined,
@@ -30,6 +33,7 @@ export function createOverlays({
     closeTimer: NodeJS.Timeout | undefined,
     undockTimer: NodeJS.Timeout | undefined,
     docked = false,
+    covered = false,
     busy = false,
     activityId = 0,
     captionData = emptyCaption();
@@ -98,12 +102,14 @@ export function createOverlays({
   function scheduleDrift() {
     clearTimeout(drift);
     drift = setTimeout(
-      () => {
+      async () => {
         if (
           alive(stray) &&
           !docked &&
           !busy &&
-          !powerMonitor.isOnBatteryPower()
+          !covered &&
+          !powerMonitor.isOnBatteryPower() &&
+          !(await fullscreen())
         ) {
           const [x, y] = stray.getPosition(),
             angle = Math.random() * Math.PI * 2;
@@ -132,7 +138,7 @@ export function createOverlays({
       stray.setAlwaysOnTop(true, "floating");
       stray.setIgnoreMouseEvents(true, { forward: true });
       stray.once("ready-to-show", () => {
-        if (alive(stray) && !docked) stray.showInactive();
+        if (alive(stray) && !docked && !covered) stray.showInactive();
       });
       stray.on("closed", () => {
         stray = undefined;
@@ -159,10 +165,19 @@ export function createOverlays({
       if (!alive(stray) || !docked) return;
       docked = false;
       stray.setPosition(islandSpot().x, islandSpot().y);
-      stray.showInactive();
+      if (!covered) stray.showInactive();
       send(stray, { type: "stray-dock", docked: false });
       glideTo(home || restingSpot(), 900);
     }, delay);
+  }
+  // Step out of the way of fullscreen games, videos and presentations.
+  async function checkCover() {
+    if (!alive(stray)) return;
+    const next = await fullscreen();
+    if (next === covered || !alive(stray)) return;
+    covered = next;
+    if (covered) stray.hide();
+    else if (!docked) stray.showInactive();
   }
   function flee(px: number, py: number) {
     if (!alive(stray) || docked) return;
@@ -248,6 +263,8 @@ export function createOverlays({
       switch (e.type) {
         case "state":
           return syncStray();
+        case "foreground":
+          return void checkCover();
         case "voice-start":
           return begin("voice");
         case "record":

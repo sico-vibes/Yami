@@ -4,11 +4,11 @@ This guide describes features currently represented in the source. Hardware-depe
 
 ## Companion and conversation
 
-**Yami, the cat-ghost.** Yami is drawn as a white cat-ghost with a wispy tail (`src/yami/`). Her tail, ears, eyes and body move while she is hovered, listening, thinking, speaking or being carried, then settle to a still pose and stop requesting animation frames. Reduced motion shows static poses.
+**Yami, the cat spirit.** Yami is a floating, armless spirit with cat ears and a round, front-facing face whose lower half burns downward as a layered flame: a pale outer flame, a lighter middle and a white-hot core (`src/yami/`). While she is hovered, listening, thinking, speaking or being carried, the flame tongues flicker and curl, embers drift off and fade, and a soft glow under her shows she is floating. Afterwards she settles to a still pose and stops requesting animation frames. Turn on **Living flame** to keep a gentle flicker at idle. Reduced motion shows static poses.
 
-**Spirit island.** A small top-center transparent island can open the main app and utility panel, display listening/thinking/speaking state, and accept the configured ability trigger. While Yami runs a tool, a small card under the island names the action (for example "Opening Spotify"). Scrolling down on the island opens the drawer; scrolling up at the top of the drawer tucks it away. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
+**Spirit island.** A small top-center transparent island can open the main app and utility panel, display listening/thinking/speaking state, and accept the configured ability trigger. While Yami runs a tool, a small card under the island names the action (for example "Opening Spotify"). When media is playing, hovering the small now-playing pill grows it into a card with progress and previous/play/next controls. Hovering the island otherwise hints that scrolling opens more. Scrolling down on the island opens the drawer; scrolling up at the top of the drawer tucks it away. It remains in the Windows tray when the main window is closed. Quit Yami from the tray to stop background work.
 
-**Roaming.** With **Let Yami roam** on (Settings > Behavior, or the tray menu), Yami floats in a small click-through window on the desktop. She dodges the cursor twice with a quip, then lets you catch her: click opens Yami, drag moves her. She drifts to a nearby spot every few minutes (skipped on battery), naps after a minute alone, and flies into the island during voice and dictation turns.
+**Roaming.** With **Let Yami roam** on (Settings > Behavior, or the tray menu), Yami floats in a small click-through window on the desktop. She dodges the cursor twice with a quip, then lets you catch her: click opens Yami, drag moves her. She drifts to a nearby spot every few minutes (skipped on battery or while a fullscreen app is in front), hides while a fullscreen game, video or presentation is in front, naps after a minute alone, and flies into the island during voice and dictation turns. The tray checkbox follows the Settings toggle.
 
 **Captions.** During a voice or dictation turn a pill at the bottom of the screen shows the held shortcut keys, your live transcript (`You`), then Yami's reply (`Yami`). The caption window exists only for the turn and closes a few seconds after it ends.
 
@@ -24,7 +24,7 @@ This guide describes features currently represented in the source. Hardware-depe
 
 | Slot | Shipped choices and ember costs |
 | --- | --- |
-| Skin | Yami free; Ember 160; Wisp 160; Amethyst 400; Gilded 400; Void 1,000. Each is the same cat-ghost in a different colourway. Saved `hitodama` selections from earlier builds migrate to `yami` on start. |
+| Skin | Yami free; Ember 160; Wisp 160; Amethyst 400; Gilded 400; Void 1,000. Each is the same cat spirit with its own flame colours. Saved `hitodama` selections from earlier builds migrate to `yami` on start. |
 | Voice | Charon free; Puck, Leda, Aoede, Enceladus, Algenib, Laomedeia, Jack, Ankit, Cheng, and Linda cost 240 each. Several named personas map to Gemini prebuilt voices plus delivery instructions. |
 | Personality | Alley Cat free; New/custom personality 100. |
 | Ability | Collapse is included with Void; Sidearm costs 400. The ability is armed by tapping the island and triggered by its configured mouse or keyboard binding. |
@@ -79,7 +79,8 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Behavior | Memory | On | Includes saved facts in Gemini context; stored facts remain until deleted. |
 | Behavior | Noise suppression | On | Requests noise suppression from the renderer audio capture chain. |
 | Behavior | Reduced motion | Off | Reduces UI animation. |
-| Behavior | Let Yami roam | On | Shows the roaming cat-ghost window on the desktop. |
+| Behavior | Let Yami roam | On | Shows the roaming Yami window on the desktop. |
+| Behavior | Living flame | Off | Keeps Yami's flame flickering at idle. Uses a little more power. |
 | Behavior | Terminal commands | Off | Required before a model terminal tool is available; each command still asks confirmation. |
 | Behavior | Raw desktop automation | Off | Required before coordinate clicks are available; each click still asks confirmation. |
 | System | Start with Windows | Off | Uses Electron login-item settings. |

@@ -27,14 +27,26 @@ The same Windows machine and fixture conditions were sampled once with the unsig
 
 This is a short observation, not a task peak, a 15-minute soak, or a guaranteed idle CPU claim. The 50–100 MB idle target remains unmet. Reducing the current Electron floor may require a renderer/runtime architecture change after profiling; do not simulate savings by forcing pages out of the working set. The [measurement summary](evidence/performance-2026-10-17.json) records the procedure and samples. Run `node scripts/measure-performance.mjs --packaged` after packaging to gather a fresh local result. Use `YAMI_PACKAGE_DIR` when testing an output directory other than `release`.
 
+## Version 0.2.0 packaged comparison (2026-10-17)
+
+The same machine and procedure (packaged build, hidden main window, collapsed island, no provider session, clipboard/context/weather off, 10-second settle, three snapshots five seconds apart) was run once per setting:
+
+| Setting | Processes | Private working set | Sampled CPU (of 12 logical CPUs) |
+| --- | ---: | ---: | ---: |
+| Roaming off | 8 | 174.4–220.7 MB | 0% |
+| Roaming on (default) | 9 | 187.8–200.3 MB | 0–1.75% |
+| Living flame on (with roaming) | 9 | 242.3–265.8 MB | 1.42–4.67% |
+
+Roaming adds one renderer process, and its memory difference is within the run-to-run spread seen here. Living flame clearly costs memory and CPU because each visible Yami keeps animating at about 30 fps, so it is off by default. In the desktop check, a settled Yami requested zero animation frames over 1.5 seconds and Living flame about 49 frames over 1.5 seconds. Single short runs vary by tens of megabytes; this is not a soak test, and the 50–100 MB idle target remains unmet. The [v0.2 measurement summary](evidence/performance-2026-10-17-v0.2.json) records the samples.
+
 ## Current sources of background work
 
 - Main process checks due tasks every five seconds. A separate Windows waitable timer asks the operating system to wake at the next scheduled action.
 - Clipboard history polls every 1.8 seconds while enabled; polling skips known private contexts and pauses briefly after Yami writes text.
 - Global keyboard and mouse hooks remain active while Yami is running and shortcuts are enabled. These hooks support hold-to-talk, dictation, lasso, launcher, and ability input.
-- The tray and island remain active while the main window is hidden. Electron windows use `backgroundThrottling: true`. The cat-ghost requests animation frames only while active and cancels its loop once settled (zero frames at idle in the browser preview). The roaming window adds one small transparent renderer when **Let Yami roam** is on; it does not poll the cursor (hover arrives through forwarded mouse events) and runs one drift timer every 3–6 minutes. The caption window exists only during a voice or dictation turn. The island no longer polls media every eight seconds: it reads media on start, on foreground-app changes, on hover and when the drawer closes, and polls every 15 seconds only while something is playing. These changes have not yet been measured on Windows.
+- The tray and island remain active while the main window is hidden. Electron windows use `backgroundThrottling: true`. The cat spirit requests animation frames only while active and cancels its loop once settled (zero frames at idle in the browser preview). The optional **Living flame** setting deliberately keeps one animation loop per visible Yami running at idle. The roaming window adds one small transparent renderer when **Let Yami roam** is on and hides while a fullscreen app is in front; it does not poll the cursor (hover arrives through forwarded mouse events) and runs one drift timer every 3–6 minutes. The caption window exists only during a voice or dictation turn. The island no longer polls media every eight seconds: it reads media on start, on foreground-app changes, on hover and when the drawer closes, and polls every 15 seconds only while something is playing. See the v0.2.0 comparison above for measured idle figures.
 - Hardware metrics refresh while the Stats view is mounted; renderer interval is 2.5 seconds and main-process values are cached for 1.5 seconds.
-- Controls refresh every six seconds, the island refreshes its media hint every eight seconds, and Windows media-script results are cached for six seconds while active or 30 seconds while inactive. In-flight PowerShell/native-script requests are deduplicated.
+- Controls refresh every six seconds while that panel is open, the island media card re-reads media every five seconds only while it is open, and Windows media-script results are cached for six seconds while active or 30 seconds while inactive. In-flight PowerShell/native-script requests are deduplicated.
 - A live Gemini socket and audio buffers exist during an explicit voice session. They should close and release temporary data after the user ends the turn/session.
 - Lasso capture temporarily holds a display image and opens an overlay only while the selection is active.
 
