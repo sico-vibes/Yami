@@ -6,7 +6,7 @@ import path from "node:path";
 test(
   "compiled Windows host reads real state and protects unknown operations",
   { skip: process.platform !== "win32", timeout: 30000 },
-  async () => {
+  async (t) => {
     const child = spawn(path.resolve("native/bin/Yami.Native.exe"), [], {
       windowsHide: true,
     });
@@ -54,10 +54,19 @@ test(
       } finally {
         await call("clipboardRestore");
       }
-      await call("volume", { value: controls.volume });
-      assert.ok(
-        Math.abs((await call("controls")).volume - controls.volume) <= 1,
-      );
+      try {
+        await call("volume", { value: controls.volume });
+        assert.ok(
+          Math.abs((await call("controls")).volume - controls.volume) <= 1,
+        );
+      } catch (error) {
+        // Windows CI machines can have no default audio endpoint. Keep the
+        // rejection check narrow so unrelated COM or bridge failures still fail.
+        assert.match(error.message, /0x80070490/);
+        t.diagnostic(
+          "No default audio endpoint: Windows correctly rejected volume control (0x80070490). Interactive audio verification remains a local check.",
+        );
+      }
       await call("configure", {
         hotkeys: false,
         voiceShortcut: "Ctrl+Alt+Y",

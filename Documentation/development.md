@@ -87,3 +87,4 @@ Windows packaging copies the Electron distribution already installed under `node
 ## Contribution and security
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) and [SECURITY.md](../SECURITY.md). Report security issues privately while no public advisory process is configured. Yami’s local native host is not a sandbox; terminal access acts with the current user’s privileges.
+The native test accepts only Windows HRESULT `0x80070490` for the volume operation on machines with no default audio endpoint (such as hosted Windows CI). Other errors fail the test. This does not verify an audio write on CI: volume behavior still needs an interactive Windows device check.
