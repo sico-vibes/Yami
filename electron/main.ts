@@ -41,6 +41,7 @@ import {
   validateScheduled,
 } from "./policy";
 import type { AppItem, State, Task } from "../src/shared";
+import { islandSize, peekSize } from "../src/island-bounds";
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -122,31 +123,12 @@ function setPanel(open: boolean, tab = currentUtility) {
   // Start the slow hardware queries so Stats has data the moment it opens.
   if (open) metrics.warm();
   currentUtility = tab;
-  const heights: Record<string, number> = {
-    Controls: 390,
-    Today: 460,
-    Stats: 360,
-    Clipboard: 440,
-    Apps: 650,
-    Wallpaper: 310,
-    Power: 185,
-    AI: 490,
-  };
-  const widths: Record<string, number> = {
-    Controls: 650,
-    Today: 900,
-    Stats: 900,
-    Clipboard: 790,
-    Apps: 730,
-    Wallpaper: 1040,
-    Power: 650,
-    AI: 790,
-  };
   const display = screen.getPrimaryDisplay().workAreaSize;
+  const size = islandSize(open, tab);
   island.setBounds(
     islandBounds(
-      open ? Math.min(widths[tab] || 730, display.width - 30) : 220,
-      open ? Math.min((heights[tab] || 400) + 34, display.height - 20) : 96,
+      open ? Math.min(size.width, display.width - 30) : size.width,
+      open ? Math.min(size.height, display.height - 20) : size.height,
     ),
   );
   island.setFocusable(open);
@@ -157,7 +139,8 @@ function setPanel(open: boolean, tab = currentUtility) {
 // Grow the collapsed island to fit the media card without opening the drawer.
 function peekIsland(open: boolean) {
   if (panelOpen) return;
-  island.setBounds(islandBounds(open ? 400 : 220, open ? 200 : 96));
+  const size = open ? peekSize : islandSize(false, currentUtility);
+  island.setBounds(islandBounds(size.width, size.height));
   island.setIgnoreMouseEvents(!open, { forward: true });
 }
 async function confirm(title: string, detail: string) {

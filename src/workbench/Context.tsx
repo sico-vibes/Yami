@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../api";
 import { Empty, Icon } from "../ui";
+import { Select } from "../controls";
 export function ContextView({ report }: { report: (text: string) => void }) {
   const [items, setItems] = useState<any[]>([]),
     [windows, setWindows] = useState<any[]>([]),
@@ -47,18 +48,21 @@ export function ContextView({ report }: { report: (text: string) => void }) {
         </div>
         {!!windows.length && (
           <div className="setting-row">
-            <select
-              aria-label="Window to attach"
+            <Select
+              className="select-wide"
+              label="Window to attach"
               value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-            >
-              <option value="">Choose a window</option>
-              {windows.map((w) => (
-                <option key={w.handle} value={w.handle}>
-                  {w.name || w.process} · {w.title}
-                </option>
-              ))}
-            </select>
+              onChange={setSelected}
+              options={[
+                { value: "", label: "Choose a window" },
+                ...windows.map((w) => ({
+                  value: String(w.handle),
+                  label: w.name || w.process,
+                  hint: w.title,
+                  icon: "app-window",
+                })),
+              ]}
+            />
             <button
               className="soft-button"
               disabled={!selected}

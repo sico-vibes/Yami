@@ -1,0 +1,230 @@
+/* Home: welcome, composer and conversation. */
+.home-page {
+  max-width: 870px;
+  margin: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px;
+}
+.welcome {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding-bottom: 35px;
+  min-height: 280px;
+  position: relative;
+}
+/* A still aurora orb behind Yami, tinted by her skin. */
+.welcome:before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 300px;
+  transform: translate(-50%, -64%);
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side at 42% 46%, color-mix(in srgb, var(--soul, #b9a6ff) 34%, transparent), transparent),
+    radial-gradient(closest-side at 64% 58%, rgba(241, 167, 214, 0.16), transparent),
+    radial-gradient(closest-side at 36% 66%, rgba(147, 169, 255, 0.2), transparent);
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: -1;
+}
+.welcome h1 {
+  font-size: 38px;
+  font-weight: 300;
+  margin-top: 14px;
+  letter-spacing: -0.04em;
+}
+.welcome p {
+  color: var(--muted);
+  font-size: 15px;
+  margin: 10px 0 24px;
+}
+.welcome .soft-button {
+  background: var(--grad-glow) !important;
+  color: var(--on-glow);
+  border: 0;
+  font-weight: 500;
+  padding: 12px 22px;
+  box-shadow:
+    inset 0 1px 0 #ffffff66,
+    0 10px 30px rgba(147, 169, 255, 0.28);
+}
+.welcome .soft-button:hover {
+  background: var(--grad-glow-hover) !important;
+}
+.shortcut-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.composer-wrap {
+  flex-shrink: 0;
+  padding-bottom: 3px;
+}
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 8px 8px 8px 10px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  box-shadow:
+    var(--highlight),
+    0 14px 40px rgba(4, 2, 22, 0.35);
+  backdrop-filter: var(--blur);
+  transition:
+    border-color var(--dur),
+    box-shadow var(--dur) var(--ease);
+}
+.composer:focus-within {
+  border-color: var(--selected-line);
+  box-shadow:
+    var(--highlight),
+    0 0 0 4px rgba(188, 170, 255, 0.07),
+    0 14px 40px rgba(4, 2, 22, 0.4);
+}
+.composer textarea {
+  flex: 1;
+  background: none;
+  border: 0;
+  padding: 10px 4px;
+  max-height: 130px;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 39px;
+  box-shadow: none;
+}
+.composer textarea:focus {
+  background: none;
+  box-shadow: none;
+}
+.composer .icon-button {
+  margin-bottom: 3px;
+}
+.send-button {
+  display: grid;
+  place-items: center;
+  background: var(--grad-glow);
+  color: var(--on-glow);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-bottom: 1px;
+  box-shadow:
+    inset 0 1px 0 #ffffff70,
+    0 6px 18px rgba(147, 169, 255, 0.3);
+}
+.send-button:hover {
+  background: var(--grad-glow-hover) !important;
+}
+.composer-hint {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  color: var(--faint);
+  font-size: 10px;
+  margin-top: 13px;
+}
+.composer-hint kbd {
+  font-size: 9px;
+  padding: 2px 5px;
+  background: none;
+}
+.conversation {
+  flex: 1;
+  overflow: auto;
+  padding: 22px 2px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.message {
+  max-width: 90%;
+  font-size: 14px;
+  line-height: 1.65;
+  animation: page-enter var(--dur-slow) var(--ease-fluid);
+}
+.message.user {
+  align-self: flex-end;
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  border-radius: 22px 22px 6px 22px;
+  background: linear-gradient(135deg, rgba(188, 170, 255, 0.2), rgba(147, 169, 255, 0.12));
+  border: 1px solid var(--selected-line);
+  padding: 12px 18px;
+}
+.message.assistant {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 2px 10px;
+}
+.message small {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  flex-shrink: 0;
+  color: var(--glow);
+}
+.message-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.sources {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.sources button {
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 6px 10px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-soft);
+}
+.conversation-status {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.selection-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 9px;
+}
+.selection-preview img {
+  width: 70px;
+  height: 50px;
+  object-fit: contain;
+  border-radius: var(--r-xs);
+  background: #000;
+}
+.selection-preview .icon-button {
+  margin-left: auto;
+}

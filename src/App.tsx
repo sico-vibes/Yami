@@ -6,6 +6,8 @@ import { Settings } from "./Settings";
 import { Loadout } from "./Loadout";
 import { Plans } from "./Plans";
 import { MainNavigation } from "./MainNavigation";
+import { skinFor } from "./yami/skins";
+import { TooltipLayer } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export function App() {
   const [tab, setTab] = useState<Tab>("home"),
@@ -84,9 +86,11 @@ export function App() {
           "--wallpaper": state.currentWallpaper
             ? `url("${asset(state.currentWallpaper)}")`
             : "none",
+          "--soul": skinFor(state.settings.soul).glow,
         } as React.CSSProperties
       }
     >
+      <TooltipLayer />
       <header className="titlebar">
         <div className="brand">
           <Spirit size={25} soul={state.settings.soul} />

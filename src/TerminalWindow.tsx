@@ -4,6 +4,7 @@ import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { api } from "./api";
 import { Icon, IconButton } from "./ui";
+import { TooltipLayer } from "./controls";
 import type { WorkbenchState, WorkbenchSettings } from "./workbench-types";
 type View = {
   id: string;
@@ -78,10 +79,10 @@ export default function TerminalWindow() {
         fontSize: 14,
         theme: {
           background: "#00000000",
-          foreground: "#f4f4f4",
-          cursor: "#8dccff",
-          selectionBackground: "#8dccff55",
-          black: "#11191e",
+          foreground: "#f3f1ff",
+          cursor: "#bcaaff",
+          selectionBackground: "#bcaaff55",
+          black: "#0b0a22",
           blue: "#8dccff",
         },
       });
@@ -227,6 +228,7 @@ export default function TerminalWindow() {
         } as React.CSSProperties
       }
     >
+      <TooltipLayer />
       <header className="titlebar">
         <div className="brand">
           <Icon name="terminal-window" />

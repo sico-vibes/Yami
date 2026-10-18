@@ -5,6 +5,8 @@ import { Icon, Spirit, useYami } from "./ui";
 import { AudioEngine } from "./audio";
 import { Utilities } from "./Utilities";
 import { MediaPeek } from "./MediaPeek";
+import { skinFor } from "./yami/skins";
+import { TooltipLayer } from "./controls";
 import type { AgentSession } from "./workbench-types";
 export function Island() {
   const [agent, setAgent] = useState<AgentSession | null>(null);
@@ -210,6 +212,9 @@ export function Island() {
   return (
     <div
       className={`island-window ${open ? "expanded" : ""} ${closing ? "closing" : ""} ${asleep ? "asleep" : ""} ${armed ? "armed" : ""}`}
+      style={
+        { "--soul": skinFor(state.settings.soul).glow } as React.CSSProperties
+      }
     >
       <div
         className="island-notch"
@@ -334,6 +339,7 @@ export function Island() {
         />
       )}
       {toast && open && <div className="island-toast">{toast}</div>}
+      {open && <TooltipLayer />}
       {effect && (
         <div className={"ability-effect " + effect.kind}>
           <span />

@@ -21,9 +21,9 @@ export function Lasso() {
     c.height = innerHeight * devicePixelRatio;
     const ctx = c.getContext("2d")!;
     ctx.scale(devicePixelRatio, devicePixelRatio);
-    ctx.strokeStyle = "#8dccff";
+    ctx.strokeStyle = "#bcaaff";
     ctx.lineWidth = 3;
-    ctx.shadowColor = "#8dccff";
+    ctx.shadowColor = "#bcaaff";
     ctx.shadowBlur = 9;
     ctx.beginPath();
     points.current.forEach((p, i) =>

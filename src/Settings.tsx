@@ -3,6 +3,7 @@ import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
+import { Select, StatusChip } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 const groups = [
   ["user", "Yami"],
@@ -91,9 +92,14 @@ export function Settings({
   }, [state.keys.tavily]);
   const show = (label: string) =>
     !search || label.toLowerCase().includes(search.toLowerCase());
-  const row = (title: string, detail: string, control: ReactNode) =>
+  const row = (
+    title: string,
+    detail: string,
+    control: ReactNode,
+    stacked = false,
+  ) =>
     show(title + " " + detail) ? (
-      <div className="setting-row" key={title}>
+      <div className={`setting-row ${stacked ? "stacked" : ""}`} key={title}>
         <div>
           <strong>{title}</strong>
           <p>{detail}</p>
@@ -211,7 +217,8 @@ export function Settings({
               {row(
                 "Personality",
                 "Choose a personality in your loadout.",
-                <span className="muted">
+                <span className="value-pill">
+                  <Icon name="flame" size={14} />
                   {s.personality === "chad" ? "Alley Cat" : "Custom"}
                 </span>,
               )}
@@ -331,20 +338,21 @@ export function Settings({
               {row(
                 "Microphone",
                 "Choose your voice and dictation input.",
-                <select
-                  aria-label="Microphone"
+                <Select
+                  label="Microphone"
                   value={s.microphone}
-                  onChange={(e) => void patch({ microphone: e.target.value })}
-                >
-                  <option value="">Windows default</option>
-                  {devices
-                    .filter((d) => d.kind === "audioinput")
-                    .map((d) => (
-                      <option key={d.deviceId} value={d.deviceId}>
-                        {d.label || "Microphone"}
-                      </option>
-                    ))}
-                </select>,
+                  onChange={(microphone) => void patch({ microphone })}
+                  options={[
+                    { value: "", label: "Windows default", icon: "microphone" },
+                    ...devices
+                      .filter((d) => d.kind === "audioinput")
+                      .map((d) => ({
+                        value: d.deviceId,
+                        label: d.label || "Microphone",
+                        icon: "microphone",
+                      })),
+                  ]}
+                />,
               )}
               {row(
                 "Microphone permissions",
@@ -361,11 +369,11 @@ export function Settings({
               {row(
                 "Yami version",
                 `Version ${diagnostics?.app || "0.1.0"} · Windows ${diagnostics?.windows || ""}`,
-                <span className="connected">
-                  {diagnostics?.native?.ok
-                    ? "Windows connected"
-                    : "Connecting…"}
-                </span>,
+                <StatusChip
+                  status={
+                    diagnostics?.native?.ok ? "Windows connected" : "Connecting…"
+                  }
+                />,
               )}
             </div>
           </>
@@ -440,19 +448,15 @@ export function Settings({
               {row(
                 "Keep clipboard history",
                 "Pinned items remain until you remove them.",
-                <select
-                  aria-label="Clipboard retention"
-                  value={s.clipboardDays}
-                  onChange={(e) =>
-                    void patch({ clipboardDays: Number(e.target.value) })
-                  }
-                >
-                  {[1, 7, 14, 30].map((n) => (
-                    <option key={n} value={n}>
-                      {n} days
-                    </option>
-                  ))}
-                </select>,
+                <Select
+                  label="Clipboard retention"
+                  value={String(s.clipboardDays)}
+                  onChange={(days) => void patch({ clipboardDays: Number(days) })}
+                  options={[1, 7, 14, 30].map((n) => ({
+                    value: String(n),
+                    label: n === 1 ? "1 day" : `${n} days`,
+                  }))}
+                />,
               )}
               {row(
                 "Clear clipboard history",
@@ -510,14 +514,17 @@ export function Settings({
               {row(
                 "Screen access",
                 "Only a screenshot you explicitly select is sent to Gemini.",
-                <span className="muted">On request</span>,
+                <span className="value-pill">
+                  <Icon name="selection" size={14} />
+                  On request
+                </span>,
               )}
               {row(
                 "Local encryption",
                 "API keys and unpinned clipboard entries use Windows DPAPI.",
-                <span className="connected">
-                  {diagnostics?.encryption ? "Enabled" : "Unavailable"}
-                </span>,
+                <StatusChip
+                  status={diagnostics?.encryption ? "Enabled" : "Unavailable"}
+                />,
               )}
             </div>
             <div className="privacy-copy">
@@ -558,7 +565,7 @@ export function Settings({
               {row(
                 "Convert, Tools, Actions",
                 "Each wheel needs its own modifier.",
-                <span className="segmented">
+                <span className="modifier-grid">
                   {(
                     [
                       ["fileWheelConvert", "Convert"],
@@ -566,18 +573,15 @@ export function Settings({
                       ["fileWheelActions", "Actions"],
                     ] as const
                   ).map(([key, label]) => (
-                    <select
-                      key={key}
-                      aria-label={label}
-                      value={String(s[key])}
-                      onChange={(event) =>
-                        void patch({ [key]: event.target.value })
-                      }
-                    >
-                      {["Shift", "Ctrl", "Alt"].map((modifier) => (
-                        <option key={modifier}>{modifier}</option>
-                      ))}
-                    </select>
+                    <span key={key}>
+                      <small>{label}</small>
+                      <Select
+                        label={`${label} wheel modifier`}
+                        value={String(s[key])}
+                        onChange={(modifier) => void patch({ [key]: modifier })}
+                        options={["Shift", "Ctrl", "Alt"]}
+                      />
+                    </span>
                   ))}
                 </span>,
               )}
@@ -600,6 +604,7 @@ export function Settings({
                 "Engines",
                 "Downloaded into local app data only when a conversion needs them.",
                 <EngineStatus />,
+                true,
               )}
               {row(
                 "Send to menu",

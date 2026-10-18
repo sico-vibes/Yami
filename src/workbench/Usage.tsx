@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import type { WorkbenchState } from "../workbench-types";
 import { api } from "../api";
 import { Icon, Toggle } from "../ui";
+import { Meter, shortTime, StatusChip } from "../controls";
+const names: Record<string, string> = {
+  codex: "Codex",
+  claude: "Claude",
+  cursor: "Cursor",
+  copilot: "GitHub Copilot",
+  opencode: "OpenCode Go",
+  grok: "Grok",
+  custom: "Custom endpoint",
+};
+const providerName = (p: string) => names[p] || p;
+const providerIcon = (p: string) =>
+  p === "copilot" ? "github-logo" : p === "custom" ? "plugs" : "chart-bar";
 export function Usage({
   data,
   report,
@@ -63,85 +76,129 @@ export function Usage({
           />
         </div>
       </div>
-      {[
-        "codex",
-        "claude",
-        "cursor",
-        "copilot",
-        "opencode",
-        "grok",
-        ...(data.settings.customUsageUrl ? ["custom"] : []),
-      ].map((provider) => {
-        const r = data.usage.find((r) => r.provider === provider);
+      {(() => {
+        const providers = [
+          "codex",
+          "claude",
+          "cursor",
+          "copilot",
+          "opencode",
+          "grok",
+          ...(data.settings.customUsageUrl ? ["custom"] : []),
+        ];
+        const reading = (p: string) => data.usage.find((r) => r.provider === p);
+        const read = (provider: string) => {
+          setBusy((old) => [...old, provider]);
+          void api("usage.refresh", { provider })
+            .catch((e) => report(e.message))
+            .finally(() => setBusy((old) => old.filter((p) => p !== provider)));
+        };
+        const refresh = (provider: string, compact = false) => {
+          const r = reading(provider),
+            waiting = !!r?.retryAt && r.retryAt > Date.now();
+          return (
+            <button
+              className={compact ? "icon-button usage-read" : "soft-button"}
+              aria-label={`Read ${providerName(provider)} usage`}
+              data-tip={
+                waiting
+                  ? `Next reading after ${shortTime(r!.retryAt!, false)}`
+                  : "Read signed-in usage"
+              }
+              disabled={busy.includes(provider) || waiting}
+              onClick={() => read(provider)}
+            >
+              <Icon
+                name={busy.includes(provider) ? "circle-notch" : "arrow-clockwise"}
+                size={16}
+              />
+              {!compact && (busy.includes(provider) ? "Reading…" : "Read usage")}
+            </button>
+          );
+        };
+        const connected = providers.filter((p) => reading(p));
+        const others = providers.filter((p) => !reading(p));
         return (
-          <section className="workbench-usage" key={provider}>
-            <div className="workbench-entry-title">
-              <Icon name="chart-bar" />
-              <h2>{provider === "opencode" ? "OpenCode Go" : provider}</h2>
-              <span className="workbench-state">
-                {r?.status || "Not connected"}
-              </span>
-              <button
-                className="soft-button"
-                disabled={
-                  busy.includes(provider) ||
-                  (!!r?.retryAt && r.retryAt > Date.now())
-                }
-                onClick={() => {
-                  setBusy((old) => [...old, provider]);
-                  void api("usage.refresh", { provider })
-                    .catch((e) => report(e.message))
-                    .finally(() =>
-                      setBusy((old) => old.filter((p) => p !== provider)),
-                    );
-                }}
-              >
-                {busy.includes(provider) ? "Reading…" : "Read signed-in usage"}
-              </button>
-            </div>
-            {r ? (
-              <>
-                <p className="setting-note">
-                  {r.note || `${r.account} · ${r.source}`}
-                </p>
-                {r.windows.map((w) => (
-                  <div className="workbench-quota" key={w.id + w.group}>
-                    <span>
-                      {w.group && `${w.group} · `}
-                      {w.label}
+          <>
+            {connected.map((provider) => {
+              const r = reading(provider)!,
+                groups = [...new Set(r.windows.map((w) => w.group || ""))];
+              return (
+                <section className="workbench-usage usage-card" key={provider}>
+                  <header className="entry-head">
+                    <span className="entry-icon">
+                      <Icon name={providerIcon(provider)} />
                     </span>
-                    <strong>
-                      {w.used === null
-                        ? "Unknown"
-                        : `${Math.round(w.used * 100)}% used`}
-                    </strong>
-                    <small>
-                      {w.resetsAt
-                        ? `Resets ${new Date(w.resetsAt).toLocaleString()}`
-                        : "Reset time unavailable"}
-                    </small>
-                  </div>
-                ))}
-                {r.fetchedAt > 0 && (
-                  <small>
-                    Last reading {new Date(r.fetchedAt).toLocaleString()}
-                    {r.retryAt && r.retryAt > Date.now()
-                      ? ` · Next refresh ${new Date(r.retryAt).toLocaleTimeString()}`
-                      : ""}
-                  </small>
-                )}
+                    <div className="entry-heading">
+                      <strong>{providerName(provider)}</strong>
+                      <small>{r.note || `${r.account} · ${r.source}`}</small>
+                    </div>
+                    <StatusChip status={r.status} />
+                    {refresh(provider)}
+                  </header>
+                  {groups.map((group) => (
+                    <div className="usage-group" key={group}>
+                      {group && groups.length > 0 && <h3>{group}</h3>}
+                      {r.windows
+                        .filter((w) => (w.group || "") === group)
+                        .map((w) => (
+                          <div className="usage-window" key={w.id + w.group}>
+                            <span className="usage-label">{w.label}</span>
+                            <Meter
+                              value={w.used}
+                              label={`${w.label} used`}
+                            />
+                            <strong>
+                              {w.used === null
+                                ? "Unknown"
+                                : `${Math.round(w.used * 100)}%`}
+                            </strong>
+                            <small>
+                              {w.resetsAt
+                                ? `Resets ${shortTime(w.resetsAt)}`
+                                : "Reset time unavailable"}
+                            </small>
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+                  {r.fetchedAt > 0 && (
+                    <footer className="usage-foot">
+                      <Icon name="clock" size={14} />
+                      Last reading {shortTime(r.fetchedAt)}
+                      {r.retryAt && r.retryAt > Date.now()
+                        ? ` · Next refresh ${shortTime(r.retryAt, false)}`
+                        : ""}
+                    </footer>
+                  )}
+                </section>
+              );
+            })}
+            {!!others.length && (
+              <>
+                <h3 className="group-title">Not read yet</h3>
+                <p className="setting-note">
+                  Uses each provider's installed client and sign-in. No
+                  inference, sign-in or reset-credit action is triggered.
+                </p>
+                <div className="usage-grid">
+                  {others.map((provider) => (
+                    <div className="usage-tile" key={provider}>
+                      <span className="entry-icon">
+                        <Icon name={providerIcon(provider)} />
+                      </span>
+                      <strong>{providerName(provider)}</strong>
+                      {refresh(provider, true)}
+                    </div>
+                  ))}
+                </div>
               </>
-            ) : (
-              <p className="setting-note">
-                Uses this provider's installed client and sign-in. No inference,
-                sign-in or reset-credit action is triggered.
-              </p>
             )}
-          </section>
+          </>
         );
-      })}
+      })()}
+      <h3 className="group-title">Custom usage endpoint</h3>
       <section className="workbench-usage">
-        <h2>Custom usage endpoint</h2>
         <p className="setting-note">
           A chat API is not automatically a quota API. Supports windows with id,
           label, usedPercent and resetsAt, or Claude-style utilization windows.

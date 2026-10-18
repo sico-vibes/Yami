@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import type { AgentRequest, WorkbenchState } from "../workbench-types";
 import { api } from "../api";
 import { Empty, Icon, IconButton, Modal } from "../ui";
+import { relativeTime, Select, StatusChip } from "../controls";
+const agents = [
+  { value: "claude", label: "Claude Code" },
+  { value: "codex", label: "Codex" },
+  { value: "gemini", label: "Gemini CLI" },
+  { value: "copilot", label: "Copilot CLI" },
+  { value: "cursor", label: "Cursor" },
+  { value: "opencode", label: "OpenCode" },
+];
 export function Sessions({
   data,
   report,
@@ -42,22 +51,12 @@ export function Sessions({
             </p>
           </div>
           <div className="setting-control workbench-actions">
-            <select
-              aria-label="Agent to connect"
+            <Select
+              label="Agent to connect"
               value={agent}
-              onChange={(e) => setAgent(e.target.value)}
-            >
-              {[
-                "claude",
-                "codex",
-                "gemini",
-                "copilot",
-                "cursor",
-                "opencode",
-              ].map((id) => (
-                <option key={id}>{id}</option>
-              ))}
-            </select>
+              onChange={setAgent}
+              options={agents.map((a) => ({ ...a, icon: "terminal-window" }))}
+            />
             <button
               className="soft-button"
               onClick={() =>
@@ -95,53 +94,72 @@ export function Sessions({
       ) : (
         <div className="workbench-list">
           {[...data.sessions].reverse().map((s) => (
-            <article className="workbench-entry" key={s.id}>
-              <div className="workbench-entry-title">
-                <Icon
-                  name={s.phase === "waiting" ? "hand" : "terminal-window"}
-                />
-                <strong>{s.project}</strong>
-                <span className="workbench-state">{s.phase}</span>
-              </div>
-              <p>
-                {s.agent} · {s.detail}
-              </p>
-              <small>
-                {s.source} · {new Date(s.at).toLocaleTimeString()}
-              </small>
-              <div className="workbench-actions">
-                <button
-                  className="soft-button"
-                  onClick={() => void call("agents.open", { id: s.id })}
-                >
-                  {s.window || s.terminalId
-                    ? "Return to session"
-                    : "Open project folder"}
-                </button>
+            <article className="workbench-entry session-card" key={s.id}>
+              <header className="entry-head">
+                <span className="entry-icon">
+                  <Icon
+                    name={s.phase === "waiting" ? "hand" : "terminal-window"}
+                  />
+                </span>
+                <div className="entry-heading">
+                  <strong>{s.project}</strong>
+                  <small>
+                    {agents.find((a) => a.value === s.agent)?.label || s.agent}
+                    {" · "}
+                    {s.source} · {relativeTime(s.at)}
+                  </small>
+                </div>
+                <StatusChip status={s.phase} />
                 <IconButton
                   icon="x"
                   label={`Dismiss ${s.project}`}
                   onClick={() => void call("agents.dismiss", { id: s.id })}
                 />
-              </div>
-              {!!s.files.length && (
-                <details>
-                  <summary>Changed files ({s.files.length})</summary>
-                  {s.files.map((file) => (
-                    <button
-                      className="text-button workbench-file"
-                      key={file}
-                      onClick={() =>
-                        void api("agents.diff", { id: s.id, file })
-                          .then(setDiff)
-                          .catch((e) => report(e.message))
-                      }
-                    >
-                      {file.split(/[\\/]/).pop()}
-                    </button>
-                  ))}
-                </details>
-              )}
+              </header>
+              <p className="entry-detail">{s.detail}</p>
+              <footer className="entry-foot">
+                {!!s.files.length && (
+                  <details className="file-list">
+                    <summary>
+                      {s.files.length} changed{" "}
+                      {s.files.length === 1 ? "file" : "files"}
+                    </summary>
+                    <div>
+                      {s.files.map((file) => (
+                        <button
+                          className="file-chip"
+                          key={file}
+                          data-tip={file}
+                          onClick={() =>
+                            void api("agents.diff", { id: s.id, file })
+                              .then(setDiff)
+                              .catch((e) => report(e.message))
+                          }
+                        >
+                          <Icon name="file-code" size={14} />
+                          {file.split(/[\\/]/).pop()}
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                <button
+                  className="soft-button entry-action"
+                  onClick={() => void call("agents.open", { id: s.id })}
+                >
+                  <Icon
+                    name={
+                      s.window || s.terminalId
+                        ? "arrow-square-out"
+                        : "folder-open"
+                    }
+                    size={16}
+                  />
+                  {s.window || s.terminalId
+                    ? "Return to session"
+                    : "Open project folder"}
+                </button>
+              </footer>
             </article>
           ))}
         </div>

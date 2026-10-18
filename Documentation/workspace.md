@@ -1,13 +1,49 @@
 # AI workspace and Yami Terminal
 
-The AI dock tab extends Yami's existing settings navigation, rounded controls,
-Phosphor icons, status pills and reduced-motion transitions. It contains Sessions,
-Usage, Connections, Context, Dictation, Notes, Recap, MCP and Workspace settings.
+The AI dock tab uses Yami's Nightglow cards, status words, meters and Select menus,
+with the same settings navigation, rounded controls, Phosphor icons and reduced-motion
+behaviour as the rest of the app. It contains Sessions, Usage, Connections, Context,
+Dictation, Notes, Recap, MCP and Workspace settings.
 The island's AI utility shows a compact activity view and pending decisions.
 The implementation is on the `main` branch and in the local portable build from
 2026-10-18. No public release has been published.
 
 ![AI workspace with synthetic activity](assets/screenshots/workspace.png)
+
+## Screens
+
+Each page opens with the same header: a light title, one muted line and at most one
+action. Lists are cards, choices are Yami menus, and an empty page says what to do next.
+
+- **Sessions.** One card per agent session: an icon tile, the project, the agent's
+  name (for example Claude Code), its source and how long ago it was seen, a status
+  word and the latest detail. Changed files sit behind a disclosure as file chips.
+  Each chip shows its full path on hover and opens the bounded diff. Dismiss removes
+  the card. Pending permission requests appear in a dialog over the page.
+- **Usage.** Allowance alerts and background refresh are two toggles. Each provider
+  that has been read gets a card with its account, source, status word, and each
+  limit as a label, a meter, a percentage and a reset time, grouped by account.
+  Providers not read yet sit in a tile grid under "Not read yet", each with a Read
+  button. A provider is read only when you press its button, or when background
+  refresh is on and it has been read before. The custom endpoint form is at the bottom.
+- **Recap.** Three stat tiles count completed turns, sessions and projects in the
+  last seven days. Below them, each project has a timeline card: agent, status word
+  and time. With no events, the page shows an empty state.
+- **Notes.** A collapsed meeting recorder card sits above the notes. The list card
+  holds search and saved notes; the editor card holds the title and body, then the
+  summary and proposed Desk actions, each with an "Add to Desk" button.
+- **Dictation, MCP and Workspace.** Plain settings are grouped rows. Dictionary rules
+  and per-app cleanup are form cards: an input row with a primary Add button, then
+  saved rows separated by hairlines. The MCP page uses a card for its server and its
+  tool call. The default shell and background are Select menus; blur and opacity are
+  sliders.
+- **Connections and Context.** Connections are one card per service showing its state
+  and quota items. Context lists attached items as cards, and window context is a row.
+- **Island drawer, AI tab.** Two columns. On the left, Agent activity lists the five
+  latest sessions with their status words. On the right, Open Yami Terminal is the
+  primary button, Open AI workspace is soft, and an Allowance card shows up to three
+  usage meters. With no agents connected, the drawer says to connect them from the
+  AI workspace.
 
 ## Terminal
 
@@ -74,6 +110,9 @@ and fresh/stale/authentication/backoff/error/unavailable state. Missing values
 remain unknown. These numbers are subscription quota, not inferred token cost
 or API billing. Account access is read-only: Yami does not initiate sign-in,
 refresh credentials, switch accounts or use reset credits.
+
+The Usage page shows each limit as a meter with its percentage and reset time.
+A limit with no value reads "Unknown"; it is never estimated from activity.
 
 Codex uses a bounded `codex app-server` initialize/initialized/account-rate-limits
 exchange. Choose its executable when discovery cannot find it. Claude reads its
@@ -163,6 +202,11 @@ using synthesized WAV audio and the installed recognizer. The browser fixtures p
 all 17 screens and all nine AI subsections without external requests before the
 file wheel was merged. The preview now has 19 screens (adding File wheel and
 Background). That run has not been repeated after the merge.
+
+The Nightglow redesign of these pages (2026-10-18) changed presentation only. Its
+checks are in the [verification history](reference/verification-history.md). It has
+not been run in the packaged Windows app. The AI workspace and terminal screenshots
+were regenerated from synthetic preview fixtures with `capture-workbench.mjs`.
 
 Live provider accounts, live service credentials, each installed agent release,
 microphone quality and system-audio capture across devices have not been tested.

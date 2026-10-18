@@ -38,6 +38,9 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `src/yami/` — the Yami character: `YamiSpirit.tsx` renders, `motion.ts` holds the tested flame and pose maths, `features.ts` the face and ears, `skins.ts` the colourways.
 - `src/Island.tsx`, `src/Utilities.tsx`, `src/Today.tsx`, `src/MediaPeek.tsx` — the island notch, drawer tabs, Today panel and now-playing card.
 - `src/Loadout.tsx`, `src/LoadoutHub.tsx` — loadout catalogue and the orbiting hub; `src/Stray.tsx`, `src/Caption.tsx` — roaming Yami and caption pill.
+- `src/controls.tsx` — shared `Select`, `TooltipLayer`, `StatusChip`, `Meter` and the `shortTime` and `relativeTime` helpers. `src/status-tone.ts` maps status words to colour families; `tests/status-tone.test.mjs` covers it.
+- `src/ui.tsx` — Icon, IconButton, Toggle, Empty and Modal. `src/island-bounds.ts` — island window size for the notch, media card and each drawer tab, shared by `electron/main.ts` and the preview.
+- `src/style.css` — imports the stylesheets in `src/styles/`: `tokens.css` (Nightglow tokens), `base.css` (reset, type, buttons, fields, window frame, dock, modals), `controls.css` (Select, tooltip, chips, meter, checkbox, disclosure), `home.css`, `sidebar-pages.css` (Settings and AI layout, rows, toggles), `loadout.css` (Soul, Bond, Desk), `island.css`, `drawer-tabs.css`, `overlays.css`, `today.css`, `responsive.css`, `workbench.css`, and `cards.css` (entry, usage, recap, notes, form and engine cards). `wheel.css` is imported only by the file-wheel window.
 - `src/migrations.ts` — saved-data upgrades run on start.
 - `src/default-settings.ts` — shared settings defaults for desktop and browser fixtures.
 - `src/preview/` — browser-only fixture state and bridge. Preview changes are temporary and are not written to desktop data.
@@ -84,6 +87,12 @@ Verification scripts in the repository include `scripts/verify-dev.mjs`, `script
 ## Web preview behavior
 
 The preview loads the same renderer pages and styles as Electron but supplies a browser fixture bridge. Keep fixture data stable, obviously synthetic, and separated from production app state. For each new renderer command, define a safe fixture result so the interface can be exercised without granting real local file, power, provider, microphone, or screen access. Do not make the fixture return “success” for an action the browser cannot perform; show a clear simulated result or unavailable state. `npm run preview:web` is for interface feedback, never a release validation path.
+
+The preview draws the island at the real size of each drawer tab, using `src/island-bounds.ts`. Its fixtures include demo data for the redesigned screens: three usage windows (24%, 78% and 93%), recap events and two changed files on the demo session, and three clipboard entries. All of it is synthetic and has no OS effect.
+
+### Checking a UI change
+
+Check the screen in the preview at the default window size, 1160×790, and at the minimum window size, 850×610 (the minimum set in `electron/main.ts`). Open each menu with the keyboard, move through it with the arrow keys, and close it with Escape. Hover icon buttons to see their tooltips. Compare the screen with Reduced motion on and off in Settings > Behavior. The preview does not show the real island, native windows, display scaling or shortcuts, so repeat the screen in the Windows app before calling it done.
 
 ## Package layout
 

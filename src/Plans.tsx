@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { State, Task } from "./shared";
 import { api, time } from "./api";
 import { Empty, Icon, IconButton, Modal, Toggle } from "./ui";
+import { Select } from "./controls";
 export function Plans({
   state,
   report,
@@ -251,13 +252,18 @@ export function Plans({
           </label>
           <label className="form-label">
             Action
-            <select value={action} onChange={(e) => setAction(e.target.value)}>
-              <option value="remind">Remind me</option>
-              <option value="open_app">Open an app</option>
-              <option value="routine">Open several apps</option>
-              <option value="open_url">Open a website</option>
-              <option value="search_site">Search YouTube</option>
-            </select>
+            <Select
+              label="Action"
+              value={action}
+              onChange={setAction}
+              options={[
+                { value: "remind", label: "Remind me", icon: "bell" },
+                { value: "open_app", label: "Open an app", icon: "app-window" },
+                { value: "routine", label: "Open several apps", icon: "stack" },
+                { value: "open_url", label: "Open a website", icon: "globe" },
+                { value: "search_site", label: "Search YouTube", icon: "youtube-logo" },
+              ]}
+            />
           </label>
           {action !== "remind" && (
             <label className="form-label">
@@ -282,14 +288,16 @@ export function Plans({
             </label>
             <label className="form-label">
               Repeat
-              <select
+              <Select
+                label="Repeat"
                 value={repeat}
-                onChange={(e) => setRepeat(e.target.value)}
-              >
-                <option value="none">Once</option>
-                <option value="daily">Every day</option>
-                <option value="weekly">Every week</option>
-              </select>
+                onChange={setRepeat}
+                options={[
+                  { value: "none", label: "Once" },
+                  { value: "daily", label: "Every day" },
+                  { value: "weekly", label: "Every week" },
+                ]}
+              />
             </label>
           </div>
           <button

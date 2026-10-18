@@ -14,7 +14,7 @@ export function CropTool({ files }: { files: WheelFile[] }) {
     if (!canvas.current || !image) return;
     const ctx = paintStill(canvas.current, image, 720);
     if (!ctx) return;
-    ctx.strokeStyle = "#bba057";
+    ctx.strokeStyle = "#bcaaff";
     ctx.lineWidth = 2;
     ctx.strokeRect(box.x * canvas.current.width, box.y * canvas.current.height, box.w * canvas.current.width, box.h * canvas.current.height);
   }, [image, box]);

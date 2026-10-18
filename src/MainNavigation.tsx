@@ -43,7 +43,7 @@ export function MainNavigation({
           className={tab === id ? "selected" : ""}
           aria-label={label}
           aria-current={tab === id ? "page" : undefined}
-          title={label}
+          data-tip={tab === id ? undefined : label}
           onClick={() => { if (window.dispatchEvent(new Event("yami-before-navigate", { cancelable: true }))) onNavigate(id); }}
         >
           <Icon name={icon} size={22} />

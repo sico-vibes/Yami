@@ -3,6 +3,7 @@ import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
 import { Empty, Icon, IconButton } from "./ui";
 import { Launcher } from "./Launcher";
+import { shortTime } from "./controls";
 import { Today } from "./Today";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
@@ -320,7 +321,7 @@ function Stats({ report }: { report: (m: string) => void }) {
           data.cpu.load,
           data.cpu.name,
           data.cpu.speed + " GHz",
-          "#c7ad5b",
+          "#93a9ff",
         )}
         {gauge(
           "GPU",
@@ -329,14 +330,14 @@ function Stats({ report }: { report: (m: string) => void }) {
           data.gpu[0]?.used != null
             ? `${data.gpu[0].used} / ${data.gpu[0].total} MB`
             : "Usage not reported",
-          "#b696d3",
+          "#d9a6f0",
         )}
         {gauge(
           "RAM",
           (data.memory.used / data.memory.total) * 100,
           `${bytes(data.memory.used)} / ${bytes(data.memory.total)}`,
           bytes(data.memory.available) + " free",
-          "#b3ce85",
+          "#93e2c6",
         )}
       </div>
       <div className="process-list">
@@ -552,7 +553,7 @@ function Clipboard({
       </div>
       <div className="clipboard-scroll">
         {items.map((c) => (
-          <div className="clipboard-item" key={c.id}>
+          <div className="clipboard-item" key={c.id} data-pinned={c.pinned}>
             <button
               className="clipboard-text"
               onClick={() =>
@@ -561,8 +562,8 @@ function Clipboard({
                 )
               }
             >
-              {c.text}
-              <small>{new Date(c.at).toLocaleString()}</small>
+              <span>{c.text}</span>
+              <small>{shortTime(c.at)}</small>
             </button>
             <IconButton
               icon="push-pin"

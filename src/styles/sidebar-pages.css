@@ -1,0 +1,338 @@
+/* Sidebar pages (Settings and the AI workspace): a fixed glass sidebar and
+   one scrolling reading column. Both run to the window's bottom gutter; the
+   column scrolls under the dock and fades out above it. */
+.page-settings,
+.page-ai {
+  padding-bottom: 0;
+  overflow: hidden;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.settings-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  gap: var(--space-7);
+  padding: var(--space-2) var(--gutter) var(--gutter);
+  max-width: 1320px;
+  margin: auto;
+  height: 100%;
+}
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: var(--r-xl);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.055),
+    rgba(255, 255, 255, 0.015)
+  );
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+  padding: var(--space-5) var(--space-3);
+  height: 100%;
+  overflow: hidden;
+}
+.settings-sidebar h2 {
+  margin: 0 var(--space-3) var(--space-4);
+  font-size: var(--fs-h2);
+}
+.settings-sidebar .search-field {
+  margin: 0 0 var(--space-3);
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  flex-shrink: 0;
+}
+.settings-sidebar .search-field input {
+  font-size: var(--fs-sm);
+}
+.settings-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.settings-sidebar nav::-webkit-scrollbar {
+  display: none;
+}
+.settings-sidebar nav button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+  text-align: left;
+  color: var(--muted);
+  border-radius: var(--r-md);
+  font-size: var(--fs-body);
+  min-height: 44px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+.settings-sidebar nav button i {
+  font-size: 18px;
+}
+.settings-sidebar nav button:hover:not(:disabled) {
+  color: var(--text);
+}
+.settings-sidebar nav button.selected {
+  background: var(--selected);
+  border-color: var(--selected-line);
+  color: var(--text);
+  font-weight: 500;
+}
+.settings-sidebar nav button.selected i {
+  color: var(--glow);
+}
+.settings-content {
+  min-width: 0;
+  overflow-y: auto;
+  /* The top padding clears the 20px edge fade. */
+  padding: var(--space-5) var(--space-2) var(--dock-safe) 0;
+  margin-top: calc(-1 * var(--space-4));
+  -webkit-mask-image: var(--fade-edges);
+  mask-image: var(--fade-edges);
+}
+.settings-content > * {
+  max-width: var(--read-max);
+}
+.settings-content h1 {
+  font-size: var(--fs-h1);
+  font-weight: 300;
+}
+.settings-content .page-head {
+  margin-bottom: var(--space-2);
+}
+/* Section rhythm: a titled section opens with --section-gap; sibling cards,
+   notes and lists inside it stack with --stack-gap. */
+.group-title {
+  font-size: var(--fs-2xs);
+  color: var(--glow);
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  margin: var(--section-gap) var(--space-1) var(--space-3);
+}
+.setting-group {
+  border-radius: var(--r-lg);
+  padding: var(--space-1) var(--card-pad);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+}
+.setting-group + .setting-group,
+.setting-group + .setting-note,
+.setting-group + .workbench-list,
+.setting-group + .workbench-usage,
+.setting-note + .setting-group {
+  margin-top: var(--stack-gap);
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  min-height: var(--row-min);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line);
+}
+.setting-row:last-child {
+  border-bottom: 0;
+}
+.setting-row > div:first-child {
+  min-width: 0;
+}
+.setting-row strong {
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.setting-row p {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+  margin-top: var(--space-1);
+  max-width: 560px;
+}
+.setting-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  max-width: 50%;
+}
+.setting-control .soft-button {
+  padding: 8px 16px;
+  font-size: var(--fs-sm);
+}
+.setting-control .compact-input {
+  width: 200px;
+  font-size: var(--fs-xs);
+  padding: 9px 12px;
+}
+.setting-control textarea {
+  font-size: var(--fs-xs);
+  max-width: 230px;
+}
+.setting-control select {
+  max-width: 230px;
+  font-size: var(--fs-xs);
+  padding: 8px 10px;
+}
+.setting-row select,
+.segmented select {
+  padding: 8px 10px;
+  font-size: var(--fs-xs);
+}
+.segmented {
+  display: flex;
+  gap: var(--space-2);
+}
+.setting-row input[type="number"] {
+  width: 96px;
+  text-align: right;
+}
+.setting-row input[type="range"] {
+  width: 160px;
+}
+.key-hint {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.toggle {
+  height: 26px;
+  width: 46px;
+  min-width: 46px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  padding: 3px;
+}
+.toggle span {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #d9d5f2;
+  box-shadow: 0 2px 6px rgba(6, 4, 30, 0.45);
+}
+.toggle[aria-checked="true"] {
+  background: var(--grad-glow);
+  box-shadow: 0 0 16px rgba(188, 170, 255, 0.3);
+}
+.toggle[aria-checked="true"] span {
+  transform: translateX(20px);
+  background: #ffffff;
+}
+.toggle[aria-checked="true"]:hover {
+  background: var(--grad-glow-hover) !important;
+}
+.key-binding {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+}
+/* A shortcut recorder is a button: give it the soft pill. */
+button.key-binding {
+  min-height: 36px;
+  padding: 6px 8px 6px 16px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: var(--fs-sm);
+}
+button.key-binding:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+}
+.key-binding span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.key-binding kbd {
+  font-size: var(--fs-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  padding: 6px 9px;
+  box-shadow: inset 0 -2px 0 rgba(255, 255, 255, 0.05);
+}
+.key-binding small {
+  color: var(--faint);
+}
+.usage-strip {
+  display: flex;
+  gap: var(--space-5);
+  padding: var(--space-4) 0;
+}
+.usage-strip div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.usage-strip b {
+  font-size: 22px;
+  font-weight: 300;
+}
+.usage-strip span {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+}
+.model-list {
+  display: flex;
+  flex-wrap: wrap;
+  padding: var(--space-3) 0;
+  gap: 6px;
+  max-height: 160px;
+  overflow: auto;
+}
+.model-list button {
+  font-size: var(--fs-2xs);
+  border-radius: var(--r-pill);
+  padding: 6px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.privacy-copy {
+  margin-top: var(--stack-gap);
+  padding: var(--card-pad);
+  border-radius: var(--r-lg);
+  background: linear-gradient(
+    150deg,
+    rgba(188, 170, 255, 0.08),
+    rgba(255, 255, 255, 0.015)
+  );
+  border: 1px solid var(--line);
+}
+.privacy-copy h3 {
+  font-size: var(--fs-h3);
+}
+.privacy-copy p {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-top: var(--space-3);
+}
+@media (max-width: 950px) {
+  /* The dock now spans the sidebar too: both columns stop above it. */
+  .settings-layout {
+    --sidebar-w: 220px;
+    gap: var(--space-5);
+    padding: var(--space-2) var(--space-4) calc(var(--dock-safe) - var(--space-3));
+  }
+  .settings-content {
+    padding-bottom: var(--space-6);
+  }
+  .setting-row {
+    gap: var(--space-3);
+  }
+  .setting-row p {
+    font-size: var(--fs-2xs);
+  }
+  .setting-control .compact-input {
+    width: 155px;
+  }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Note, WorkbenchState } from "../workbench-types";
 import { api } from "../api";
-import { Empty, Icon, Toggle } from "../ui";
+import { Icon, Toggle } from "../ui";
 import { PcmCapture, encodeBytes } from "../pcm-capture";
 export function Notes({
   data,
@@ -111,8 +111,16 @@ export function Notes({
           New note
         </button>
       </div>
-      <details className="workbench-recording">
-        <summary>Record a meeting</summary>
+      <details className="workbench-recording record-card">
+        <summary>
+          <span className="entry-icon">
+            <Icon name={recording ? "record" : "microphone"} />
+          </span>
+          <span className="entry-heading">
+            <strong>{recording ? "Recording a meeting" : "Record a meeting"}</strong>
+            <small>Transcribe a call into a note, only when you start it.</small>
+          </span>
+        </summary>
         <p className="setting-note">
           Tell everyone before recording. Audio stays in temporary storage until
           transcription, then is deleted. Gemini transcription sends audio to
@@ -127,15 +135,21 @@ export function Notes({
           />
           Participants know I am recording.
         </label>
-        <div className="workbench-actions">
-          <Toggle label="Record microphone" value={mic} onChange={setMic} />
-          <span>Microphone</span>
-          <Toggle
-            label="Record system audio"
-            value={system}
-            onChange={setSystem}
-          />
-          <span>System audio</span>
+        <div className="record-sources">
+          <span>
+            <Icon name="microphone" size={16} />
+            Microphone
+            <Toggle label="Record microphone" value={mic} onChange={setMic} />
+          </span>
+          <span>
+            <Icon name="speaker-high" size={16} />
+            System audio
+            <Toggle
+              label="Record system audio"
+              value={system}
+              onChange={setSystem}
+            />
+          </span>
         </div>
         <div className="workbench-actions">
           {recording ? (
@@ -190,7 +204,7 @@ export function Notes({
         </div>
       </details>
       <div className="workbench-notes">
-        <aside>
+        <aside className="notes-list">
           <label className="search-field">
             <Icon name="magnifying-glass" />
             <input
@@ -212,39 +226,47 @@ export function Notes({
                     .catch((e) => report(e.message))
                 }
               >
-                {n.title}
+                <span>{n.title || "Untitled note"}</span>
                 <small>{new Date(n.at).toLocaleDateString()}</small>
               </button>
             ))}
+          {!results.length && (
+            <p className="notes-empty">
+              {data.notes.length
+                ? "No notes match."
+                : "Notes stay on this PC. Recording and AI summaries only run when you start them."}
+            </p>
+          )}
         </aside>
-        <section>
-          <label className="form-label">
-            Title
-            <input
-              value={note.title || ""}
-              onChange={(e) => setNote({ ...note, title: e.target.value })}
-            />
-          </label>
-          <label className="form-label">
-            Note
-            <textarea
-              className="workbench-note-editor"
-              value={note.text || ""}
-              onChange={(e) => setNote({ ...note, text: e.target.value })}
-            />
-          </label>
-          <div className="workbench-actions">
-            <button
-              className="soft-button"
-              disabled={busy || !note.text?.trim()}
-              onClick={() =>
-                void api("notes.save", note)
-                  .then(setNote)
-                  .catch((e) => report(e.message))
-              }
-            >
-              Save note
-            </button>
+        <section className="note-editor">
+          <input
+            className="note-title"
+            aria-label="Title"
+            placeholder="Untitled note"
+            value={note.title || ""}
+            onChange={(e) => setNote({ ...note, title: e.target.value })}
+          />
+          <textarea
+            className="workbench-note-editor"
+            aria-label="Note"
+            placeholder="Write something worth returning to…"
+            value={note.text || ""}
+            onChange={(e) => setNote({ ...note, text: e.target.value })}
+          />
+          <div className="note-toolbar">
+            {note.id && (
+              <button
+                className="text-button danger"
+                onClick={() =>
+                  void api("notes.remove", { id: note.id })
+                    .then(() => setNote({ title: "", text: "" }))
+                    .catch((e) => report(e.message))
+                }
+              >
+                <Icon name="trash" size={15} />
+                Delete note
+              </button>
+            )}
             <button
               className="soft-button"
               disabled={busy || !note.text?.trim()}
@@ -256,23 +278,25 @@ export function Notes({
                   .finally(() => setBusy(false));
               }}
             >
+              <Icon name="sparkle" size={16} />
               Summarize with Gemini
             </button>
-            {note.id && (
-              <button
-                className="text-button"
-                onClick={() =>
-                  void api("notes.remove", { id: note.id })
-                    .then(() => setNote({ title: "", text: "" }))
-                    .catch((e) => report(e.message))
-                }
-              >
-                Delete note
-              </button>
-            )}
+            <button
+              className="primary-button"
+              disabled={busy || !note.text?.trim()}
+              onClick={() =>
+                void api("notes.save", note)
+                  .then(setNote)
+                  .catch((e) => report(e.message))
+              }
+            >
+              Save note
+            </button>
           </div>
-          {note.summary && (
-            <div className="workbench-prose">
+        </section>
+      </div>
+      {note.summary && (
+            <div className="workbench-prose note-summary">
               <h2>Summary and proposed actions</h2>
               <pre>{note.summary}</pre>
               {note.summary
@@ -283,19 +307,22 @@ export function Notes({
                   return (
                     <button
                       key={i}
-                      className="text-button"
+                      className="summary-task"
+                      data-tip="Add to Desk"
+                      aria-label={`Add to Desk: ${title}`}
                       onClick={() =>
                         void api("todo.add", { title })
                           .then(() => report("Added to Desk."))
                           .catch((e) => report(e.message))
                       }
                     >
-                      Add to Desk: {title}
+                      <Icon name="plus-circle" size={16} />
+                      <span>{title}</span>
                     </button>
                   );
                 })}
               <button
-                className="soft-button"
+                className="soft-button summary-attach"
                 onClick={() =>
                   void api("context.use", {
                     title: note.title || "Meeting summary",
@@ -307,14 +334,6 @@ export function Notes({
               </button>
             </div>
           )}
-        </section>
-      </div>
-      {!data.notes.length && !note.text && (
-        <Empty icon="note-pencil" title="Keep something worth returning to">
-          Notes stay on this PC. Recording and AI summaries only run when you
-          start them.
-        </Empty>
-      )}
     </>
   );
 }

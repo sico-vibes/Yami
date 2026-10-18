@@ -78,6 +78,13 @@ No wheel window, shelf, or engine process exists at idle. The renderer loads the
 
 File wheel settings are stored with the rest of Yami’s settings: enable the drag gesture, pick the three modifiers, change the Explorer shortcut, reveal a finished file, play the optional tick, and install the Send to shortcut. The tick is off by default. Two wheels cannot share a modifier.
 
+The settings screen shows the three modifiers as labelled menus (Convert, Tools and
+Actions), each choosing Shift, Ctrl or Alt. Engines appear as tiles, one per helper:
+FFmpeg, ImageMagick, 7-Zip, 7-Zip Extra and ExifTool. A tile shows the engine's
+version (or its licence, until a version is known) and either a Ready status word or
+a Get button. Get downloads and checks the engine, shows a spinning icon with
+"Getting…" while it runs, and reports any failure in a note below the tiles.
+
 ## Manual check on Windows
 
 1. Start Yami and drag a file from File Explorer. Tap Shift, then release the file on JPG or Compress.
@@ -100,3 +107,4 @@ File wheel settings are stored with the rest of Yami’s settings: enable the dr
 18. If LibreOffice is installed, drop a PPTX on PDF. If it is not, confirm the wheel says LibreOffice is not installed and does not download it.
 19. On the actions wheel, copy a path and confirm the clipboard. Move a file into another folder. Open the terminal in that folder. Pin Float and confirm the small window stays above other windows until it is closed.
 20. After ffmpeg has downloaded, open the convert wheel for a photo and confirm HEIC is absent unless `ffmpeg -muxers` actually lists HEIC.
+21. In Settings, open the File wheel group. Confirm each engine tile shows Ready after its download, that Get reads "Getting…" while one runs, and that a changed modifier menu moves that wheel to the new key.

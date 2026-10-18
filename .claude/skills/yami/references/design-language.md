@@ -1,99 +1,108 @@
-# Yami design language
+# Yami design language (Nightglow)
 
-The full, current values live in `Documentation/reference/design-system.md` and
-the CSS in `src/styles/`. This page is the short version an agent needs before
-touching UI. When you change the look, update both files.
+The full system lives in `Documentation/reference/design-system.md`; every
+value lives in `src/styles/tokens.css`. This page is the short version an agent
+needs before touching UI. When you change the look, update all three.
 
 ## Mood
 
-Calm, nocturnal and spiritual: dark translucent surfaces, soft glows, blurred
-wallpapers, a little gold for actions and a cool blue for focus. Yami is a
-gentle, slightly cheeky companion. Nothing shouts; motion is soft and short.
+A still night sky, soft glass and a lavender light that belongs to the spirit.
+Calm, nocturnal, gently cheeky. Nothing shouts; motion answers the user and
+then stops.
 
-## Tokens (`src/styles/base.css` `:root`)
+## Rules an agent must follow
 
-| Token      | Value                       | Use                                                                       |
-| ---------- | --------------------------- | ------------------------------------------------------------------------- |
-| `--text`   | `#f4f4f4`                   | main text                                                                 |
-| `--muted`  | `#9ca7b0`                   | secondary text                                                            |
-| `--accent` | `#8dccff`                   | focus rings, links, primary outline buttons                               |
-| `--gold`   | `#c9ad5c`                   | selected tabs, active states; filled action `#bba057` with `#17140b` text |
-| `--panel`  | `rgba(255,255,255,.035)`    | card surfaces                                                             |
-| `--line`   | `rgba(255,255,255,.075)`    | hairlines                                                                 |
-| `--ease`   | `cubic-bezier(.22,1,.36,1)` | default easing                                                            |
+1. **Tokens only.** Use `var(--…)` for colour, spacing, radius, type and motion.
+   No raw hex, no off-scale gaps. Missing value → add a token and document it.
+2. **One accent.** `--glow` (lavender) means selected, on, focus and primary.
+   Filled primaries use `--grad-glow` with `--on-glow` text. `--moon` is for
+   attention and purchases, `--mint` for good, `--rose` for warm highlights and
+   high usage, `--danger` for problems. `--gold`/`--accent` are legacy aliases.
+3. **Cards never touch.** Sibling cards are `--stack-gap` (12px) apart; a titled
+   section starts `--section-gap` (32px) below. Card recipe: `--surface-1`,
+   1px `--line`, `--highlight`, `--r-lg`, `--card-pad`.
+4. **Reuse components.** Never ship a native `<select>` or a `title` tooltip in
+   a shipped screen:
+   - choices → `Select` from `src/controls.tsx` (human option labels, stored
+     values unchanged);
+   - hints → `data-tip` (the per-window `TooltipLayer` renders it);
+   - states → `StatusChip` (tone from `src/status-tone.ts`, tested);
+   - shares → `Meter`; read-only values → `.value-pill`;
+   - times → `shortTime` / `relativeTime`;
+   - icon actions → `IconButton` with a `label`;
+   - lists → entry cards (`.entry-head` = icon tile + two-line heading + chip +
+     one action), form cards (`.form-card`) or tiles.
+5. **Every page opens with `.page-head`**: 32px light title, one muted line, at
+   most one action on the right.
+6. **Function first.** Restyling never removes behaviour, state, errors or
+   accessible names. Follow `Documentation/adaptation.md`.
+7. **Check two sizes.** Preview at 1160×790 and 850×610, reduced motion on and
+   off; drawer tabs must fit their height in `src/island-bounds.ts`.
 
-Main window: dark blue-green gradients over a heavily blurred, dimmed wallpaper
-(`--wallpaper`). Island and drawer: near-black (`#050505`–`#0d0d10`). Skin glow
-colours come from `src/yami/skins.ts`; use `color-mix(in srgb, var(--soul) N%,
-transparent)` to tint surfaces by the current skin.
+## Key values
 
-## Type and shape
+| Group | Values |
+| --- | --- |
+| Inks | `--ink-0` `#06051a` (notch) · `--ink-1` `#0b0a22` (base) · `--ink-2` · `--ink-3` |
+| Text | `--text` `#f3f1ff` · `--text-soft` · `--muted` `#a49fc6` · `--faint` |
+| Accent | `--glow` `#bcaaff` · `--grad-glow` `#cdbcff→#a2b3ff` · `--on-glow` `#17123a` |
+| Space | 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 (`--space-1…9`) |
+| Type | 38 display · 32 h1 (300) · 20 h2 · 16 h3 · 14 body · 13 · 12 · 11 labels · 10 micro |
+| Radius | 8 · 12 fields · 16 tiles/menus · 22 cards · 28 sidebar/composer · pill |
+| Layout | `--gutter` 24 · `--page-max` 1040 · `--read-max` 860 · `--sidebar-w` 256 · `--dock-safe` 112 · `--drawer-gap` 10 |
+| Motion | `--ease-fluid` for entrances/presses · `--ease-island` for notch/drawer · 0.16 / 0.26 / 0.42s |
 
-- Rubik Variable everywhere. Headline 36px/400, title 21px/600, body 14px,
-  labels 12px, island micro text 9–11px.
-- Radii: fields 10px, cards 12–16px, island utility tiles 14px, drawer bottom
-  corners 22px, pills 22–24px, dock 40px, glass loadout cards 16px. Never leave
-  sharp corners on images; clip transformed images with
-  `clip-path: inset(0 round Rpx)`.
-- Wallpaper tiles also need horizontal image overscan: counter-skewing a narrow
-  image exposes opposite corners even when its parent has a rounded clip.
-- Spacing: 8px base gap; cards ~14px padding; island drawer 16px padding.
+Rubik Variable everywhere; Cascadia Mono only for shell, code and JSON.
+Phosphor icons via `<Icon>`; icon tiles in cards are 38px lavender-tinted
+squares with 12px radius.
 
-## Surfaces and controls
+## Surfaces
 
-Adaptations reuse and extend these existing controls, layouts and interactions.
-Keep the source feature's backend and operating behavior intact while presenting
-it as Yami; see `Documentation/adaptation.md` from the repository root. New tabs,
-buttons, hover effects and toggles follow existing patterns, not a new UI system.
-
-- Glass: `background: #ffffff0f; backdrop-filter: blur(14px) saturate(1.3);
-border: 1px solid #ffffff1f;` plus an inset top highlight and a soft dark
-  shadow. Hover tints the border/glow with the item's colour.
-- Buttons: generic `button:hover` adds a faint white wash. Filled buttons
-  (`.play-button`, `.gold-button`, primary) must define their own `:hover`
-  colour or they turn grey. Active state scales to 0.975. Keyboard focus shows a
-  2px `--accent` outline.
-- Toggles use `<Toggle>`; settings rows use the `row(title, help, control)`
-  helper in `Settings.tsx` inside a `.setting-group` under a `.group-title`.
-- Icons: Phosphor via `<Icon name size fill?>`; icon-only buttons need
-  `IconButton` with an accessible `label`.
+- **Main window:** static `--stars` over `--aurora` over an ink gradient, with
+  the wallpaper blurred and blended at 32%. Scroll areas use the
+  `--fade-edges` mask so content dissolves above the dock.
+- **Sidebar pages** (Settings, AI): glass sidebar + one reading column, both to
+  the bottom gutter; the column scrolls under the dock.
+- **Card pages** (Bond, Desk): one column up to `--page-max`.
+- **Floating glass** (dock, menus, modals, toasts): `--line-strong`,
+  `--shadow-float`, `--blur`. Backdrop blur does not work over the real desktop,
+  so the island and overlays stay opaque ink.
 
 ## The island
 
-- Collapsed: 180x66 black notch with concave shoulders, Yami centred. After ~8
-  quiet seconds it slims to a 190x12 bar and Yami tucks away; hover or activity
-  restores it. Size changes ease over 0.32s.
-- Concave shoulders are bounded radial cutouts: 15px awake, 2px asleep. Never
-  let shoulder geometry extend below the idle bar or use spreading shadows.
+- Collapsed: 180×66 notch, 20px lower corners, concave shoulders (15px awake,
+  2px asleep, never below the bar), solid `--ink-0` with the skin colour
+  (`--soul`) pooling at the bottom edge and a matching rim light. After ~8 quiet
+  seconds it slims to a 190×12 bar and Yami tucks away. Size changes ease 0.32s.
 - Click or scroll down opens the drawer; double-click opens the app;
-  right-click arms an equipped ability. No buttons inside the notch.
-- Open: the notch disappears and the drawer grows out of its footprint with a
-  clip-path reveal (0.3s), content fading in; closing reverses (0.19s) before
-  the window shrinks. Tabs: Controls, Today, Stats, Clipboard, Apps, Wallpaper,
-  Power, gold pill for the selected tab.
-- Small cards under the notch (activity, mini media, hints) are 200x26 black
-  pills; the media card grows to 380px. Messages too big for the collapsed
-  island go to the caption pill via `api("caption.notice", { message })`.
+  right-click arms an ability (moon rim). No buttons inside the notch.
+- Drawer: grows from the notch footprint (0.34s clip-path), closes in 0.19s.
+  Ink with aurora and stars, 26px lower corners, 16px padding, `--drawer-gap`
+  grids. Tabs sit in a recessed track; the selected tab is a lit lavender pill.
+- Pills under the notch (activity, mini media, hints) are 200×26 ink pills
+  with a hairline. Long messages go to the caption pill via
+  `api("caption.notice", { message })`.
+- Window sizes per tab live in `src/island-bounds.ts` (main process and
+  preview share it).
 
 ## Overlays
 
-- Caption pill (bottom centre, only during voice/dictation or a notice): light
-  pill `#fbfbfdf2` labelled `You`/`Dictating`/`Typed`, dark pill `#0b0c10f2`
-  labelled `Yami`, 9px-radius key chips above.
-- Roaming Yami: 240x180 click-through window, 12px-radius dark speech bubbles
-  with Yami's own quips.
+Caption pill: 24px radius; the user's words on pale lavender-white with ink
+text, Yami's reply on ink glass with a skin-tinted corner. Roaming bubble:
+14px-radius ink glass with a tail. Lasso stroke `#bcaaff`.
 
 ## The Yami character
 
-- A front-facing, armless spirit: round head (radius 27) with two cat ears, oval
-  eyes, a small cat mouth, whiskers and blush; the lower half burns downward as
-  three flame layers (outer, middle, core) with one long centre tongue. No
-  hands, paws or tail. Never draw her side-on.
+- A front-facing, armless spirit: round head (radius 27) with two cat ears,
+  oval eyes, a small cat mouth, whiskers and blush; the lower half burns
+  downward as three flame layers (outer, middle, core) with one long centre
+  tongue. No hands, paws or tail. Never draw her side-on.
 - Geometry and motion live in `src/yami/motion.ts` (pure, tested), features in
   `features.ts`, colours in `skins.ts`, rendering in `YamiSpirit.tsx`.
 - Skins: Yami (white core, periwinkle flame), Ember, Wisp, Amethyst, Gilded,
   Void (dark core, pale features). A new skin needs `flame[3]`, `line`, `eye`,
-  `glow`, a catalogue card and a price in `electron/requests.ts`.
+  `glow`, a catalogue card and a price in `electron/requests.ts`. The glow
+  becomes `--soul` for the notch, Home orb, drawer and caption tint.
 - Motion budget: one `requestAnimationFrame` loop per visible Yami, running only
   while hovered (+2.5s), in a non-idle state, roaming or dragged, or with Living
   flame on (paced to ~30 fps). It eases to rest and cancels the loop. Embers are
@@ -106,15 +115,15 @@ border: 1px solid #ffffff1f;` plus an inset top highlight and a soft dark
 
 ## Motion rules
 
-Animate for interaction and active work only. Use `--ease` or the
-`cubic-bezier(.2,.8,.2,1)` used by the island; keep UI transitions 0.15–0.35s.
-Every keyframe or continuous loop needs a reduced-motion override
-(`html[data-reduced="true"]` and `prefers-reduced-motion`).
-The main dock uses one sliding selected pill (0.24s) and an incoming-page fade
-(0.2s), both finite and disabled by either reduced-motion preference.
+Animate for interaction and active work only, 0.15–0.42s, finite. Entrances
+fade and rise 8px; menus scale from 0.98; the dock pill slides over 0.42s;
+spinners turn only while work runs. Every keyframe needs a reduced-motion
+override (`html[data-reduced="true"]` and `prefers-reduced-motion`). Skies,
+stars and glows are static images: no idle animation.
 
 ## Voice and copy
 
 Short, warm, lightly witty, second person. Say what happened and what to do
 next ("Connect your Gemini API key in Settings > API keys to talk to Yami.").
-Never imitate Hitodama's wording.
+Option labels are human ("PowerShell 7", "Claude Code"); status words stay the
+real state. Never imitate Hitodama's wording.

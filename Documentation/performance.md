@@ -85,6 +85,19 @@ measure a terminal/agent task peak or long-term recording/model ceiling. See
 
 These are source-level observations; they do not establish total CPU or RAM consumption. Browser/Electron process layout and Windows accounting can vary by machine and Electron version. The short baseline above is not a peak measurement or long-run test.
 
+## Nightglow redesign (2026-10-18): not measured
+
+The Nightglow redesign changed tokens, shared controls (Select, tooltip layer, status chips, meters) and the AI and drawer screens. **No performance measurement was run for it.** Every figure on this page predates it, and the merged build on `main` has not been measured. What the code shows:
+
+- No interval, polling loop or native query was added. The existing Usage retry timer and the Stats, Controls, media and Today timers are unchanged.
+- The tooltip layer listens for pointer, focus, key, press and scroll events while it is mounted. Its only timer is the short hover or focus delay for the element under the pointer, and it runs nothing while the pointer is still.
+- Select adds window listeners only while its menu is open, and its menu leaves the DOM when closed.
+- The sky (`--aurora`, `--stars`) and the glows are static gradients. Spinners (`circle-notch`) turn only while a read, download or install is running.
+- The dock, select menus, the home composer, the Soul slots and modal scrims use backdrop blur (`--blur` or a fixed 8–30px blur). Blur costs GPU time while those surfaces are visible. That cost has not been measured. Settings and workbench cards are translucent fills without blur.
+- The Soul page's hub veil no longer drifts. The earlier 24-second infinite `veil-drift` animation was removed so the page is still while you only look at it.
+
+The Windows-first idle target (50–100 MB) and the active-task ceiling (600–700 MB) remain pending the procedure below.
+
 ## Measurement procedure
 
 For a repeatable idle reading:

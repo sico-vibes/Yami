@@ -2,18 +2,20 @@
 .today-grid {
   display: grid;
   grid-template-columns: 150px minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 12px;
+  gap: var(--drawer-gap);
   height: 100%;
 }
 .today-column {
   display: grid;
-  gap: 12px;
+  gap: var(--drawer-gap);
   align-content: start;
   min-width: 0;
 }
 .today-grid section {
-  background: #ffffff06;
-  border-radius: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+  border-radius: 20px;
   padding: 14px;
   min-width: 0;
 }
@@ -27,7 +29,7 @@
 }
 .today-grid h3 small {
   font-size: 10px;
-  color: #8f8b94;
+  color: var(--muted);
   font-weight: 400;
 }
 .today-grid .muted {
@@ -37,22 +39,28 @@
   display: grid;
   justify-items: center;
   padding: 18px 14px !important;
+  background:
+    radial-gradient(120px 90px at 50% 0, rgba(188, 170, 255, 0.16), transparent),
+    var(--surface-1) !important;
 }
 .today-clock b {
   font-size: 44px;
   line-height: 1;
-  font-weight: 300;
+  font-weight: 250;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
 .today-clock b + b {
-  color: var(--gold);
+  background: var(--grad-aurora);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .today-clock small,
 .today-weather small {
   margin-top: 8px;
   font-size: 10px;
-  color: #8f8b94;
+  color: var(--muted);
 }
 .today-weather {
   display: grid;
@@ -60,7 +68,7 @@
   gap: 4px;
 }
 .today-weather > i {
-  color: #ffc24a;
+  color: var(--moon);
 }
 .today-weather b {
   font-size: 22px;
@@ -73,7 +81,7 @@
   display: grid;
   justify-items: center;
   gap: 6px;
-  color: #8f8b94;
+  color: var(--muted);
   font-size: 11px;
 }
 .week-strip {
@@ -88,22 +96,24 @@
   justify-items: center;
   gap: 3px;
   padding: 6px 0 9px;
-  border-radius: 10px;
-  color: #a9b5c0;
+  border-radius: 14px;
+  color: var(--text-soft);
+  border: 1px solid transparent;
 }
 .week-strip small {
   font-size: 9px;
-  color: #8f8b94;
+  color: var(--muted);
 }
 .week-strip b {
   font-size: 12px;
   font-weight: 500;
 }
 .week-strip .today b {
-  color: var(--gold);
+  color: var(--glow);
 }
 .week-strip .picked {
-  background: #c9ad5c22;
+  background: var(--selected);
+  border-color: var(--selected-line);
 }
 .week-strip i {
   position: absolute;
@@ -111,7 +121,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #d7b958;
+  background: var(--rose);
 }
 .week-agenda .agenda-row {
   padding: 7px 0;
@@ -130,8 +140,9 @@
   display: grid;
   place-items: center;
   background:
-    radial-gradient(closest-side, #0d0d10 82%, transparent 84%),
-    conic-gradient(var(--gold) calc(var(--progress) * 360deg), #ffffff12 0);
+    radial-gradient(closest-side, var(--ink-1) 82%, transparent 84%),
+    conic-gradient(from 0deg, #93a9ff, #bcaaff calc(var(--progress) * 180deg), #f1a7d6 calc(var(--progress) * 360deg), #ffffff12 0);
+  box-shadow: 0 0 24px rgba(188, 170, 255, 0.14);
 }
 .focus-dial b {
   font-size: 17px;
@@ -150,14 +161,16 @@
 }
 .focus-presets button {
   font-size: 10px;
-  padding: 5px 8px;
-  border-radius: 12px;
-  color: #a9b5c0;
-  background: #ffffff08;
+  padding: 5px 9px;
+  border-radius: var(--r-pill);
+  color: var(--text-soft);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
 }
 .focus-presets button.selected {
-  color: #d7b958;
-  background: #c9ad5c22;
+  color: var(--text);
+  background: var(--selected);
+  border-color: var(--selected-line);
 }
 .focus-actions {
   display: flex;
@@ -165,13 +178,13 @@
 }
 .focus-actions button {
   min-width: 64px;
-  border-radius: 14px;
-  padding: 7px 12px;
+  border-radius: var(--r-pill);
+  padding: 7px 13px;
   font-size: 11px;
-  background: #ffffff0d;
+  background: var(--surface-2);
 }
 .today-grid .focus-actions .gold-button {
-  background: #bba057;
+  background: var(--grad-glow);
 }
 .today-todos {
   display: flex;

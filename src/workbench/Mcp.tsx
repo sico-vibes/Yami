@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { WorkbenchState } from "../workbench-types";
 import { api } from "../api";
+import { Select } from "../controls";
+import { Icon } from "../ui";
 export function Mcp({
   data,
   report,
@@ -26,6 +28,20 @@ export function Mcp({
           </p>
         </div>
       </div>
+      <section className="workbench-usage form-card">
+      <header className="entry-head">
+        <span className="entry-icon">
+          <Icon name="plug" />
+        </span>
+        <div className="entry-heading">
+          <strong>Server</strong>
+          <small>
+            {tools.length
+              ? `${tools.length} ${tools.length === 1 ? "tool" : "tools"} available`
+              : "Not connected"}
+          </small>
+        </div>
+      </header>
       <div className="workbench-form">
         <label className="form-label">
           Server address
@@ -64,6 +80,7 @@ export function Mcp({
               .finally(() => setBusy(false));
           }}
         >
+          <Icon name="plugs-connected" size={16} />
           Connect and list tools
         </button>
         <button
@@ -78,16 +95,21 @@ export function Mcp({
           Disconnect
         </button>
       </div>
+      </section>
       {!!tools.length && (
-        <>
+        <section className="workbench-usage form-card">
           <label className="form-label">
             Tool
-            <select value={name} onChange={(e) => setName(e.target.value)}>
-              <option value="">Choose a tool</option>
-              {tools.map((t) => (
-                <option key={t.name}>{t.name}</option>
-              ))}
-            </select>
+            <Select
+              className="select-wide"
+              label="Tool"
+              value={name}
+              onChange={setName}
+              options={[
+                { value: "", label: "Choose a tool" },
+                ...tools.map((t) => ({ value: t.name, label: t.name, icon: "wrench" })),
+              ]}
+            />
           </label>
           {name && (
             <>
@@ -112,7 +134,7 @@ export function Mcp({
                 />
               </label>
               <button
-                className="soft-button"
+                className="primary-button"
                 disabled={busy}
                 onClick={() => {
                   let parsed;
@@ -129,13 +151,14 @@ export function Mcp({
                     .finally(() => setBusy(false));
                 }}
               >
+                <Icon name="play" size={16} />
                 Review and run
               </button>
             </>
           )}
-        </>
+        </section>
       )}
-      {result && <pre className="workbench-prose">{result}</pre>}
+      {result && <pre className="workbench-prose mcp-result">{result}</pre>}
     </>
   );
 }

@@ -1,0 +1,118 @@
+/* Nightglow: Yami's design tokens. Every surface, colour and motion value
+   starts here; component styles reference these names instead of raw hex. */
+:root {
+  /* Night inks, from the notch outward. */
+  --ink-0: #06051a;
+  --ink-1: #0b0a22;
+  --ink-2: #12102c;
+  --ink-3: #1a1738;
+
+  /* Text. */
+  --text: #f3f1ff;
+  --text-soft: #d6d2f0;
+  --muted: #a49fc6;
+  --faint: #77729c;
+
+  /* Spirit palette: lavender leads, periwinkle cools, rose and moon warm. */
+  --glow: #bcaaff;
+  --glow-2: #93a9ff;
+  --rose: #f1a7d6;
+  --moon: #f1d69c;
+  --mint: #93e2c6;
+  --danger: #ff9e9e;
+  --on-glow: #17123a;
+  --grad-glow: linear-gradient(135deg, #cdbcff 0%, #a2b3ff 100%);
+  --grad-glow-hover: linear-gradient(135deg, #dbcdff 0%, #b3c1ff 100%);
+  --grad-aurora: linear-gradient(120deg, #93a9ff, #bcaaff 45%, #f1a7d6);
+
+  /* Glass surfaces and hairlines. */
+  --surface-1: rgba(255, 255, 255, 0.04);
+  --surface-2: rgba(255, 255, 255, 0.065);
+  --surface-3: rgba(255, 255, 255, 0.09);
+  --surface-hover: rgba(255, 255, 255, 0.075);
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.12);
+  --selected: rgba(188, 170, 255, 0.16);
+  --selected-line: rgba(188, 170, 255, 0.32);
+  --highlight: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --shadow-soft: 0 10px 30px rgba(4, 2, 22, 0.35);
+  --shadow-float: 0 24px 70px rgba(4, 2, 22, 0.55);
+  --blur: blur(22px) saturate(1.35);
+
+  /* Legacy names kept so older rules keep resolving. */
+  --accent: var(--glow);
+  --gold: var(--glow);
+  --panel: var(--surface-1);
+
+  /* Shape. */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+
+  /* Space: a 4px base. Use these steps only. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+
+  /* Type scale (Rubik Variable). Island micro text may go to 9px. */
+  --fs-display: 38px;
+  --fs-h1: 32px;
+  --fs-h2: 20px;
+  --fs-h3: 16px;
+  --fs-body: 14px;
+  --fs-sm: 13px;
+  --fs-xs: 12px;
+  --fs-2xs: 11px;
+  --fs-micro: 10px;
+
+  /* Layout. */
+  --gutter: 24px; /* window edge to content, titlebar included */
+  --page-max: 1040px; /* single-column pages (Bond, Desk) */
+  --read-max: 860px; /* settings and workbench content column */
+  --sidebar-w: 256px;
+  --dock-safe: 112px; /* scroll padding so the last item clears the dock */
+  --section-gap: var(--space-7); /* before a new titled section */
+  --stack-gap: var(--space-3); /* between sibling cards */
+  --card-pad: var(--space-5);
+  --row-min: 68px;
+  --drawer-pad: var(--space-4);
+  --drawer-gap: 10px; /* every grid inside the island drawer */
+  /* Scrolling content dissolves just before it reaches the floating dock. */
+  --fade-edges: linear-gradient(
+    transparent,
+    #000 20px,
+    #000 calc(100% - 128px),
+    transparent calc(100% - 44px)
+  );
+
+  /* Motion: soft, short and finite. */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-fluid: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-island: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 0.16s;
+  --dur: 0.26s;
+  --dur-slow: 0.42s;
+
+  /* Static night sky: aurora washes and a sparse star dust. */
+  --aurora:
+    radial-gradient(900px 560px at 8% -12%, #5a3db866, transparent 62%),
+    radial-gradient(760px 520px at 108% 12%, #2a4ab855, transparent 60%),
+    radial-gradient(820px 560px at 72% 118%, #9a3f8a44, transparent 62%);
+  --stars:
+    radial-gradient(1px 1px at 22px 34px, #ffffff70, transparent 100%),
+    radial-gradient(1px 1px at 148px 92px, #ffffff50, transparent 100%),
+    radial-gradient(1.4px 1.4px at 86px 168px, #ffffff60, transparent 100%),
+    radial-gradient(1px 1px at 204px 214px, #ffffff40, transparent 100%),
+    radial-gradient(1.2px 1.2px at 260px 40px, #ffffff55, transparent 100%);
+  /* Five tile sizes so the dust never reads as a grid. */
+  --stars-size: 300px 260px, 410px 330px, 230px 370px, 520px 450px, 370px 210px;
+}

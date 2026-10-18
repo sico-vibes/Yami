@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { WorkbenchState } from "../workbench-types";
 import { api } from "../api";
 import { Toggle } from "../ui";
+import { Select } from "../controls";
 export function WorkspaceSettings({
   data,
   report,
@@ -80,15 +81,17 @@ export function WorkspaceSettings({
             <strong>Default shell</strong>
             <p>New sessions use this shell. Existing shells keep running.</p>
           </div>
-          <select
-            aria-label="Default terminal shell"
+          <Select
+            label="Default terminal shell"
             value={s.terminalShell}
-            onChange={(e) => patch({ terminalShell: e.target.value })}
-          >
-            {["auto", "pwsh", "powershell", "cmd"].map((v) => (
-              <option key={v}>{v}</option>
-            ))}
-          </select>
+            onChange={(terminalShell) => patch({ terminalShell })}
+            options={[
+              { value: "auto", label: "Automatic", hint: "PowerShell 7 when installed" },
+              { value: "pwsh", label: "PowerShell 7" },
+              { value: "powershell", label: "Windows PowerShell" },
+              { value: "cmd", label: "Command Prompt" },
+            ]}
+          />
         </div>
         <div className="setting-row">
           <div>
@@ -98,15 +101,16 @@ export function WorkspaceSettings({
               default.
             </p>
           </div>
-          <select
-            aria-label="Terminal background"
+          <Select
+            label="Terminal background"
             value={s.terminalBackground}
-            onChange={(e) => patch({ terminalBackground: e.target.value })}
-          >
-            <option value="yami">Follow Yami</option>
-            <option value="custom">Custom image</option>
-            <option value="none">None</option>
-          </select>
+            onChange={(terminalBackground) => patch({ terminalBackground })}
+            options={[
+              { value: "yami", label: "Follow Yami", icon: "sparkle" },
+              { value: "custom", label: "Custom image", icon: "image" },
+              { value: "none", label: "None", icon: "prohibit" },
+            ]}
+          />
         </div>
         <div className="setting-row">
           <div>

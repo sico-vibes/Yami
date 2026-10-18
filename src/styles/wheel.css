@@ -1,6 +1,6 @@
 html[data-window="tool"],
 html[data-window="tool"] body {
-  background: #12181d;
+  background: var(--ink-1);
 }
 .wheel-root,
 .shelf-root,
@@ -30,7 +30,7 @@ html[data-window="tool"] body {
   justify-content: center;
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(16, 22, 28, 0.78);
+  background: rgba(14, 12, 38, 0.78);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 18px 40px rgba(0, 0, 0, 0.28);
@@ -96,8 +96,8 @@ html[data-window="tool"] body {
 }
 .wheel-chip[aria-checked="true"],
 .wheel-chip:hover:not(:disabled) {
-  border-color: rgba(201, 173, 92, 0.9);
-  background: rgba(32, 28, 18, 0.88);
+  border-color: rgba(188, 170, 255, 0.9);
+  background: rgba(40, 32, 84, 0.88);
 }
 .wheel-chip:focus-visible {
   outline: 2px solid var(--accent);
@@ -132,7 +132,7 @@ html[data-window="tool"] body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(16, 22, 28, 0.88);
+  background: rgba(14, 12, 38, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 22px;
   backdrop-filter: blur(18px);
@@ -161,14 +161,14 @@ html[data-window="tool"] body {
   font-size: 13px;
 }
 .shelf-root.hot {
-  border-color: rgba(141, 204, 255, 0.8);
+  border-color: rgba(188, 170, 255, 0.8);
 }
 .tool-root {
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 18px 18px 16px;
-  background: rgba(17, 22, 27, 0.96);
+  background: rgba(14, 12, 38, 0.96);
   border-radius: 22px;
   overflow: auto;
 }
@@ -237,7 +237,7 @@ html[data-window="tool"] body {
   background: rgba(255, 255, 255, 0.05);
 }
 .segmented button[aria-pressed="true"] {
-  background: rgba(141, 204, 255, 0.18);
+  background: rgba(188, 170, 255, 0.18);
   color: var(--text);
 }
 .tool-actions {
@@ -254,8 +254,8 @@ html[data-window="tool"] body {
   background: rgba(255, 255, 255, 0.06);
 }
 .tool-actions .primary {
-  background: #bba057;
-  color: #17140b;
+  background: var(--grad-glow);
+  color: var(--on-glow);
   font-weight: 600;
 }
 .markup-tools,
@@ -272,7 +272,7 @@ html[data-window="tool"] body {
   background: rgba(255, 255, 255, 0.05);
 }
 .markup-tools button[aria-pressed="true"] {
-  background: rgba(141, 204, 255, 0.2);
+  background: rgba(188, 170, 255, 0.2);
 }
 @media (prefers-reduced-motion: reduce) {
   .wheel-chip,

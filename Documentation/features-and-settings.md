@@ -51,7 +51,7 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 **Launcher.** `Win + A` searches installed apps, local files, and saved snippets. Favorite/recent apps are local. A chosen app launches through the Windows shell. Snippets can be stored, copied, and removed.
 
-**Clipboard.** When enabled, Yami polls for text and keeps up to 500 entries. Choose a retention period of 1, 7, 14, or 30 days. Pinned entries do not expire automatically; they are stored unencrypted in `data.json`, while unpinned entries are encrypted. Copy, pin, delete, clear, and search history from the utility panel. See [security limitations](security-and-providers.md#practical-security-limits) before relying on exclusions.
+**Clipboard.** When enabled, Yami polls for text and keeps up to 500 entries. Choose a retention period of 1, 7, 14, or 30 days. Pinned entries do not expire automatically; they are stored unencrypted in `data.json`, while unpinned entries are encrypted. Copy, pin, delete, clear, and search history from the utility panel. Each entry is a card with its time and a pin button; pinned entries are listed first. See [security limitations](security-and-providers.md#practical-security-limits) before relying on exclusions.
 
 ## File wheel
 
@@ -70,6 +70,26 @@ Dropping on a conversion petal saves a new file beside the original. Images, aud
 | Apps | Browse and launch installed applications; recent and favorite lists are local. | App discovery depends on Windows shortcuts and registered apps. |
 | Wallpaper | Add a folder, browse discovered images, and apply a selection as the Windows desktop wallpaper. | User image files remain in place. Existing selected paths can become unavailable if files move. |
 | Power | Lock, sleep, restart, or shutdown. | Each action shows an explicit confirmation. A restart/shutdown request is scheduled by Windows with a short delay. |
+
+## Look and controls
+
+Yami uses one visual system, Nightglow: indigo glass cards over a still night sky,
+with lavender reserved for what is selected or switched on. The island notch and
+its drawer are opaque, because a transparent window cannot blur what is behind it.
+The [design system](reference/design-system.md) lists the tokens and components.
+
+- **Menus.** Choices on shipped screens use Yami's own menu instead of the native
+  list. Arrow keys and Home/End move through it, Enter or Space chooses, letters
+  jump to a match, and Escape or Tab closes it. Focus stays on the menu button.
+- **Tooltips.** Icon buttons and dock items show a short Yami tooltip after about
+  0.4 seconds of hover, or 0.25 seconds of keyboard focus. The native Windows
+  tooltip no longer appears. Tooltips add detail; every control keeps its label.
+- **Status words.** Agent, connection and usage states are a word with a coloured
+  dot. The colour adds emphasis; the word carries the meaning.
+- **Motion.** Animation is kept to interaction and active work. Yami's Reduced
+  motion setting (Settings > Behavior) or the Windows reduced-motion preference
+  stops the transitions described here. Nothing keeps moving while you only
+  look at a screen.
 
 ## Settings reference
 
@@ -125,6 +145,7 @@ interactive Windows PTYs. Defaults: monitoring, transcript fallback, background
 usage and alerts are off; the terminal shortcut is empty; the terminal background
 follows Yami at 6px blur and 22% opacity; scrollback is 3,000 lines; recap retention
 is seven days. Dictation stays on Gemini unless a Windows recognizer is selected.
+Its screens use the same cards, status words and meters as the rest of the app.
 Account, device and installed-agent verification limits are listed in the
 [AI workspace and terminal guide](workspace.md).
 
@@ -132,6 +153,7 @@ Account, device and installed-agent verification limits are listed in the
 
 - Windows sleep wake, microphone permissions, brightness, radio toggles, media sessions, and app discovery are affected by system state or hardware.
 - Yami cannot act on the secure lock/UAC desktop or after a full shutdown.
+- Plans uses the Windows date-and-time control (`datetime-local`). Its icon is tinted to match Yami, but the picker itself is still the Windows one.
 - Clipboard and private-window exclusions are heuristics, not a universal privacy detector.
 - The app does not send email, chat messages, or make purchases through its model tools. These are explicitly forbidden by the prompt and no such declared action exists.
 - Terminal and coordinate tools are disabled by default. If enabled, they act with the signed-in Windows user’s privileges.

@@ -82,14 +82,14 @@
   width: 720px;
   height: 720px;
   background:
-    radial-gradient(420px 280px at 18% 12%, rgba(141, 204, 255, 0.2), transparent 70%),
-    radial-gradient(380px 260px at 84% 88%, rgba(201, 173, 92, 0.16), transparent 72%),
-    linear-gradient(165deg, #1a242c, #12181d 58%, #171624);
+    radial-gradient(420px 280px at 18% 12%, rgba(147, 169, 255, 0.2), transparent 70%),
+    radial-gradient(380px 260px at 84% 88%, rgba(241, 167, 214, 0.14), transparent 72%),
+    linear-gradient(165deg, #1a1838, #0f0d26 58%, #171430);
 }
 .preview-island {
-  width: 960px;
-  min-height: 650px;
-  height: 650px;
+  width: min(1100px, calc(100vw - 48px));
+  min-height: 720px;
+  height: 720px;
   background:
     linear-gradient(#1e343930, #15231d60),
     url("/wallpapers/starter-01.jpg") center/cover;
@@ -128,9 +128,11 @@
   display: block;
   border: 0;
 }
+/* Real window size for the current island state (set by the preview bridge). */
 .preview-frame .island-window {
-  width: 100%;
-  height: 100%;
+  width: var(--island-w, 100%);
+  height: var(--island-h, 100%);
+  margin: 0 auto;
 }
 .preview-frame[data-window="island"] body,
 .preview-frame[data-window="stray"] body,

@@ -3,6 +3,7 @@ import { randomId } from "./view-utils";
 import type { ConnectionConfig, WorkbenchState } from "../workbench-types";
 import { api } from "../api";
 import { Empty, Icon, IconButton, Modal, Toggle } from "../ui";
+import { Select } from "../controls";
 export function Connections({
   data,
   report,
@@ -114,24 +115,20 @@ export function Connections({
         >
           <label className="form-label">
             Service
-            <select
-              value={edit.kind}
-              onChange={(e) =>
-                setEdit({ ...edit, kind: e.target.value as any })
-              }
-            >
-              {[
-                "github",
-                "vercel",
-                "n8n",
-                "notion",
-                "calcom",
-                "resend",
-                "stripe",
-              ].map((kind) => (
-                <option key={kind}>{kind}</option>
-              ))}
-            </select>
+            <Select
+              label="Service"
+              value={edit.kind || "github"}
+              onChange={(kind) => setEdit({ ...edit, kind: kind as any })}
+              options={[
+                { value: "github", label: "GitHub", icon: "github-logo" },
+                { value: "vercel", label: "Vercel", icon: "triangle" },
+                { value: "n8n", label: "n8n", icon: "flow-arrow" },
+                { value: "notion", label: "Notion", icon: "notion-logo" },
+                { value: "calcom", label: "Cal.com", icon: "calendar-dots" },
+                { value: "resend", label: "Resend", icon: "envelope-simple" },
+                { value: "stripe", label: "Stripe", icon: "stripe-logo" },
+              ]}
+            />
           </label>
           <label className="form-label">
             Name
@@ -306,20 +303,19 @@ export function LocalServer({
       {!!models.length && (
         <label className="form-label">
           Chat model
-          <select
-            aria-label="Local chat model"
+          <Select
+            label="Local chat model"
             value={data.settings.localModel}
-            onChange={(e) =>
-              void api("workbench.settings", {
-                localModel: e.target.value,
-              }).catch((e) => report(e.message))
+            onChange={(localModel) =>
+              void api("workbench.settings", { localModel }).catch((e) =>
+                report(e.message),
+              )
             }
-          >
-            <option value="">Choose a model</option>
-            {models.map((model) => (
-              <option key={model}>{model}</option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "Choose a model" },
+              ...models.map((model) => ({ value: model, label: model, icon: "cpu" })),
+            ]}
+          />
         </label>
       )}
       {data.settings.localModel && (

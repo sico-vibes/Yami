@@ -1,7 +1,8 @@
 import { useState } from "react";
 import type { WorkbenchState } from "../workbench-types";
 import { api } from "../api";
-import { IconButton } from "../ui";
+import { Icon, IconButton } from "../ui";
+import { Select } from "../controls";
 export function Dictation({
   data,
   report,
@@ -36,14 +37,15 @@ export function Dictation({
               recognizer.
             </p>
           </div>
-          <select
-            aria-label="Dictation engine"
+          <Select
+            label="Dictation engine"
             value={data.settings.dictationEngine}
-            onChange={(e) => patch({ dictationEngine: e.target.value })}
-          >
-            <option value="gemini">Gemini</option>
-            <option value="windows">Windows offline</option>
-          </select>
+            onChange={(dictationEngine) => patch({ dictationEngine })}
+            options={[
+              { value: "gemini", label: "Gemini", icon: "sparkle" },
+              { value: "windows", label: "Windows offline", icon: "windows-logo" },
+            ]}
+          />
         </div>
         <div className="setting-row">
           <div>
@@ -71,6 +73,7 @@ export function Dictation({
         </div>
       </div>
       <h3 className="group-title">Dictionary and spoken snippets</h3>
+      <section className="workbench-usage form-card">
       <form
         className="workbench-rule-form"
         onSubmit={(e) => {
@@ -83,14 +86,15 @@ export function Dictation({
             .catch((e) => report(e.message));
         }}
       >
-        <select
-          aria-label="Dictation rule type"
+        <Select
+          label="Dictation rule type"
           value={kind}
-          onChange={(e) => setKind(e.target.value)}
-        >
-          <option value="word">Word replacement</option>
-          <option value="snippet">Spoken snippet</option>
-        </select>
+          onChange={setKind}
+          options={[
+            { value: "word", label: "Word replacement", icon: "swap" },
+            { value: "snippet", label: "Spoken snippet", icon: "text-aa" },
+          ]}
+        />
         <input
           aria-label="Spoken phrase"
           placeholder="When I say…"
@@ -103,18 +107,25 @@ export function Dictation({
           value={replacement}
           onChange={(e) => setReplacement(e.target.value)}
         />
-        <button className="soft-button" disabled={!heard.trim()}>
+        <button className="primary-button" disabled={!heard.trim()}>
+          <Icon name="plus" size={16} />
           Add
         </button>
       </form>
-      <div className="workbench-list">
+      {!data.rules.length && (
+        <p className="form-card-empty">
+          Teach Yami a name it mishears, or a phrase that expands into text.
+        </p>
+      )}
+      <div className="rule-list">
         {data.rules.map((r) => (
-          <div className="workbench-quota" key={r.id}>
-            <span>
-              {r.heard}
-              <small>{r.kind}</small>
+          <div className="rule-row" key={r.id}>
+            <span className="rule-kind">
+              {r.kind === "snippet" ? "Snippet" : "Word"}
             </span>
-            <span>{r.replacement}</span>
+            <span className="rule-heard">“{r.heard}”</span>
+            <Icon name="arrow-right" size={14} />
+            <span className="rule-out">{r.replacement}</span>
             <IconButton
               icon="trash"
               label={`Remove ${r.heard}`}
@@ -127,7 +138,9 @@ export function Dictation({
           </div>
         ))}
       </div>
+      </section>
       <h3 className="group-title">Per-app cleanup</h3>
+      <section className="workbench-usage form-card">
       <p className="setting-note">
         Optional Gemini rewriting after transcription. Verbatim keeps the
         transcript with your dictionary rules. Nothing is rewritten unless you
@@ -155,23 +168,29 @@ export function Dictation({
           value={appName}
           onChange={(e) => setAppName(e.target.value)}
         />
-        <select
-          aria-label="Dictation cleanup style"
+        <Select
+          label="Dictation cleanup style"
           value={mode}
-          onChange={(e) => setMode(e.target.value)}
-        >
-          <option value="verbatim">Verbatim</option>
-          <option value="natural">Natural</option>
-          <option value="polished">Polished</option>
-        </select>
-        <button className="soft-button" disabled={!appName.trim()}>
+          onChange={setMode}
+          options={[
+            { value: "verbatim", label: "Verbatim" },
+            { value: "natural", label: "Natural" },
+            { value: "polished", label: "Polished" },
+          ]}
+        />
+        <button className="primary-button" disabled={!appName.trim()}>
+          <Icon name="plus" size={16} />
           Add app rule
         </button>
       </form>
+      <div className="rule-list">
       {Object.entries(data.settings.cleanup).map(([name, style]) => (
-        <div className="workbench-quota" key={name}>
-          <span>{name}</span>
-          <span>{style}</span>
+        <div className="rule-row" key={name}>
+          <span className="entry-icon">
+            <Icon name="app-window" size={15} />
+          </span>
+          <span className="rule-heard">{name}</span>
+          <span className="rule-kind">{style}</span>
           <IconButton
             icon="trash"
             label={`Remove cleanup for ${name}`}
@@ -183,22 +202,28 @@ export function Dictation({
           />
         </div>
       ))}
+      </div>
+      </section>
       <h3 className="group-title">Last dictation</h3>
-      <p className="workbench-prose">
-        {data.settings.lastDictation ||
-          "Your next completed dictation will appear here."}
-      </p>
-      <button
-        className="soft-button"
-        disabled={!data.settings.lastDictation}
-        onClick={() =>
-          void api("speech.copyLast")
-            .then(() => report("Last dictation copied."))
-            .catch((e) => report(e.message))
-        }
-      >
-        Copy last dictation
-      </button>
+      <section className="workbench-usage last-dictation">
+        <Icon name="quotes" size={20} />
+        <p className={data.settings.lastDictation ? "" : "muted"}>
+          {data.settings.lastDictation ||
+            "Your next completed dictation will appear here."}
+        </p>
+        <button
+          className="soft-button"
+          disabled={!data.settings.lastDictation}
+          onClick={() =>
+            void api("speech.copyLast")
+              .then(() => report("Last dictation copied."))
+              .catch((e) => report(e.message))
+          }
+        >
+          <Icon name="copy" size={16} />
+          Copy
+        </button>
+      </section>
     </>
   );
 }

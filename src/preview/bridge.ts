@@ -4,13 +4,21 @@ import type { WheelMode } from "../wheel/types";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
 import { previewOverlay } from "./overlays";
 import { previewWorkbench } from "./workbench";
+import { islandSize, peekSize } from "../island-bounds";
 let state = createFixture();
 let wheelSample = "image";
 let wheelMode: WheelMode = "convert";
 let previewTool = "tool:background";
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
+  if (event.type === "panel") sizeIsland(islandSize(event.open, event.tab));
   for (const fn of listeners) fn(event);
+}
+// Give the preview island the same size as the real island window.
+function sizeIsland(size: { width: number; height: number }) {
+  const root = document.documentElement.style;
+  root.setProperty("--island-w", size.width + "px");
+  root.setProperty("--island-h", size.height + "px");
 }
 function changed() {
   emit({ type: "state", state: structuredClone(state) });
@@ -298,8 +306,10 @@ export function installPreviewBridge() {
         case "voice.stop":
         case "ability.arm":
         case "shortcuts.capture":
-        case "island.mouse":
         case "island.peek":
+          sizeIsland(a.open ? peekSize : islandSize(false, ""));
+          return true;
+        case "island.mouse":
         case "selection.clear":
           return true;
         case "wheel.session":

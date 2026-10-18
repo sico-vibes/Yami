@@ -31,6 +31,12 @@ In a web preview, a browser-side fixture bridge substitutes for `window.yami`. I
 
 The terminal (`src/TerminalWindow.tsx`) and the AI workspace (`src/workbench/`) load lazily, so xterm.js and the workspace screens cost nothing until they are opened. The file wheel and its tool windows (`src/wheel/`) load only in their own transparent windows.
 
+Shared renderer pieces are small modules. `src/ui.tsx` holds Icon, IconButton, Toggle, Empty and Modal. `src/controls.tsx` holds `Select`, `TooltipLayer`, `StatusChip`, `Meter` and the time helpers `shortTime` and `relativeTime`. `src/status-tone.ts` maps a status word to its colour family and is unit-tested. `src/island-bounds.ts` holds the island window size for the notch, the media card and each drawer tab.
+
+`TooltipLayer` is mounted once in each window that shows tooltips: the main window, the island while its drawer is open, and the terminal. While mounted it listens for pointer, focus, press, key and scroll events; the only timer is a short one-shot delay for the element under the pointer or focus. `Select` draws its menu in a portal on `document.body`, so clipped containers cannot cut it off. It adds window listeners only while its menu is open and removes them when the menu closes.
+
+Stylesheets are split by responsibility. `src/style.css` imports `styles/tokens.css` (every Nightglow value), `base`, `controls`, `home`, `sidebar-pages`, `loadout`, `island`, `drawer-tabs`, `overlays`, `today`, `responsive`, `workbench` and `cards`, in that order. `styles/wheel.css` is imported only by the file-wheel window.
+
 ## Electron main process
 
 `electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. `electron/windows.ts` creates sandboxed windows. `electron/overlays.ts` owns the roaming stray window and the caption window, and labels tool activity for the island using `electron/activity.ts`. `electron/focus-timer.ts` owns the Today focus countdown. The file wheel is a separate transparent window created for one drag or shortcut and destroyed afterwards (`electron/wheel/service.ts`); its scripts load only in that window. The main process coordinates those modules with the native child process and assistant service.
@@ -64,6 +70,10 @@ Sensitive actions are enumerated in [`electron/policy.ts`](../electron/policy.ts
 The main process checks enabled tasks every five seconds and clipboard history every 1.8 seconds. Clipboard polling is skipped when disabled and pauses briefly after Yami writes to the clipboard. The Controls panel refreshes controls/media every six seconds, the island reads its media hint on demand and polls every 15 seconds only while media is active, the focus timer arms one timeout only while running, and Stats refreshes every 2.5 seconds. Stats answers instantly: CPU load and memory come from Node, while GPU (10 s), disks (30 s), process list (8 s) and network (2 s) are refreshed in the background only while Stats keeps asking, and opening the drawer warms them. PowerShell/native-script work is deduplicated while in flight; media results are cached for six seconds while active and 30 seconds while inactive. These are implementation intervals, not performance measurements; see the [performance budgets](performance.md).
 
 When the next scheduled task changes, Yami asks Windows to set or cancel a waitable wake timer. The AI workspace starts no terminal, helper or model at idle, and its usage, connection and transcript timers are opt-in. The file wheel has no process or window at idle. This is a best-effort request: Windows policy and hardware decide whether a sleeping system wakes.
+
+The Nightglow redesign added no interval, polling loop or native query. The continuous background drift on the Soul page is described in [performance](performance.md).
+
+The island window size is computed in `src/island-bounds.ts`. `electron/main.ts` applies it to the real island window, and the browser preview uses the same function to draw its island at true size. The sizes are unchanged in the app.
 
 ## Build layout
 

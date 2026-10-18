@@ -37,15 +37,17 @@ html[data-window="caption"] body {
   top: 14px;
   transform: translateX(-50%);
   max-width: 220px;
-  padding: 7px 11px;
-  border-radius: 12px;
-  background: #0b0c10f0;
-  color: #f4f4f4;
+  padding: 7px 12px;
+  border-radius: 14px;
+  background: rgba(14, 12, 38, 0.95);
+  color: var(--text);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0 6px 18px #0006;
-  animation: bubble-in 0.18s ease-out;
+  box-shadow:
+    inset 0 0 0 1px var(--line-strong),
+    0 8px 22px rgba(4, 2, 22, 0.5);
+  animation: bubble-in 0.26s var(--ease-fluid);
 }
 .stray-bubble:after {
   content: "";
@@ -87,7 +89,7 @@ html[data-window="caption"] body {
 }
 .caption-keys i {
   font-style: normal;
-  color: #f4f4f4cc;
+  color: #f3f1ffcc;
   text-shadow: 0 1px 4px #000a;
 }
 .caption-keys kbd {
@@ -95,45 +97,53 @@ html[data-window="caption"] body {
   font-size: 13px;
   font-weight: 600;
   line-height: 1;
-  color: #f4f4f4;
-  background: #0b0c10ee;
-  border-radius: 9px;
+  color: var(--text);
+  background: rgba(14, 12, 38, 0.94);
+  border-radius: 11px;
   padding: 8px 12px;
   box-shadow:
+    inset 0 0 0 1px var(--line-strong),
     inset 0 -2px 0 #ffffff14,
-    0 4px 14px #0007;
+    0 6px 18px rgba(4, 2, 22, 0.5);
 }
 .caption-pill {
   display: flex;
   align-items: baseline;
   gap: 10px;
   max-width: 720px;
-  padding: 11px 18px;
-  border-radius: 22px;
-  background: #fbfbfdf2;
-  color: #17181c;
+  padding: 12px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #fbfafff5, #efeafff2);
+  color: var(--on-glow);
   font-size: 14px;
   line-height: 1.4;
-  box-shadow: 0 8px 28px #0005;
-  animation: bubble-in-up 0.2s ease-out;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 10px 32px rgba(4, 2, 22, 0.4);
+  animation: bubble-in-up 0.28s var(--ease-fluid);
 }
 .caption-pill b {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8a8d96;
+  color: #7a6fc0;
   flex-shrink: 0;
 }
 .caption-pill .waiting {
-  color: #8a8d96;
+  color: #8a84b0;
 }
 .caption-pill.reply {
-  background: #0b0c10f2;
-  color: #f4f4f4;
+  background:
+    radial-gradient(260px 80px at 0 0, color-mix(in srgb, var(--soul, #b8c6ff) 18%, transparent), transparent),
+    rgba(14, 12, 38, 0.95);
+  color: var(--text);
+  box-shadow:
+    inset 0 0 0 1px var(--line-strong),
+    0 10px 32px rgba(4, 2, 22, 0.5);
 }
 .caption-pill.reply b {
-  color: #9ca7b0;
+  color: var(--glow);
 }
 @keyframes bubble-in-up {
   from {
@@ -148,16 +158,18 @@ html[data-window="caption"] body {
   transform: translateX(-50%);
   width: 200px;
   height: 26px;
-  border-radius: 8px;
-  background: #070707;
+  border-radius: 13px;
+  background: var(--ink-0);
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 9px;
+  padding: 5px 11px;
   font-size: 10px;
-  color: #d9e2e8;
-  box-shadow: 0 2px 5px #0004;
-  animation: bubble-in-up 0.18s ease-out;
+  color: var(--text-soft);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    0 4px 10px rgba(4, 2, 22, 0.4);
+  animation: bubble-in-up 0.24s var(--ease-fluid);
 }
 .island-activity span {
   overflow: hidden;
@@ -165,7 +177,7 @@ html[data-window="caption"] body {
   text-overflow: ellipsis;
 }
 .island-activity i {
-  color: #b8c6ff;
+  color: var(--glow);
 }
 html[data-reduced="true"] .stray-window,
 html[data-reduced="true"] .stray-bubble,
@@ -183,10 +195,11 @@ html[data-reduced="true"] .island-activity {
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: #1e1e21;
-  color: #a9b5c0;
+  padding: 6px 13px;
+  border-radius: var(--r-pill);
+  background: rgba(26, 23, 56, 0.92);
+  border: 1px solid var(--line);
+  color: var(--muted);
   font-size: 10px;
   pointer-events: none;
   z-index: 5;
@@ -211,10 +224,14 @@ html[data-reduced="true"] .island-activity {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 18px;
-  background: linear-gradient(#0d0d10, #050505);
-  box-shadow: 0 6px 18px #0006;
-  animation: peek-grow 0.2s ease-out;
+  border-radius: 22px;
+  background:
+    radial-gradient(220px 90px at 0 50%, rgba(183, 123, 208, 0.18), transparent),
+    linear-gradient(var(--ink-1), var(--ink-0));
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    0 10px 24px rgba(4, 2, 22, 0.5);
+  animation: peek-grow 0.26s var(--ease-fluid);
   transform-origin: 50% 0;
 }
 @keyframes peek-grow {
@@ -227,11 +244,11 @@ html[data-reduced="true"] .island-activity {
   flex-shrink: 0;
   width: 54px;
   height: 54px;
-  border-radius: 12px;
+  border-radius: 14px;
   display: grid;
   place-items: center;
-  color: #f4f4f4;
-  background: linear-gradient(135deg, #6b4b7a, #c27d8f);
+  color: #fff;
+  background: linear-gradient(135deg, #6c5ad6, #b77bd0 55%, #f1a7d6);
 }
 .media-peek-body {
   flex: 1;
@@ -251,7 +268,7 @@ html[data-reduced="true"] .island-activity {
 }
 .media-peek-body > span {
   font-size: 10px;
-  color: #8f8b94;
+  color: var(--muted);
 }
 .media-peek-progress {
   display: flex;
@@ -259,7 +276,7 @@ html[data-reduced="true"] .island-activity {
   gap: 6px;
   margin-top: 4px;
   font-size: 9px;
-  color: #8f8b94;
+  color: var(--muted);
 }
 .media-peek-progress progress {
   appearance: none;
@@ -268,11 +285,11 @@ html[data-reduced="true"] .island-activity {
   border: 0;
 }
 .media-peek-progress progress::-webkit-progress-bar {
-  background: #29292c;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
 }
 .media-peek-progress progress::-webkit-progress-value {
-  background: #c9ad5c;
+  background: var(--grad-aurora);
   border-radius: 4px;
 }
 .media-peek-keys {
@@ -296,13 +313,14 @@ html[data-reduced="true"] .island-activity {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 9px;
-  border-radius: 8px;
-  background: #070707;
-  color: #8da4b4;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--ink-0);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--muted);
   font-size: 9px;
   pointer-events: none;
-  animation: bubble-in-up 0.18s ease-out;
+  animation: bubble-in-up 0.24s var(--ease-fluid);
 }
 html[data-reduced="true"] .media-peek,
 html[data-reduced="true"] .island-scroll-hint {

@@ -17,7 +17,7 @@ const demo: WorkbenchState = {
       detail: "Reviewing a local change (demo)",
       at: Date.now(),
       source: "hook",
-      files: [],
+      files: ["Demo folder/src/App.tsx", "Demo folder/README.md"],
     },
   ],
   usage: [
@@ -34,12 +34,42 @@ const demo: WorkbenchState = {
           label: "5-hour limit",
           used: 0.24,
           resetsAt: Date.now() + 3600000,
-          group: "codex",
+          group: "Demo account",
+        },
+        {
+          id: "codex:weekly",
+          label: "Weekly limit",
+          used: 0.78,
+          resetsAt: Date.now() + 4 * 86400000,
+          group: "Demo account",
+        },
+        {
+          id: "codex:review",
+          label: "Code review",
+          used: 0.93,
+          resetsAt: Date.now() + 2 * 86400000,
+          group: "Demo account",
         },
       ],
     },
   ],
-  history: [],
+  // Synthetic recap events so the timeline has something to show.
+  history: (
+    [
+      ["finished", 3],
+      ["working", 12],
+      ["thinking", 13],
+      ["waiting", 40],
+      ["finished", 320],
+      ["idle", 330],
+    ] as const
+  ).map(([phase, minutes]) => ({
+    session: "demo-codex",
+    agent: "codex",
+    project: "Demo workspace",
+    phase,
+    at: Date.now() - minutes * 60000,
+  })),
 };
 const text = (value: string) => btoa(unescape(encodeURIComponent(value)));
 export function previewWorkbench(

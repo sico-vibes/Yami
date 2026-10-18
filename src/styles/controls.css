@@ -1,0 +1,309 @@
+/* Yami controls: Select, tooltip, status chip, meter, checkbox, disclosure. */
+.select {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  min-width: 120px;
+  max-width: 260px;
+  padding: 0 var(--space-3) 0 14px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  text-align: left;
+}
+.select:hover:not(:disabled) {
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+}
+.select.open {
+  border-color: var(--selected-line);
+  background: var(--surface-3);
+}
+.select-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-caret {
+  color: var(--muted);
+  transition: transform var(--dur) var(--ease-fluid);
+}
+.select.open .select-caret {
+  transform: rotate(180deg);
+}
+.select > i:first-child {
+  color: var(--glow);
+}
+.select-menu {
+  position: fixed;
+  z-index: 80;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: var(--r-md);
+  background:
+    radial-gradient(240px 120px at 0 0, rgba(120, 90, 220, 0.16), transparent 70%),
+    rgba(20, 17, 46, 0.97);
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    var(--highlight),
+    var(--shadow-float);
+  backdrop-filter: var(--blur);
+  font-size: var(--fs-sm);
+  transform-origin: 50% 0;
+  animation: menu-in var(--dur) var(--ease-fluid);
+  scrollbar-width: thin;
+}
+.select-menu.up {
+  transform-origin: 50% 100%;
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 36px;
+  padding: 6px 10px 6px 12px;
+  border-radius: 10px;
+  color: var(--text-soft);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.select-option > span {
+  flex: 1;
+}
+.select-option small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  margin-top: 2px;
+}
+.select-option.active {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.select-option[aria-selected="true"] {
+  color: var(--text);
+  font-weight: 500;
+}
+.select-option[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+.select-check {
+  color: var(--glow);
+}
+.tooltip {
+  position: fixed;
+  z-index: 90;
+  width: max-content;
+  max-width: 240px;
+  padding: 6px 11px;
+  border-radius: 10px;
+  background: rgba(24, 21, 54, 0.97);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 8px 24px rgba(4, 2, 22, 0.5);
+  color: var(--text);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  animation: tip-in 0.14s ease-out;
+}
+.tooltip.below {
+  transform: translate(-50%, 0);
+}
+@keyframes tip-in {
+  from {
+    opacity: 0;
+  }
+}
+/* Status words get a dot and a colour family; the word itself stays. */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px 0 9px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  --tone: var(--faint);
+}
+.status-chip::first-letter {
+  text-transform: uppercase;
+}
+.status-chip > i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 0 8px var(--tone);
+}
+.status-chip[data-tone="active"] {
+  --tone: var(--glow);
+  color: #ddd4ff;
+  background: rgba(188, 170, 255, 0.12);
+  border-color: rgba(188, 170, 255, 0.26);
+}
+.status-chip[data-tone="good"] {
+  --tone: var(--mint);
+  color: #c4f1df;
+  background: rgba(147, 226, 198, 0.1);
+  border-color: rgba(147, 226, 198, 0.22);
+}
+.status-chip[data-tone="attention"] {
+  --tone: var(--moon);
+  color: #f6e3bb;
+  background: rgba(241, 214, 156, 0.1);
+  border-color: rgba(241, 214, 156, 0.22);
+}
+.status-chip[data-tone="problem"] {
+  --tone: var(--danger);
+  color: #ffc9c9;
+  background: rgba(255, 158, 158, 0.1);
+  border-color: rgba(255, 158, 158, 0.22);
+}
+.meter {
+  display: block;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.meter > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--grad-glow);
+  transition: width var(--dur-slow) var(--ease-fluid);
+}
+.meter[data-tone="warm"] > i {
+  background: linear-gradient(90deg, #cdbcff, var(--moon));
+}
+.meter[data-tone="high"] > i {
+  background: linear-gradient(90deg, var(--rose), #ff9e9e);
+}
+/* Checkboxes: a soft rounded square that lights up when checked. */
+input[type="checkbox"] {
+  appearance: none;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border-radius: 6px;
+  border: 1.5px solid var(--faint);
+  background: transparent;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  transition:
+    background var(--dur-fast),
+    border-color var(--dur-fast);
+}
+input[type="checkbox"]:hover {
+  border-color: var(--muted);
+}
+input[type="checkbox"]:checked {
+  border-color: transparent;
+  background: var(--grad-glow);
+}
+input[type="checkbox"]:checked::after {
+  content: "";
+  width: 9px;
+  height: 5px;
+  border: 2px solid var(--on-glow);
+  border-top: 0;
+  border-right: 0;
+  transform: translateY(-1px) rotate(-45deg);
+}
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* Disclosures: a summary row with a turning caret. */
+details > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  border-radius: var(--r-sm);
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+details > summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin: 0 4px 0 2px;
+  border: 1.5px solid currentColor;
+  border-top: 0;
+  border-left: 0;
+  transform: rotate(-45deg);
+  transition: transform var(--dur) var(--ease-fluid);
+  opacity: 0.7;
+}
+details[open] > summary::before {
+  transform: rotate(45deg);
+}
+details > summary:hover {
+  color: var(--text);
+}
+details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .select-menu,
+  .tooltip {
+    animation: none;
+  }
+}
+/* A read-only value in a settings row. */
+.value-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.value-pill i {
+  color: var(--glow);
+}
+/* Date and time fields keep the native picker; its icon takes Yami's tint. */
+input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.75;
+  filter: invert(78%) sepia(30%) saturate(900%) hue-rotate(205deg);
+}
+input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

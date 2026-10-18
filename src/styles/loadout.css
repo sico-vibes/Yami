@@ -1,22 +1,25 @@
 .loadout-page {
   height: 100%;
-  padding: 12px 28px 0;
+  padding: var(--space-5) var(--space-7) 0;
   position: relative;
   min-height: 400px;
 }
 .loadout-page > h2 {
   position: relative;
   z-index: 1;
-  font-size: 18px;
-  margin: 0 4px;
+  font-size: var(--fs-h1);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  margin: 0;
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: var(--space-3);
 }
 .loadout-page > h2 small {
-  font-size: 12px;
+  font-size: var(--fs-body);
+  letter-spacing: 0;
   font-weight: 400;
-  color: #9ca7b0;
+  color: var(--muted);
 }
 /* A blurred, skin-tinted veil behind the hub. */
 .loadout-veil {
@@ -52,13 +55,7 @@
       transparent 45%
     ),
     radial-gradient(ellipse at 82% 86%, #5a3fb026, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, transparent 40%, #070a10cc 100%);
-  animation: veil-drift 24s ease-in-out infinite alternate;
-}
-@keyframes veil-drift {
-  to {
-    transform: translate(18px, -12px) scale(1.05);
-  }
+    radial-gradient(ellipse at 50% 50%, transparent 40%, #08071ccc 100%);
 }
 .loadout-hub {
   position: relative;
@@ -99,12 +96,12 @@
   position: absolute;
   inset: 10px;
   border-radius: 50%;
-  border: 1px solid #ffffff14;
+  border: 1px solid rgba(188, 170, 255, 0.16);
   pointer-events: none;
 }
 .soul-orbit:after {
   inset: -18px;
-  border-color: #ffffff0a;
+  border-color: rgba(188, 170, 255, 0.08);
 }
 .loadout-node {
   position: absolute;
@@ -115,10 +112,10 @@
   gap: 10px;
   min-width: 128px;
   padding: 9px 14px 9px 9px;
-  background: #ffffff0f;
-  backdrop-filter: blur(14px) saturate(1.3);
-  border: 1px solid #ffffff1f;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--line-strong);
+  border-radius: 18px;
   box-shadow:
     inset 0 1px 0 #ffffff14,
     0 8px 24px #0006;
@@ -156,11 +153,8 @@
 .loadout-node small {
   display: block;
   font-size: 9px;
-  color: #a7b3bf;
+  color: var(--muted);
   margin-top: 2px;
-}
-html[data-reduced="true"] .loadout-veil:after {
-  animation: none;
 }
 .picker-head {
   display: flex;
@@ -172,15 +166,16 @@ html[data-reduced="true"] .loadout-veil:after {
   font-size: 21px;
 }
 .embers {
-  background: #b9902922;
-  color: #f0dca4;
+  background: rgba(241, 214, 156, 0.12);
+  border: 1px solid rgba(241, 214, 156, 0.24);
+  color: var(--moon);
   border-radius: 20px;
   padding: 6px 13px;
   font-size: 11px;
   font-weight: 600;
 }
 .picker-head .icon-button {
-  background: #ffffff08;
+  background: var(--surface-1);
 }
 .card-stage {
   position: relative;
@@ -200,7 +195,7 @@ html[data-reduced="true"] .loadout-veil:after {
 .loadout-card {
   position: absolute;
   inset: 0;
-  border-radius: 26px;
+  border-radius: 28px;
   transform-origin: 20% 100%;
   display: flex;
   align-items: center;
@@ -214,9 +209,10 @@ html[data-reduced="true"] .loadout-veil:after {
       color-mix(in srgb, var(--tint) 24%, transparent),
       #ffffff0a
     ),
-    linear-gradient(#ffffff0c, #ffffff03), #2b241b;
+    linear-gradient(#ffffff0e, #ffffff03), #191536;
   box-shadow:
-    0 4px 8px -2px #0003,
+    inset 0 1px 0 #ffffff14,
+    0 6px 14px -4px #0005,
     0 2px 3px #0001;
   transition:
     transform 0.6s var(--ease),
@@ -225,7 +221,8 @@ html[data-reduced="true"] .loadout-veil:after {
 }
 .loadout-card[data-active="true"] {
   box-shadow:
-    inset 0 0 0 1.5px #e6c07a9c,
+    inset 0 0 0 1.5px rgba(188, 170, 255, 0.7),
+    0 0 30px rgba(188, 170, 255, 0.18),
     0 8px 30px #0002;
 }
 .loadout-card:not([data-front="true"]) > * {
@@ -240,7 +237,7 @@ html[data-reduced="true"] .loadout-veil:after {
   flex-shrink: 0;
 }
 .card-art .ph-lock-simple {
-  color: #99988e88;
+  color: #a49fc688;
 }
 .loadout-card h3 {
   font-size: 23px;
@@ -248,15 +245,16 @@ html[data-reduced="true"] .loadout-veil:after {
   margin: 13px 0 5px;
 }
 .rarity {
-  color: #aaa9a0;
+  color: var(--text-soft);
   font-size: 9px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   border-radius: 20px;
   padding: 3px 10px;
   background: #ffffff12;
 }
 .loadout-card p {
-  color: #b2b1ab;
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
   margin-top: 9px;
@@ -267,16 +265,16 @@ html[data-reduced="true"] .loadout-veil:after {
   width: 100%;
   min-height: 39px;
   flex-shrink: 0;
-  border-radius: 13px;
+  border-radius: var(--r-pill);
   font-size: 11px;
   font-weight: 600;
-  background: #ffffff12;
-  color: #b3b0a5;
+  background: var(--surface-3);
+  color: var(--text-soft);
   margin-top: 12px;
 }
 .loadout-card > button.buy-button {
-  background: #c9ad5c;
-  color: #251d0d;
+  background: linear-gradient(135deg, #f6e2b4, #e9c27f);
+  color: #2a1d08;
 }
 .loadout-card button:disabled {
   opacity: 0.65;
@@ -293,10 +291,10 @@ html[data-reduced="true"] .loadout-veil:after {
 }
 .deck-controls span {
   font-size: 12px;
-  color: #a8a7a0;
+  color: var(--muted);
 }
 .deck-controls .icon-button {
-  background: #ffffff08;
+  background: var(--surface-1);
 }
 .trigger-row {
   position: absolute;
@@ -310,11 +308,11 @@ html[data-reduced="true"] .loadout-veil:after {
 }
 .trigger-row p {
   font-size: 10px;
-  color: #9c9c9c;
+  color: var(--muted);
   margin-top: 8px;
 }
 .trigger-row .soft-button {
-  border-radius: 8px;
+  border-radius: var(--r-pill);
   min-width: 80px;
   padding: 7px;
 }
@@ -328,87 +326,122 @@ html[data-reduced="true"] .loadout-veil:after {
 }
 .memory-page,
 .plans-page {
-  max-width: 1100px;
+  max-width: calc(var(--page-max) + 2 * var(--space-7));
   margin: auto;
-  padding: 25px 40px;
+  padding: var(--space-5) var(--space-7) 0;
 }
 .count-badge {
-  font-size: 12px;
-  color: #98bbd4;
-  background: #8dccff12;
-  border-radius: 20px;
-  padding: 8px 13px;
+  font-size: var(--fs-xs);
+  color: var(--glow);
+  background: var(--selected);
+  border: 1px solid var(--selected-line);
+  border-radius: var(--r-pill);
+  padding: 7px 13px;
+  flex-shrink: 0;
 }
 .memory-page > .search-field {
-  margin-bottom: 20px;
+  margin-bottom: var(--space-3);
 }
 .memory-form {
   display: flex;
-  gap: 10px;
+  gap: var(--space-2);
 }
 .memory-form > input {
   flex: 1;
 }
 .memory-list {
-  margin-top: 25px;
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
 }
 .memory-page > .setting-note {
   text-align: center;
+  margin-top: var(--space-5);
 }
 .memory-row {
   display: flex;
-  gap: 15px;
+  gap: var(--space-4);
   align-items: center;
-  border-bottom: 1px solid var(--line);
-  padding: 17px 5px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  box-shadow: var(--highlight);
+  border-radius: var(--r-md);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
+  min-height: 56px;
 }
 .memory-row > i {
-  color: #8dccff;
+  color: var(--glow);
 }
 .memory-row > p {
   flex: 1;
-  color: #c8d5de;
-  font-size: 14px;
+  color: var(--text-soft);
+  font-size: var(--fs-body);
 }
+/* Desk: a card column on the left, the calendar card on the right. */
 .desk-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 285px;
-  gap: 28px;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: var(--space-6);
+  align-items: start;
+}
+.desk-grid > div {
+  display: grid;
+  gap: var(--stack-gap);
 }
 .desk-section {
-  margin-bottom: 27px;
+  padding: var(--card-pad);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
 }
 .desk-section h2 {
-  font-size: 17px;
-  margin-bottom: 15px;
+  display: flex;
+  align-items: baseline;
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  margin-bottom: var(--space-3);
 }
 .desk-section h2 small {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 400;
-  margin-left: 7px;
+  margin-left: var(--space-2);
+}
+.desk-section .empty {
+  padding: var(--space-5) var(--space-4) var(--space-3);
+}
+.desk-grid aside {
+  display: grid;
+  gap: var(--space-3);
+}
+.desk-grid aside .setting-note {
+  margin: 0 var(--space-2);
 }
 .inline-form {
   display: flex;
-  gap: 5px;
-  border-bottom: 1px solid #ffffff0a;
-  padding-bottom: 9px;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 .inline-form input {
   flex: 1;
-  font-size: 12px;
-  padding: 9px 11px;
-  background: #ffffff04;
+  font-size: var(--fs-sm);
+  padding: 9px 14px;
+  border-radius: var(--r-pill);
 }
 .inline-form .icon-button {
-  width: 30px;
-  height: 33px;
+  width: 34px;
+  height: 34px;
+  background: var(--surface-2);
 }
 .todo-row {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 6px 2px;
-  font-size: 13px;
+  gap: var(--space-3);
+  padding: 6px var(--space-1);
+  min-height: 40px;
+  font-size: var(--fs-sm);
+  border-radius: var(--r-sm);
 }
 .todo-row > span {
   flex: 1;
@@ -424,27 +457,31 @@ html[data-reduced="true"] .loadout-veil:after {
 .check-circle {
   width: 17px;
   height: 17px;
-  border: 1.5px solid #71818c;
+  border: 1.5px solid var(--faint);
   border-radius: 50%;
   display: grid;
   place-items: center;
   padding: 0;
 }
 .check-circle.checked {
-  background: #8dccff;
-  border-color: #8dccff;
-  color: #122736;
+  background: var(--grad-glow);
+  border-color: transparent;
+  color: var(--on-glow);
 }
 .done {
   text-decoration: line-through;
-  color: #7f939f;
+  color: var(--faint);
 }
 .plan-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
   border-bottom: 1px solid var(--line);
+}
+.plan-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 .plan-row > div {
   flex: 1;
@@ -457,22 +494,24 @@ html[data-reduced="true"] .loadout-veil:after {
 .plan-row p,
 .plan-row small {
   font-size: 11px;
-  color: #8ba0af;
+  color: var(--muted);
   margin-top: 4px;
 }
 .plan-icon {
   width: 33px;
   height: 33px;
-  border-radius: 10px;
-  background: #8dccff0e;
+  border-radius: 12px;
+  background: var(--selected);
   display: grid;
   place-items: center;
-  color: #9bb9d0;
+  color: var(--glow);
 }
 .calendar {
-  border-radius: 20px;
-  background: #ffffff04;
-  padding: 17px;
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+  padding: var(--card-pad) var(--space-4);
 }
 .calendar-head {
   display: flex;
@@ -497,7 +536,7 @@ html[data-reduced="true"] .loadout-veil:after {
 }
 .calendar-grid > small {
   padding: 10px 0;
-  color: #8394a2;
+  color: var(--faint);
   font-size: 10px;
 }
 .calendar-grid button {
@@ -507,14 +546,16 @@ html[data-reduced="true"] .loadout-veil:after {
   min-height: 25px;
 }
 .calendar-grid button.today {
-  background: #8dccff;
-  color: #102130;
+  background: var(--grad-glow);
+  color: var(--on-glow);
+  font-weight: 500;
+  box-shadow: 0 4px 14px rgba(160, 150, 255, 0.3);
 }
 .calendar-grid button > i {
   position: absolute;
   width: 3px;
   height: 3px;
-  background: #8dccff;
+  background: var(--rose);
   border-radius: 50%;
   bottom: 2px;
   left: 50%;

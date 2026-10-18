@@ -6,6 +6,8 @@ Adaptation brings an existing feature into Yami with the same functional end res
 
 Extend existing tabs, dock and utility navigation, settings groups and rows, `IconButton`, `Toggle`, fields, dialogs, status pills and empty/error states. Reuse Rubik, Phosphor, Yami's tokens, spacing, rounded geometry, hover/focus treatments and reduced-motion behavior. A new feature can add a new tab or control by following these patterns; it must not introduce a second visual system. Reuse implementation as well as appearance where possible. See [Design system](reference/design-system.md).
 
+For a new screen or control, start from the reusable components listed in the design system: page head, setting group, entry and form cards, tiles, `Select`, `StatusChip`, `Meter`, `IconButton` and `Toggle`. Use `Select` instead of a native `<select>`, and give its options readable labels while keeping the stored values unchanged. Give icon-only buttons a label; the tooltip layer shows it through `data-tip`.
+
 ## Preserve the behavior
 
 Before implementing, record the upstream repository and revision, the exact feature being adapted, its inputs and outputs, backend/API contracts, state transitions, persistence, side effects, streaming/cancellation, failure and recovery behavior, and the end-to-end result. Map each behavior to the Yami control or screen that exposes it.

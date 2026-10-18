@@ -36,6 +36,12 @@ These are proposed design choices inferred from the upstream examples, not measu
 
 The selected terminal, local notes, Windows dictation, AI workspace and file wheel are on `main`. See the [AI workspace and terminal guide](workspace.md) and the [File wheel guide](file-wheel.md) for scope and verification. Still open: live account and service checks, installed agent CLI compatibility, audio device testing, the Windows drag check, GPU terminal rendering, WSL and panes, a bundled Whisper-class model, a mobile relay, automatic MCP tools, OCR, and full IDE features.
 
+**Nightglow gaps (open, 2026-10-18).** The Nightglow redesign is on `main` and was checked only in the browser preview at 1160×790 and 850×610. Still open:
+
+- The native date and time picker in Plans is still the Windows control; only its icon is tinted.
+- Nightglow has not been run in the packaged Windows app.
+- Idle memory has not been re-measured since the redesign.
+
 A roadmap idea should move into shipped documentation only after its code, settings, permission behavior, privacy impact, platform support, tests or manual verification, and asset/dependency licensing are available in the repository. Preserve local user data and provider keys during changes. State platform limits and provider costs/quotas directly.
 
 Named upstream feature adaptations must also follow the [adaptation rules](adaptation.md): preserve the selected feature's backend/operating semantics and prove parity through Yami's existing design language. The [Coucou, Terax and CodeNotch review](research/adaptation-review.md) records pinned sources, the proposed scope, and the Windows checks that remain open.

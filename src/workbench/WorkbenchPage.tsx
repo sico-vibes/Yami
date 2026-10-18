@@ -10,6 +10,7 @@ import { ContextView } from "./Context";
 import { WorkspaceSettings } from "./WorkspaceSettings";
 import { Mcp } from "./Mcp";
 import { Icon } from "../ui";
+import { Meter, relativeTime, StatusChip } from "../controls";
 import { api } from "../api";
 const pages = [
   ["Sessions", "robot"],
@@ -90,45 +91,92 @@ export default function WorkbenchPage({
       )}
       <section className={compact ? "" : "settings-content"} key={page}>
         {compact ? (
-          <>
-            <div className="workbench-entry-title">
-              <strong>Agent activity</strong>
-              <button
-                className="text-button"
-                onClick={() => void api("show", { tab: "ai" })}
-              >
-                Open AI workspace
-              </button>
+          <div className="drawer-ai">
+            <section className="drawer-card drawer-ai-sessions">
+              <h3>
+                Agent activity
+                <small>
+                  {data.sessions.length
+                    ? `${data.sessions.length} ${data.sessions.length === 1 ? "session" : "sessions"}`
+                    : "Quiet"}
+                </small>
+              </h3>
+              {data.sessions.length ? (
+                <div className="drawer-ai-list">
+                  {data.sessions
+                    .slice(-5)
+                    .reverse()
+                    .map((s) => (
+                      <div className="drawer-ai-row" key={s.id}>
+                        <span className="entry-icon">
+                          <Icon
+                            name={s.phase === "waiting" ? "hand" : "terminal-window"}
+                            size={16}
+                          />
+                        </span>
+                        <div className="entry-heading">
+                          <strong>{s.project}</strong>
+                          <small>
+                            {s.agent} · {s.detail} · {relativeTime(s.at)}
+                          </small>
+                        </div>
+                        <StatusChip status={s.phase} />
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="drawer-ai-empty">
+                  <Icon name="robot" size={28} />
+                  <p>Connect your CLIs from the AI workspace to see activity here.</p>
+                </div>
+              )}
+            </section>
+            <div className="drawer-ai-side">
+              <section className="drawer-card drawer-ai-actions">
+                <button
+                  className="primary-button"
+                  onClick={() =>
+                    void api("terminal.open").catch((e) => report(e.message))
+                  }
+                >
+                  <Icon name="terminal-window" size={18} />
+                  Open Yami Terminal
+                </button>
+                <button
+                  className="soft-button"
+                  onClick={() => void api("show", { tab: "ai" })}
+                >
+                  <Icon name="arrow-square-out" size={16} />
+                  Open AI workspace
+                </button>
+              </section>
+              <section className="drawer-card">
+                <h3>Allowance</h3>
+                {data.usage.some((r) => r.windows.length) ? (
+                  data.usage
+                    .flatMap((r) =>
+                      r.windows.map((w) => ({ ...w, provider: r.provider })),
+                    )
+                    .slice(0, 3)
+                    .map((w) => (
+                      <div className="drawer-meter" key={w.provider + w.id + w.group}>
+                        <span>
+                          {w.provider} · {w.label}
+                          <b>
+                            {w.used === null ? "—" : `${Math.round(w.used * 100)}%`}
+                          </b>
+                        </span>
+                        <Meter value={w.used} label={`${w.provider} ${w.label} used`} />
+                      </div>
+                    ))
+                ) : (
+                  <p className="setting-note">
+                    Read your plan limits from Usage in the AI workspace.
+                  </p>
+                )}
+              </section>
             </div>
-            {data.sessions.length ? (
-              data.sessions
-                .slice(-5)
-                .reverse()
-                .map((s) => (
-                  <div className="workbench-quota" key={s.id}>
-                    <span>
-                      {s.project}
-                      <small>
-                        {s.agent} · {s.detail}
-                      </small>
-                    </span>
-                    <span className="workbench-state">{s.phase}</span>
-                  </div>
-                ))
-            ) : (
-              <p className="setting-note">
-                Connect your CLIs from the AI workspace to see activity here.
-              </p>
-            )}
-            <button
-              className="soft-button"
-              onClick={() =>
-                void api("terminal.open").catch((e) => report(e.message))
-              }
-            >
-              Open Yami Terminal
-            </button>
-          </>
+          </div>
         ) : (
           content
         )}

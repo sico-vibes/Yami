@@ -11,8 +11,8 @@ talks through the user's own Gemini key, dictates, circles things on screen and
 runs local Windows utilities. Read this whole file before changing anything,
 then open the reference files you need:
 
-- `references/design-language.md` — colours, type, shapes, motion and the Yami
-  character rules. Read before any UI work.
+- `references/design-language.md` — the Nightglow tokens, component rules,
+  layout, motion and the Yami character rules. Read before any UI work.
 - `references/recipes.md` — step-by-step recipes (new setting, IPC request,
   window, model tool, skin, utility tab, native call) and known pitfalls.
 - `../../../Documentation/adaptation.md` — adaptation rules and the required
@@ -88,7 +88,10 @@ src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   yami/            YamiSpirit.tsx (renderer), motion.ts (pure maths), skins.ts, features.ts
   shared.ts        State/Settings types   default-settings.ts   migrations.ts
   ui.tsx           Icon, IconButton, Toggle, Modal, useYami, Spirit re-export
-  styles/          base, island, loadout, overlays, today, responsive (.css)
+  controls.tsx     Select, TooltipLayer, StatusChip, Meter, shortTime/relativeTime
+  status-tone.ts   status word → colour family (tested)   island-bounds.ts  island size per tab
+  styles/          tokens (Nightglow design tokens), base, controls, home, sidebar-pages,
+                   cards, loadout, island, drawer-tabs, overlays, today, responsive, workbench, wheel
   workbench/       lazy AI workspace; TerminalWindow.tsx lazy xterm.js/fit renderer
   wheel/           file-wheel window, tool windows, catalogue, gesture rules (own transparent windows)
   preview/         browser-only fixture bridge for `npm run preview:web`
