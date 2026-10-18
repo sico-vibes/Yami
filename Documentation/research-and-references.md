@@ -14,6 +14,21 @@ The [feature recommendations note](research/feature-recommendations-2026-10-18.m
 
 These are ideas, not dependencies. Yami copies no code, artwork, or wording from them.
 
+## Desk shell, dock, widget, and folder references (2026-10-18)
+
+The [feature recommendations note](research/feature-recommendations-2026-10-18.md) sections 2 and 4 record these sources, checked on 2026-10-18:
+
+- [end4-pC](https://github.com/pctrade/end4-pC) — a personal fork of illogical-impulse with a bar, a launcher, widgets, and presets. The [GitHub API](https://api.github.com/repos/pctrade/end4-pC) reports GPL-3.0.
+- [illogical-impulse (dots-hyprland)](https://github.com/end-4/dots-hyprland) — the upstream Hyprland shell, with an overview, sidebars, AI, and translation. GPL-3.0.
+- [Flairy: Custom Folder Icons](https://apps.apple.com/us/app/flairy-custom-folder-icons/id6785116899?mt=12) — a free Mac app for folder icons. Its features were read from the App Store listing.
+- [SHAppBarMessage](https://learn.microsoft.com/en-us/windows/desktop/api/Shellapi/nf-shellapi-shappbarmessage) and [Shell messages](https://learn.microsoft.com/en-gb/windows/win32/shell/messages) — app bar reservation of a screen edge.
+- [GHacks on third-party widgets](https://www.ghacks.net/?p=181162) and [BetaNews on third-party widgets](https://betanews.com/2022/10/06/windows-11-build-25217-third-party-widgets/) — preview-era coverage of the Windows Widgets board. Check Microsoft Learn for current requirements.
+- [Windows Mode on Rainmeter skins](https://www.windowsmode.com/?p=45807) — skins and their scripting.
+- [Customizing Icons (MSDN archive)](https://msdn2.microsoft.com/en-us/library/bb776856(v=vs.85)) and [WinHelpOnline on folder icons](https://www.winhelponline.com/blog/shell-folders-are-displayed-with-the-standard-folder-icon-in-windows/) — the folder icon mechanism.
+- [Omarchy Dynamic Island](https://github.com/Arjun010011/omarchy-dynamic-island) — MIT; a Linux island with an activity model.
+
+These are ideas and platform references. Yami copies no code, artwork, or wording from them.
+
 Research links used to inform this documentation and its comparison notes. External pages can change after the date checked; links point to upstream projects and providers rather than copied snapshots.
 
 ## Documentation structure
