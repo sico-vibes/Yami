@@ -15,6 +15,7 @@ import {
 } from "electron";
 import { spawn } from "node:child_process";
 import { runPowerShell, nativeScript } from "./platform";
+import { createWheel } from "./wheel/service";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
@@ -45,6 +46,7 @@ protocol.registerSchemesAsPrivileged([
 if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
 let store: Store, native: Native, assistant: Assistant;
+let wheel: ReturnType<typeof createWheel> | undefined;
 let main: BrowserWindow,
   island: BrowserWindow,
   lasso: BrowserWindow | undefined,
@@ -652,6 +654,7 @@ async function effect(kind: string, before?: any, after?: any) {
   });
 }
 async function nativeEvent(e: any) {
+  if (wheel?.onNative(e)) return;
   if (e.eventName === "foreground") {
     const aliases: Record<string, string> = {
       chrome: "Google Chrome",
@@ -749,7 +752,9 @@ async function controls() {
 const weather = () => readWeather(store, assetRoot);
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on("second-instance", () => showMain());
+  app.on("second-instance", (_event, argv) => {
+    if (!wheel?.acceptArgv(argv)) showMain();
+  });
   app
     .whenReady()
     .then(async () => {
@@ -836,6 +841,14 @@ else {
       island.setAlwaysOnTop(true, "floating");
       island.setIgnoreMouseEvents(true, { forward: true });
       island.once("ready-to-show", () => island.showInactive());
+      wheel = createWheel({
+        makeWindow,
+        broadcast,
+        notify,
+        native,
+        getSettings: () => store.state.settings,
+        getWallpapers: () => store.state.wallpapers,
+      });
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))
         .resize({ width: 20, height: 20 });
@@ -845,6 +858,7 @@ else {
         Menu.buildFromTemplate([
           { label: "Open Yami", click: () => showMain() },
           { label: "Settings", click: () => showMain("settings") },
+          ...(wheel?.trayItems() || []),
           { type: "separator" },
           {
             label: "Quit Yami",
@@ -940,6 +954,7 @@ else {
         set panelOpen(value) {
           panelOpen = value;
         },
+        wheel: (method, args, sender) => wheel!.handle(method, args, sender),
       });
       ipcMain.handle("yami:invoke", async (event, method, args) => {
         if (

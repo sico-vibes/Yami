@@ -11,6 +11,10 @@ import { Effects } from "./Effects";
 const mode = new URLSearchParams(location.search).get("window") || "main";
 document.documentElement.dataset.window = mode;
 function renderDesktop() {
+  if (mode === "wheel" || mode === "shelf" || mode === "tool" || mode === "float") {
+    void import("./wheel/entry").then((entry) => entry.mountWheel(mode));
+    return;
+  }
   createRoot(document.getElementById("root")!).render(
     mode === "island" ? (
       <Island />

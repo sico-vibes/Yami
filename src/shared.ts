@@ -29,6 +29,13 @@ export type Settings = {
   ability: string;
   abilityButton: string;
   customPersonality: string;
+  fileWheelEnabled: boolean;
+  fileWheelConvert: string;
+  fileWheelTools: string;
+  fileWheelActions: string;
+  fileWheelHotkey: string;
+  fileWheelReveal: boolean;
+  fileWheelSound: boolean;
 };
 export type Task = {
   id: string;
@@ -96,6 +103,7 @@ declare global {
     yami: {
       invoke: (method: string, args?: any) => Promise<any>;
       on: (callback: (event: YamiEvent) => void) => () => void;
+      filePath?: (file: File) => string;
     };
   }
 }

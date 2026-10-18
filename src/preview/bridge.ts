@@ -1,6 +1,11 @@
 import type { YamiEvent, State } from "../shared";
+import { PREVIEW_SAMPLES } from "../wheel/catalog";
+import type { WheelMode } from "../wheel/types";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
 let state = createFixture();
+let wheelSample = "image";
+let wheelMode: WheelMode = "convert";
+let previewTool = "tool:background";
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
   for (const fn of listeners) fn(event);
@@ -8,8 +13,40 @@ export function emit(event: YamiEvent) {
 function changed() {
   emit({ type: "state", state: structuredClone(state) });
 }
+function previewNames(tool: string) {
+  if (tool === "tool:merge" || tool === "tool:organize" || tool === "tool:pdf-split")
+    return ["notes.pdf", "extra.pdf"];
+  if (tool === "tool:join") return ["one.mp4", "two.mp4"];
+  if (tool.startsWith("tool:video") || tool === "tool:speed" || tool === "tool:snapshots" || tool === "tool:split")
+    return ["clip.mp4"];
+  if (["tool:trim", "tool:normalize", "tool:channels", "tool:bleep", "tool:visualizer"].includes(tool))
+    return ["voice.wav"];
+  if (tool === "tool:collage") return ["grove.png", "second.png"];
+  return ["grove.png"];
+}
+
 function toast(message: string) {
   emit({ type: "toast", message });
+}
+function wheelSession() {
+  const sample =
+    PREVIEW_SAMPLES.find((item) => item.id === wheelSample) || PREVIEW_SAMPLES[0];
+  return {
+    id: "preview-wheel",
+    mode: wheelMode,
+    source: "hotkey",
+    files: sample.names.map((name) => ({
+      path: `preview://${encodeURIComponent(name)}`,
+      name,
+      size: 2306867,
+      ext: name.includes(".") ? name.split(".").pop() : "",
+    })),
+    hint: "Preview only. Nothing is written to disk.",
+    sound: state.settings.fileWheelSound,
+    reducedMotion: state.settings.reducedMotion,
+    x: 0,
+    y: 0,
+  };
 }
 export function resetPreview() {
   state = createFixture();
@@ -22,6 +59,9 @@ export function installPreviewBridge() {
       return () => {
         listeners.delete(callback);
       };
+    },
+    filePath(file: File) {
+      return `preview://${encodeURIComponent(file.name)}`;
     },
     async invoke(method, args = {}) {
       const a = args;
@@ -238,6 +278,101 @@ export function installPreviewBridge() {
         case "island.mouse":
         case "selection.clear":
           return true;
+        case "wheel.session":
+          return wheelSession();
+        case "wheel.caps":
+          return { heicEncode: false };
+        case "wheel.float.get":
+          return {
+            files: [
+              {
+                path: "preview://grove.png",
+                name: "grove.png",
+                size: 2306867,
+                ext: "png",
+              },
+            ],
+          };
+        case "wheel.float.close":
+          toast("Preview closed the float shelf.");
+          return true;
+        case "wheel.swap":
+          wheelMode = a.mode || wheelMode;
+          emit({ type: "wheel-session", session: wheelSession() });
+          return wheelSession();
+        case "wheel.sample":
+          wheelSample = String(a.id || wheelSample);
+          emit({ type: "wheel-session", session: wheelSession() });
+          return wheelSession();
+        case "wheel.close":
+          toast("Preview closed the wheel.");
+          return true;
+        case "wheel.choose":
+          toast(
+            `Preview only — ${String(a.petalId || "that petal")} was not applied.`,
+          );
+          return { accepted: false, preview: true, petalId: a.petalId };
+        case "wheel.fail":
+          toast(String(a.message || "Preview wheel error"));
+          return true;
+        case "wheel.sendTo":
+          toast("Preview only — the Windows Send to menu was not changed.");
+          return false;
+        case "wheel.shelf":
+        case "wheel.shelf.drop":
+          toast("Preview only — the drop shelf does not receive real files.");
+          return false;
+        case "wheel.configure":
+          return true;
+        case "wheel.tool.get":
+          return {
+            tool: previewTool,
+            files: previewNames(previewTool).map((name) => ({
+              path: `preview://${encodeURIComponent(name)}`,
+              name,
+              size: 2306867,
+              ext: name.split(".").pop(),
+            })),
+          };
+        case "wheel.tool.sample":
+          previewTool = String(a.tool || previewTool);
+          return true;
+        case "wheel.tool.apply":
+          toast(`Preview only — ${String(a.tool || "the tool")} was not saved.`);
+          return { preview: true, outputs: ["grove Background.png"] };
+        case "wheel.preview":
+          return "";
+        case "wheel.metadata":
+          return [
+            { tag: "EXIF:Artist", value: "Preview" },
+            { tag: "EXIF:Copyright", value: "Example only" },
+          ];
+        case "wheel.backgrounds":
+          return [1, 2, 3].map((n) => ({
+            id: `starter-${n}`,
+            url: `/wallpapers/starter-0${n}.jpg`,
+          }));
+        case "wheel.engines":
+          return [
+            ["ffmpeg", "9.0.2"],
+            ["magick", "7.1.2-34"],
+            ["sevenZip", "26.04"],
+            ["sevenExtra", "26.04"],
+            ["exiftool", "13.59"],
+          ].map(([id, version]) => ({
+            id,
+            version,
+            license: "See the file wheel notes",
+            installed: false,
+          }));
+        case "wheel.engines.install":
+          toast("Preview only — engines are not downloaded.");
+          return false;
+        case "wheel.pdf.info":
+          return { pages: 3 };
+        case "wheel.copyText":
+          toast("Preview only — text was not copied to the desktop clipboard.");
+          return false;
         default:
           throw new Error(`Desktop-only action: ${method}`);
       }

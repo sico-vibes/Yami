@@ -19,6 +19,8 @@ const screens = [
   "Apps",
   "Wallpaper",
   "Power",
+  "File wheel",
+  "Background",
 ];
 function Preview() {
   const requested =
@@ -65,7 +67,7 @@ function Preview() {
         </span>
       </div>
       <div
-        className={`preview-stage ${island ? "preview-island" : "preview-main"}`}
+        className={`preview-stage ${screen === "File wheel" ? "preview-wheel" : screen === "Background" ? "preview-tool" : island ? "preview-island" : "preview-main"}`}
       >
         <iframe
           ref={frame}
@@ -81,11 +83,21 @@ export function startPreview() {
   const params = new URLSearchParams(location.search);
   if (params.get("stage") === "1") {
     const screen = params.get("screen") || "Home",
-      utility = screens.indexOf(screen) >= 6,
+      utility =
+        screens.indexOf(screen) >= 6 &&
+        screen !== "File wheel" &&
+        screen !== "Background",
       island = utility || screen === "Island";
-    document.documentElement.dataset.window = island ? "island" : "main";
+    document.documentElement.dataset.window =
+      screen === "File wheel" ? "wheel" : screen === "Background" ? "tool" : island ? "island" : "main";
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
+    if (screen === "File wheel" || screen === "Background") {
+      void import("../wheel/entry").then((entry) =>
+        entry.mountWheel(screen === "Background" ? "tool" : "wheel"),
+      );
+      return;
+    }
     createRoot(document.getElementById("root")!).render(
       island ? <Island /> : <App />,
     );

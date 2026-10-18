@@ -44,7 +44,8 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `electron/preload.ts` — narrow renderer bridge.
 - `electron/store.ts` — local persistent state and encrypted credentials.
 - `native/Host.cs` — Windows message-line host and Win32/UI Automation actions.
-- `native/Media.ps1`, `native/Radios.ps1` — Windows helpers.
+- `native/Wheel.cs` — drag-and-tap wheel hook and file-wheel hotkey.
+- `native/Media.ps1`, `native/Radios.ps1`, `native/ExplorerSelection.ps1`, `native/SendToLink.ps1` — Windows helpers.
 - `tests/` — unit and integration fixtures.
 - `scripts/` — build, startup, verification, icon, and fixture commands.
 
