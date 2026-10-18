@@ -27,4 +27,11 @@ export const defaults: Settings = {
   ability: "",
   abilityButton: "M1",
   customPersonality: "",
+  fileWheelEnabled: true,
+  fileWheelConvert: "Shift",
+  fileWheelTools: "Ctrl",
+  fileWheelActions: "Alt",
+  fileWheelHotkey: "Ctrl+Alt+Y",
+  fileWheelReveal: false,
+  fileWheelSound: false,
 };

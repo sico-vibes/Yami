@@ -73,6 +73,14 @@
   height: 100%;
   width: 100%;
 }
+.preview-wheel {
+  width: 720px;
+  height: 720px;
+  background:
+    radial-gradient(420px 280px at 18% 12%, rgba(141, 204, 255, 0.2), transparent 70%),
+    radial-gradient(380px 260px at 84% 88%, rgba(201, 173, 92, 0.16), transparent 72%),
+    linear-gradient(165deg, #1a242c, #12181d 58%, #171624);
+}
 .preview-island {
   width: 960px;
   min-height: 650px;

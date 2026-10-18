@@ -29,3 +29,7 @@ Community sources are context, not controlled measurements or official product r
 - [Hacker News discussion: Windows native app development](https://news.ycombinator.com/item?id=47475938)
 
 No RAM numbers from these threads are treated as evidence. Yami’s own resource budgets require the repeatable process-tree method documented in [Performance goals](performance.md).
+
+## File wheel technique
+
+The Windows drag wheel was informed by public projects: [Hyoi](https://github.com/hibara/Hyoi) (MIT), [Holdem](https://github.com/iamzubin/holdem) (MIT), [Wedge](https://github.com/Regncreative/Wedge) (MIT), [Kando](https://github.com/kando-menu/kando), and Explorer integration ideas from [PowerToys](https://github.com/microsoft/PowerToys). Yami does not copy their code, artwork, or interface. The wheel’s appearance comes from Yami’s own dark glass, Rubik type, and accent colours. A separate Mac utility was used only as a behaviour reference for “drag, tap a modifier, drop on a petal”; its layout, wording, and branding are not used.

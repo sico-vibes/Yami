@@ -1,6 +1,10 @@
 import type { YamiEvent, State } from "../shared";
+import { PREVIEW_SAMPLES } from "../wheel/catalog";
+import type { WheelMode } from "../wheel/types";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
 let state = createFixture();
+let wheelSample = "image";
+let wheelMode: WheelMode = "convert";
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
   for (const fn of listeners) fn(event);
@@ -10,6 +14,26 @@ function changed() {
 }
 function toast(message: string) {
   emit({ type: "toast", message });
+}
+function wheelSession() {
+  const sample =
+    PREVIEW_SAMPLES.find((item) => item.id === wheelSample) || PREVIEW_SAMPLES[0];
+  return {
+    id: "preview-wheel",
+    mode: wheelMode,
+    source: "hotkey",
+    files: sample.names.map((name) => ({
+      path: `preview://${encodeURIComponent(name)}`,
+      name,
+      size: 2306867,
+      ext: name.includes(".") ? name.split(".").pop() : "",
+    })),
+    hint: "Preview only. Nothing is written to disk.",
+    sound: state.settings.fileWheelSound,
+    reducedMotion: state.settings.reducedMotion,
+    x: 0,
+    y: 0,
+  };
 }
 export function resetPreview() {
   state = createFixture();
@@ -22,6 +46,9 @@ export function installPreviewBridge() {
       return () => {
         listeners.delete(callback);
       };
+    },
+    filePath(file: File) {
+      return `preview://${encodeURIComponent(file.name)}`;
     },
     async invoke(method, args = {}) {
       const a = args;
@@ -237,6 +264,38 @@ export function installPreviewBridge() {
         case "shortcuts.capture":
         case "island.mouse":
         case "selection.clear":
+          return true;
+        case "wheel.session":
+          return wheelSession();
+        case "wheel.caps":
+          return { heicEncode: false };
+        case "wheel.swap":
+          wheelMode = a.mode || wheelMode;
+          emit({ type: "wheel-session", session: wheelSession() });
+          return wheelSession();
+        case "wheel.sample":
+          wheelSample = String(a.id || wheelSample);
+          emit({ type: "wheel-session", session: wheelSession() });
+          return wheelSession();
+        case "wheel.close":
+          toast("Preview closed the wheel.");
+          return true;
+        case "wheel.choose":
+          toast(
+            `Preview only — ${String(a.petalId || "that petal")} was not applied.`,
+          );
+          return { accepted: false, preview: true, petalId: a.petalId };
+        case "wheel.fail":
+          toast(String(a.message || "Preview wheel error"));
+          return true;
+        case "wheel.sendTo":
+          toast("Preview only — the Windows Send to menu was not changed.");
+          return false;
+        case "wheel.shelf":
+        case "wheel.shelf.drop":
+          toast("Preview only — the drop shelf does not receive real files.");
+          return false;
+        case "wheel.configure":
           return true;
         default:
           throw new Error(`Desktop-only action: ${method}`);

@@ -45,6 +45,12 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 **Clipboard.** When enabled, Yami polls for text and keeps up to 500 entries. Choose a retention period of 1, 7, 14, or 30 days. Pinned entries do not expire automatically; they are stored unencrypted in `data.json`, while unpinned entries are encrypted. Copy, pin, delete, clear, and search history from the utility panel. See [security limitations](security-and-providers.md#practical-security-limits) before relying on exclusions.
 
+## File wheel
+
+Dragging a file and tapping a modifier can open a wheel of conversions, tools, or file actions at the pointer. The same wheel is available from an Explorer shortcut (`Ctrl+Alt+Y` by default), a Send to shortcut, and a tray drop shelf. The wheel window exists only while that gesture is open.
+
+The current build proves the gesture and the petal list. Dropping on a petal reports the choice and does not convert the file yet. See [File wheel](file-wheel.md) for the phase status, the unverified Windows drag, and the manual test list.
+
 ## Windows utilities
 
 | Utility | Available behavior | Limit |
@@ -70,6 +76,11 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Shortcuts | Voice | `Win+Alt` | Hold to speak; release to finish. |
 | Shortcuts | Dictation | `Ctrl+Win` | Hold to dictate. |
 | Shortcuts | Circle to ask | `Ctrl+Shift` | Hold and draw a screen selection. |
+| File wheel | Drag wheel | On | Tap a modifier during a file drag. Holding the key does not open the wheel. |
+| File wheel | Convert / Tools / Actions | Shift / Ctrl / Alt | Each wheel uses a different modifier. |
+| File wheel | Explorer shortcut | `Ctrl+Alt+Y` | Uses the files selected in the foreground File Explorer window. |
+| File wheel | Reveal saved files | Off | Asks Explorer to show a finished file. Saved once conversions run. |
+| File wheel | Petal sound | Off | Short tick when the highlighted petal changes. |
 | Behavior | Memory | On | Includes saved facts in Gemini context; stored facts remain until deleted. |
 | Behavior | Noise suppression | On | Requests noise suppression from the renderer audio capture chain. |
 | Behavior | Reduced motion | Off | Reduces UI animation. |
