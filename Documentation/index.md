@@ -14,6 +14,7 @@ Yami is both the application and the name of its cat-spirit companion. She lives
 | Understand voice, dictation, search, plans, utilities, or settings | [Features and settings](features-and-settings.md) |
 | Use terminal sessions, agent activity, allowances, connections or notes | [AI workspace and terminal](workspace.md) |
 | Convert or edit a dragged file | [File wheel](file-wheel.md) |
+| See where Yami is heading and the ranked feature ideas | [Product brief](reference/product-brief.md) and [feature recommendations](research/feature-recommendations-2026-10-18.md) |
 | See which information leaves the PC and what requires confirmation | [Security and provider data flow](security-and-providers.md) |
 | Follow a renderer event through Electron into Windows | [Architecture](architecture.md) |
 | Run, build, package, or contribute | [Development and release](development.md) and the repository [contribution guide](../CONTRIBUTING.md) |

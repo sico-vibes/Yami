@@ -1,5 +1,19 @@
 # Research and references
 
+## Utility, launcher, and customization references (2026-10-18)
+
+The [feature recommendations note](research/feature-recommendations-2026-10-18.md) records these sources, checked on 2026-10-18:
+
+- [Hitodama](https://hitodama.in/) — the inspiration; a paid Windows voice assistant. Its public page lists no skin packs, utilities suite, or cursor control.
+- [omacale](https://github.com/AyushKr2003/omacale) — a GPL-3.0 Caelestia-style shell for Omarchy. Idea source only.
+- [omarchy-dynamic-island](https://github.com/Arjun010011/omarchy-dynamic-island) — an MIT Dynamic Island for Omarchy. Its plugin catalogue page at [plugins.omarchy.org](https://plugins.omarchy.org/plugin.html?id=omarchy-dynamic-island) reported "Plugin not found" on the same date.
+- [Raycast](https://www.raycast.com/raycast-vs-alfred) — launcher reference. Plan and pricing descriptions conflicted across [Toolradar](https://toolradar.com/tools/raycast/reviews), [The Sweet Setup](https://thesweetsetup.com/?p=162473), and [Asian Efficiency](https://www.asianefficiency.com/productivity/raycast-mac-productivity-hub/); check the official page before relying on any of them.
+- [CursorFX on WinCustomize](https://www.wincustomize.com/article/308547) — a commercial Windows cursor customizer; reference for the cursor manager idea.
+- [omarchy-waybar-config](https://github.com/gupta-akshay/omarchy-waybar-config) — an example of the Omarchy theme community.
+- [PowerToys](https://github.com/microsoft/PowerToys) — MIT; a reference for keep-awake, window zones, colour picking, and text extraction. Its features were recalled from public descriptions and need a check against the current project.
+
+These are ideas, not dependencies. Yami copies no code, artwork, or wording from them.
+
 Research links used to inform this documentation and its comparison notes. External pages can change after the date checked; links point to upstream projects and providers rather than copied snapshots.
 
 ## Documentation structure

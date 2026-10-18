@@ -120,7 +120,11 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 ## Working loop
 
 1. Read the relevant code and docs first (`Documentation/features-and-settings.md`,
-   `architecture.md`, `reference/design-system.md`).
+   `architecture.md`, `reference/design-system.md`). For new features or direction,
+   read `Documentation/reference/product-brief.md` and the ranked ideas in
+   `Documentation/research/feature-recommendations-2026-10-18.md` first. Those
+   ideas are proposals: check their guardrails (idle cost, off-by-default, preview
+   before system changes) and the Windows-API verification gaps before building.
 2. Build UI in the browser preview: `npm run preview:web` →
    `http://127.0.0.1:5174/?screen=Home` (screens: Home, Bond, Soul, Desk,
    Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power,

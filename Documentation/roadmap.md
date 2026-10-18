@@ -11,6 +11,9 @@ This page separates implemented behavior from future ideas. Features described a
 
 ## Planned ideas (not shipped)
 
+The ranked list of feature ideas, with their references, code review, costs, and guardrails, is in the [feature recommendations note (2026-10-18)](research/feature-recommendations-2026-10-18.md). Its Tier 1 items (Theme Hub, cursor manager, a launcher on the Windows Search index, keep-awake, an island OSD, a window switcher with snap zones, and scheduled theme and wallpaper changes) are the proposed starting point. None of them is implemented yet.
+
+
 - **Deeper utilities.** Additional Windows system panels, app controls, and integrations may be explored after current utilities have clear permissions, support checks, and data flow.
 - **Animation.** The cat spirit's flame now flickers while active and settles at idle, with an optional Living flame. Further ideas: eyes that follow the cursor, more roaming reactions, and a hop out of the island at startup.
 - **Provider extensions.** The provider layer could support optional alternatives behind a clear capability interface. There is no general plug-in API, provider marketplace, or guaranteed compatibility today.

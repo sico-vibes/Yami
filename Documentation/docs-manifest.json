@@ -67,6 +67,12 @@
       "path": "research/adaptation-review.md"
     },
     {
+      "slug": "feature-recommendations",
+      "title": "Feature recommendations (2026-10-18)",
+      "group": "Project",
+      "path": "research/feature-recommendations-2026-10-18.md"
+    },
+    {
       "slug": "performance",
       "title": "Performance goals",
       "group": "Project",
