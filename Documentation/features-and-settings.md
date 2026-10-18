@@ -49,7 +49,7 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 Dragging a file and tapping a modifier can open a wheel of conversions, tools, or file actions at the pointer. The same wheel is available from an Explorer shortcut (`Ctrl+Alt+Y` by default), a Send to shortcut, and a tray drop shelf. The wheel window exists only while that gesture is open.
 
-Dropping on a conversion petal saves a new file beside the original when the matching engine is installed. Compress, details, background, the image tools, the media tools, PDF merge, split, and organize open a small window. Document conversion and the file-action petals are visible and say they are not connected yet. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
+Dropping on a conversion petal saves a new file beside the original. Images, audio, and video need the matching engine. Documents, sheets, subtitles, and zip, tar, and gz archives convert inside Yami. Slides and page pictures need LibreOffice to already be installed. Compress, details, background, the image tools, the media tools, PDF merge, split, and organize open a small window. OCR and the file-action petals are not connected yet. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
 
 ## Windows utilities
 

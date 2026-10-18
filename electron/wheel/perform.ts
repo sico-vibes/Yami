@@ -17,6 +17,7 @@ import {
 } from "../../src/wheel/plans";
 import type { WheelFile } from "../../src/wheel/types";
 import { packGzip, packTar, packZip, unpackGzip, unpackTar, unpackZip } from "./archive.ts";
+import { convertOffice, isOfficeKind } from "./convert-docs.ts";
 import type { EngineStore } from "./engines.ts";
 import { imagesToPdf, mergePdf } from "./pdf.ts";
 import { performTool } from "./perform-tools.ts";
@@ -82,10 +83,13 @@ async function performNow(input: {
       if (extensionOf(file.name) === target || (target === "jpg" && extensionOf(file.name) === "jpeg"))
         continue;
       const output = allocateFile(path.dirname(file.path), stemOf(file.name), target, fs.existsSync);
-      const command = convertCommand(kindOf(file.name), target, file.path, output);
-      const exe = await engines.ensure(command.engine);
-      notify(`Converting ${file.name}`);
-      await runChecked(exe, command.args, file.name, notify);
+      if (isOfficeKind(file.name)) await convertOffice(file.path, file.name, output, target, notify);
+      else {
+        const command = convertCommand(kindOf(file.name), target, file.path, output);
+        const exe = await engines.ensure(command.engine);
+        notify(`Converting ${file.name}`);
+        await runChecked(exe, command.args, file.name, notify);
+      }
       outputs.push(output);
     }
     if (!outputs.length) throw new Error("Those files are already in that format.");

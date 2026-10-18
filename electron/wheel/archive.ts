@@ -1,6 +1,6 @@
 import { crc32, deflateRawSync, gunzipSync, gzipSync, inflateRawSync } from "node:zlib";
 
-export type ArchiveEntry = { name: string; data: Buffer };
+export type ArchiveEntry = { name: string; data: Buffer; store?: boolean };
 
 function safeName(name: string) {
   const cleaned = name.replace(/\\/g, "/").replace(/^\.\//, "");
@@ -20,11 +20,11 @@ export function packZip(entries: ArchiveEntry[]) {
   let offset = 0;
   for (const entry of entries) {
     const name = Buffer.from(safeName(entry.name));
-    const data = deflateRawSync(entry.data);
+    const data = entry.store ? entry.data : deflateRawSync(entry.data);
     const local = Buffer.alloc(30 + name.length);
     local.writeUInt32LE(0x04034b50, 0);
     local.writeUInt16LE(20, 4);
-    local.writeUInt16LE(8, 8);
+    local.writeUInt16LE(entry.store ? 0 : 8, 8);
     local.writeUInt32LE(crc32(entry.data) >>> 0, 14);
     local.writeUInt32LE(data.length, 18);
     local.writeUInt32LE(entry.data.length, 22);
@@ -35,7 +35,7 @@ export function packZip(entries: ArchiveEntry[]) {
     central.writeUInt32LE(0x02014b50, 0);
     central.writeUInt16LE(20, 4);
     central.writeUInt16LE(20, 6);
-    central.writeUInt16LE(8, 10);
+    central.writeUInt16LE(entry.store ? 0 : 8, 10);
     central.writeUInt32LE(crc32(entry.data) >>> 0, 16);
     central.writeUInt32LE(data.length, 20);
     central.writeUInt32LE(entry.data.length, 24);

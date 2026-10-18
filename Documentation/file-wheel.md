@@ -36,7 +36,13 @@ Mute, trim, video crop, speed, join, snapshots, split, video redact, normalize, 
 
 PDF split writes one PDF per page into a new folder, up to 200 pages. Organize can reorder, rotate, duplicate, and drop pages. Both use pdf-lib and were executed here. QR reading uses jsQR in the tool window. A generated code was decoded in the unit tests. The preview picture has no code, so that window says none was found.
 
-Document, spreadsheet, subtitle, and slide conversions are still listed and not connected. Float, copy, move, copy path, and terminal are listed and not connected.
+Subtitles convert between SRT, VTT, and plain text. Markdown conversion covers headings, paragraphs, emphasis, links, and fenced code. It is not a full Markdown parser. HTML becomes text by stripping tags. DOCX, EPUB, and XLSX are office packages written and read by Yami. CSV and TSV use the same table. A text or sheet PDF is a plain Helvetica page, not a laid-out document. PDF text uses PDF.js and was checked on a PDF this build wrote. These paths were executed in tests.
+
+XLS and ODS are refused. The message tells you to save as XLSX or CSV. Slide files, and any conversion to PNG or JPG that is not a normal image, ask for `soffice` on the PC. Yami does not download LibreOffice. If it is missing, the job stops with that reason. That path was not run.
+
+OCR is not connected. There is no Tesseract download and no Windows OCR call in this build.
+
+Float, copy, move, copy path, and terminal are listed and not connected.
 
 ## Phase status
 
@@ -45,7 +51,7 @@ Document, spreadsheet, subtitle, and slide conversions are still listed and not 
 | 0 | Drag hook, wheel window, drop target, shortcut, Send to, drop shelf | Code is in the repo. The gesture rules are unit-tested. The live Windows drag is not. |
 | 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
 | 2 | Remaining image, video, audio, and PDF tools, plus QR | Image adjust, markup, crop, redact, and collage save a canvas PNG. PDF split and organize were executed in tests. QR reading was executed on a generated code. ffmpeg command plans for mute, trim, crop, speed, join, snapshots, split, redact, normalize, channels, bleep, and the visualizer are unit-tested and were not run. |
-| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Not started. Convert petals for those kinds are listed; choosing one reports that the tool is not connected. |
+| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Subtitles, a small Markdown/HTML/text path, DOCX, EPUB, CSV/TSV/XLSX, archive repack, plain-text PDF, and PDF text extraction were executed in tests. Slides and page pictures call LibreOffice if it is already installed. That program was not run, and it is not downloaded. OCR is not connected. XLS and ODS are refused with a message. |
 | 4 | HEIC encode, float shelf, remaining file actions | Not started. HEIC stays off the convert wheel. Float is listed and not connected. |
 
 ## Windows drag, unverified
@@ -88,3 +94,5 @@ File wheel settings are stored with the rest of Yami’s settings: enable the dr
 14. Open Trim, Speed, Snapshots, and Normalize on a short media file after ffmpeg has downloaded. Confirm the new copy or folder. Then try Split and confirm the clips start near the chosen times.
 15. Split a three-page PDF and rotate one page in Organize.
 16. Drop a photo that contains a QR code and confirm the text. A photo without a code should say none was found.
+17. Convert a Markdown file to HTML, a CSV to XLSX, and an SRT to VTT. Confirm the new files beside the originals. Convert a text PDF and confirm the words survived.
+18. If LibreOffice is installed, drop a PPTX on PDF. If it is not, confirm the wheel says LibreOffice is not installed and does not download it.

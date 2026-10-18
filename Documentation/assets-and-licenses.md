@@ -45,6 +45,7 @@ These programs are not bundled in the Yami package. A job downloads one into `%L
 | ExifTool 13.59 Windows x64 | Read and strip image metadata | GPL-1.0-or-later OR Artistic-1.0-Perl. The zip also contains Strawberry Perl notices. | SHA-256 from `exiftool.org/checksums-13.59.txt`, matched against the SourceForge download on 2026-10-18. |
 | pdf-lib | Merge, split, and organize PDFs, and build a PDF from PNG or JPEG pages | MIT. It runs inside the Electron main process and is imported only for that job. | npm lockfile. |
 | jsQR | Read a QR code from an image in the tool window | Apache-2.0. Loaded only when that tool opens. | npm lockfile. |
+| PDF.js (`pdfjs-dist`) | Read text from a PDF | Apache-2.0. Loaded only when a PDF is converted to text, Markdown, or EPUB. The package stays outside the main bundle so its font files can be read from disk. | npm lockfile. |
 
 No code, artwork, or wording was copied from the Mac utility used as a behaviour reference, or from Hyoi, Holdem, Wedge, Kando, or PowerToys.
 
