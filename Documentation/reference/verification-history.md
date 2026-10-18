@@ -2,6 +2,8 @@
 
 > Historical record from the previously verified Windows build. It predates the 2026-10-17 documentation, browser-preview, and replacement-wallpaper updates. It is evidence of those earlier checks, not a certification of the current release. Repeat relevant checks against the final packaged build; current procedures are in [Development and release](../development.md).
 
+The 2026-10-18 checks for the AI workspace and the file wheel are recorded in [AI workspace and terminal](../workspace.md) and [File wheel](../file-wheel.md). They are newer than the table below.
+
 ## Recorded checks
 
 | Area | Earlier result |

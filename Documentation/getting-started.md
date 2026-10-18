@@ -51,6 +51,8 @@ If no Tavily key is connected, basic research uses Wikipedia’s search API. A r
 - Hold **Ctrl + Shift**, draw around a screen region, and ask about it. The screenshot is sent to Gemini when a key is connected; without one it remains a local selection in the console.
 - Press **Win + A** to open the app/file/snippet launcher.
 - Scroll down on the island to open the utility panel; choose Controls, Today, Stats, Clipboard, Apps, Wallpaper, or Power.
+- Drag a file in File Explorer and tap **Shift** (convert), **Ctrl** (tools) or **Alt** (actions) to open the file wheel. **Ctrl + Alt + Y** opens it for the files selected in Explorer. The [file wheel guide](file-wheel.md) lists what has and has not been checked on Windows.
+- Open **AI** from the dock for sessions, usage and connections. Open a terminal from its Sessions panel. Both stay idle until you connect a service or open a terminal. See [AI workspace and terminal](workspace.md).
 - Close the main window to leave Yami running in the tray. Choose Quit Yami from the tray to exit.
 
 Shortcuts can be rebound in **Settings → Shortcuts**. Use Escape to cancel a shortcut capture, active recording, or screen selection. See [Features and settings](features-and-settings.md) for full behavior and limits.

@@ -4,6 +4,8 @@ Reviewed 2026-10-17. This is a source-based feasibility review and a proposed ex
 
 Apply the [adaptation rules](../adaptation.md): preserve each selected feature's operating behavior while reusing Yami's interface. Selecting a feature does not commit Yami to reproducing the source application's entire product.
 
+**Status update (2026-10-18).** The terminal, agent sessions and approvals, service connectors, local model chat, subscription quota readers and quota state described here are now implemented on `main` in the narrower scope recorded in [AI workspace and terminal](../workspace.md). The proposed presentation and implementation-order sections below remain the 2026-10-17 record. They are not a completed plan, and the Windows and live-account checks they list are still open.
+
 ## Source revisions and boundaries
 
 | Repository | Pinned revision | Source examined | License observed |

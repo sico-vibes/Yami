@@ -89,6 +89,10 @@ Scheduled work is narrower than the full tool set. The accepted inner actions ar
 ## Other network destinations
 
 - **Weather:** When enabled, an explicitly entered city is resolved against bundled GeoNames data. Without a city, Yami requests approximate IP location from `https://ipwho.is/`, then calls `https://api.met.no/weatherapi/locationforecast/2.0/compact` with rounded latitude and longitude. Location and weather are disabled by default.
+- **AI workspace subscription quota (opt-in, manual refresh by default):** Claude reads `https://api.anthropic.com` usage with the existing CLI credential; Cursor reads `https://cursor.com/api/usage-summary`; Copilot reads `https://api.github.com/copilot_internal/user`; OpenCode Go reads `https://opencode.ai/inference/go/v1/usage` (OpenCode Zen credit is shown separately and is not a Go quota); Grok checks the `https://auth.x.ai` issuer and reads `https://cli-chat-proxy.grok.com/v1/billing`; Codex uses the local `codex app-server` process. A custom endpoint is any HTTPS (or loopback) URL the user enters. Yami does not sign in, refresh credentials, switch accounts or use reset credits.
+- **AI workspace connectors (opt-in, read-only status):** GitHub (`https://api.github.com`), Vercel (`https://api.vercel.com`), n8n (the user's own server URL), Notion (`https://api.notion.com`), Cal.com (`https://api.cal.com/v2`), Resend (`https://api.resend.com`) and Stripe (`https://api.stripe.com/v1/charges`, read-only). Each uses a token the user supplies. Open links go to the service's own dashboard; Yami sends no email, charges or publishes through them.
+- **Local model and MCP (user-configured only):** the local model chat calls the OpenAI-compatible server the user sets, by default `http://127.0.0.1:11434/v1`. HTTP MCP calls the server the user configures, and each advertised tool call needs its own confirmation. Remote servers must use HTTPS, and credential-bearing query parameters and redirects are refused.
+- **File-wheel engines (downloaded on first use):** FFmpeg from `https://www.gyan.dev/ffmpeg/builds/`, ImageMagick from `https://github.com/ImageMagick/ImageMagick/releases/`, 7-Zip from `https://www.7-zip.org/`, and ExifTool from `https://sourceforge.net/projects/exiftool/` with checksums from `https://exiftool.org/`. Each download is checked against a pinned SHA-256 before it is run. No file is sent to these hosts; they are fetched only when a job needs that engine. LibreOffice is never downloaded.
 - **Speed test:** The user must confirm before running the bundled `@m-lab/ndt7` client and its worker scripts. M-Lab publishes results, including the user’s IP address, in an open dataset; the test transfers real data.
 - **External links:** the app opens HTTP or HTTPS URLs in the default browser. It rejects other protocols and URLs containing embedded credentials.
 - **App shortcuts:** launcher destinations include websites such as Gmail, YouTube, and Amazon. No account login information is read by Yami.
@@ -107,6 +111,12 @@ When loaded data contains the retired `gemini-2.5-flash` or `gemini-2.5-flash-na
 | Unpinned clipboard entries | Encrypted with `safeStorage` before being serialized to `data.json`. |
 | Pinned clipboard entries | Saved as readable text in `data.json` so they can remain directly usable. Pin only material you are comfortable storing unencrypted in your user profile. |
 | User-selected wallpapers | The filesystem path is stored; the selected image remains wherever the user keeps it. |
+| AI workspace settings, notes, dictionary and snippets, cached quota metadata, retained agent phase changes | `workbench.json` in the user-data folder, written with a temp-file/rename pattern. Pending approvals are not saved. Export includes workspace text and excludes keys. |
+| Agent relay pipe token | `agent-relay.json`; the native relay checks that the connecting process belongs to the same Windows user. |
+| Subscription and connector credentials | Entered by the user and stored in `credentials.bin` with the other keys, never in `workbench.json` or the renderer. |
+| Recording audio | Bounded temporary PCM files that are deleted on discard, owner close or quit. They are not crash-recovery storage. |
+| File-wheel engines | `%LOCALAPPDATA%\Yami\engines`. Each download is checked against the pinned SHA-256 in `electron/wheel/engine-catalog.ts` before it can run. |
+| File-wheel outputs | New files saved beside the original; the source file is never overwritten. |
 | Exported file | Includes settings, conversations, plans, memories, and other app state as implemented; excludes credentials and clipboard history. |
 
 Yami supports export, history clearing, clipboard clearing, and a separately confirmed full local-data deletion. Clearing all data also removes the provider keys. Do not use exports as secret backups: they are not encrypted by Yami.
@@ -124,6 +134,8 @@ Clipboard history is enabled by default, polls every 1.8 seconds, stores a maxim
 ## Action permissions and confirmations
 
 The model cannot execute arbitrary named functions. `electron/assistant.ts` publishes a fixed Gemini function-declaration list; the Electron main process dispatches a matching allowlist and returns the result or error.
+
+AI workspace actions follow the same rule. An agent permission request is decided in Yami only after the Yami card is shown and acknowledged within 1.2 seconds; otherwise the CLI keeps control and nothing is granted silently. Terminal sessions start only when the user opens one. File-wheel conversions and tools run only after the user drops a file on a petal, and they write a new file beside the original.
 
 Always-confirm actions are: close a window, activate a UI Automation control, click a raw screen coordinate, insert arbitrary text into a foreground field, write/replace a file, move a file, recycle a file, and run a PowerShell command. Power actions (lock, sleep, restart, shutdown) also require a separate explicit confirmation in the app. Confirmation requests expire after two minutes; declining or timing out cancels the action. Terminal and raw coordinate automation are disabled by default and each also requires its respective setting to be enabled.
 

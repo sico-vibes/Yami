@@ -1,6 +1,6 @@
 # File wheel
 
-The file wheel opens beside the pointer while Yami is running, then converts a dropped file or starts a tool. This page records what the current build actually does. Windows drag, hotkeys, and engine downloads have not been exercised on a Windows machine in this change.
+The file wheel opens beside the pointer while Yami is running, then converts a dropped file or starts a tool. This page records what the current build actually does. The code is on `main` (merged 2026-10-18) and is included in the local portable build. The Windows drag, hotkeys, Send to, and engine downloads have not yet been exercised on a Windows machine.
 
 ## What you can do
 

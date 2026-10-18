@@ -16,7 +16,7 @@ This guide describes features currently represented in the source. Hardware-depe
 
 **Live voice.** Hold the voice shortcut or press the island ability button, speak, then release to finish. Voice connects through the Gemini Live API and streams audio. Yami uses explicit speech activity start/end boundaries; it does not send continuously when idle. A voice turn can make the same declared tool calls as text chat. A lasso selection with Gemini connected starts a one-shot voice question about the selected image.
 
-**Dictation.** Hold the dictation shortcut. Yami remembers the foreground window handle, captures speech, asks Gemini to transcribe and resolve spoken corrections, then inserts the final text into that original field using clipboard-preserving paste. Password fields are rejected by the native host. Dictation text is also retained in conversation history.
+**Dictation.** Hold the dictation shortcut. Yami remembers the foreground window handle, captures speech, asks Gemini to transcribe and resolve spoken corrections, then inserts the final text into that original field using clipboard-preserving paste. Password fields are rejected by the native host. Dictation text is also retained in conversation history. The engine is chosen in AI > Dictation: Gemini (the default), or an installed Windows speech recognizer, which transcribes 16 kHz mono WAV audio locally and needs no key.
 
 **Circle to ask.** Hold the lasso shortcut, draw a loop around anything on screen, and complete the selection. Capture occurs locally. With Gemini connected, the selected image can be sent with a voice turn; without a key, the image appears in the console selection. Cancel with Escape.
 
@@ -84,6 +84,7 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Shortcuts | Voice | `Win+Alt` | Hold to speak; release to finish. |
 | Shortcuts | Dictation | `Ctrl+Win` | Hold to dictate. |
 | Shortcuts | Circle to ask | `Ctrl+Shift` | Hold and draw a screen selection. |
+| Dictation | Engine | Gemini (`gemini`) | `windows` uses an installed Windows speech recognizer; see AI > Dictation. |
 | File wheel | Drag wheel | On | Tap a modifier during a file drag. Holding the key does not open the wheel. |
 | File wheel | Convert / Tools / Actions | Shift / Ctrl / Alt | Each wheel uses a different modifier. |
 | File wheel | Explorer shortcut | `Ctrl+Alt+Y` | Uses the files selected in the foreground File Explorer window. |
@@ -114,16 +115,20 @@ The source declares the voice and text defaults as `gemini-3.8-live` and `gemini
 
 Settings includes provider-key replacement/removal, Tavily account usage display, clipboard history toggle/retention/clear, conversation history clearing, data export, and confirmed full-data deletion. Export omits credentials and clipboard; full deletion also removes keys. See [Security and provider data flow](security-and-providers.md#local-storage) for exact storage locations and protection.
 
-## Known boundaries
+## AI workspace and terminal
 
-The development checkout includes an [AI workspace and terminal](workspace.md):
-agent hooks/decisions, quota readers, seven read-only service connectors, local
-chat, HTTP MCP, selected context, notes/recordings, dictionary/snippets, Windows
-speech and recaps. That guide lists account/device verification limits.
-Monitoring, transcript fallback, background usage and alerts default off.
-Terminal shortcut defaults empty; background follows Yami at 6px blur/22% opacity;
-scrollback defaults to 3,000 lines; recap retention is seven days. Dictation stays
-on Gemini unless an installed Windows recognizer is selected.
+The AI tab and Yami Terminal are part of the app on `main`. They add agent session
+hooks and approvals, subscription allowance readers, seven read-only service
+connectors, selected context, a local model chat, HTTP MCP, notes and recordings,
+dictionary and snippet rules, Windows speech and recaps. Terminal sessions are
+interactive Windows PTYs. Defaults: monitoring, transcript fallback, background
+usage and alerts are off; the terminal shortcut is empty; the terminal background
+follows Yami at 6px blur and 22% opacity; scrollback is 3,000 lines; recap retention
+is seven days. Dictation stays on Gemini unless a Windows recognizer is selected.
+Account, device and installed-agent verification limits are listed in the
+[AI workspace and terminal guide](workspace.md).
+
+## Known boundaries
 
 - Windows sleep wake, microphone permissions, brightness, radio toggles, media sessions, and app discovery are affected by system state or hardware.
 - Yami cannot act on the secure lock/UAC desktop or after a full shutdown.

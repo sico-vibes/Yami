@@ -4,8 +4,8 @@ The AI dock tab extends Yami's existing settings navigation, rounded controls,
 Phosphor icons, status pills and reduced-motion transitions. It contains Sessions,
 Usage, Connections, Context, Dictation, Notes, Recap, MCP and Workspace settings.
 The island's AI utility shows a compact activity view and pending decisions.
-The implementation is available in the current development checkout; no new public
-release has been published.
+The implementation is on the `main` branch and in the local portable build from
+2026-10-18. No public release has been published.
 
 ![AI workspace with synthetic activity](assets/screenshots/workspace.png)
 
@@ -159,8 +159,10 @@ resize, Ctrl+C, native relay Allow/Deny, visible-card ACK, descendant cleanup an
 fixture-chat preservation. Contract tests cover named-pipe authentication,
 fallback/questions, configuration merging, quota semantics, local HTTP/MCP,
 credential validation and recording failure/retry/commit. Offline speech passed
-using synthesized WAV audio and the installed recognizer. Browser fixtures pass
-all 17 screens and all nine AI subsections without external requests.
+using synthesized WAV audio and the installed recognizer. The browser fixtures passed
+all 17 screens and all nine AI subsections without external requests before the
+file wheel was merged. The preview now has 19 screens (adding File wheel and
+Background). That run has not been repeated after the merge.
 
 Live provider accounts, live service credentials, each installed agent release,
 microphone quality and system-audio capture across devices have not been tested.

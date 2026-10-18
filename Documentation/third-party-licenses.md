@@ -19,6 +19,9 @@ This initial inventory records direct packages from the application manifest. It
 | `@xterm/xterm`, `@xterm/addon-fit` | Interactive terminal renderer and fit addon | MIT notices in the generated versioned inventory. |
 | `node-pty`, `node-addon-api` | Windows PTY bridge/native addon | MIT notices, including winpty and Microsoft ConPTY; bundled binaries remain under their upstream terms. |
 | `systeminformation` | Hardware and process metrics | MIT; [systeminformation repository](https://github.com/sebhildebrandt/systeminformation). |
+| `pdf-lib` | PDF merge, split, organize, and image pages, run in the main process when a job needs them | MIT; [pdf-lib repository](https://github.com/Hopding/pdf-lib). |
+| `jsqr` | QR reading in the file wheel's tool window, loaded only when that tool opens | Apache-2.0; [jsQR repository](https://github.com/cozmo/jsQR). |
+| `pdfjs-dist` | PDF text extraction (PDF.js), loaded only for PDF text conversion | Apache-2.0; [PDF.js repository](https://github.com/mozilla/pdf.js). |
 | `electron` | Desktop runtime | MIT for the project; retain runtime third-party notices for the exact release. |
 | `marked` | Markdown parser used to build the docs viewer | MIT; [Marked repository](https://github.com/markedjs/marked). |
 | `dompurify` | Sanitize generated documentation HTML | MPL-2.0 or Apache-2.0; [DOMPurify repository](https://github.com/cure53/DOMPurify). Choose and retain the corresponding license text for redistribution. |

@@ -28,7 +28,8 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
    `src/migrations.ts` (run from `electron/store.ts`) and a test.
 2. **Every authored text file stays at or under 1,000 lines.** Split by
    responsibility before you get close (`npm run check:lines`). `electron/main.ts`
-   sits near the limit: put new main-process features in their own module.
+   is about 960 lines: put new main-process features in their own module, and
+   move pure helpers to `policy.ts` or another focused module rather than growing it.
 3. **Idle comes first.** No polling loops, no animation and no native queries
    when nothing is happening. Animate only for interaction and active work,
    always respect reduced motion, and measure the full process tree when you
@@ -57,7 +58,7 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
 | UI              | React 19 + TypeScript 7, Vite 8, plain CSS in `src/styles/` (no CSS framework)                                                                               |
 | Fonts and icons | Rubik Variable (`@fontsource-variable/rubik`), Phosphor web icons                                                                                            |
 | AI              | `@google/genai` (Gemini text + Live voice), optional Tavily, Wikipedia fallback                                                                              |
-| Windows         | `native/Host.cs` + `ProcessJobs.cs`, .NET Framework `csc.exe`, versioned host selected by `host-manifest.json`; JSON lines, short-lived Hook relay and PowerShell helpers |
+| Windows         | `native/Host.cs`, `ProcessJobs.cs` and `Wheel.cs` (file-wheel drag hook), .NET Framework `csc.exe`, content-hashed host selected by `host-manifest.json`; JSON lines, short-lived `Hook.cs` relay for agent hooks, PowerShell helpers and `Speech.ps1` |
 | System data     | `systeminformation`, Node `os`                                                                                                                               |
 | Tests           | Node test runner (`tests/*.test.mjs`, run with `--experimental-transform-types`), Playwright scripts in `scripts/verify-*.mjs`                               |
 | Packaging       | electron-builder, unsigned portable `.exe` in `release/`                                                                                                     |
@@ -75,7 +76,9 @@ electron/        main process
   activity.ts      friendly labels for tool calls  policy.ts  permission and URL checks
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
-  workbench/       sessions/hooks, quota, connections, terminal, local model, MCP, context, speech/notes
+  workbench/       AI workspace: sessions/hooks, quota, connections, terminal PTY, local model, MCP, context, speech/notes
+  wheel/           file wheel: service window, engine downloads, command plans, PDF/archive/document conversion
+  native-path.ts   resolves the content-hashed native host from host-manifest.json
 src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   App.tsx          main window (Home, Bond = memory, Soul = loadout, Desk = plans, Settings)
   Island.tsx       top-centre notch + drawer (Utilities.tsx tabs, Today.tsx, MediaPeek.tsx)
@@ -87,8 +90,9 @@ src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   ui.tsx           Icon, IconButton, Toggle, Modal, useYami, Spirit re-export
   styles/          base, island, loadout, overlays, today, responsive (.css)
   workbench/       lazy AI workspace; TerminalWindow.tsx lazy xterm.js/fit renderer
+  wheel/           file-wheel window, tool windows, catalogue, gesture rules (own transparent windows)
   preview/         browser-only fixture bridge for `npm run preview:web`
-native/          Host.cs, Media.ps1, Radios.ps1
+native/          Host.cs, ProcessJobs.cs, Wheel.cs, Hook.cs, Media.ps1, Radios.ps1, Speech.ps1, ExplorerSelection.ps1, SendToLink.ps1
 scripts/         dev, build, docs, icon export, verification and measurement
 tests/           unit and native contract tests
 Documentation/   full docs (Markdown) + generated viewer `index.html`
@@ -120,7 +124,7 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 2. Build UI in the browser preview: `npm run preview:web` →
    `http://127.0.0.1:5174/?screen=Home` (screens: Home, Bond, Soul, Desk,
    Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power,
-   Stray, Caption, AI, Terminal). The stage alone renders at `?stage=1&screen=<name>`.
+   Stray, Caption, AI, Terminal, File wheel, Background). The stage alone renders at `?stage=1&screen=<name>`.
 3. Run it for real on Windows: `npm run dev` (Vite on 5173 + Electron).
 4. Verify (pick what applies, report what you could not run):
 

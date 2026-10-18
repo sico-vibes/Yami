@@ -47,6 +47,8 @@ Across eight processes, private working set was **164.6–168.2 MB**, shared-inc
 
 Focused Edge and Windows Electron checks also confirmed that the dock highlight and incoming-page fade have no running animations after settling, rapid navigation retargets correctly, and both the OS and Yami reduced-motion preferences suppress the new motion. The idle bar keeps the existing one-time eight-second sleep timer; its shoulder fix changes only CSS geometry.
 
+The merged build on `main` (commit `0c850a0`, packaged as `release/Yami 0.2.1.exe`) has not been measured with the procedure below. Run `node scripts/measure-performance.mjs --packaged` before quoting figures for it.
+
 ## Current sources of background work
 
 The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript
@@ -79,6 +81,7 @@ measure a terminal/agent task peak or long-term recording/model ceiling. See
 - Controls refresh every six seconds while that panel is open, the island media card re-reads media every five seconds only while it is open, and Windows media-script results are cached for six seconds while active or 30 seconds while inactive. In-flight PowerShell/native-script requests are deduplicated.
 - A live Gemini socket and audio buffers exist during an explicit voice session. They should close and release temporary data after the user ends the turn/session.
 - Lasso capture temporarily holds a display image and opens an overlay only while the selection is active.
+- The file wheel's drag hook runs inside the existing Windows host, so it adds no process. Its wheel, shelf, tool and float windows are created on demand and closed afterwards, and engine downloads start only when a job needs them.
 
 These are source-level observations; they do not establish total CPU or RAM consumption. Browser/Electron process layout and Windows accounting can vary by machine and Electron version. The short baseline above is not a peak measurement or long-run test.
 

@@ -27,12 +27,14 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 | `npm run check` | Run the line-limit check, TypeScript check, and tests. |
 | `npm run package` | Build and create an unsigned Windows portable executable with electron-builder under `release/`. |
 
-`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power, Stray (roaming Yami), and Caption (the bottom caption pill); `?stage=1&screen=<name>` renders one screen on its own; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
+`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power, Stray (roaming Yami), Caption (the bottom caption pill), AI, Terminal, File wheel and Background (the file wheel tool window), which is 19 screens in total; `?stage=1&screen=<name>` renders one screen on its own; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
 
 ## Source map
 
 - `src/` — React/TypeScript renderer and styles. `src/main.tsx` picks the component from `?window=` (main, island, lasso, effect, stray, caption).
 - `src/MainNavigation.tsx` — main dock buttons and event-driven selected-pill positioning, with finite CSS transitions.
+- `src/workbench/` — the lazy AI workspace (Sessions, Usage, Connections, Context, Dictation, Notes, Recap, MCP and Workspace settings); `src/workbench-types.ts` holds its shared types. `src/TerminalWindow.tsx` is the lazy xterm.js terminal.
+- `src/wheel/` — file-wheel window, tool windows and their command catalogue, gesture rules and in-renderer conversions. `src/styles/wheel.css` and `src/styles/workbench.css` hold their styles.
 - `src/yami/` — the Yami character: `YamiSpirit.tsx` renders, `motion.ts` holds the tested flame and pose maths, `features.ts` the face and ears, `skins.ts` the colourways.
 - `src/Island.tsx`, `src/Utilities.tsx`, `src/Today.tsx`, `src/MediaPeek.tsx` — the island notch, drawer tabs, Today panel and now-playing card.
 - `src/Loadout.tsx`, `src/LoadoutHub.tsx` — loadout catalogue and the orbiting hub; `src/Stray.tsx`, `src/Caption.tsx` — roaming Yami and caption pill.
@@ -41,6 +43,9 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `src/preview/` — browser-only fixture state and bridge. Preview changes are temporary and are not written to desktop data.
 - `electron/main.ts` — application lifetime, main and island windows, tray, IPC routing, state coordination, task schedules, network helpers, and action dispatcher.
 - `electron/requests.ts` — IPC request handler and feature action dispatch.
+- `electron/workbench/` — AI workspace controllers: `index.ts` routes validated IPC; `agents.ts` and `hooks.ts` handle agent sessions and approvals; `usage.ts`, `connections.ts`, `local-model.ts` and `mcp.ts` make the opt-in network requests; `terminal.ts` and `terminal-host.ts` run the PTY sidecar; `speech.ts`, `meetings.ts`, `context.ts`, `storage.ts` and `transcripts.ts` cover speech, recordings, selected context, `workbench.json` and transcripts; `network.ts` checks server URLs (HTTPS, or loopback HTTP only) and refuses credential-bearing query parameters.
+- `electron/wheel/` — file-wheel service, engine catalogue and downloads, command plans (`perform.ts`, `perform-tools.ts`), archive, PDF and document conversion, file actions and the HEIC probe.
+- `electron/native-path.ts` — resolves the native host executable from `host-manifest.json` and rejects a manifest whose name does not match the content-hash pattern.
 - `electron/windows.ts` — sandboxed window factory (`makeWindow`).
 - `electron/overlays.ts` — roaming Yami window, caption pill window, caption notices and tool-activity events; `electron/activity.ts` labels tool calls.
 - `electron/focus-timer.ts` — Today focus countdown; `electron/controls.ts` — volume, brightness and radio controls.
@@ -51,7 +56,8 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `electron/policy.ts` — URL, target, and advanced-tool checks.
 - `electron/preload.ts` — narrow renderer bridge.
 - `electron/store.ts` — local persistent state and encrypted credentials.
-- `native/Host.cs` — Windows message-line host and Win32/UI Automation actions.
+- `native/Host.cs` — Windows message-line host and Win32/UI Automation actions. `native/ProcessJobs.cs` owns Job Objects for helpers and shells.
+- `native/Hook.cs` — short-lived relay that agent CLI hooks run to reach the pipe; `native/Speech.ps1` — installed Windows speech recognition.
 - `native/Wheel.cs` — drag-and-tap wheel hook and file-wheel hotkey.
 - `native/Media.ps1`, `native/Radios.ps1`, `native/ExplorerSelection.ps1`, `native/SendToLink.ps1` — Windows helpers.
 - `tests/` — unit and integration fixtures.
@@ -81,7 +87,7 @@ The preview loads the same renderer pages and styles as Electron but supplies a 
 
 ## Package layout
 
-Workspace verification commands in the development checkout:
+Workspace verification commands:
 
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
@@ -104,7 +110,7 @@ Vite output under `dist/` and Electron output under `dist-electron/` are bundled
 
 The resulting portable binary is not signed. A release owner must decide signing and update behavior before publishing broadly. The Yami repository is intentionally private during development even though the source is intended for MIT open-source distribution.
 
-Windows packaging copies the Electron distribution already installed under `node_modules/electron/dist`, keeping the runtime consistent with the lockfile and avoiding a second archive extraction. Build on Windows. A local output override, `--config.directories.output=release/current`, can keep a new build separate from an earlier package.
+Windows packaging copies the Electron distribution already installed under `node_modules/electron/dist`, keeping the runtime consistent with the lockfile and avoiding a second archive extraction. If that folder is missing (for example after `npm ci` in a fresh checkout where the Electron binary was not downloaded), run `node node_modules/electron/install.js` before packaging. `npm run package` fails with "electronDist does not exist" until it is present. Build on Windows. A local output override, `--config.directories.output=release/current`, can keep a new build separate from an earlier package.
 
 ## Release checklist
 
