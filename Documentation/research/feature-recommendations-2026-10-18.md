@@ -82,6 +82,18 @@ Source: [Flairy on the Mac App Store](https://apps.apple.com/us/app/flairy-custo
 - **Rainmeter (skins).** Described as light, but no benchmarks were found. Skins can run Lua scripts, so any skin system needs a security model. Source: [Windows Mode](https://www.windowsmode.com/?p=45807).
 - **Folder icons.** See section 4.2.
 
+### Filee (file conversion, MIT)
+Sources: [KnifeLemon/Filee](https://github.com/KnifeLemon/Filee), its [GitHub API record](https://api.github.com/repos/KnifeLemon/Filee), its [engine script](https://raw.githubusercontent.com/KnifeLemon/Filee/main/build/fetch-engines.ps1), and its [src tree](https://github.com/KnifeLemon/Filee/tree/main/src), checked 2026-10-18.
+
+- A free C#/.NET converter. Hold Ctrl (or Option on macOS), drag files onto a ring of formats, and drop them on a target. Output is saved beside the original, and it works offline. It also has an Explorer menu, a keyboard shortcut, a `filee` CLI, watch folders, parallel batch processing, and automatic route chaining.
+- Platforms: Windows (installer or portable zip), macOS 14+ (preview), and Linux (preview; drag needs X11).
+- Licence: MIT. Bundled engines keep their own licences. Created 2026-09-29; about 3,800 stars and 31 open issues. Windows builds are not yet code-signed.
+- Format counts differ: the README says about 244, the header says 180+. Neither is verified.
+- Coverage: HEIC, camera RAW, PSD, SVG tracing, CAD and 3D (DWG, DXF, STL, OBJ, GLB, PLY), PDF to and from Word, HWP and HWPX (Korean), e-books (via calibre), fonts, and data formats (JSON, YAML, TOML, XML, vCard). Yami covers a much smaller set; see section 3.
+- Engines are fetched by a script that pins SHA-256 values and stops on a mismatch, as Yami does. Each engine's licence is listed in the script header: LibreOffice (MPL-2.0), H2Orestart (GPL-3.0), Temurin JRE (GPLv2 with Classpath Exception), rhwp (MIT), Pandoc (GPL-2.0-or-later), 7-Zip (LGPL-2.1 with unRAR restriction), Ghostscript (AGPL-3.0), FFmpeg (GPL-3.0), and calibre (GPL-3.0). Several are installed with administrative installs that leave the system unchanged.
+- The source tree has projects for the app, CLI, core, engines, Explorer menu, and three platforms. The engine layer is `Filee.Engines`.
+- Verdict for Yami: better on breadth and workflow, not a drop-in replacement. Yami is better integrated and runs no background work. Its MIT code can be reused with attribution, but its GPL and AGPL engines must stay downloaded at runtime, not bundled.
+
 ## 3. What Yami has today (code review, 2026-10-18)
 
 Confirmed in the code:
@@ -200,6 +212,9 @@ Weight: **Low** means event-driven or on demand, with no idle cost. **Medium** m
 | 28 | Settings search and keybind list in the launcher | Typing a settings name jumps to its page; `<` lists shortcuts. | end4-pC | Low | Existing launcher and settings |
 | 29 | Desk surface (one window) | One transparent, click-through window with clock, weather, and media widgets. Updates once a minute or on events, hidden in full-screen. | end4-pC, illogical-impulse | Low to medium | One Electron window; measure before release. Section 4.1 |
 | 30 | Optional app bar dock | A dock or bar that reserves a screen edge and steps aside in full-screen. | end4-pC, illogical-impulse | Medium | App bar messages; *verify* with Electron. Section 4.1 |
+| 34 | Conversion route planner | Chain steps automatically, for example DOCX to PDF to PNG, and show the route before running. | Filee | Low | Extends the existing `perform` plans; no new engines needed for the first version |
+| 35 | Parallel batch with a cap | Convert several dropped files at once, with a fixed limit on concurrent jobs and per-file progress. | Filee | Low to medium | Bounded worker pool; stop on cancel; memory limit per engine |
+| 36 | PDF page ranges | Choose pages when splitting, merging, or converting a PDF. | Filee | Low | Existing `pdf-pages.ts` and pdf-lib |
 
 ### Tier 3: later, after a permissions model
 
@@ -214,6 +229,9 @@ Weight: **Low** means event-driven or on demand, with no idle cost. **Medium** m
 | 31 | Window overview with live previews | Open windows as thumbnails, drawn only while the overview is open. | illogical-impulse | Medium (GPU while open) | DWM thumbnails; *verify* the cost |
 | 32 | Theme pack gallery | Share and install declarative theme packs, with automated checks and manual review for new authors. | end4-pC presets | Low | Declarative data only, never scripts |
 | 33 | Screen translation and Lens-style search | Translate or search on-screen text. | illogical-impulse | Medium (network) | Opt-in only; Windows OCR plus a provider; no upload by default |
+| 37 | HWP and HWPX conversion | Read and write Korean HWP and HWPX documents. | Filee (rhwp, MIT) | Medium | rhwp is MIT, so it can be reused with attribution. Engine downloaded on demand. |
+| 38 | Watch folders (opt-in) | Convert new files that appear in a chosen folder. | Filee | Medium | Off by default. Use file-system events, not polling, and stop when disabled. |
+| 39 | E-book and more output formats | More e-book formats (MOBI, AZW3, FB2) through calibre, downloaded on demand. | Filee | Medium | calibre is GPL-3.0. Download at runtime only; never bundle. |
 
 ### Tier 4: explore
 
@@ -234,6 +252,8 @@ Weight: **Low** means event-driven or on demand, with no idle cost. **Medium** m
 - **Lock-screen replacement.** Windows does not let apps replace the lock screen.
 - **Shader transitions and glass effects by default.** They cost GPU.
 - **Uploading screen content by default,** for example for Lens-style search.
+- **Bundling GPL or AGPL engines in the installer.** Ghostscript (AGPL-3.0), calibre, FFmpeg, Pandoc, and H2Orestart stay downloaded at runtime, with their licence texts shown.
+- **Watch folders on by default.** Background watching breaks the idle rule.
 
 ## 7. Guardrails for every item
 
@@ -258,6 +278,9 @@ Weight: **Low** means event-driven or on demand, with no idle cost. **Medium** m
 - App bar behaviour with an Electron window and other toolbars is unverified.
 - DWM thumbnail cost is unmeasured.
 - A reported reboot reset of custom folder icons is unexplained and unverified.
+- Filee was not run. Its speed, memory use, and output quality are unmeasured.
+- Filee's format counts differ between its README (about 244) and its header (180+).
+- Filee's `engines.json` (the version pins) was not readable, so its engine versions are unverified.
 - No Rainmeter skin benchmarks were found.
 
 ## 9. Suggested next steps for a future agent

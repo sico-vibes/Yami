@@ -26,6 +26,7 @@ The [feature recommendations note](research/feature-recommendations-2026-10-18.m
 - [Windows Mode on Rainmeter skins](https://www.windowsmode.com/?p=45807) — skins and their scripting.
 - [Customizing Icons (MSDN archive)](https://msdn2.microsoft.com/en-us/library/bb776856(v=vs.85)) and [WinHelpOnline on folder icons](https://www.winhelponline.com/blog/shell-folders-are-displayed-with-the-standard-folder-icon-in-windows/) — the folder icon mechanism.
 - [Omarchy Dynamic Island](https://github.com/Arjun010011/omarchy-dynamic-island) — MIT; a Linux island with an activity model.
+- [Filee](https://github.com/KnifeLemon/Filee) — an MIT file converter for Windows, macOS, and Linux with route chaining, batch, watch folders, and a checksum-verified engine script. Its engine script is at [fetch-engines.ps1](https://raw.githubusercontent.com/KnifeLemon/Filee/main/build/fetch-engines.ps1). Format counts and speed are unverified.
 
 These are ideas and platform references. Yami copies no code, artwork, or wording from them.
 
