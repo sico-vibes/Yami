@@ -13,6 +13,18 @@ export function emit(event: YamiEvent) {
 function changed() {
   emit({ type: "state", state: structuredClone(state) });
 }
+function previewNames(tool: string) {
+  if (tool === "tool:merge" || tool === "tool:organize" || tool === "tool:pdf-split")
+    return ["notes.pdf", "extra.pdf"];
+  if (tool === "tool:join") return ["one.mp4", "two.mp4"];
+  if (tool.startsWith("tool:video") || tool === "tool:speed" || tool === "tool:snapshots" || tool === "tool:split")
+    return ["clip.mp4"];
+  if (["tool:trim", "tool:normalize", "tool:channels", "tool:bleep", "tool:visualizer"].includes(tool))
+    return ["voice.wav"];
+  if (tool === "tool:collage") return ["grove.png", "second.png"];
+  return ["grove.png"];
+}
+
 function toast(message: string) {
   emit({ type: "toast", message });
 }
@@ -301,10 +313,7 @@ export function installPreviewBridge() {
         case "wheel.tool.get":
           return {
             tool: previewTool,
-            files: (previewTool === "tool:merge"
-              ? ["notes.pdf", "extra.pdf"]
-              : ["grove.png"]
-            ).map((name) => ({
+            files: previewNames(previewTool).map((name) => ({
               path: `preview://${encodeURIComponent(name)}`,
               name,
               size: 2306867,
@@ -344,6 +353,11 @@ export function installPreviewBridge() {
           }));
         case "wheel.engines.install":
           toast("Preview only — engines are not downloaded.");
+          return false;
+        case "wheel.pdf.info":
+          return { pages: 3 };
+        case "wheel.copyText":
+          toast("Preview only — text was not copied to the desktop clipboard.");
           return false;
         default:
           throw new Error(`Desktop-only action: ${method}`);

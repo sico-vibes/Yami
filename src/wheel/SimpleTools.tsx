@@ -1,5 +1,6 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api";
+import { Save, ToolShell } from "./ToolShell";
 import type { WheelFile } from "./types";
 
 export function CompressTool({ files }: { files: WheelFile[] }) {
@@ -45,6 +46,8 @@ export function CompressTool({ files }: { files: WheelFile[] }) {
 export function MetadataTool({ files }: { files: WheelFile[] }) {
   const [fields, setFields] = useState<{ tag: string; value: string }[]>([]);
   const [query, setQuery] = useState("");
+  const [tag, setTag] = useState("EXIF:Artist");
+  const [value, setValue] = useState("");
   const [note, setNote] = useState("");
   useEffect(() => {
     if (!files[0] || files[0].path.startsWith("preview://")) {
@@ -69,9 +72,22 @@ export function MetadataTool({ files }: { files: WheelFile[] }) {
           </span>
         ))}
       </div>
+      <label className="tool-row">
+        Field
+        <input aria-label="Metadata field" value={tag} onChange={(event) => setTag(event.target.value)} />
+        <span />
+      </label>
+      <label className="tool-row">
+        Value
+        <input aria-label="Metadata value" value={value} onChange={(event) => setValue(event.target.value)} />
+        <span />
+      </label>
       <div className="tool-actions">
         <button type="button" onClick={() => void api("wheel.engines.install", { id: "exiftool" }).then(() => setNote("ExifTool is ready.")).catch((error: Error) => setNote(error.message))}>
           Download ExifTool
+        </button>
+        <button type="button" onClick={() => void api("wheel.tool.apply", { tool: "tool:metadata", edits: [{ tag, value }] }).catch((error: Error) => setNote(error.message))}>
+          Save field
         </button>
         <button type="button" className="primary" onClick={() => void api("wheel.tool.apply", { tool: "tool:metadata", removeAll: true }).catch((error: Error) => setNote(error.message))}>
           Remove all
@@ -116,27 +132,3 @@ export function PendingTool({ title }: { title: string }) {
   );
 }
 
-function ToolShell({ title, note, children }: { title: string; note: string; children: ReactNode }) {
-  return (
-    <div className="tool-root">
-      <header className="tool-head">
-        <h1>{title}</h1>
-        <button type="button" aria-label="Close" onClick={() => void api("wheel.close")}>×</button>
-      </header>
-      {children}
-      {note && <p className="tool-note">{note}</p>}
-    </div>
-  );
-}
-
-function Save({ label, onClick }: { label: string; onClick: () => Promise<unknown> | void }) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <div className="tool-actions">
-      <span />
-      <button type="button" className="primary" disabled={busy} onClick={() => { setBusy(true); void Promise.resolve(onClick()).finally(() => setBusy(false)); }}>
-        {busy ? "Saving…" : label}
-      </button>
-    </div>
-  );
-}

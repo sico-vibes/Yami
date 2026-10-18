@@ -43,7 +43,8 @@ These programs are not bundled in the Yami package. A job downloads one into `%L
 | ImageMagick 7.1.2-34 portable Q16-HDRI | Raster conversion and image compress | [ImageMagick License](https://imagemagick.org/script/license.php) | SHA-256 published on the GitHub release, 2026-10-18. HEIC encoding is not available in this build. |
 | 7-Zip 26.04 `7zr.exe` and `7z2604-extra.7z` | Extract 7z and rar. Zip, tar, and gz are implemented in Yami. | GNU LGPL. The RAR decoder adds the unRAR restriction. | SHA-256 computed from the files downloaded from 7-zip.org on 2026-10-18. |
 | ExifTool 13.59 Windows x64 | Read and strip image metadata | GPL-1.0-or-later OR Artistic-1.0-Perl. The zip also contains Strawberry Perl notices. | SHA-256 from `exiftool.org/checksums-13.59.txt`, matched against the SourceForge download on 2026-10-18. |
-| pdf-lib | Merge PDFs and build a PDF from PNG or JPEG pages | MIT. It runs inside the Electron main process and is imported only for that job. | npm lockfile. |
+| pdf-lib | Merge, split, and organize PDFs, and build a PDF from PNG or JPEG pages | MIT. It runs inside the Electron main process and is imported only for that job. | npm lockfile. |
+| jsQR | Read a QR code from an image in the tool window | Apache-2.0. Loaded only when that tool opens. | npm lockfile. |
 
 No code, artwork, or wording was copied from the Mac utility used as a behaviour reference, or from Hyoi, Holdem, Wedge, Kando, or PowerToys.
 

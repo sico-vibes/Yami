@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { shell } from "electron";
@@ -20,6 +19,8 @@ import type { WheelFile } from "../../src/wheel/types";
 import { packGzip, packTar, packZip, unpackGzip, unpackTar, unpackZip } from "./archive.ts";
 import type { EngineStore } from "./engines.ts";
 import { imagesToPdf, mergePdf } from "./pdf.ts";
+import { performTool } from "./perform-tools.ts";
+import { runChecked, runProcess } from "./spawn.ts";
 
 let chain: Promise<unknown> = Promise.resolve();
 function enqueue<T>(work: () => Promise<T>) {
@@ -29,49 +30,6 @@ function enqueue<T>(work: () => Promise<T>) {
     () => undefined,
   );
   return run;
-}
-
-export function runProcess(
-  command: string,
-  args: string[],
-  onText?: (text: string) => void,
-) {
-  return new Promise<{ code: number; stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(command, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (text) => {
-      stdout += text;
-      onText?.(text);
-    });
-    child.stderr.on("data", (text) => {
-      stderr += text;
-    });
-    child.on("error", reject);
-    child.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
-  });
-}
-
-async function runChecked(command: string, args: string[], label: string, notify: (m: string) => void) {
-  let bucket = 0;
-  const result = await runProcess(command, args, (text) => {
-    const fraction = progressFraction(text);
-    if (fraction == null) return;
-    const next = Math.ceil(fraction * 4);
-    if (next <= bucket) return;
-    bucket = next;
-    notify(`${label} ${Math.min(100, Math.round(fraction * 100))}%`);
-  });
-  if (result.code !== 0)
-    throw new Error(result.stderr.trim().split(/\r?\n/).at(-1) || `${label} failed.`);
-  return result;
-}
-
-function progressFraction(text: string) {
-  if (text.includes("progress=end")) return 1;
-  return null;
 }
 
 async function writeEntries(folder: string, entries: { name: string; data: Buffer }[]) {
@@ -116,17 +74,8 @@ async function performNow(input: {
     notify(saved.length === 1 ? `Saved ${path.basename(saved[0])}` : `Saved ${saved.length} files.`);
     return saved;
   };
-  if (input.petalId === "tool:background" && input.options?.png) {
-    const file = files[0];
-    const output = allocateFile(
-      path.dirname(file.path),
-      toolBase(file.name, "Background"),
-      "png",
-      fs.existsSync,
-    );
-    await fs.promises.writeFile(output, decodePng(String(input.options.png)));
-    return finish([output]);
-  }
+  const tooled = await performTool(input, finish);
+  if (tooled) return tooled;
   if (input.petalId.startsWith("to:")) {
     const target = input.petalId.slice(3);
     for (const file of files) {
@@ -285,17 +234,6 @@ async function pagesPdf(input: { files: WheelFile[] }) {
   );
   await imagesToPdf(input.files.map((file) => file.path), output);
   return output;
-}
-
-function decodePng(value: string) {
-  const match = /^data:image\/png;base64,([A-Za-z0-9+/=\s]+)$/.exec(value);
-  if (!match) throw new Error("The background preview was not a PNG.");
-  const bytes = Buffer.from(match[1], "base64");
-  if (bytes.length < 8 || bytes.length > 25 * 1024 * 1024)
-    throw new Error("That background image is too large.");
-  if (bytes.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a")
-    throw new Error("That background image is not a PNG.");
-  return bytes;
 }
 
 export async function readMetadata(engines: EngineStore, file: string) {

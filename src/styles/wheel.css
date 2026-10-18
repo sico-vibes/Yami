@@ -196,6 +196,7 @@ html[data-window="tool"] body {
 .tool-preview img {
   max-width: 100%;
   max-height: 360px;
+  touch-action: none;
 }
 .tool-row {
   display: grid;

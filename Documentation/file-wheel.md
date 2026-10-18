@@ -30,7 +30,13 @@ ffmpeg is asked to write `-progress pipe:1`. This build toasts when that stream 
 
 Zip, tar, and gz extract inside Yami. A `.7z` or `.rar` asks `7za.exe` from the 7-Zip extra package. That standalone program extracts 7z. It does not include the unRAR decoder, so a `.rar` is expected to fail with 7-Zip’s own message until a `7z.exe` build that contains unRAR is pinned. That path was not run.
 
-Phase 2 and 3 petals are listed on the wheel. Choosing one opens a window that says the tool is not connected yet.
+Adjust, markup, crop, redact, and collage draw in the tool window and save that picture as a new PNG. The long side is capped (1600 for adjust, 2048 for crop, 720 for the live preview) so a huge photo does not stay expanded in memory. They do not call ImageMagick. Redact is manual boxes only: face finding and text finding are not in this build, and nothing is uploaded.
+
+Mute, trim, video crop, speed, join, snapshots, split, video redact, normalize, channels, bleep, and the waveform visualizer build ffmpeg arguments and run ffmpeg as a child process. Normalize measures loudness first and, when ffmpeg prints the measurement JSON, applies a second pass. Split copies the stream, so each cut lands on a nearby keyframe. Snapshots and split write a new folder. Speed stays between 0.5× and 2× and keeps pitch with `atempo`. These commands were checked as text. ffmpeg itself was not run.
+
+PDF split writes one PDF per page into a new folder, up to 200 pages. Organize can reorder, rotate, duplicate, and drop pages. Both use pdf-lib and were executed here. QR reading uses jsQR in the tool window. A generated code was decoded in the unit tests. The preview picture has no code, so that window says none was found.
+
+Document, spreadsheet, subtitle, and slide conversions are still listed and not connected. Float, copy, move, copy path, and terminal are listed and not connected.
 
 ## Phase status
 
@@ -38,7 +44,7 @@ Phase 2 and 3 petals are listed on the wheel. Choosing one opens a window that s
 | --- | --- | --- |
 | 0 | Drag hook, wheel window, drop target, shortcut, Send to, drop shelf | Code is in the repo. The gesture rules are unit-tested. The live Windows drag is not. |
 | 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
-| 2 | Remaining image, video, audio, and PDF tools, plus QR | Not started. Those petals open a window that says they are not connected. |
+| 2 | Remaining image, video, audio, and PDF tools, plus QR | Image adjust, markup, crop, redact, and collage save a canvas PNG. PDF split and organize were executed in tests. QR reading was executed on a generated code. ffmpeg command plans for mute, trim, crop, speed, join, snapshots, split, redact, normalize, channels, bleep, and the visualizer are unit-tested and were not run. |
 | 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Not started. Convert petals for those kinds are listed; choosing one reports that the tool is not connected. |
 | 4 | HEIC encode, float shelf, remaining file actions | Not started. HEIC stays off the convert wheel. Float is listed and not connected. |
 
@@ -77,4 +83,8 @@ File wheel settings are stored with the rest of Yami’s settings: enable the dr
 9. Drop a PNG on JPG. Confirm Yami downloads ImageMagick once, the checksum matches, and a new JPG appears beside the original.
 10. Drop a WAV on MP3 and a short MP4 on GIF. Confirm ffmpeg downloads once and both outputs appear.
 11. Open Compress, Details, and Add BG from the tools wheel. Save each and confirm the new file. Turn on “Reveal saved files” and confirm Explorer selects the result.
-12. Merge two PDFs and extract a zip. Confirm the merged PDF and the extracted folder. Then drop a file on Crop or Trim and confirm the window says that tool is not connected.
+12. Merge two PDFs and extract a zip. Confirm the merged PDF and the extracted folder.
+13. Open Adjust, Markup, Crop, Redact, and Collage. Save each and confirm a new PNG. Redact should cover only the boxes you draw.
+14. Open Trim, Speed, Snapshots, and Normalize on a short media file after ffmpeg has downloaded. Confirm the new copy or folder. Then try Split and confirm the clips start near the chosen times.
+15. Split a three-page PDF and rotate one page in Organize.
+16. Drop a photo that contains a QR code and confirm the text. A photo without a code should say none was found.

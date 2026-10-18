@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from "electron";
+import { app, BrowserWindow, clipboard, screen } from "electron";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
@@ -9,6 +9,7 @@ import { filesFromArgv } from "../../src/wheel/argv";
 import { petalsFor } from "../../src/wheel/catalog";
 import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
+import { pageCount } from "./pdf-pages.ts";
 import { performWheel, readMetadata } from "./perform.ts";
 import { describeWheelFiles } from "./paths";
 
@@ -368,6 +369,14 @@ export function createWheel(deps: Deps) {
         }
         case "wheel.metadata":
           return readMetadata(engines, (await describeWheelFiles([String(args.path || "")]))[0].path);
+        case "wheel.pdf.info": {
+          const [file] = await describeWheelFiles([String(args.path || "")]);
+          if (file.path.startsWith("preview://")) return { pages: 3 };
+          return { pages: await pageCount(file.path) };
+        }
+        case "wheel.copyText":
+          clipboard.writeText(String(args.text || "").slice(0, 4000));
+          return true;
         case "wheel.backgrounds":
           return (deps.getWallpapers?.() || []).slice(0, 12).map((item) => ({
             id: item,

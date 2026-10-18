@@ -1,6 +1,26 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { AdjustTool } from "./AdjustTool";
 import { BackgroundTool } from "./BackgroundTool";
+import { CollageTool } from "./CollageTool";
+import { CropTool } from "./CropTool";
+import { MarkupTool } from "./MarkupTool";
+import {
+  BleepTool,
+  ChannelsTool,
+  JoinTool,
+  NormalizeTool,
+  SnapTool,
+  SpeedTool,
+  SplitTool,
+  TrimTool,
+  VideoCropTool,
+  VideoRedactTool,
+  VisualizerTool,
+} from "./MediaTools";
+import { OrganizeTool, PdfSplitTool } from "./PdfTools";
+import { QrTool } from "./QrTool";
+import { RedactTool } from "./RedactTool";
 import { CompressTool, MergeTool, MetadataTool, PendingTool } from "./SimpleTools";
 import type { WheelFile } from "./types";
 
@@ -10,6 +30,25 @@ const previewTools = [
   ["tool:compress", "Compress"],
   ["tool:metadata", "Details"],
   ["tool:merge", "Merge"],
+  ["tool:adjust", "Adjust"],
+  ["tool:markup", "Markup"],
+  ["tool:crop", "Crop"],
+  ["tool:redact", "Redact"],
+  ["tool:collage", "Collage"],
+  ["tool:qr", "QR"],
+  ["tool:trim", "Trim"],
+  ["tool:video-crop", "Video crop"],
+  ["tool:speed", "Speed"],
+  ["tool:join", "Join"],
+  ["tool:snapshots", "Snapshots"],
+  ["tool:split", "Split"],
+  ["tool:video-redact", "Video redact"],
+  ["tool:normalize", "Normalize"],
+  ["tool:channels", "Channels"],
+  ["tool:bleep", "Bleep"],
+  ["tool:visualizer", "Visualizer"],
+  ["tool:pdf-split", "Split pages"],
+  ["tool:organize", "Organize"],
 ];
 
 export function ToolApp() {
@@ -22,33 +61,85 @@ export function ToolApp() {
       setFiles(session.files || []);
     });
   }, []);
-  const body =
-    tool === "tool:background" ? (
-      <BackgroundTool files={files} />
-    ) : tool === "tool:compress" ? (
-      <CompressTool files={files} />
-    ) : tool === "tool:metadata" ? (
-      <MetadataTool files={files} />
-    ) : tool === "tool:merge" || tool === "tool:pdf" ? (
-      <MergeTool files={files} />
-    ) : (
-      <PendingTool title="Tool" />
-    );
+  const body = bodyFor(tool, files);
   if (!preview) return body;
   return (
     <div>
       <label className="wheel-sample">
         Tool
-        <select aria-label="Preview tool" value={tool} onChange={(event) => {
-          setTool(event.target.value);
-          void api("wheel.tool.sample", { tool: event.target.value });
-        }}>
+        <select
+          aria-label="Preview tool"
+          value={tool}
+          onChange={(event) => {
+            const next = event.target.value;
+            setTool(next);
+            void api("wheel.tool.sample", { tool: next }).then(() => api("wheel.tool.get")).then((session) => {
+              if (session) setFiles(session.files || []);
+            });
+          }}
+        >
           {previewTools.map(([id, label]) => (
-            <option key={id} value={id}>{label}</option>
+            <option key={id} value={id}>
+              {label}
+            </option>
           ))}
         </select>
       </label>
       {body}
     </div>
   );
+}
+
+function bodyFor(tool: string, files: WheelFile[]) {
+  switch (tool) {
+    case "tool:background":
+      return <BackgroundTool files={files} />;
+    case "tool:compress":
+      return <CompressTool files={files} />;
+    case "tool:metadata":
+      return <MetadataTool files={files} />;
+    case "tool:merge":
+    case "tool:pdf":
+      return <MergeTool files={files} />;
+    case "tool:adjust":
+      return <AdjustTool files={files} />;
+    case "tool:markup":
+      return <MarkupTool files={files} />;
+    case "tool:crop":
+      return <CropTool files={files} />;
+    case "tool:redact":
+      return <RedactTool files={files} />;
+    case "tool:collage":
+      return <CollageTool files={files} />;
+    case "tool:qr":
+      return <QrTool files={files} />;
+    case "tool:trim":
+      return <TrimTool files={files} />;
+    case "tool:video-crop":
+      return <VideoCropTool />;
+    case "tool:speed":
+      return <SpeedTool />;
+    case "tool:join":
+      return <JoinTool files={files} />;
+    case "tool:snapshots":
+      return <SnapTool />;
+    case "tool:split":
+      return <SplitTool />;
+    case "tool:video-redact":
+      return <VideoRedactTool />;
+    case "tool:normalize":
+      return <NormalizeTool />;
+    case "tool:channels":
+      return <ChannelsTool />;
+    case "tool:bleep":
+      return <BleepTool />;
+    case "tool:visualizer":
+      return <VisualizerTool />;
+    case "tool:pdf-split":
+      return <PdfSplitTool />;
+    case "tool:organize":
+      return <OrganizeTool files={files} />;
+    default:
+      return <PendingTool title="Tool" />;
+  }
 }
