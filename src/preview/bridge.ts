@@ -282,6 +282,20 @@ export function installPreviewBridge() {
           return wheelSession();
         case "wheel.caps":
           return { heicEncode: false };
+        case "wheel.float.get":
+          return {
+            files: [
+              {
+                path: "preview://grove.png",
+                name: "grove.png",
+                size: 2306867,
+                ext: "png",
+              },
+            ],
+          };
+        case "wheel.float.close":
+          toast("Preview closed the float shelf.");
+          return true;
         case "wheel.swap":
           wheelMode = a.mode || wheelMode;
           emit({ type: "wheel-session", session: wheelSession() });

@@ -18,6 +18,7 @@ import {
 import type { WheelFile } from "../../src/wheel/types";
 import { packGzip, packTar, packZip, unpackGzip, unpackTar, unpackZip } from "./archive.ts";
 import { convertOffice, isOfficeKind } from "./convert-docs.ts";
+import { cachedHeic } from "./heic-probe.ts";
 import type { EngineStore } from "./engines.ts";
 import { imagesToPdf, mergePdf } from "./pdf.ts";
 import { performTool } from "./perform-tools.ts";
@@ -85,7 +86,8 @@ async function performNow(input: {
       const output = allocateFile(path.dirname(file.path), stemOf(file.name), target, fs.existsSync);
       if (isOfficeKind(file.name)) await convertOffice(file.path, file.name, output, target, notify);
       else {
-        const command = convertCommand(kindOf(file.name), target, file.path, output);
+        const allowHeic = target === "heic" ? await cachedHeic(engines) : false;
+        const command = convertCommand(kindOf(file.name), target, file.path, output, allowHeic);
         const exe = await engines.ensure(command.engine);
         notify(`Converting ${file.name}`);
         await runChecked(exe, command.args, file.name, notify);

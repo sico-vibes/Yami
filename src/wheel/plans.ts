@@ -35,11 +35,15 @@ export function convertCommand(
   target: string,
   input: string,
   output: string,
+  allowHeic = false,
 ): EngineCommand {
-  if (target === "heic")
-    throw new Error(
-      "HEIC encoding is not available. The portable ImageMagick build has no x265 encoder, and this build does not claim ffmpeg can write HEIC.",
-    );
+  if (target === "heic") {
+    if (!allowHeic)
+      throw new Error(
+        "HEIC encoding is not available. The portable ImageMagick build has no x265 encoder, and ffmpeg has not reported an HEIC muxer.",
+      );
+    return ffmpeg(input, ["-c:v", "libx265", "-tag:v", "hvc1"], output);
+  }
   if (kind === "audio" || target === "mp3")
     return ffmpeg(input, target === "mp3" && kind !== "audio" ? ["-vn", ...AUDIO.mp3] : AUDIO[target] || [], output);
   if (kind === "video" || kind === "gif") {

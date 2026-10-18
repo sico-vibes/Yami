@@ -9,6 +9,8 @@ import { filesFromArgv } from "../../src/wheel/argv";
 import { petalsFor } from "../../src/wheel/catalog";
 import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
+import { runFileAction } from "./file-actions.ts";
+import { cachedHeic } from "./heic-probe.ts";
 import { pageCount } from "./pdf-pages.ts";
 import { performWheel, readMetadata } from "./perform.ts";
 import { describeWheelFiles } from "./paths";
@@ -38,6 +40,8 @@ export function createWheel(deps: Deps) {
   let shelf: BrowserWindow | undefined;
   let toolWindow: BrowserWindow | undefined;
   let toolSession: { tool: string; files: WheelFile[] } | null = null;
+  let floatWindow: BrowserWindow | undefined;
+  let floatFiles: WheelFile[] = [];
   const engines = new EngineStore(engineRoot());
   let chosen = false;
   let releaseTimer: NodeJS.Timeout | undefined;
@@ -53,6 +57,23 @@ export function createWheel(deps: Deps) {
     toolSession = null;
     if (toolWindow && !toolWindow.isDestroyed()) toolWindow.close();
     toolWindow = undefined;
+  };
+  const openFloat = (files: WheelFile[]) => {
+    floatFiles = files;
+    if (floatWindow && !floatWindow.isDestroyed()) floatWindow.close();
+    floatWindow = deps.makeWindow("float", {
+      width: 320,
+      height: 280,
+      alwaysOnTop: true,
+      resizable: false,
+      skipTaskbar: true,
+    });
+    const current = floatWindow;
+    current.setAlwaysOnTop(true, "floating");
+    current.on("closed", () => {
+      if (floatWindow === current) floatWindow = undefined;
+    });
+    current.once("ready-to-show", () => current.show());
   };
   const openTool = (tool: string, files: WheelFile[]) => {
     closeTool();
@@ -298,7 +319,7 @@ export function createWheel(deps: Deps) {
         case "wheel.session":
           return session;
         case "wheel.caps":
-          return { heicEncode: false };
+          return { heicEncode: await cachedHeic(engines) };
         case "wheel.swap":
           if (!session) return null;
           session = { ...session, mode: args.mode };
@@ -321,8 +342,19 @@ export function createWheel(deps: Deps) {
           const petal = petalsFor(
             files.map((file) => file.name),
             session?.mode || "convert",
+            { heicEncode: await cachedHeic(engines) },
           ).find((item) => item.id === args.petalId);
           if (!petal) throw new Error("That petal does not fit these files.");
+          if (petal.id === "action:float") {
+            openFloat(files);
+            closeWheel();
+            return { tool: "float" };
+          }
+          if (petal.id.startsWith("action:")) {
+            await runFileAction(petal.id, files, deps.notify);
+            closeWheel();
+            return { action: petal.id };
+          }
           if (petal.window) {
             openTool(petal.id, files);
             closeWheel();
@@ -343,6 +375,13 @@ export function createWheel(deps: Deps) {
         }
         case "wheel.tool.get":
           return toolSession;
+        case "wheel.float.get":
+          return { files: floatFiles };
+        case "wheel.float.close":
+          if (floatWindow && !floatWindow.isDestroyed()) floatWindow.close();
+          floatWindow = undefined;
+          floatFiles = [];
+          return true;
         case "wheel.tool.apply": {
           if (!toolSession) throw new Error("Nothing is open to save.");
           const outputs = await performWheel({

@@ -42,7 +42,9 @@ XLS and ODS are refused. The message tells you to save as XLSX or CSV. Slide fil
 
 OCR is not connected. There is no Tesseract download and no Windows OCR call in this build.
 
-Float, copy, move, copy path, and terminal are listed and not connected.
+Copy path writes the paths to the clipboard. Copy asks PowerShell to put the files on the Windows clipboard. Move asks for a folder and renames the file, copying across drives when a rename is refused. Terminal opens PowerShell in the file's folder. Those three were not run. Float opens a small always-on-top list and stays until it is closed.
+
+HEIC is still absent from the convert wheel. The first time a convert wheel opens, if ffmpeg is already installed, Yami reads `ffmpeg -encoders` and `ffmpeg -muxers`. The HEIC petal appears only when both an HEVC encoder and an HEIC or HEIF muxer are listed. This build does not claim the pinned Gyan or ImageMagick packages can write HEIC. The probe was not run here.
 
 ## Phase status
 
@@ -52,7 +54,7 @@ Float, copy, move, copy path, and terminal are listed and not connected.
 | 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
 | 2 | Remaining image, video, audio, and PDF tools, plus QR | Image adjust, markup, crop, redact, and collage save a canvas PNG. PDF split and organize were executed in tests. QR reading was executed on a generated code. ffmpeg command plans for mute, trim, crop, speed, join, snapshots, split, redact, normalize, channels, bleep, and the visualizer are unit-tested and were not run. |
 | 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Subtitles, a small Markdown/HTML/text path, DOCX, EPUB, CSV/TSV/XLSX, archive repack, plain-text PDF, and PDF text extraction were executed in tests. Slides and page pictures call LibreOffice if it is already installed. That program was not run, and it is not downloaded. OCR is not connected. XLS and ODS are refused with a message. |
-| 4 | HEIC encode, float shelf, remaining file actions | Not started. HEIC stays off the convert wheel. Float is listed and not connected. |
+| 4 | HEIC encode, float shelf, file actions | HEIC stays off the wheel until ffmpeg, already installed, reports both an HEVC encoder and an HEIC muxer. That probe was not run here. Float opens a small always-on-top list. Copy path is real. Copy, move, and the terminal are implemented for Windows and were not run. |
 
 ## Windows drag, unverified
 
@@ -96,3 +98,5 @@ File wheel settings are stored with the rest of Yami’s settings: enable the dr
 16. Drop a photo that contains a QR code and confirm the text. A photo without a code should say none was found.
 17. Convert a Markdown file to HTML, a CSV to XLSX, and an SRT to VTT. Confirm the new files beside the originals. Convert a text PDF and confirm the words survived.
 18. If LibreOffice is installed, drop a PPTX on PDF. If it is not, confirm the wheel says LibreOffice is not installed and does not download it.
+19. On the actions wheel, copy a path and confirm the clipboard. Move a file into another folder. Open the terminal in that folder. Pin Float and confirm the small window stays above other windows until it is closed.
+20. After ffmpeg has downloaded, open the convert wheel for a photo and confirm HEIC is absent unless `ffmpeg -muxers` actually lists HEIC.

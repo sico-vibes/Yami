@@ -10,5 +10,7 @@ export function mountWheel(mode: string) {
   if (mode === "shelf") root.render(<DropShelf />);
   else if (mode === "tool")
     void import("./ToolApp").then(({ ToolApp }) => root.render(<ToolApp />));
+  else if (mode === "float")
+    void import("./FloatShelf").then(({ FloatShelf }) => root.render(<FloatShelf />));
   else root.render(<WheelApp />);
 }
