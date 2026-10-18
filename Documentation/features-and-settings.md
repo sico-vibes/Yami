@@ -49,7 +49,7 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 Dragging a file and tapping a modifier can open a wheel of conversions, tools, or file actions at the pointer. The same wheel is available from an Explorer shortcut (`Ctrl+Alt+Y` by default), a Send to shortcut, and a tray drop shelf. The wheel window exists only while that gesture is open.
 
-The current build proves the gesture and the petal list. Dropping on a petal reports the choice and does not convert the file yet. See [File wheel](file-wheel.md) for the phase status, the unverified Windows drag, and the manual test list.
+Dropping on a conversion petal saves a new file beside the original when the matching engine is installed. Compress, details, background, and PDF merge open a small window. Other petals are visible and say they are not connected yet. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
 
 ## Windows utilities
 
@@ -79,7 +79,7 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | File wheel | Drag wheel | On | Tap a modifier during a file drag. Holding the key does not open the wheel. |
 | File wheel | Convert / Tools / Actions | Shift / Ctrl / Alt | Each wheel uses a different modifier. |
 | File wheel | Explorer shortcut | `Ctrl+Alt+Y` | Uses the files selected in the foreground File Explorer window. |
-| File wheel | Reveal saved files | Off | Asks Explorer to show a finished file. Saved once conversions run. |
+| File wheel | Reveal saved files | Off | Asks Explorer to show a finished file after a conversion or tool save. |
 | File wheel | Petal sound | Off | Short tick when the highlighted petal changes. |
 | Behavior | Memory | On | Includes saved facts in Gemini context; stored facts remain until deleted. |
 | Behavior | Noise suppression | On | Requests noise suppression from the renderer audio capture chain. |

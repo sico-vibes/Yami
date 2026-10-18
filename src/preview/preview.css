@@ -73,6 +73,11 @@
   height: 100%;
   width: 100%;
 }
+.preview-tool {
+  width: 520px;
+  height: 760px;
+  background: #12181d;
+}
 .preview-wheel {
   width: 720px;
   height: 720px;

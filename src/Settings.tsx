@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
+import { EngineStatus } from "./wheel/Engines";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 const groups = [
   ["user", "Yami"],
@@ -577,6 +578,11 @@ export function Settings({
                 "Petal sound",
                 "A quiet tick when the highlighted petal changes.",
                 toggle("fileWheelSound", "Petal sound"),
+              )}
+              {row(
+                "Engines",
+                "Downloaded into local app data only when a conversion needs them.",
+                <EngineStatus />,
               )}
               {row(
                 "Send to menu",

@@ -847,6 +847,7 @@ else {
         notify,
         native,
         getSettings: () => store.state.settings,
+        getWallpapers: () => store.state.wallpapers,
       });
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))

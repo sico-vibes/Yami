@@ -5,6 +5,7 @@ import { createFixture, demoApps, demoMetrics } from "./fixtures";
 let state = createFixture();
 let wheelSample = "image";
 let wheelMode: WheelMode = "convert";
+let previewTool = "tool:background";
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
   for (const fn of listeners) fn(event);
@@ -297,6 +298,53 @@ export function installPreviewBridge() {
           return false;
         case "wheel.configure":
           return true;
+        case "wheel.tool.get":
+          return {
+            tool: previewTool,
+            files: (previewTool === "tool:merge"
+              ? ["notes.pdf", "extra.pdf"]
+              : ["grove.png"]
+            ).map((name) => ({
+              path: `preview://${encodeURIComponent(name)}`,
+              name,
+              size: 2306867,
+              ext: name.split(".").pop(),
+            })),
+          };
+        case "wheel.tool.sample":
+          previewTool = String(a.tool || previewTool);
+          return true;
+        case "wheel.tool.apply":
+          toast(`Preview only — ${String(a.tool || "the tool")} was not saved.`);
+          return { preview: true, outputs: ["grove Background.png"] };
+        case "wheel.preview":
+          return "";
+        case "wheel.metadata":
+          return [
+            { tag: "EXIF:Artist", value: "Preview" },
+            { tag: "EXIF:Copyright", value: "Example only" },
+          ];
+        case "wheel.backgrounds":
+          return [1, 2, 3].map((n) => ({
+            id: `starter-${n}`,
+            url: `/wallpapers/starter-0${n}.jpg`,
+          }));
+        case "wheel.engines":
+          return [
+            ["ffmpeg", "9.0.2"],
+            ["magick", "7.1.2-34"],
+            ["sevenZip", "26.04"],
+            ["sevenExtra", "26.04"],
+            ["exiftool", "13.59"],
+          ].map(([id, version]) => ({
+            id,
+            version,
+            license: "See the file wheel notes",
+            installed: false,
+          }));
+        case "wheel.engines.install":
+          toast("Preview only — engines are not downloaded.");
+          return false;
         default:
           throw new Error(`Desktop-only action: ${method}`);
       }

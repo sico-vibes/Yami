@@ -63,6 +63,7 @@
     "@m-lab/ndt7": "^0.1.5",
     "@phosphor-icons/web": "^2.1.2",
     "motion": "^14.3.0",
+    "pdf-lib": "^1.17.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "systeminformation": "^5.33.15"

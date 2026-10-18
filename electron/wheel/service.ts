@@ -2,10 +2,14 @@ import { app, BrowserWindow, screen } from "electron";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { filesFromArgv } from "../../src/wheel/argv";
-import type { WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
+import { petalsFor } from "../../src/wheel/catalog";
+import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
+import { EngineStore } from "./engines.ts";
+import { performWheel, readMetadata } from "./perform.ts";
 import { describeWheelFiles } from "./paths";
 
 const exec = promisify(execFile);
@@ -24,12 +28,16 @@ type Deps = {
     reducedMotion?: boolean;
     fileWheelEnabled?: boolean;
   };
+  getWallpapers?: () => string[];
 };
 
 export function createWheel(deps: Deps) {
   let session: WheelSession | null = null;
   let wheel: BrowserWindow | undefined;
   let shelf: BrowserWindow | undefined;
+  let toolWindow: BrowserWindow | undefined;
+  let toolSession: { tool: string; files: WheelFile[] } | null = null;
+  const engines = new EngineStore(engineRoot());
   let chosen = false;
   let releaseTimer: NodeJS.Timeout | undefined;
 
@@ -39,6 +47,33 @@ export function createWheel(deps: Deps) {
   const clearRelease = () => {
     if (releaseTimer) clearTimeout(releaseTimer);
     releaseTimer = undefined;
+  };
+  const closeTool = () => {
+    toolSession = null;
+    if (toolWindow && !toolWindow.isDestroyed()) toolWindow.close();
+    toolWindow = undefined;
+  };
+  const openTool = (tool: string, files: WheelFile[]) => {
+    closeTool();
+    toolSession = { tool, files };
+    toolWindow = deps.makeWindow("tool", {
+      width: 480,
+      height: 720,
+      alwaysOnTop: true,
+      resizable: false,
+      minimizable: false,
+      maximizable: false,
+    });
+    const current = toolWindow;
+    current.on("closed", () => {
+      if (toolWindow === current) {
+        toolWindow = undefined;
+        toolSession = null;
+      }
+    });
+    current.once("ready-to-show", () => {
+      if (!current.isDestroyed()) current.show();
+    });
   };
   const closeWheel = () => {
     clearRelease();
@@ -270,6 +305,7 @@ export function createWheel(deps: Deps) {
           return session;
         case "wheel.close":
           closeWheel();
+          closeTool();
           return true;
         case "wheel.fail":
           deps.notify(String(args.message || "The wheel could not finish."));
@@ -280,15 +316,70 @@ export function createWheel(deps: Deps) {
           const files = Array.isArray(args.paths) && args.paths.length
             ? await describeWheelFiles(args.paths.map(String))
             : session?.files || [];
-          const label = String(args.petalId || "a petal");
-          deps.notify(
-            files.length
-              ? `Received ${label} for ${files.map((file) => file.name).join(", ")}. Conversion engines are not connected yet.`
-              : "Drop a file on a petal.",
-          );
-          closeWheel();
-          return { accepted: true, petalId: label, files: files.map((file) => file.name) };
+          if (!files.length) throw new Error("Drop a file on a petal.");
+          const petal = petalsFor(
+            files.map((file) => file.name),
+            session?.mode || "convert",
+          ).find((item) => item.id === args.petalId);
+          if (!petal) throw new Error("That petal does not fit these files.");
+          if (petal.window) {
+            openTool(petal.id, files);
+            closeWheel();
+            return { tool: petal.id };
+          }
+          try {
+            const outputs = await performWheel({
+              petalId: petal.id,
+              files,
+              engines,
+              reveal: !!deps.getSettings().fileWheelReveal,
+              notify: deps.notify,
+            });
+            return { outputs };
+          } finally {
+            closeWheel();
+          }
         }
+        case "wheel.tool.get":
+          return toolSession;
+        case "wheel.tool.apply": {
+          if (!toolSession) throw new Error("Nothing is open to save.");
+          const outputs = await performWheel({
+            petalId: String(args.tool || toolSession.tool),
+            files: toolSession.files,
+            options: args,
+            engines,
+            reveal: !!deps.getSettings().fileWheelReveal,
+            notify: deps.notify,
+          });
+          closeTool();
+          return { outputs };
+        }
+        case "wheel.preview": {
+          const [file] = await describeWheelFiles([String(args.path || "")]);
+          if (file.path.startsWith("preview://")) return "";
+          if (!["png", "jpg", "jpeg", "webp", "gif"].includes(file.ext))
+            throw new Error("This preview needs a PNG, JPEG, WebP, or GIF.");
+          const bytes = await fs.promises.readFile(file.path);
+          if (bytes.length > 12 * 1024 * 1024)
+            throw new Error("That image is too large to preview here.");
+          const mime = file.ext === "png" ? "image/png" : file.ext === "webp" ? "image/webp" : file.ext === "gif" ? "image/gif" : "image/jpeg";
+          return `data:${mime};base64,${bytes.toString("base64")}`;
+        }
+        case "wheel.metadata":
+          return readMetadata(engines, (await describeWheelFiles([String(args.path || "")]))[0].path);
+        case "wheel.backgrounds":
+          return (deps.getWallpapers?.() || []).slice(0, 12).map((item) => ({
+            id: item,
+            url: item.startsWith("/wallpapers/")
+              ? item
+              : "yami-asset://file/" + encodeURIComponent(item),
+          }));
+        case "wheel.engines":
+          return engines.list();
+        case "wheel.engines.install":
+          await engines.ensure(args.id);
+          return engines.list();
         case "wheel.shelf":
           api.openShelf();
           return true;
@@ -358,4 +449,9 @@ async function installSendTo() {
     { windowsHide: true, timeout: 8000 },
   );
   return { shortcut };
+}
+
+function engineRoot() {
+  const base = process.env.LOCALAPPDATA || path.join(os.homedir(), ".local", "share");
+  return path.join(base, "Yami", "engines");
 }

@@ -1,3 +1,7 @@
+html[data-window="tool"],
+html[data-window="tool"] body {
+  background: #12181d;
+}
 .wheel-root,
 .shelf-root,
 .tool-root,

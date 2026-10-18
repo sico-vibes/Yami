@@ -20,17 +20,27 @@ The same wheel opens from three fallbacks:
 - **Send to.** Settings can add a “Yami file wheel” shortcut. Windows starts Yami with `--file-wheel` and the file paths.
 - **Drop shelf.** The tray menu opens a small window. It is created when asked and destroyed when closed.
 
-Plain conversions are meant to save a new file beside the original and show a short toast. Tool petals are meant to open a small window. That dispatch is not connected yet: the current build accepts the petal and reports the file names, then closes.
+A plain conversion saves a new copy beside the original and shows a toast. It never overwrites the source. A name clash becomes `photo 2.png`. Compound names such as `archive.tar.gz` keep the stem `archive`. Tool copies use a suffix such as Compressed, No Metadata, Background, or Merged.
+
+Image, audio, and video conversions build an ImageMagick or ffmpeg command and run that executable as a child process. Zip, tar, and gz are handled in Yami. Rar and 7z ask 7-Zip. PDF merge and “pages PDF” use pdf-lib inside the main process, loaded only when that job runs. The background tool draws the preview on a canvas and saves that PNG. Compress and details open a small window. Details can strip metadata with ExifTool, or with ffmpeg for audio and video.
+
+Those engines are not shipped inside Yami. The first time a job needs one, Yami downloads it into `%LOCALAPPDATA%\Yami\engines`, checks the pinned SHA-256, and refuses to run it if the hash differs. The pins were taken on 2026-10-18 from the publisher’s checksum or from a download of that exact file. The ffmpeg URL is Gyan’s “latest release” alias, pinned to the 9.0.2 hash, so a newer upload fails closed until the pin is updated. HEIC encoding is refused. The portable ImageMagick build has no x265 encoder, and this build does not claim ffmpeg can write HEIC.
+
+ffmpeg is asked to write `-progress pipe:1`. This build toasts when that stream prints `progress=end`. It does not turn `out_time` into a live percentage. A video target size is the exception: if `ffprobe.exe` is beside the downloaded ffmpeg, Yami reads the duration and sets a bitrate.
+
+Zip, tar, and gz extract inside Yami. A `.7z` or `.rar` asks `7za.exe` from the 7-Zip extra package. That standalone program extracts 7z. It does not include the unRAR decoder, so a `.rar` is expected to fail with 7-Zip’s own message until a `7z.exe` build that contains unRAR is pinned. That path was not run.
+
+Phase 2 and 3 petals are listed on the wheel. Choosing one opens a window that says the tool is not connected yet.
 
 ## Phase status
 
 | Phase | Scope | This build |
 | --- | --- | --- |
 | 0 | Drag hook, wheel window, drop target, shortcut, Send to, drop shelf | Code is in the repo. The gesture rules are unit-tested. The live Windows drag is not. |
-| 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Not started. |
-| 2 | Remaining image, video, audio, and PDF tools, plus QR | Not started. |
-| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Not started. |
-| 4 | HEIC encode, float shelf, remaining file actions | Not started. HEIC stays off the convert wheel until a probe says an engine can write it. |
+| 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
+| 2 | Remaining image, video, audio, and PDF tools, plus QR | Not started. Those petals open a window that says they are not connected. |
+| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Not started. Convert petals for those kinds are listed; choosing one reports that the tool is not connected. |
+| 4 | HEIC encode, float shelf, remaining file actions | Not started. HEIC stays off the convert wheel. Float is listed and not connected. |
 
 ## Windows drag, unverified
 
@@ -64,3 +74,7 @@ File wheel settings are stored with the rest of Yami’s settings: enable the dr
 6. Install Send to, right-click a file, and confirm the wheel opens with that file.
 7. Open the tray drop shelf, drop a file, and confirm a wheel follows.
 8. Confirm Task Manager does not keep an extra Yami window after the wheel closes.
+9. Drop a PNG on JPG. Confirm Yami downloads ImageMagick once, the checksum matches, and a new JPG appears beside the original.
+10. Drop a WAV on MP3 and a short MP4 on GIF. Confirm ffmpeg downloads once and both outputs appear.
+11. Open Compress, Details, and Add BG from the tools wheel. Save each and confirm the new file. Turn on “Reveal saved files” and confirm Explorer selects the result.
+12. Merge two PDFs and extract a zip. Confirm the merged PDF and the extracted folder. Then drop a file on Crop or Trim and confirm the window says that tool is not connected.
