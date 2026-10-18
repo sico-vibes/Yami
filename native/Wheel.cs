@@ -168,8 +168,12 @@ static class FileWheel {
     static List<string> AsStrings(object raw) {
         List<string> list = new List<string>();
         if (raw is string) list.Add((string)raw);
-        else if (raw is object[]) foreach (object item in (object[])raw) if (item != null) list.Add(Convert.ToString(item));
-        else if (raw is ArrayList) foreach (object item in (ArrayList)raw) if (item != null) list.Add(Convert.ToString(item));
+        else if (raw is object[]) {
+            foreach (object item in (object[])raw) if (item != null) list.Add(Convert.ToString(item));
+        }
+        else if (raw is ArrayList) {
+            foreach (object item in (ArrayList)raw) if (item != null) list.Add(Convert.ToString(item));
+        }
         return list;
     }
 

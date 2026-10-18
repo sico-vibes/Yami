@@ -18,7 +18,7 @@ import { imagesToPdf, mergePdf } from "../electron/wheel/pdf.ts";
 test("new files keep the original name and add a counter when needed", () => {
   assert.equal(stemOf("archive.tar.gz"), "archive");
   assert.equal(stemOf("grove.png"), "grove");
-  const taken = new Set(["/tmp/grove.jpg"]);
+  const taken = new Set([path.join("/tmp", "grove.jpg")]);
   assert.equal(
     allocateFile("/tmp", "grove", "jpg", (value) => taken.has(value)),
     path.join("/tmp", "grove 2.jpg"),
