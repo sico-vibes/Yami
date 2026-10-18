@@ -55,6 +55,7 @@ export type RequestContext = {
   apps: AppItem[];
   launcherFiles: { name: string; path: string }[];
   panelOpen: any;
+  wheel?: (method: string, args: any, sender?: Electron.WebContents) => Promise<any>;
 };
 export function createRequestHandler(ctx: RequestContext) {
   const {
@@ -92,12 +93,20 @@ export function createRequestHandler(ctx: RequestContext) {
         return store.publicState();
       case "settings": {
         const keys = Object.keys(store.state.settings);
+        const next = { ...store.state.settings };
         for (const [k, v] of Object.entries(a))
-          if (
-            keys.includes(k) &&
-            typeof v === typeof (store.state.settings as any)[k]
-          )
-            (store.state.settings as any)[k] = v;
+          if (keys.includes(k) && typeof v === typeof (next as any)[k])
+            (next as any)[k] = v;
+        const modifiers = [
+          next.fileWheelConvert,
+          next.fileWheelTools,
+          next.fileWheelActions,
+        ];
+        if (new Set(modifiers).size < modifiers.length)
+          throw new Error(
+            "Give Convert, Tools, and Actions different modifier keys.",
+          );
+        store.state.settings = next;
         if (!process.env.YAMI_DATA_DIR)
           app.setLoginItemSettings({
             openAtLogin: store.state.settings.launchAtLogin,
@@ -599,6 +608,10 @@ export function createRequestHandler(ctx: RequestContext) {
           live: assistant.liveDiagnostics,
         };
       default:
+        if (method.startsWith("wheel.")) {
+          if (!ctx.wheel) throw new Error("The file wheel is not available.");
+          return ctx.wheel(method, a, sender);
+        }
         throw new Error("Unknown application request: " + method);
     }
   };

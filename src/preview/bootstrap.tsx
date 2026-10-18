@@ -26,6 +26,8 @@ const screens = [
   "Caption",
   "AI",
   "Terminal",
+  "File wheel",
+  "Background",
 ];
 const overlays = ["Stray", "Caption"];
 function Preview() {
@@ -81,7 +83,7 @@ function Preview() {
         </span>
       </div>
       <div
-        className={`preview-stage ${island ? "preview-island" : "preview-main"}`}
+        className={`preview-stage ${screen === "File wheel" ? "preview-wheel" : screen === "Background" ? "preview-tool" : island ? "preview-island" : "preview-main"}`}
       >
         <iframe
           ref={frame}
@@ -98,8 +100,10 @@ export function startPreview() {
   if (params.get("stage") === "1") {
     const screen = params.get("screen") || "Home",
       overlay = overlays.includes(screen),
+      tool = screen === "File wheel" || screen === "Background",
       utility =
         !overlay &&
+        !tool &&
         ![
           "Home",
           "Bond",
@@ -113,11 +117,21 @@ export function startPreview() {
       island = utility || screen === "Island";
     document.documentElement.dataset.window = overlay
       ? screen.toLowerCase()
-      : island
-        ? "island"
-        : "main";
+      : screen === "File wheel"
+        ? "wheel"
+        : screen === "Background"
+          ? "tool"
+          : island
+            ? "island"
+            : "main";
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
+    if (screen === "File wheel" || screen === "Background") {
+      void import("../wheel/entry").then((entry) =>
+        entry.mountWheel(screen === "Background" ? "tool" : "wheel"),
+      );
+      return;
+    }
     createRoot(document.getElementById("root")!).render(
       screen === "Terminal" ? (
         <Suspense fallback={<p>Opening demo terminal…</p>}>

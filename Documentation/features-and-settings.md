@@ -53,6 +53,12 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 **Clipboard.** When enabled, Yami polls for text and keeps up to 500 entries. Choose a retention period of 1, 7, 14, or 30 days. Pinned entries do not expire automatically; they are stored unencrypted in `data.json`, while unpinned entries are encrypted. Copy, pin, delete, clear, and search history from the utility panel. See [security limitations](security-and-providers.md#practical-security-limits) before relying on exclusions.
 
+## File wheel
+
+Dragging a file and tapping a modifier can open a wheel of conversions, tools, or file actions at the pointer. The same wheel is available from an Explorer shortcut (`Ctrl+Alt+Y` by default), a Send to shortcut, and a tray drop shelf. The wheel window exists only while that gesture is open.
+
+Dropping on a conversion petal saves a new file beside the original. Images, audio, and video need the matching engine. Documents, sheets, subtitles, and zip, tar, and gz archives convert inside Yami. Slides and page pictures need LibreOffice to already be installed. Compress, details, background, the image tools, the media tools, PDF merge, split, and organize open a small window. OCR is not connected. Copy path, move, the Windows clipboard copy, PowerShell, and the float shelf are on the actions wheel. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
+
 ## Windows utilities
 
 | Utility | Available behavior | Limit |
@@ -78,6 +84,11 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Shortcuts | Voice | `Win+Alt` | Hold to speak; release to finish. |
 | Shortcuts | Dictation | `Ctrl+Win` | Hold to dictate. |
 | Shortcuts | Circle to ask | `Ctrl+Shift` | Hold and draw a screen selection. |
+| File wheel | Drag wheel | On | Tap a modifier during a file drag. Holding the key does not open the wheel. |
+| File wheel | Convert / Tools / Actions | Shift / Ctrl / Alt | Each wheel uses a different modifier. |
+| File wheel | Explorer shortcut | `Ctrl+Alt+Y` | Uses the files selected in the foreground File Explorer window. |
+| File wheel | Reveal saved files | Off | Asks Explorer to show a finished file after a conversion or tool save. |
+| File wheel | Petal sound | Off | Short tick when the highlighted petal changes. |
 | Behavior | Memory | On | Includes saved facts in Gemini context; stored facts remain until deleted. |
 | Behavior | Noise suppression | On | Requests noise suppression from the renderer audio capture chain. |
 | Behavior | Reduced motion | Off | Reduces UI animation. |

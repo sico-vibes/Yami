@@ -14,7 +14,7 @@ await build({
   platform: "node",
   format: "cjs",
   outfile: "dist-electron/main.cjs",
-  external: ["electron", "node-pty"],
+  external: ["electron", "node-pty", "pdfjs-dist"],
   target: "node22",
 });
 await build({

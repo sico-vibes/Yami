@@ -25,6 +25,12 @@
       "path": "workspace.md"
     },
     {
+      "slug": "file-wheel",
+      "title": "File wheel",
+      "group": "Using Yami",
+      "path": "file-wheel.md"
+    },
+    {
       "slug": "wallpapers",
       "title": "Starter wallpapers",
       "group": "Using Yami",

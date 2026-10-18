@@ -1,3 +1,6 @@
+import os from "node:os";
+import path from "node:path";
+
 export const sensitiveTools = new Set([
   "delete_file",
   "write_file",
@@ -45,4 +48,42 @@ export function nextOccurrence(
     at.setDate(at.getDate() + (task.repeat === "weekly" ? 7 : 1));
   } while (at <= now);
   return at.toISOString();
+}
+export function assertFile(raw: string) {
+  const value = path.resolve(raw),
+    home = os.homedir();
+  const relative = path.relative(home, value);
+  if (
+    relative.startsWith("..") ||
+    path.isAbsolute(relative) ||
+    /^(AppData|\.ssh|\.aws|\.codex)(\\|$)/i.test(relative) ||
+    /\.(env|pem|key)$/i.test(value)
+  )
+    throw new Error(
+      "Choose a regular file in your user folders. Private credential and application-data folders are excluded.",
+    );
+  return value;
+}
+const scheduleTools = new Set([
+  "remind",
+  "open_app",
+  "open_url",
+  "search_site",
+  "set_volume",
+  "media_control",
+  "routine",
+]);
+export function validateScheduled(tool: string, args: any, depth = 0) {
+  if (!scheduleTools.has(tool) || depth > 1)
+    throw new Error("This action cannot run unattended.");
+  if (tool === "routine") {
+    if (
+      !Array.isArray(args.steps) ||
+      !args.steps.length ||
+      args.steps.length > 10
+    )
+      throw new Error("A routine needs 1–10 actions.");
+    for (const step of args.steps)
+      validateScheduled(step.tool, step.args, depth + 1);
+  }
 }

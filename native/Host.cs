@@ -69,11 +69,14 @@ class Host {
         KeyboardHandle = SetWindowsHookEx(13, KeyboardProc, GetModuleHandle(null), 0);
         MouseHandle = SetWindowsHookEx(14, MouseProc, GetModuleHandle(null), 0);
         ForegroundHook=SetWinEventHook(3,3,IntPtr.Zero,ForegroundProc,0,0,0);
+        FileWheel.Install();
         var reader = new Thread(ReadLoop); reader.SetApartmentState(ApartmentState.STA); reader.IsBackground = true; reader.Start();
         Application.Run();
+        FileWheel.Uninstall();
         UnhookWindowsHookEx(KeyboardHandle); UnhookWindowsHookEx(MouseHandle);
     }
     static void Send(object value) { lock(OutputLock) { Console.WriteLine(Json.Serialize(value)); Console.Out.Flush(); } }
+    internal static void Emit(object value) { Send(value); }
     static void ForegroundChanged(IntPtr hook,uint evt,IntPtr h,int obj,int child,uint thread,uint time){try{uint pid;GetWindowThreadProcessId(h,out pid);var p=Process.GetProcessById((int)pid);Send(new{eventName="foreground",process=p.ProcessName});}catch{}}
     static void ReadLoop() {
         string line;
@@ -106,22 +109,27 @@ class Host {
             if(lasso && !Lasso) Send(new {eventName="lasso-start"}); Lasso=lasso;
             if(key==0x1B && message==0x100) Send(new {eventName="escape"});
             if(AbilityArmed&&AbilityButton.StartsWith("K:")&&key.ToString()==AbilityButton.Substring(2)&&(message==0x100||message==0x104))Send(new{eventName="ability-click"});
+            FileWheel.OnKey(key, message, Voice||Dictation||Lasso);
             if(Hotkeys&&win&&key==0x41&&message==0x100){Send(new{eventName="launcher"});return new IntPtr(1);}
         }
         return CallNextHookEx(KeyboardHandle, code, w, l);
     }
     [StructLayout(LayoutKind.Sequential)] struct MouseData { public int x,y; public uint mouseData,flags,time; public IntPtr extra; }
     static IntPtr MouseHook(int code, IntPtr w, IntPtr l) {
-        if(code>=0 && AbilityArmed) {
-            long m=w.ToInt64(); bool hit=(AbilityButton=="M1" && m==0x201)||(AbilityButton=="M2"&&m==0x204)||(AbilityButton=="M3"&&m==0x207);
-            if(hit) { var p=(MouseData)Marshal.PtrToStructure(l,typeof(MouseData)); Send(new {eventName="ability-click",x=p.x,y=p.y}); }
+        if(code>=0) {
+            var p=(MouseData)Marshal.PtrToStructure(l,typeof(MouseData));
+            long m=w.ToInt64();
+            FileWheel.OnMouse(m, p.x, p.y);
+            bool hit=AbilityArmed && ((AbilityButton=="M1" && m==0x201)||(AbilityButton=="M2"&&m==0x204)||(AbilityButton=="M3"&&m==0x207));
+            if(hit) Send(new {eventName="ability-click",x=p.x,y=p.y});
         }
         return CallNextHookEx(MouseHandle,code,w,l);
     }
     static object Dispatch(string method, Dictionary<string, object> a) {
         switch(method) {
             case "ping": return new {ok=true, platform=Environment.OSVersion.ToString()};
-            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));return true;
+            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));FileWheel.Configure(a);return true;
+            case "clipboardFiles": FileWheel.SetFileDrop(a.ContainsKey("paths")?a["paths"]:null); return true;
             case "wake": {if(!a.ContainsKey("at")){CancelWaitableTimer(WakeTimer);return true;}long due=DateTime.Parse(Str(a,"at"),null,System.Globalization.DateTimeStyles.RoundtripKind).ToUniversalTime().ToFileTimeUtc();return SetWaitableTimer(WakeTimer,ref due,0,IntPtr.Zero,IntPtr.Zero,true);}
             case "context": return Context();
             case "processJob.create": return ProcessJobs.Own(Convert.ToInt32(a["pid"]));

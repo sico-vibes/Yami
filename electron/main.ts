@@ -15,9 +15,9 @@ import {
 } from "electron";
 import { spawn } from "node:child_process";
 import { runPowerShell, nativeScript } from "./platform";
+import { createWheel } from "./wheel/service";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { createRequestHandler } from "./requests";
@@ -32,11 +32,13 @@ import { createFocusTimer } from "./focus-timer";
 import { Workbench } from "./workbench";
 import { windowsBrightness, windowsControls } from "./controls";
 import {
+  assertFile,
   checkToolPermission,
   nextOccurrence,
   safeWebUrl,
   sensitiveTools,
   requiredTarget,
+  validateScheduled,
 } from "./policy";
 import type { AppItem, State, Task } from "../src/shared";
 
@@ -51,6 +53,7 @@ if (process.env.YAMI_DATA_DIR)
 let store: Store, native: Native, assistant: Assistant;
 let overlays: ReturnType<typeof createOverlays> | undefined;
 let workbench: Workbench | undefined;
+let wheel: ReturnType<typeof createWheel> | undefined;
 let trayMenu: Electron.Menu | undefined;
 const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
@@ -169,21 +172,6 @@ async function confirm(title: string, detail: string) {
     approvals.set(id, { resolve, timer });
     broadcast({ type: "confirm", id, title, detail });
   });
-}
-function assertFile(raw: string) {
-  const value = path.resolve(raw),
-    home = os.homedir();
-  const relative = path.relative(home, value);
-  if (
-    relative.startsWith("..") ||
-    path.isAbsolute(relative) ||
-    /^(AppData|\.ssh|\.aws|\.codex)(\\|$)/i.test(relative) ||
-    /\.(env|pem|key)$/i.test(value)
-  )
-    throw new Error(
-      "Choose a regular file in your user folders. Private credential and application-data folders are excluded.",
-    );
-  return value;
 }
 async function discoverApps() {
   const all: AppItem[] = [];
@@ -304,29 +292,6 @@ async function launchApp(name: string) {
   ].slice(0, 30);
   changed();
   return { opened: match.name };
-}
-const scheduleTools = new Set([
-  "remind",
-  "open_app",
-  "open_url",
-  "search_site",
-  "set_volume",
-  "media_control",
-  "routine",
-]);
-function validateScheduled(tool: string, args: any, depth = 0) {
-  if (!scheduleTools.has(tool) || depth > 1)
-    throw new Error("This action cannot run unattended.");
-  if (tool === "routine") {
-    if (
-      !Array.isArray(args.steps) ||
-      !args.steps.length ||
-      args.steps.length > 10
-    )
-      throw new Error("A routine needs 1–10 actions.");
-    for (const step of args.steps)
-      validateScheduled(step.tool, step.args, depth + 1);
-  }
 }
 async function action(
   name: string,
@@ -637,6 +602,7 @@ async function effect(kind: string, before?: any, after?: any) {
   });
 }
 async function nativeEvent(e: any) {
+  if (wheel?.onNative(e)) return;
   if (e.eventName === "foreground") {
     const aliases: Record<string, string> = {
       chrome: "Google Chrome",
@@ -711,7 +677,9 @@ const setBrightness = (args: { value: number }) =>
 const weather = () => readWeather(store, assetRoot);
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
-  app.on("second-instance", () => showMain());
+  app.on("second-instance", (_event, argv) => {
+    if (!wheel?.acceptArgv(argv)) showMain();
+  });
   app
     .whenReady()
     .then(async () => {
@@ -808,6 +776,14 @@ else {
         fullscreen: () => native.call("fullscreen").catch(() => false),
       });
       overlays.syncStray();
+      wheel = createWheel({
+        makeWindow,
+        broadcast,
+        notify,
+        native,
+        getSettings: () => store.state.settings,
+        getWallpapers: () => store.state.wallpapers,
+      });
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))
         .resize({ width: 20, height: 20 });
@@ -826,6 +802,7 @@ else {
             changed();
           },
         },
+        ...(wheel?.trayItems() || []),
         { type: "separator" },
         {
           label: "Quit Yami",
@@ -932,6 +909,7 @@ else {
         set panelOpen(value) {
           panelOpen = value;
         },
+        wheel: (method, args, sender) => wheel!.handle(method, args, sender),
       });
       ipcMain.handle("yami:invoke", async (event, method, args) => {
         if (

@@ -30,4 +30,11 @@ export const defaults: Settings = {
   abilityButton: "M1",
   customPersonality: "",
   dictationEngine: "gemini",
+  fileWheelEnabled: true,
+  fileWheelConvert: "Shift",
+  fileWheelTools: "Ctrl",
+  fileWheelActions: "Alt",
+  fileWheelHotkey: "Ctrl+Alt+Y",
+  fileWheelReveal: false,
+  fileWheelSound: false,
 };

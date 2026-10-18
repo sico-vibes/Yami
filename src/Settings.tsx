@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
+import { EngineStatus } from "./wheel/Engines";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 const groups = [
@@ -12,6 +13,7 @@ const groups = [
   ["database", "Your data"],
   ["shield-check", "Privacy"],
   ["terminal-window", "Workspace"],
+  ["circles-four", "File wheel"],
 ];
 export function Settings({
   state,
@@ -151,6 +153,7 @@ export function Settings({
     "API keys": "Your Gemini key, and a free Tavily key for web search.",
     "Your data": "Everything you keep here stays on this PC.",
     Privacy: "Choose what Yami can see and do.",
+    "File wheel": "Drag a file, tap a modifier, and drop it on a petal.",
   };
   const all = !!search;
   return (
@@ -541,6 +544,79 @@ export function Settings({
                 Read Google’s API terms <Icon name="arrow-up-right" size={14} />
               </button>
             </div>
+          </>
+        )}
+        {(section === "File wheel" || all) && (
+          <>
+            <h3 className="group-title">Drag a file onto a petal</h3>
+            <div className="setting-group">
+              {row(
+                "Drag wheel",
+                "While dragging, tap Shift, Ctrl, or Alt. Holding a modifier still changes the Windows drag.",
+                toggle("fileWheelEnabled", "Drag wheel"),
+              )}
+              {row(
+                "Convert, Tools, Actions",
+                "Each wheel needs its own modifier.",
+                <span className="segmented">
+                  {(
+                    [
+                      ["fileWheelConvert", "Convert"],
+                      ["fileWheelTools", "Tools"],
+                      ["fileWheelActions", "Actions"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <select
+                      key={key}
+                      aria-label={label}
+                      value={String(s[key])}
+                      onChange={(event) =>
+                        void patch({ [key]: event.target.value })
+                      }
+                    >
+                      {["Shift", "Ctrl", "Alt"].map((modifier) => (
+                        <option key={modifier}>{modifier}</option>
+                      ))}
+                    </select>
+                  ))}
+                </span>,
+              )}
+              {row(
+                "Explorer shortcut",
+                "Opens the wheel for the files selected in File Explorer.",
+                shortcut("fileWheelHotkey"),
+              )}
+              {row(
+                "Reveal saved files",
+                "After a conversion, show the new file in File Explorer.",
+                toggle("fileWheelReveal", "Reveal saved files"),
+              )}
+              {row(
+                "Petal sound",
+                "A quiet tick when the highlighted petal changes.",
+                toggle("fileWheelSound", "Petal sound"),
+              )}
+              {row(
+                "Engines",
+                "Downloaded into local app data only when a conversion needs them.",
+                <EngineStatus />,
+              )}
+              {row(
+                "Send to menu",
+                "Adds Yami to the Windows Send to menu.",
+                button("Install Send to", () =>
+                  void api("wheel.sendTo")
+                    .then(() => report("Send to shortcut installed."))
+                    .catch((error) => report(error.message)),
+                ),
+              )}
+            </div>
+            <p className="setting-note">
+              Tapping a modifier during a drag is still being proven on Windows.
+              If the drag cancels, use the shortcut, Send to, or the tray drop
+              shelf. Desktop icons are not always visible to the Explorer
+              shortcut.
+            </p>
           </>
         )}
       </section>
