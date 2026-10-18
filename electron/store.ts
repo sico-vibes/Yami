@@ -97,18 +97,35 @@ export class Store {
   key(name: string): string;
   key(name: string, value: string): boolean;
   key(name: string, value?: string): string | boolean {
-    if (!["gemini", "tavily"].includes(name))
+    if (
+      !["gemini", "tavily"].includes(name) &&
+      !/^(connection|provider):[a-z0-9-]{1,64}$/.test(name)
+    )
       throw new Error("Unknown API provider.");
     if (value === undefined) return this.secrets[name] || "";
+    this.setKeys({ [name]: value });
+    return !!value;
+  }
+  setKeys(changes: Record<string, string>) {
     if (!safeStorage.isEncryptionAvailable())
       throw new Error("Windows credential encryption is unavailable.");
-    if (value) this.secrets[name] = value;
-    else delete this.secrets[name];
-    fs.writeFileSync(
-      this.secretsFile,
-      safeStorage.encryptString(JSON.stringify(this.secrets)),
-    );
-    return !!value;
+    const secrets = { ...this.secrets };
+    for (const [name, value] of Object.entries(changes)) {
+      if (
+        !["gemini", "tavily"].includes(name) &&
+        !/^(connection|provider):[a-z0-9-]{1,64}$/.test(name)
+      )
+        throw new Error("Unknown API provider.");
+      if (typeof value !== "string" || value.length > 12000)
+        throw new Error("Invalid credential.");
+      if (value) secrets[name] = value;
+      else delete secrets[name];
+    }
+    const encrypted = safeStorage.encryptString(JSON.stringify(secrets));
+    fs.mkdirSync(path.dirname(this.secretsFile), { recursive: true });
+    fs.writeFileSync(this.secretsFile + ".tmp", encrypted);
+    fs.renameSync(this.secretsFile + ".tmp", this.secretsFile);
+    this.secrets = secrets;
   }
   usage(
     type: "words" | "dictations" | "turns" | "searches" | "credits",

@@ -124,6 +124,8 @@ class Host {
             case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));return true;
             case "wake": {if(!a.ContainsKey("at")){CancelWaitableTimer(WakeTimer);return true;}long due=DateTime.Parse(Str(a,"at"),null,System.Globalization.DateTimeStyles.RoundtripKind).ToUniversalTime().ToFileTimeUtc();return SetWaitableTimer(WakeTimer,ref due,0,IntPtr.Zero,IntPtr.Zero,true);}
             case "context": return Context();
+            case "processJob.create": return ProcessJobs.Own(Convert.ToInt32(a["pid"]));
+            case "processJob.close": return ProcessJobs.Close(Convert.ToInt32(a["pid"]));
             case "windows": return Windows();
             case "focus": return FocusWindow(FindWindow(Str(a,"name")));
             case "focusHandle": return FocusWindow(new IntPtr(Convert.ToInt64(a["handle"])));

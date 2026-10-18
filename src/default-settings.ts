@@ -29,4 +29,5 @@ export const defaults: Settings = {
   ability: "",
   abilityButton: "M1",
   customPersonality: "",
+  dictationEngine: "gemini",
 };

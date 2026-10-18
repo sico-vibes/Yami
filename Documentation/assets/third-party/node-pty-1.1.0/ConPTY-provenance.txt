@@ -1,0 +1,7 @@
+node-pty 1.1.0 bundles Microsoft ConPTY 1.23.251008001 in third_party/conpty/.
+Yami uses the bundled Windows x64 ConPTY DLL and OpenConsole executable.
+Microsoft Terminal/ConPTY source license: MIT, Microsoft Corporation.
+License source inspected 2026-10-18:
+https://github.com/microsoft/terminal/blob/main/LICENSE
+The required Microsoft notice is preserved in ConPTY-LICENSE.txt.
+node-pty's own LICENSE and deps/winpty/LICENSE are collected separately.

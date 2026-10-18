@@ -12,6 +12,7 @@ Yami is both the application and the name of its cat-spirit companion. She lives
 | --- | --- |
 | Install and connect your own Gemini key | [Getting started](getting-started.md) |
 | Understand voice, dictation, search, plans, utilities, or settings | [Features and settings](features-and-settings.md) |
+| Use terminal sessions, agent activity, allowances, connections or notes | [AI workspace and terminal](workspace.md) |
 | See which information leaves the PC and what requires confirmation | [Security and provider data flow](security-and-providers.md) |
 | Follow a renderer event through Electron into Windows | [Architecture](architecture.md) |
 | Run, build, package, or contribute | [Development and release](development.md) and the repository [contribution guide](../CONTRIBUTING.md) |

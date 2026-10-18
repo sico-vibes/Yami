@@ -1,5 +1,9 @@
 # Asset and third-party provenance
 
+## Adaptation research
+
+The [Coucou, Terax and CodeNotch review](research/adaptation-review.md) imports no upstream runtime code, dependencies or assets. Research checkouts/downloads remain under ignored local artifact directories. Coucou's MIT code license is separate from its reserved branding/character/media license; Terax's root is Apache-2.0 with additional terminal-component provenance; CodeNotch's root and Windows code are MIT with separate third-party asset notices. Recheck the exact reused files and required attribution before implementing any proposed adaptation. Yami keeps its own character, artwork, copy, sounds and design language under the [adaptation rules](adaptation.md).
+
 Yami combines authored UI and artwork with third-party packages, icons, fonts, geographic data, and measurement workers. Each component keeps its own license. The project’s MIT license applies only to Yami-authored material.
 
 ## Visual assets
@@ -34,6 +38,14 @@ The lockfile records exact package versions. Top-level runtime dependencies incl
 This table is a navigation aid, not a complete generated software bill of materials. Before a public release, produce a versioned dependency-license inventory from the exact install/lockfile, include required notice texts in the package, and review native/helper binaries as well as npm packages. Check that replacement wallpapers and every other non-code asset are represented in the asset manifest. Do not label the old Hitodama wallpapers as MIT or Yami-owned.
 
 ## Release checklist for asset changes
+
+The terminal adds `@xterm/xterm` 6.0.0, `@xterm/addon-fit` 0.11.0, `node-pty`
+1.1.0 and `node-addon-api` 7.1.1 (MIT; retain bundled Windows binary notices).
+Exact notices are collected in `assets/third-party/` and packaged licenses.
+Backgrounds reuse Yami starter images or a user-picked image. No upstream artwork,
+Mochi branding or downloaded reference assets are shipped. New workspace/terminal
+screenshots use synthetic browser fixtures without credentials or real shell data.
+See the [pinned source review](research/adaptation-review.md) for upstream licenses.
 
 1. Identify the upstream or creator for every new file.
 2. Verify that the license permits the intended release and redistribution.

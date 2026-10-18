@@ -2,6 +2,15 @@
 
 Each recipe ends with the same duty: update the docs (see SKILL.md, "Finish").
 
+## Adapt an upstream feature
+
+Read `Documentation/adaptation.md` from the repository root. Pin the source
+revision and license, define the selected feature's exact functional scope, and
+map backend contracts, states, side effects and failures to existing Yami UI
+patterns. Implement the operating path behind the existing main/native boundary;
+do not simplify functionality to fit the presentation. Verify parity on Windows
+and document unresolved platform differences instead of calling them complete.
+
 ## Add a setting
 
 1. Add the field to `Settings` in `src/shared.ts` and its default in
@@ -56,7 +65,7 @@ system prompt forbids purchases and sending messages; keep it that way.
 Add a `case "name":` in `native/Host.cs` (keep each case to one line in the
 existing style, add `DllImport`s at the top), call it with
 `native.call("name", args)`, and `.catch()` failures. Rebuild with
-`npm run build:native` (close any running Yami first). Test it quickly by
+`npm run build:native` (versioned host builds leave running Yami untouched). Test it quickly by
 compiling to a scratch path and piping `{"id":1,"method":"name","args":{}}` into
 the exe.
 
@@ -81,7 +90,12 @@ in the docs.
   files you touched (some older files are not Prettier-clean; leave them).
 - **`ELECTRON_RUN_AS_NODE`:** terminals hosted by Electron apps export it. Launch
   scripts must `delete env.ELECTRON_RUN_AS_NODE` (an empty string still counts).
-- **Locked native host:** CS0016 on build means a Yami instance is running.
+- **Versioned native host:** resolve `host-manifest.json` with `nativeHostPath` in
+  tests/scripts; do not hardcode or replace a running `Yami.Native.exe`.
+- **Workspace:** optional features stay off until configured. Use
+  `electron/workbench/` controllers and safe `src/preview/workbench.ts` fixtures.
+  Never read real account credentials just to test UI. The PTY helper is lazy,
+  Job Object-owned and its node-pty files must be unpacked in a package.
 - **Background browser tabs pause `requestAnimationFrame`:** if animation tests
   report zero frames, render with headless Playwright (`channel: "msedge"`) or
   test in Electron instead.

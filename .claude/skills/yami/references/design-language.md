@@ -35,9 +35,16 @@ transparent)` to tint surfaces by the current skin.
   corners 22px, pills 22–24px, dock 40px, glass loadout cards 16px. Never leave
   sharp corners on images; clip transformed images with
   `clip-path: inset(0 round Rpx)`.
+- Wallpaper tiles also need horizontal image overscan: counter-skewing a narrow
+  image exposes opposite corners even when its parent has a rounded clip.
 - Spacing: 8px base gap; cards ~14px padding; island drawer 16px padding.
 
 ## Surfaces and controls
+
+Adaptations reuse and extend these existing controls, layouts and interactions.
+Keep the source feature's backend and operating behavior intact while presenting
+it as Yami; see `Documentation/adaptation.md` from the repository root. New tabs,
+buttons, hover effects and toggles follow existing patterns, not a new UI system.
 
 - Glass: `background: #ffffff0f; backdrop-filter: blur(14px) saturate(1.3);
 border: 1px solid #ffffff1f;` plus an inset top highlight and a soft dark
@@ -56,6 +63,8 @@ border: 1px solid #ffffff1f;` plus an inset top highlight and a soft dark
 - Collapsed: 180x66 black notch with concave shoulders, Yami centred. After ~8
   quiet seconds it slims to a 190x12 bar and Yami tucks away; hover or activity
   restores it. Size changes ease over 0.32s.
+- Concave shoulders are bounded radial cutouts: 15px awake, 2px asleep. Never
+  let shoulder geometry extend below the idle bar or use spreading shadows.
 - Click or scroll down opens the drawer; double-click opens the app;
   right-click arms an equipped ability. No buttons inside the notch.
 - Open: the notch disappears and the drawer grows out of its footprint with a
@@ -101,6 +110,8 @@ Animate for interaction and active work only. Use `--ease` or the
 `cubic-bezier(.2,.8,.2,1)` used by the island; keep UI transitions 0.15–0.35s.
 Every keyframe or continuous loop needs a reduced-motion override
 (`html[data-reduced="true"]` and `prefers-reduced-motion`).
+The main dock uses one sliding selected pill (0.24s) and an incoming-page fade
+(0.2s), both finite and disabled by either reduced-motion preference.
 
 ## Voice and copy
 

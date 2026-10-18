@@ -326,6 +326,7 @@ export class Assistant {
       this.emit({ type: "state" });
     }
   }
+  dictationTransform?: (text: string, target: number) => Promise<string>;
   async dictation(data: string, mimeType: string, target: number) {
     const response = await this.client().models.generateContent({
       model: this.store.state.settings.textModel,
@@ -337,8 +338,10 @@ export class Assistant {
       ],
       config: { maxOutputTokens: 4096 },
     });
-    const text = response.text?.trim();
+    let text = response.text?.trim();
     if (!text) throw new Error("No speech was recognised.");
+    if (this.dictationTransform)
+      text = await this.dictationTransform(text, target);
     this.store.usage("dictations");
     this.store.usage("words", text.split(/\s+/).length);
     this.store.message("user", text);

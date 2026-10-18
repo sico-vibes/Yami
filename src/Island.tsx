@@ -5,7 +5,9 @@ import { Icon, Spirit, useYami } from "./ui";
 import { AudioEngine } from "./audio";
 import { Utilities } from "./Utilities";
 import { MediaPeek } from "./MediaPeek";
+import type { AgentSession } from "./workbench-types";
 export function Island() {
+  const [agent, setAgent] = useState<AgentSession | null>(null);
   const [open, setOpen] = useState(false),
     [tab, setTab] = useState<UtilityTab>("Controls"),
     [status, setStatus] = useState("idle"),
@@ -47,7 +49,10 @@ export function Island() {
   }
   const start = (kind: "voice" | "dictation", target = 0, oneShot = false) => {
     if (!prefs.current) return;
-    if (!keyReady.current) {
+    if (
+      !keyReady.current &&
+      !(kind === "dictation" && prefs.current.dictationEngine === "windows")
+    ) {
       // The main process shows the missing-key notice in the caption pill.
       if (openRef.current) report("Connect your Gemini API key in Settings.");
       void api("show", { tab: "settings" });
@@ -61,7 +66,8 @@ export function Island() {
     setMode("");
   };
   const event = (e: YamiEvent) => {
-    if (e.type === "panel") {
+    if (e.type === "agent-activity") setAgent(e.session);
+    else if (e.type === "panel") {
       openRef.current = e.open;
       setOpen(e.open);
       setClosing(false);
@@ -169,6 +175,7 @@ export function Island() {
     !mode &&
     status === "idle" &&
     !activity &&
+    !agent &&
     !toast &&
     !peek &&
     !notchHover &&
@@ -192,6 +199,14 @@ export function Island() {
       });
   };
   if (!state) return null;
+  const currentActivity =
+    activity ||
+    (agent
+      ? {
+          icon: agent.phase === "waiting" ? "hand" : "robot",
+          label: `${agent.agent} · ${agent.detail}`,
+        }
+      : null);
   return (
     <div
       className={`island-window ${open ? "expanded" : ""} ${closing ? "closing" : ""} ${asleep ? "asleep" : ""} ${armed ? "armed" : ""}`}
@@ -237,7 +252,15 @@ export function Island() {
           <Spirit
             size={mode || status === "speaking" ? 36 : 49}
             soul={state.settings.soul}
-            state={mode === "dictation" ? "listening" : status}
+            state={
+              mode === "dictation"
+                ? "listening"
+                : status === "idle" &&
+                    agent &&
+                    ["thinking", "working"].includes(agent.phase)
+                  ? "thinking"
+                  : status
+            }
           />
         </span>
         {(mode || status !== "idle") && (
@@ -253,10 +276,10 @@ export function Island() {
           </div>
         )}
       </div>
-      {!open && activity && !toast && (
+      {!open && currentActivity && !toast && (
         <div className="island-activity" role="status">
-          <Icon name={activity.icon} size={12} />
-          <span>{activity.label}</span>
+          <Icon name={currentActivity.icon} size={12} />
+          <span>{currentActivity.label}</span>
         </div>
       )}
       {!open && peek && media?.active && (
@@ -276,26 +299,31 @@ export function Island() {
       {!open &&
         notchHover &&
         !peek &&
-        !activity &&
+        !currentActivity &&
         !toast &&
         !media?.active && (
           <div className="island-scroll-hint" aria-hidden="true">
             <Icon name="caret-double-down" size={11} /> Scroll for more
           </div>
         )}
-      {!open && !asleep && !peek && media?.active && !toast && !activity && (
-        <button
-          className="mini-media"
-          onClick={() => expand(true, "Controls")}
-          onMouseEnter={() => {
-            setPeek(true);
-            void api("island.peek", { open: true });
-          }}
-        >
-          <Icon name={media.playing ? "music-notes" : "pause"} size={12} />
-          <span>{media.title}</span>
-        </button>
-      )}
+      {!open &&
+        !asleep &&
+        !peek &&
+        media?.active &&
+        !toast &&
+        !currentActivity && (
+          <button
+            className="mini-media"
+            onClick={() => expand(true, "Controls")}
+            onMouseEnter={() => {
+              setPeek(true);
+              void api("island.peek", { open: true });
+            }}
+          >
+            <Icon name={media.playing ? "music-notes" : "pause"} size={12} />
+            <span>{media.title}</span>
+          </button>
+        )}
       {open && (
         <Utilities
           state={state}

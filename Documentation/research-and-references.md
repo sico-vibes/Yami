@@ -20,6 +20,8 @@ The [Paperclip Quickstart Path](https://docs.paperclip.ing/guides/getting-starte
 
 ## Open-source product comparisons
 
+The [2026-10-17 desktop adaptation review](research/adaptation-review.md) examines pinned Coucou, Terax AI and CodeNotch source revisions for terminal, agent activity, service/model-server connections and subscription usage. It records source/module links, license boundaries, Yami placements and unresolved verification. The corresponding [adaptation policy](adaptation.md) is an engineering rule; the reviewed feature additions remain proposals.
+
 For the 2026-10-17 check, GitHub repository metadata reported MIT for [Flow Launcher](https://api.github.com/repos/Flow-Launcher/Flow.Launcher), MIT for [Handy](https://api.github.com/repos/cjpais/Handy), GPL-3.0 for [Nectar](https://api.github.com/repos/kua8/Nectar), and MIT for [PowerToys](https://api.github.com/repos/microsoft/PowerToys). These projects inform ideas about keyboard-first launch, speech capture, island/dock UI, and utility grouping. They do not establish Yami’s memory use, performance, support, or safety. Recheck upstream license files before borrowing code or assets.
 
 Community sources are context, not controlled measurements or official product records:

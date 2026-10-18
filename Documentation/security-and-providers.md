@@ -4,6 +4,32 @@ Yami runs locally and has no first-party telemetry, subscription server, or host
 
 ## Provider connections
 
+The optional [AI workspace](workspace.md) adds main-process read-only subscription
+and service requests, explicitly configured model/MCP servers and selected
+context. New keys share the Windows-encrypted credential file; broadcasts expose
+only key-presence flags. Changing a server clears its bound key unless a new key
+is supplied. HTTP is loopback-only; remote servers require HTTPS. Credential URL
+fields, credential query parameters and redirects are blocked; output is bounded.
+
+Usage reads existing client credentials without renewing/modifying them, running
+inference or using reset credits. Provider-specific unpublished routes can change.
+Service connectors provide status and links. HTTP MCP tools may have effects only
+after tool-specific confirmation; they do not become automatic Gemini tools.
+
+`workbench.json` stores local settings, notes, dictionary/snippet rules, cached
+quota metadata and retained agent phase changes. Pending approvals are not saved.
+`agent-relay.json` holds a random pipe token; the native relay checks the same
+Windows user. This is not a sandbox against other same-user programs. Hook changes
+require preview/confirmation and dated backups. Export includes workspace text
+but excludes keys; full deletion removes the sidecar/relay config. CLI hook files
+and backups are managed separately in the agent's configuration directory.
+
+Recordings use bounded temporary PCM files: Gemini sends audio to Google; Windows
+System.Speech stays local. Per-app cleanup and note summaries send text to Gemini
+only when explicitly configured/requested. Discard/owner close/quit deletes audio;
+provider/save failures retain it for retry while the view remains open. Temporary
+recording storage is not durable crash recovery.
+
 | Feature | Library / endpoint | Data sent | When it runs |
 | --- | --- | --- | --- |
 | Gemini chat, vision, tool calls, model discovery | `@google/genai` 2.30.0; Gemini Developer API `models.generateContent` and `models.list` | User prompt, recent conversation, optional selected image, function declarations and responses; the system prompt includes user name, time zone and behavior. If context or memory is enabled, their configured content is also included. | Chat, selected-image ask, key validation, or available-model refresh. |

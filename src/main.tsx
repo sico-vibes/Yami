@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/rubik";
 import "@phosphor-icons/web/regular";
@@ -11,10 +11,15 @@ import { Effects } from "./Effects";
 import { Stray } from "./Stray";
 import { CaptionOverlay } from "./Caption";
 const mode = new URLSearchParams(location.search).get("window") || "main";
+const TerminalWindow = lazy(() => import("./TerminalWindow"));
 document.documentElement.dataset.window = mode;
 function renderDesktop() {
   createRoot(document.getElementById("root")!).render(
-    mode === "island" ? (
+    mode === "terminal" ? (
+      <Suspense fallback={<div className="boot">Opening terminal…</div>}>
+        <TerminalWindow />
+      </Suspense>
+    ) : mode === "island" ? (
       <Island />
     ) : mode === "lasso" ? (
       <Lasso />

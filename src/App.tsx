@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { State, Tab, YamiEvent } from "./shared";
 import { api, asset } from "./api";
 import { Empty, Icon, IconButton, Modal, Spirit, useYami } from "./ui";
 import { Settings } from "./Settings";
 import { Loadout } from "./Loadout";
 import { Plans } from "./Plans";
+import { MainNavigation } from "./MainNavigation";
+const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export function App() {
   const [tab, setTab] = useState<Tab>("home"),
     [toast, setToast] = useState(""),
@@ -13,20 +15,44 @@ export function App() {
     [selection, setSelection] = useState<any>(null),
     [transcript, setTranscript] = useState("");
   const timer = useRef<any>(null);
+  const [attachments, setAttachments] = useState<
+    { id: string; title: string }[]
+  >([]);
   function report(message: string) {
     setToast(message);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setToast(""), 7000);
   }
   function event(e: YamiEvent) {
-    if (e.type === "navigate") setTab(e.tab);
-    else if (e.type === "status") setStatus(e.status);
+    if (e.type === "navigate") {
+      if (
+        window.dispatchEvent(
+          new Event("yami-before-navigate", { cancelable: true }),
+        )
+      )
+        setTab(e.tab);
+    } else if (e.type === "context-selected") {
+      setAttachments((old) =>
+        [...old.filter((a) => a.id !== e.item.id), e.item].slice(-5),
+      );
+      if (
+        window.dispatchEvent(
+          new Event("yami-before-navigate", { cancelable: true }),
+        )
+      )
+        setTab("home");
+    } else if (e.type === "status") setStatus(e.status);
     else if (e.type === "error" || e.type === "toast") report(e.message);
     else if (e.type === "confirm") setConfirmation(e);
     else if (e.type === "confirm-expired") setConfirmation(null);
     else if (e.type === "selection") {
       setSelection(e.image);
-      setTab("home");
+      if (
+        window.dispatchEvent(
+          new Event("yami-before-navigate", { cancelable: true }),
+        )
+      )
+        setTab("home");
     } else if (e.type === "selection-cleared") setSelection(null);
     else if (e.type === "transcript") setTranscript(e.text);
   }
@@ -79,8 +105,14 @@ export function App() {
           />
         </div>
       </header>
-      <main className={"main-content page-" + tab}>
-        {tab === "settings" ? (
+      <main key={tab} className={"main-content page-" + tab}>
+        {tab === "ai" ? (
+          <Suspense
+            fallback={<p className="empty-state">Opening workspace…</p>}
+          >
+            <WorkbenchPage report={report} />
+          </Suspense>
+        ) : tab === "settings" ? (
           <Settings state={state} report={report} />
         ) : tab === "soul" ? (
           <Loadout state={state} report={report} />
@@ -100,29 +132,15 @@ export function App() {
             }}
             report={report}
             openSettings={() => setTab("settings")}
+            attachments={attachments}
+            clearAttachments={() => setAttachments([])}
+            addAttachments={(items) =>
+              setAttachments((old) => [...old, ...items].slice(-5))
+            }
           />
         )}
       </main>
-      <nav className="bottom-dock" aria-label="Main navigation">
-        {[
-          ["home", "house", "Home"],
-          ["bond", "link", "Bond"],
-          ["soul", "flame", "Soul"],
-          ["desk", "armchair", "Desk"],
-          ["settings", "gear", "Settings"],
-        ].map(([id, icon, label]) => (
-          <button
-            key={id}
-            className={tab === id ? "selected" : ""}
-            aria-label={label}
-            title={label}
-            onClick={() => setTab(id as Tab)}
-          >
-            <Icon name={icon} size={22} />
-            {tab === id && <span>{label}</span>}
-          </button>
-        ))}
-      </nav>
+      <MainNavigation tab={tab} onNavigate={setTab} />
       {toast && (
         <div className="toast" role="status">
           {toast}
@@ -173,6 +191,9 @@ function Home({
   clearSelection,
   report,
   openSettings,
+  attachments,
+  clearAttachments,
+  addAttachments,
 }: {
   state: State;
   status: string;
@@ -181,6 +202,9 @@ function Home({
   clearSelection: () => void;
   report: (m: string) => void;
   openSettings: () => void;
+  attachments: { id: string; title: string }[];
+  clearAttachments: () => void;
+  addAttachments: (items: { id: string; title: string }[]) => void;
 }) {
   const [text, setText] = useState(""),
     [sending, setSending] = useState(false),
@@ -210,8 +234,13 @@ function Home({
     const value = text;
     setText("");
     try {
-      await api("chat", { text: value, image: selection });
+      await api("chat", {
+        text: value,
+        image: selection,
+        attachments: attachments.map((a) => a.id),
+      });
       clearSelection();
+      clearAttachments();
     } catch (e) {
       setText(value);
       report((e as Error).message);
@@ -279,6 +308,17 @@ function Home({
         </div>
       )}
       <div className="composer-wrap">
+        {!!attachments.length && (
+          <div className="selection-preview">
+            <Icon name="paperclip" />
+            <span>{attachments.map((a) => a.title).join(" · ")}</span>
+            <IconButton
+              icon="x"
+              label="Remove selected context"
+              onClick={clearAttachments}
+            />
+          </div>
+        )}
         {selection && (
           <div className="selection-preview">
             <img
@@ -300,6 +340,15 @@ function Home({
             void send();
           }}
         >
+          <IconButton
+            icon="paperclip"
+            label="Attach text files"
+            onClick={() =>
+              void api("context.pick")
+                .then(addAttachments)
+                .catch((e) => report(e.message))
+            }
+          />
           <IconButton
             icon="selection"
             label="Circle to ask"

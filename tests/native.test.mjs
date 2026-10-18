@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import readline from "node:readline";
 import path from "node:path";
+import { nativeHostPath } from "../electron/native-path.ts";
 test(
   "compiled Windows host reads real state and protects unknown operations",
   { skip: process.platform !== "win32", timeout: 30000 },
   async (t) => {
-    const child = spawn(path.resolve("native/bin/Yami.Native.exe"), [], {
+    const child = spawn(nativeHostPath(path.resolve("native/bin")), [], {
       windowsHide: true,
     });
     const pending = new Map();

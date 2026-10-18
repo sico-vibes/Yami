@@ -19,6 +19,12 @@
       "path": "features-and-settings.md"
     },
     {
+      "slug": "workspace",
+      "title": "AI workspace and terminal",
+      "group": "Using Yami",
+      "path": "workspace.md"
+    },
+    {
       "slug": "wallpapers",
       "title": "Starter wallpapers",
       "group": "Using Yami",
@@ -41,6 +47,18 @@
       "title": "Development and release",
       "group": "Project",
       "path": "development.md"
+    },
+    {
+      "slug": "adaptation",
+      "title": "Adaptation rules",
+      "group": "Project",
+      "path": "adaptation.md"
+    },
+    {
+      "slug": "adaptation-review",
+      "title": "Desktop adaptation review",
+      "group": "Project",
+      "path": "research/adaptation-review.md"
     },
     {
       "slug": "performance",

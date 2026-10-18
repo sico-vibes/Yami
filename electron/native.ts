@@ -2,6 +2,7 @@ import { app } from "electron";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import path from "node:path";
 import readline from "node:readline";
+import { nativeHostPath } from "./native-path";
 export class Native {
   process?: ChildProcessWithoutNullStreams;
   counter = 0;
@@ -15,10 +16,14 @@ export class Native {
   >();
   constructor(private event: (e: any) => void) {}
   start() {
-    const exe = app.isPackaged
-      ? path.join(process.resourcesPath, "native", "Yami.Native.exe")
-      : path.join(app.getAppPath(), "native", "bin", "Yami.Native.exe");
+    const exe = nativeHostPath(
+      app.isPackaged
+        ? path.join(process.resourcesPath, "native")
+        : path.join(app.getAppPath(), "native", "bin"),
+    );
     this.process = spawn(exe, [], { windowsHide: true, stdio: "pipe" });
+    this.process.stdin.on("error", (error) => this.fail(error));
+    this.process.stderr.on("data", () => {});
     readline
       .createInterface({ input: this.process.stdout })
       .on("line", (line) => {
@@ -62,7 +67,16 @@ export class Native {
         reject(new Error("Windows did not respond to " + method));
       }, 20000);
       this.pending.set(id, { resolve, reject, timer });
-      this.process.stdin.write(JSON.stringify({ id, method, args }) + "\n");
+      this.process.stdin.write(
+        JSON.stringify({ id, method, args }) + "\n",
+        (error) => {
+          if (error) {
+            clearTimeout(timer);
+            this.pending.delete(id);
+            reject(error);
+          }
+        },
+      );
     });
   }
   close() {

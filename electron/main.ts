@@ -29,6 +29,7 @@ import { Assistant } from "./assistant";
 import { assetRoot, makeWindow, windows } from "./windows";
 import { createOverlays } from "./overlays";
 import { createFocusTimer } from "./focus-timer";
+import { Workbench } from "./workbench";
 import { windowsBrightness, windowsControls } from "./controls";
 import {
   checkToolPermission,
@@ -49,6 +50,7 @@ if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
 let store: Store, native: Native, assistant: Assistant;
 let overlays: ReturnType<typeof createOverlays> | undefined;
+let workbench: Workbench | undefined;
 let trayMenu: Electron.Menu | undefined;
 const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
@@ -125,6 +127,7 @@ function setPanel(open: boolean, tab = currentUtility) {
     Apps: 650,
     Wallpaper: 310,
     Power: 185,
+    AI: 490,
   };
   const widths: Record<string, number> = {
     Controls: 650,
@@ -134,6 +137,7 @@ function setPanel(open: boolean, tab = currentUtility) {
     Apps: 730,
     Wallpaper: 1040,
     Power: 650,
+    AI: 790,
   };
   const display = screen.getPrimaryDisplay().workAreaSize;
   island.setBounds(
@@ -833,7 +837,17 @@ else {
       ]);
       tray.setContextMenu(trayMenu);
       tray.on("double-click", () => showMain());
+      workbench = new Workbench({
+        store,
+        native,
+        assistant,
+        broadcast,
+        showMain,
+        setPanel,
+        confirm,
+      });
       const invoke = createRequestHandler({
+        workbench,
         store,
         native,
         assistant,
@@ -926,9 +940,21 @@ else {
           )
         )
           throw new Error("Untrusted renderer.");
+        if (workbench?.handles(method))
+          return workbench.invoke(method, args, event.sender);
+        if (method === "shortcuts.capture")
+          workbench?.captureShortcuts(!!args?.active);
+        if (method === "chat") args = workbench?.prepareChat(args) || args;
+        if (
+          method === "dictation" &&
+          store.state.settings.dictationEngine === "windows"
+        )
+          return workbench?.offlineDictation(args);
         if (overlays?.handles(method)) return overlays.invoke(method, args);
         if (focusTimer.handles(method)) return focusTimer.invoke(method, args);
-        return invoke(method, args, event.sender);
+        const result = await invoke(method, args, event.sender);
+        if (method === "settings") workbench?.captureShortcuts(false);
+        return result;
       });
       await native.call("configure", {
         ...store.state.settings,
@@ -947,12 +973,14 @@ else {
       app.quit();
     });
 }
-app.on("before-quit", () => {
+app.on("before-quit", (event) => {
+  if (workbench && !workbench.confirmQuit()) { event.preventDefault(); quitting = false; return; }
   quitting = true;
   clearInterval(taskTimer);
   clearInterval(clipboardTimer);
   assistant?.stopLive();
   overlays?.dispose();
   focusTimer.dispose();
+  workbench?.dispose();
   native?.close();
 });

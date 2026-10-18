@@ -27,6 +27,8 @@ try {
     "Soul",
     "Desk",
     "Settings",
+    "AI",
+    "Terminal",
     "Island",
     "Controls",
     "Today",
@@ -41,7 +43,7 @@ try {
     await selector.selectOption(screen);
     await page.frameLocator("#preview-frame").locator("#root > *").waitFor();
     await page.waitForTimeout(250);
-    assert.ok(await page.locator(".preview-stage").isVisible(), screen);
+    await page.locator(".preview-stage").waitFor({ state: "visible" });
     if (screen === "Stats")
       await page
         .frameLocator("#preview-frame")
@@ -68,6 +70,51 @@ try {
         10,
       );
   }
+  await selector.selectOption("AI");
+  const frame = page.frameLocator("#preview-frame");
+  for (const section of [
+    "Sessions",
+    "Usage",
+    "Connections",
+    "Context",
+    "Dictation",
+    "Notes",
+    "Recap",
+    "MCP",
+    "Workspace",
+  ]) {
+    await frame
+      .getByRole("navigation", { name: "AI sections" })
+      .getByRole("button", { name: section, exact: true })
+      .click();
+    await frame.locator(".settings-content h1").waitFor();
+    assert.equal(
+      await frame.locator(".settings-content h1").count(),
+      1,
+      section,
+    );
+    assert.equal(
+      await page
+        .locator("#preview-frame")
+        .evaluate(
+          (f) =>
+            f.contentDocument.documentElement.scrollWidth <=
+            f.contentWindow.innerWidth,
+        ),
+      true,
+      section + " must fit",
+    );
+  }
+  await assert.rejects(
+    page
+      .locator("#preview-frame")
+      .evaluate((f) =>
+        f.contentWindow.yami.invoke("workbench.settings", {
+          usageKey: "fixture",
+        }),
+      ),
+    /never stores credentials/,
+  );
   await selector.selectOption("Home");
   await page.waitForTimeout(150);
   await page.screenshot({ path: `${target}/preview.png` });
@@ -144,7 +191,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      previewScreens: 15,
+      previewScreens: 17,
       documentationPages: links,
       externalPreviewRequests: external.length,
       checks: [

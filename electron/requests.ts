@@ -17,6 +17,7 @@ import type { Assistant } from "./assistant";
 import { safeWebUrl } from "./policy";
 
 export type RequestContext = {
+  workbench?: { exportData: () => any; clearData: () => void };
   store: Store;
   native: Native;
   assistant: Assistant;
@@ -563,6 +564,7 @@ export function createRequestHandler(ctx: RequestContext) {
           ...store.publicState(),
           clipboard: undefined,
           keys: undefined,
+          workbench: ctx.workbench?.exportData(),
         };
         fs.writeFileSync(r.filePath, JSON.stringify(data, null, 2));
         return true;
@@ -571,11 +573,12 @@ export function createRequestHandler(ctx: RequestContext) {
         if (
           !(await confirm(
             "Delete all my data?",
-            "This erases conversations, memories, tasks, clipboard history, settings and API keys from Yami.",
+            "This erases conversations, memories, tasks, notes, dictation rules, activity history, connections, clipboard history, settings and API keys from Yami.",
           ))
         )
           return false;
         assistant.stopLive();
+        ctx.workbench?.clearData();
         for (const f of [store.file, store.secretsFile])
           if (fs.existsSync(f)) fs.unlinkSync(f);
         app.relaunch();

@@ -310,6 +310,15 @@ kbd {
   height: calc(100vh - 66px);
   padding-bottom: 104px;
   overflow: auto;
+  animation: page-enter 0.2s var(--ease);
+}
+@keyframes page-enter {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
 }
 .bottom-dock {
   position: absolute;
@@ -329,6 +338,7 @@ kbd {
   backdrop-filter: blur(24px);
 }
 .bottom-dock button {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,8 +352,23 @@ kbd {
 }
 .bottom-dock button.selected {
   color: #f1f5f7;
+}
+.dock-selection {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  height: calc(100% - 14px);
+  width: var(--dock-width, 0px);
+  transform: translateX(var(--dock-x, 7px));
+  border-radius: 30px;
   background: #ffffff1c;
   box-shadow: inset 0 1px 0 #ffffff0c;
+  pointer-events: none;
+}
+.bottom-dock[data-ready="true"] .dock-selection {
+  transition:
+    transform 0.24s var(--ease),
+    width 0.24s var(--ease);
 }
 .toast {
   position: absolute;

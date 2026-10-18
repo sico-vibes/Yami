@@ -16,6 +16,8 @@ This initial inventory records direct packages from the application manifest. It
 | `@fontsource-variable/rubik` | Rubik font files | [Fontsource project](https://github.com/fontsource/font-files); OFL. |
 | `react`, `react-dom` | Renderer UI | [React repository](https://github.com/facebook/react); MIT. |
 | `motion` | UI animation | MIT; [Motion repository](https://github.com/motiondivision/motion). |
+| `@xterm/xterm`, `@xterm/addon-fit` | Interactive terminal renderer and fit addon | MIT notices in the generated versioned inventory. |
+| `node-pty`, `node-addon-api` | Windows PTY bridge/native addon | MIT notices, including winpty and Microsoft ConPTY; bundled binaries remain under their upstream terms. |
 | `systeminformation` | Hardware and process metrics | MIT; [systeminformation repository](https://github.com/sebhildebrandt/systeminformation). |
 | `electron` | Desktop runtime | MIT for the project; retain runtime third-party notices for the exact release. |
 | `marked` | Markdown parser used to build the docs viewer | MIT; [Marked repository](https://github.com/markedjs/marked). |

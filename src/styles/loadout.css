@@ -352,6 +352,9 @@ html[data-reduced="true"] .loadout-veil:after {
 .memory-list {
   margin-top: 25px;
 }
+.memory-page > .setting-note {
+  text-align: center;
+}
 .memory-row {
   display: flex;
   gap: 15px;

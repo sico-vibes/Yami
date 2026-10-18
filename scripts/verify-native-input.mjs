@@ -3,6 +3,7 @@ import readline from "node:readline";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { nativeHostPath } from "../electron/native-path.ts";
 fs.mkdirSync(".artifacts", { recursive: true });
 execFileSync(
   "C:\\Windows\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe",
@@ -19,7 +20,7 @@ execFileSync(
 const fixture = spawn(path.resolve(".artifacts/Fixture.exe"), [], {
     windowsHide: false,
   }),
-  host = spawn(path.resolve("native/bin/Yami.Native.exe"), [], {
+  host = spawn(nativeHostPath(path.resolve("native/bin")), [], {
     windowsHide: true,
   });
 let id = 0;

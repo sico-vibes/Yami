@@ -45,7 +45,9 @@ Gemini can use the declared tool set described in [Architecture](architecture.md
 
 **Plans.** Save a one-off or repeating reminder, app launch, URL open, site search, or routine of several app launches. Repeat options are once, daily, and weekly. Routines can have one to ten allowlisted actions. Yami checks due work while running, including while minimized to the tray, and checks missed work when it resumes. A waitable timer requests that Windows wake a sleeping PC for the next due time. This is subject to Windows policy, firmware, hardware, and session availability.
 
-**Memory.** Create, edit, or delete explicit facts. Memory is local; when the memory setting is on, saved facts enter Gemini’s prompt. A user may turn memory off without deleting stored entries.
+**Memory.** Create, edit, or delete explicit facts. Memory is local; when the memory setting is on, saved facts enter Gemini’s prompt. A user may turn memory off without deleting stored entries. The local-storage disclosure is centered beneath the memory list, including when empty.
+
+**Main navigation.** Switching among Home, Bond, Soul, Desk, and Settings slides the dock's selected pill and briefly fades in the incoming page. Reduced motion, whether set in Yami or Windows, makes these changes immediate.
 
 **Launcher.** `Win + A` searches installed apps, local files, and saved snippets. Favorite/recent apps are local. A chosen app launches through the Windows shell. Snippets can be stored, copied, and removed.
 
@@ -102,6 +104,15 @@ The source declares the voice and text defaults as `gemini-3.8-live` and `gemini
 Settings includes provider-key replacement/removal, Tavily account usage display, clipboard history toggle/retention/clear, conversation history clearing, data export, and confirmed full-data deletion. Export omits credentials and clipboard; full deletion also removes keys. See [Security and provider data flow](security-and-providers.md#local-storage) for exact storage locations and protection.
 
 ## Known boundaries
+
+The development checkout includes an [AI workspace and terminal](workspace.md):
+agent hooks/decisions, quota readers, seven read-only service connectors, local
+chat, HTTP MCP, selected context, notes/recordings, dictionary/snippets, Windows
+speech and recaps. That guide lists account/device verification limits.
+Monitoring, transcript fallback, background usage and alerts default off.
+Terminal shortcut defaults empty; background follows Yami at 6px blur/22% opacity;
+scrollback defaults to 3,000 lines; recap retention is seven days. Dictation stays
+on Gemini unless an installed Windows recognizer is selected.
 
 - Windows sleep wake, microphone permissions, brightness, radio toggles, media sessions, and app discovery are affected by system state or hardware.
 - Yami cannot act on the secure lock/UAC desktop or after a full shutdown.

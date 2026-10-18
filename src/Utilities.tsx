@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
 import { Empty, Icon, IconButton } from "./ui";
 import { Launcher } from "./Launcher";
 import { Today } from "./Today";
+const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
   "Controls",
   "Today",
@@ -12,6 +13,7 @@ export const utilityTabs: UtilityTab[] = [
   "Apps",
   "Wallpaper",
   "Power",
+  "AI",
 ];
 export function Utilities({
   state,
@@ -56,7 +58,11 @@ export function Utilities({
         ))}
       </nav>
       <div className={"utility-content utility-" + tab.toLowerCase()}>
-        {tab === "Controls" ? (
+        {tab === "AI" ? (
+          <Suspense fallback={<p>Opening AI…</p>}>
+            <WorkbenchPage compact report={report} />
+          </Suspense>
+        ) : tab === "Controls" ? (
           <Controls report={report} />
         ) : tab === "Stats" ? (
           <Stats report={report} />

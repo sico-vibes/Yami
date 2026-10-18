@@ -18,6 +18,7 @@ Cat-spirit companion with roaming mode; spirit island with action card; on-scree
 
 - Preserve the reference’s Rubik typography, dark translucent surfaces, dock, fanned catalogue, and top-center island.
 - Use Phosphor web icons; the cat spirit is a project-authored SVG with Yami’s own names and copy.
+- Adapt features through Yami's existing UI components and interaction patterns while preserving their functional/backend behavior. Record upstream revision, license and parity checks under the [adaptation rules](../adaptation.md).
 - Keep operating-system actions in the Windows integration boundary and ask for confirmation on sensitive actions.
 - Never invent system readings or claim an action succeeded without a successful result.
 - Keep local conversations, settings, plans, memories, and provider keys intact across ordinary updates.

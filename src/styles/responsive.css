@@ -69,6 +69,12 @@ html[data-reduced="true"] *:after {
   scroll-behavior: auto !important;
 }
 @media (prefers-reduced-motion: reduce) {
+  .main-content {
+    animation: none;
+  }
+  .bottom-dock[data-ready="true"] .dock-selection {
+    transition: none;
+  }
   * {
     scroll-behavior: auto !important;
   }

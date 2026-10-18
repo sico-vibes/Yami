@@ -24,6 +24,8 @@ The renderer calls `window.yami.invoke(method, args)` and subscribes to events t
 
 In a web preview, a browser-side fixture bridge substitutes for `window.yami`. It is meant for UI development and does not simulate successful OS effects or real provider behavior.
 
+`src/MainNavigation.tsx` measures the selected dock button when navigation changes and observes dock resizing (including font loading). CSS transitions move its single highlight; a keyed main element runs a finite incoming-page fade. There is no animation loop or polling for navigation, and both transitions honor the app and OS reduced-motion preferences.
+
 ## Electron main process
 
 `electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. `electron/windows.ts` creates sandboxed windows. `electron/overlays.ts` owns the roaming stray window and the caption window, and labels tool activity for the island using `electron/activity.ts`. `electron/focus-timer.ts` owns the Today focus countdown. The main process coordinates those modules with the native child process and assistant service.
@@ -38,7 +40,7 @@ There is no provider-neutral interface, model router, provider plugin API, or se
 
 ## Native Windows host
 
-`native/Host.cs` compiles to `Yami.Native.exe` using the Windows .NET Framework C# compiler. Electron launches it as a hidden child process and speaks a JSON-lines protocol over stdin/stdout. Each request has an increasing ID; the host returns a matching result or error and can emit asynchronous events such as shortcut, foreground-window, or ability events.
+`native/Host.cs` and `ProcessJobs.cs` compile to a content-versioned `Yami.Native-<hash>.exe` using the Windows .NET Framework C# compiler. `host-manifest.json` selects the current build without replacing a running binary. Electron launches it as a hidden child process and speaks a JSON-lines protocol over stdin/stdout. Each request has an increasing ID; the host returns a matching result or error and can emit asynchronous events such as shortcut, foreground-window, or ability events.
 
 The host uses Windows APIs and UI Automation for global shortcuts, foreground window discovery/focus, screen capture, clipboard reads/writes, text insertion, monitor brightness, volume, theme, app settings, media key events, and power operations. `native/Media.ps1` and `native/Radios.ps1` supply media-session and radio/night-light operations. Hardware-specific calls may fail or be unavailable; code reports an error instead of treating the request as success.
 
@@ -57,5 +59,27 @@ The main process checks enabled tasks every five seconds and clipboard history e
 When the next scheduled task changes, Yami asks Windows to set or cancel a waitable wake timer. This is a best-effort request: Windows policy and hardware decide whether a sleeping system wakes.
 
 ## Build layout
+
+`electron/workbench/index.ts` routes validated IPC to focused controllers.
+`storage.ts` keeps optional settings, notes, dictionary rules, bounded history
+and stale quota snapshots in a separate `workbench.json`. Existing `data.json`
+remains intact. New keys join the existing DPAPI-backed credentials map with
+atomic replacement; renderers see booleans only. Export includes workspace text
+and excludes keys; full deletion removes workspace data.
+
+`agents.ts` owns the authenticated per-profile named pipe and expiring requests;
+`native/Hook.cs` is a short-lived same-user relay. `hooks.ts` previews and merges
+CLI settings with backups. `transcripts.ts` is an opt-in bounded filesystem
+watcher. `usage.ts` separates quota windows and freshness/backoff state.
+`connections.ts`, `local-model.ts` and `mcp.ts` keep network requests in main.
+
+`terminal.ts` lazily creates a window and Node sidecar (`terminal-host.cjs`)
+using node-pty/ConPTY. xterm.js and fit addon form a lazy renderer chunk. Output
+credits pause the sidecar stream at 512 KB and resume below 256 KB. Job Objects
+own the helper and individual shells, including their descendants. Packaged
+node-pty is unpacked for its native addon, DLLs and worker. `speech.ts` handles
+rules and Gemini/Windows transcription; `meetings.ts` streams bounded PCM to disk
+and commits notes before removing audio. `context.ts` bounds explicit attachments
+and tracked Git diffs. See [workspace scope and verification gaps](workspace.md).
 
 Vite builds the renderer to `dist/`. `scripts/build-electron.mjs` bundles the main and preload TypeScript as CommonJS under `dist-electron/`, with Electron provided at runtime. `scripts/build-native.ps1` builds/copies the native host and PowerShell helper scripts under `native/bin/`. `electron-builder` produces the configured unsigned Windows portable artifact and copies runtime assets to external resources.

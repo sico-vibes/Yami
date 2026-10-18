@@ -1,6 +1,13 @@
-export type Tab = "home" | "bond" | "soul" | "desk" | "settings";
+export type Tab = "home" | "bond" | "soul" | "desk" | "ai" | "settings";
 export type UtilityTab =
-  "Controls" | "Today" | "Stats" | "Clipboard" | "Apps" | "Wallpaper" | "Power";
+  | "Controls"
+  | "Today"
+  | "Stats"
+  | "Clipboard"
+  | "Apps"
+  | "Wallpaper"
+  | "Power"
+  | "AI";
 export type Settings = {
   name: string;
   location: string;
@@ -31,6 +38,7 @@ export type Settings = {
   ability: string;
   abilityButton: string;
   customPersonality: string;
+  dictationEngine: "gemini" | "windows";
 };
 export type Task = {
   id: string;

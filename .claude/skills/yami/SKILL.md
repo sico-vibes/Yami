@@ -15,6 +15,8 @@ then open the reference files you need:
   character rules. Read before any UI work.
 - `references/recipes.md` — step-by-step recipes (new setting, IPC request,
   window, model tool, skin, utility tab, native call) and known pitfalls.
+- `../../../Documentation/adaptation.md` — adaptation rules and the required
+  behavior-to-UI mapping. Read before adapting a feature from another project.
 
 `AGENTS.md` at the repo root holds the non-negotiable guardrails. This skill
 expands on them; if they ever disagree, `AGENTS.md` wins.
@@ -40,6 +42,12 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
    character is project-authored SVG in `src/yami/`.
 7. **Update the documentation when you finish** (see the last section). A task
    is not done until the docs match the code.
+8. **Adapt behavior faithfully; present it as Yami.** Reuse and extend existing
+   Yami components, layouts, tokens, hover/focus and motion patterns for new
+   tabs, buttons, toggles and other controls. Preserve the source feature's
+   backend contracts, state transitions, side effects, errors and end result.
+   Document source revision/license, Windows differences and parity checks;
+   unresolved functional differences are gaps, not completed adaptations.
 
 ## Stack
 
@@ -49,7 +57,7 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
 | UI              | React 19 + TypeScript 7, Vite 8, plain CSS in `src/styles/` (no CSS framework)                                                                               |
 | Fonts and icons | Rubik Variable (`@fontsource-variable/rubik`), Phosphor web icons                                                                                            |
 | AI              | `@google/genai` (Gemini text + Live voice), optional Tavily, Wikipedia fallback                                                                              |
-| Windows         | `native/Host.cs` compiled with the .NET Framework `csc.exe` to `native/bin/Yami.Native.exe`, JSON lines over stdin/stdout; PowerShell helpers `native/*.ps1` |
+| Windows         | `native/Host.cs` + `ProcessJobs.cs`, .NET Framework `csc.exe`, versioned host selected by `host-manifest.json`; JSON lines, short-lived Hook relay and PowerShell helpers |
 | System data     | `systeminformation`, Node `os`                                                                                                                               |
 | Tests           | Node test runner (`tests/*.test.mjs`, run with `--experimental-transform-types`), Playwright scripts in `scripts/verify-*.mjs`                               |
 | Packaging       | electron-builder, unsigned portable `.exe` in `release/`                                                                                                     |
@@ -67,6 +75,7 @@ electron/        main process
   activity.ts      friendly labels for tool calls  policy.ts  permission and URL checks
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
+  workbench/       sessions/hooks, quota, connections, terminal, local model, MCP, context, speech/notes
 src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   App.tsx          main window (Home, Bond = memory, Soul = loadout, Desk = plans, Settings)
   Island.tsx       top-centre notch + drawer (Utilities.tsx tabs, Today.tsx, MediaPeek.tsx)
@@ -77,6 +86,7 @@ src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   shared.ts        State/Settings types   default-settings.ts   migrations.ts
   ui.tsx           Icon, IconButton, Toggle, Modal, useYami, Spirit re-export
   styles/          base, island, loadout, overlays, today, responsive (.css)
+  workbench/       lazy AI workspace; TerminalWindow.tsx lazy xterm.js/fit renderer
   preview/         browser-only fixture bridge for `npm run preview:web`
 native/          Host.cs, Media.ps1, Radios.ps1
 scripts/         dev, build, docs, icon export, verification and measurement
@@ -110,7 +120,7 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 2. Build UI in the browser preview: `npm run preview:web` →
    `http://127.0.0.1:5174/?screen=Home` (screens: Home, Bond, Soul, Desk,
    Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power,
-   Stray, Caption). The stage alone renders at `?stage=1&screen=<name>`.
+   Stray, Caption, AI, Terminal). The stage alone renders at `?stage=1&screen=<name>`.
 3. Run it for real on Windows: `npm run dev` (Vite on 5173 + Electron).
 4. Verify (pick what applies, report what you could not run):
 
@@ -123,6 +133,9 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 | `npm run package` then `node scripts/verify-packaged.mjs`                      | release builds (verify-packaged briefly applies then restores a wallpaper) |
 | `node scripts/measure-performance.mjs --packaged [--no-roam] [--living-flame]` | anything touching idle behaviour                                           |
 | `npm run docs`                                                                 | after editing any `Documentation/*.md`                                     |
+| `node scripts/verify-workbench.mjs [--packaged]` | native approvals, PTY state, resize, Ctrl+C and owned descendant cleanup using isolated fixtures |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-offline-speech.ps1` | synthetic WAV through installed Windows speech, without microphone/provider |
+| `node scripts/capture-workbench.mjs` | synthetic AI/terminal screenshots and supported-width layout checks |
 
 5. Add or update tests for pure logic (`tests/*.test.mjs` can import `.ts`
    files directly). Keep motion and migration logic in pure modules so they are
@@ -133,9 +146,11 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 Bump `version` in `package.json` and both top-of-file `"version"` fields in the
 compact one-line `package-lock.json`, run `npm run package`, then
 `node scripts/verify-packaged.mjs`. Output: `release/Yami <version>.exe`
-(portable, unsigned, so SmartScreen may warn). If the build fails with CS0016,
-a running Yami is locking `native/bin/Yami.Native.exe`: ask the user before
-closing it.
+(portable, unsigned, so SmartScreen may warn). Native builds now select a
+content-versioned host with an atomic manifest, leaving running old binaries
+untouched. Never close the user's app to replace a host. Keep node-pty unpacked
+for its native addon, ConPTY DLLs and worker. Source/unpacked verification can
+use `npx electron-builder --win --dir` without publishing or bumping the version.
 
 ## Finish: update the documentation (required)
 

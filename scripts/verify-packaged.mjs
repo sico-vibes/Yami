@@ -4,7 +4,8 @@ import readline from "node:readline";
 import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
-const host = spawn(path.resolve("native/bin/Yami.Native.exe"), [], {
+import { nativeHostPath } from "../electron/native-path.ts";
+const host = spawn(nativeHostPath(path.resolve("native/bin")), [], {
   windowsHide: true,
 });
 const pending = new Map();

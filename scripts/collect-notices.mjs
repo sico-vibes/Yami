@@ -35,8 +35,10 @@ function visit(name, from) {
     );
   if (!files.length && fs.existsSync(path.join(dir, "README.md")))
     files.push("README.md");
+  if (pkg.name === "node-pty") files.push("deps/winpty/LICENSE");
   const notices = [];
   for (const file of files) {
+    const basename = file.replaceAll("/", "__");
     const content = fs
       .readFileSync(path.join(dir, file), "utf8")
       .replace(/\r\n/g, "\n");
@@ -44,8 +46,8 @@ function visit(name, from) {
     for (let i = 0; i < lines.length; i += 900) {
       const target =
         lines.length > 900
-          ? `${file}.part-${Math.floor(i / 900) + 1}.txt`
-          : `${file}.txt`;
+          ? `${basename}.part-${Math.floor(i / 900) + 1}.txt`
+          : `${basename}.txt`;
       fs.writeFileSync(
         path.join(folder, target),
         lines.slice(i, i + 900).join("\n"),
@@ -53,6 +55,7 @@ function visit(name, from) {
       notices.push(`${id}/${target}`);
     }
   }
+  if (pkg.name === "node-pty") notices.push(`${id}/ConPTY-LICENSE.txt`);
   inventory.push({
     name: pkg.name,
     version: pkg.version,

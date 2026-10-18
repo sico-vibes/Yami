@@ -39,7 +39,37 @@ The same machine and procedure (packaged build, hidden main window, collapsed is
 
 Roaming adds one renderer process, and its memory difference is within the run-to-run spread seen here. Living flame clearly costs memory and CPU because each visible Yami keeps animating at about 30 fps, so it is off by default. In the desktop check, a settled Yami requested zero animation frames over 1.5 seconds and Living flame about 49 frames over 1.5 seconds. Single short runs vary by tens of megabytes; this is not a soak test, and the 50–100 MB idle target remains unmet. The [v0.2 measurement summary](evidence/performance-2026-10-17-v0.2.json) records the samples.
 
+## UI polish source-build check (2026-10-17)
+
+After the idle-notch geometry and main-navigation changes, the production-source build was sampled on Windows 10.0.26300, an AMD Ryzen 5 5600X (12 logical CPUs), and 31.9 GB RAM. The main window was hidden, the island collapsed, roaming and Living flame off, no provider session, and clipboard/context/weather disabled. Following a 10-second settle, three full-process-tree snapshots five seconds apart used `Win32_PerfFormattedData_PerfProc_Process`, including the native helper.
+
+Across eight processes, private working set was **164.6–168.2 MB**, shared-inclusive working set **732.1–735.5 MB**, and sampled normalized CPU **0–0.42%**. The earlier production-source baseline above was 165.3–167.7 MB private; these short runs are not a controlled performance comparison. The 50–100 MB idle target remains unmet. This is not a packaged measurement, task peak, or soak test; display scale and power mode were not recorded for this check. See the [sample evidence](evidence/performance-2026-10-17-ui-polish.json).
+
+Focused Edge and Windows Electron checks also confirmed that the dock highlight and incoming-page fade have no running animations after settling, rapid navigation retargets correctly, and both the OS and Yami reduced-motion preferences suppress the new motion. The idle bar keeps the existing one-time eight-second sleep timer; its shoulder fix changes only CSS geometry.
+
 ## Current sources of background work
+
+The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript
+fallback, background usage and connector timers default off. When enabled,
+agent events arrive over a pipe; transcript fallback uses bounded filesystem
+watchers, not a rescan interval. Usage refresh is five-minute opt-in; connections
+are independently opt-in at 60–3,600 seconds with deduplication/backoff. Audio
+capture exists only for an explicit recording. Terminal output uses credit-based
+backpressure and bounded scrollback; PCM writes use disk rather than retaining
+the whole recording in renderer RAM.
+
+On 2026-10-18 the production-source full-tree idle check measured **169.7–171.6
+MB private working set**, **740.4–742.2 MB shared-inclusive working set**, and
+sampled normalized CPU **0%**, across eight processes. Hardware was Windows
+10.0.26300, Ryzen 5 5600X, 12 logical CPUs, 31.9 GB RAM. Settings/method matched
+the previous no-roam UI-polish scenario: hidden main, collapsed island, Living
+flame off, no provider, clipboard/context/weather off, ten-second settle and
+three snapshots five seconds apart via Windows performance counters, including
+the native helper. Display scale and power mode were not recorded. Earlier idle
+baseline was 164.6–168.2 MB private; short noncontrolled runs do not establish a
+regression estimate. The **50–100 MB idle target remains unmet**. This does not
+measure a terminal/agent task peak or long-term recording/model ceiling. See
+[evidence](evidence/performance-2026-10-18-workspace.json).
 
 - Main process checks due tasks every five seconds. A separate Windows waitable timer asks the operating system to wake at the next scheduled action.
 - Clipboard history polls every 1.8 seconds while enabled; polling skips known private contexts and pauses briefly after Yami writes text.

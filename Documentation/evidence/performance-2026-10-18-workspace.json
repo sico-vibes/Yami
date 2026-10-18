@@ -1,0 +1,204 @@
+{
+  "date": "2026-10-18T08:11:46.734Z",
+  "build": "production-source",
+  "os": "10.0.26300",
+  "cpu": "AMD Ryzen 5 5600X 6-Core Processor             ",
+  "logicalCPUs": 12,
+  "systemRAMGB": 31.9,
+  "scenario": "Hidden main window, collapsed island, roaming off, living flame off, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.",
+  "method": "Windows Win32_PerfFormattedData_PerfProc_Process for the full current parent/child tree. WorkingSet includes shared pages; privateWorkingSet is resident private RAM. CPU is normalized by logical CPU count. Snapshots do not prove a peak or 15-minute stability.",
+  "samples": [
+    {
+      "at": "2026-10-18T08:11:34.762Z",
+      "workingSetMB": 742.2,
+      "privateWorkingSetMB": 171.6,
+      "cpuPercentOfMachine": 0,
+      "processes": [
+        {
+          "cpuPercent": 0,
+          "workingSet": 31170560,
+          "pid": 52872,
+          "name": "Yami.Native-7e2439bfd797",
+          "privateWorkingSet": 5312512
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 9416704,
+          "pid": 44344,
+          "name": "cmd#7",
+          "privateWorkingSet": 2834432
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 8318976,
+          "pid": 46440,
+          "name": "conhost#29",
+          "privateWorkingSet": 872448
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 192389120,
+          "pid": 47076,
+          "name": "electron#8",
+          "privateWorkingSet": 66072576
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 171880448,
+          "pid": 704,
+          "name": "electron#9",
+          "privateWorkingSet": 43982848
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 109539328,
+          "pid": 45276,
+          "name": "electron#10",
+          "privateWorkingSet": 7659520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 129208320,
+          "pid": 59752,
+          "name": "electron#11",
+          "privateWorkingSet": 28139520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 126308352,
+          "pid": 18440,
+          "name": "electron#12",
+          "privateWorkingSet": 25047040
+        }
+      ]
+    },
+    {
+      "at": "2026-10-18T08:11:40.736Z",
+      "workingSetMB": 740.4,
+      "privateWorkingSetMB": 169.7,
+      "cpuPercentOfMachine": 0,
+      "processes": [
+        {
+          "cpuPercent": 0,
+          "workingSet": 31346688,
+          "pid": 52872,
+          "name": "Yami.Native-7e2439bfd797",
+          "privateWorkingSet": 5365760
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 9416704,
+          "pid": 44344,
+          "name": "cmd#7",
+          "privateWorkingSet": 2834432
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 8318976,
+          "pid": 46440,
+          "name": "conhost#29",
+          "privateWorkingSet": 872448
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 192544768,
+          "pid": 47076,
+          "name": "electron#8",
+          "privateWorkingSet": 66228224
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 169615360,
+          "pid": 704,
+          "name": "electron#9",
+          "privateWorkingSet": 41717760
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 109539328,
+          "pid": 45276,
+          "name": "electron#10",
+          "privateWorkingSet": 7659520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 129208320,
+          "pid": 59752,
+          "name": "electron#11",
+          "privateWorkingSet": 28139520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 126394368,
+          "pid": 18440,
+          "name": "electron#12",
+          "privateWorkingSet": 25133056
+        }
+      ]
+    },
+    {
+      "at": "2026-10-18T08:11:46.734Z",
+      "workingSetMB": 740.4,
+      "privateWorkingSetMB": 169.7,
+      "cpuPercentOfMachine": 0,
+      "processes": [
+        {
+          "cpuPercent": 0,
+          "workingSet": 31346688,
+          "pid": 52872,
+          "name": "Yami.Native-7e2439bfd797",
+          "privateWorkingSet": 5365760
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 9416704,
+          "pid": 44344,
+          "name": "cmd#7",
+          "privateWorkingSet": 2834432
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 8318976,
+          "pid": 46440,
+          "name": "conhost#29",
+          "privateWorkingSet": 872448
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 192552960,
+          "pid": 47076,
+          "name": "electron#8",
+          "privateWorkingSet": 66236416
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 169623552,
+          "pid": 704,
+          "name": "electron#9",
+          "privateWorkingSet": 41725952
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 109539328,
+          "pid": 45276,
+          "name": "electron#10",
+          "privateWorkingSet": 7659520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 129208320,
+          "pid": 59752,
+          "name": "electron#11",
+          "privateWorkingSet": 28139520
+        },
+        {
+          "cpuPercent": 0,
+          "workingSet": 126394368,
+          "pid": 18440,
+          "name": "electron#12",
+          "privateWorkingSet": 25133056
+        }
+      ]
+    }
+  ]
+}

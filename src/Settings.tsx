@@ -1,7 +1,8 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
+const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 const groups = [
   ["user", "Yami"],
   ["keyboard", "Shortcuts"],
@@ -10,6 +11,7 @@ const groups = [
   ["key", "API keys"],
   ["database", "Your data"],
   ["shield-check", "Privacy"],
+  ["terminal-window", "Workspace"],
 ];
 export function Settings({
   state,
@@ -180,10 +182,15 @@ export function Settings({
         </nav>
       </aside>
       <section className="settings-content">
-        <h1>{all ? "Search settings" : section}</h1>
+        {section === "Workspace" && (
+          <Suspense fallback={<p>Opening workspace settings…</p>}>
+            <WorkbenchPage embedded initial="Workspace" report={report} />
+          </Suspense>
+        )}
+        {section !== "Workspace" && <><h1>{all ? "Search settings" : section}</h1>
         <p className="page-description">
           {all ? `Results for “${search}”` : titles[section]}
-        </p>
+        </p></>}
         {(section === "Yami" || all) && (
           <>
             <h3 className="group-title">Your companion</h3>

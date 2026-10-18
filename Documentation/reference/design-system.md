@@ -1,10 +1,21 @@
 # Design system
 
+The AI workspace extends Settings navigation, grouped rows, fields and toggles.
+Dock/island tabs reuse selected pills, Phosphor, focus/hover tokens and finite
+reduced-motion-aware transitions. Sessions/connections use separated list rows;
+quota bars represent published windows. Approval dialogs protect real decisions.
+Terminal chrome uses existing buttons and fields, with monospace reserved for
+shell/code data. Background blur stays static at idle.
+
 **Mode:** operate. **Visual reference:** the supplied Hitodama reference images. This document records Yami’s implemented styling and layout. It does not certify pixel matching or recover undocumented original behavior.
 
 Yami is the app name and the name used for its small spirit companion. The product remains a Windows desktop app with a transparent island above the desktop. Keep the supplied reference geometry, Rubik typography, dark translucent surfaces, bottom dock, fanned catalogue, and top-center island. Do not add a marketing site or unrelated features.
 
 The implementation lives in [`src/style.css`](../../src/style.css), which imports styles from [`src/styles/`](../../src/styles/). Loadout card geometry is in [`src/Loadout.tsx`](../../src/Loadout.tsx); Yami's shape, flame motion, features and skins are in [`src/yami/`](../../src/yami/); Phosphor icon wrappers are in [`src/ui.tsx`](../../src/ui.tsx). Product limits are in [the product brief](product-brief.md); reconstruction and verification limits are in [the verification history](verification-history.md) and [README](../../README.md).
+
+## Adaptation
+
+New features extend and reuse this system: existing tabs, dock/utility navigation, settings rows, buttons, toggles, fields, hover/focus states and motion. A new tab or action follows those patterns instead of importing its source application's interface or inventing competing controls. Presentation changes must preserve the adapted feature's end-to-end outcome, backend contracts, operating behavior and error handling; unresolved functional differences remain explicit gaps. See the [adaptation rules](../adaptation.md).
 
 ## Core tokens
 
@@ -46,7 +57,9 @@ Settings uses a 278px sidebar, flexible content column, 29px gap, 30px horizonta
 
 Catalogue mode covers the viewport with a warm translucent scrim and 30px backdrop blur; the title bar and dock are hidden. Cards are `clamp(250px, 31.1vw, 360px)` wide and `clamp(335px, 62vh, 485px)` high. The front card is upright; neighbours shift 36–60px and rotate 4–8 degrees around a 20%/100% origin. The nearest three cards on each side remain visible.
 
-The island notch is centered at the top: 180×66px normally and a 190×12px bar when idle, with 18px (10px when idle) lower corners and concave shoulder shapes; size changes ease over 0.32s. When open, the notch disappears and the utility shell starts at the top edge with 22px lower corners and height `calc(100vh - 14px)`; it opens with a 0.3s clip-path reveal from the notch footprint and closes with a 0.19s reverse. Overlay document backgrounds remain transparent so the real Windows desktop shows through.
+The island notch is centered at the top: 180×66px normally and a 190×12px bar when idle, with 18px (10px when idle) lower corners. Its concave shoulders use bounded radial cutouts, shrinking from 15px to 2px at idle so they never hang below the bar as sharp tips; size changes ease over 0.32s. When open, the notch disappears and the utility shell starts at the top edge with 22px lower corners and height `calc(100vh - 14px)`; it opens with a 0.3s clip-path reveal from the notch footprint and closes with a 0.19s reverse. Overlay document backgrounds remain transparent so the real Windows desktop shows through.
+
+Wallpaper tiles have a 20px rounded clip and an 11-degree skew. Their counter-skewed images extend 20px beyond each horizontal edge to fill all four rounded corners, including on narrow tiles. Overflowing rows align to the start so the first tile stays reachable. The memory page centers its local-storage disclosure beneath the list in both empty and populated states.
 
 ## Depth and controls
 
@@ -54,7 +67,7 @@ Depth combines dark tonal layering, backdrop blur, inset highlights, and restrai
 
 - **Buttons:** soft and primary pills use 14px text with 8px icon gaps. Primary controls have a translucent blue border and 43px minimum height. Gold utility actions use compact 11px semibold text. Hover lightens surfaces; active state scales to 0.975. Keyboard focus uses a 2px accent outline with 3px offset. Disabled buttons dim.
 - **Fields:** translucent fill and a transparent 1px border; focus uses `#8dccff88` and the focused fill. Search fields use a 44px minimum-height pill.
-- **Navigation:** the dock uses an inset translucent selected pill. Settings uses rounded rows with blue selected fill and lighter text. Keep accessible labels for icon-only actions.
+- **Navigation:** the dock uses one inset translucent selected pill that slides and resizes over 0.24s; incoming main pages fade in over 0.2s. Rapid changes retarget the pill immediately. Both motions stop after settling and are disabled by Yami's reduced-motion setting or the operating-system preference. Settings uses rounded rows with blue selected fill and lighter text. Keep accessible labels for icon-only actions; the active main navigation button exposes `aria-current="page"`.
 - **Settings groups:** shallow translucent fill, 19px horizontal inset, and hairline row separators. Controls stay beside row copy within a 46% maximum-width area.
 - **Catalogue:** tinted layered cards center the art, name, rarity, copy, and bottom action. Active and locked labels follow the owned state; wheel and arrow controls move the front card.
 - **Yami (cat spirit):** a front-facing SVG spirit with no limbs: two cat ears, oval eyes, a small cat mouth, whiskers and blush on a round head of radius 27, whose lower half burns downward as three stacked flame layers built from a polar outline. Each layer has 3–5 tongues that sweep downward and inward with a slight curl, and one long centre tongue. One `requestAnimationFrame` loop per instance runs only while active (hover plus a 2.5s linger, a non-idle state, roaming/dragging, or Living flame): tongue lengths, angles and curls flicker, up to ten embers drift away and fade, the body bobs, ears twitch, eyes blink every 4.6s, listening pulses the glow and speaking opens the mouth. When activity ends the pose eases to rest and the loop is cancelled. Connecting and sleeping dim the character; sleeping closes the eyes. Reduced-motion settings and the operating-system preference show a static pose.

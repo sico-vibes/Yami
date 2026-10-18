@@ -1,6 +1,7 @@
 import type { YamiEvent, State } from "../shared";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
 import { previewOverlay } from "./overlays";
+import { previewWorkbench } from "./workbench";
 let state = createFixture();
 const listeners = new Set<(event: YamiEvent) => void>();
 export function emit(event: YamiEvent) {
@@ -26,6 +27,7 @@ export function installPreviewBridge() {
     },
     async invoke(method, args = {}) {
       const a = args;
+      if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting)\./.test(method)) return previewWorkbench(method, a, emit);
       switch (method) {
         case "state":
           return structuredClone(state);

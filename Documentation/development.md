@@ -32,6 +32,7 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 ## Source map
 
 - `src/` — React/TypeScript renderer and styles. `src/main.tsx` picks the component from `?window=` (main, island, lasso, effect, stray, caption).
+- `src/MainNavigation.tsx` — main dock buttons and event-driven selected-pill positioning, with finite CSS transitions.
 - `src/yami/` — the Yami character: `YamiSpirit.tsx` renders, `motion.ts` holds the tested flame and pose maths, `features.ts` the face and ears, `skins.ts` the colourways.
 - `src/Island.tsx`, `src/Utilities.tsx`, `src/Today.tsx`, `src/MediaPeek.tsx` — the island notch, drawer tabs, Today panel and now-playing card.
 - `src/Loadout.tsx`, `src/LoadoutHub.tsx` — loadout catalogue and the orbiting hub; `src/Stray.tsx`, `src/Caption.tsx` — roaming Yami and caption pill.
@@ -55,8 +56,11 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 - `tests/` — unit and integration fixtures.
 - `scripts/` — build, startup, verification, icon (`export-spirit.mjs`, `create-icon.mjs`), performance measurement and fixture commands.
 - `.claude/skills/yami/` — the Yami development skill for coding agents: stack, design language, recipes and the documentation duty.
+- `.agents/skills/yami/` — the project-scoped Codex installation of the same skill, including its reference files. Invoke it as `$yami` in this repository. Keep it in sync with `.claude/skills/yami/` when updating the skill. It is not installed in a user-wide skills directory. Codex detects local skills automatically; restart Codex if it does not appear in the skill selector.
 
 ## Validation by change type
+
+For an upstream feature adaptation, read [Adaptation rules](adaptation.md) first. Record the source revision/license and behavior-to-Yami mapping before implementation, then verify the real Windows operating path as well as the reused presentation. [Desktop adaptation research](research/adaptation-review.md) contains the Coucou, Terax and CodeNotch feasibility notes; these are proposals, not installed capabilities.
 
 Pick relevant checks; do not treat them as interchangeable:
 
@@ -75,6 +79,25 @@ Verification scripts in the repository include `scripts/verify-dev.mjs`, `script
 The preview loads the same renderer pages and styles as Electron but supplies a browser fixture bridge. Keep fixture data stable, obviously synthetic, and separated from production app state. For each new renderer command, define a safe fixture result so the interface can be exercised without granting real local file, power, provider, microphone, or screen access. Do not make the fixture return “success” for an action the browser cannot perform; show a clear simulated result or unavailable state. `npm run preview:web` is for interface feedback, never a release validation path.
 
 ## Package layout
+
+Workspace verification commands in the development checkout:
+
+- `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
+  approval relay, persistent PTY, resize, interruption and descendant cleanup.
+- `npx electron-builder --win --dir` followed by
+  `node scripts/verify-workbench.mjs --packaged`: unpacked checks without applying
+  a wallpaper or accessing real accounts. `YAMI_PACKAGE_DIR` overrides the output
+  directory. This does not publish a release or bump the version.
+- `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-offline-speech.ps1`:
+  installed recognizer against a synthetic WAV; no microphone or network.
+- `node scripts/capture-workbench.mjs`: synthetic screenshots and 850/1160px checks
+  against the running preview server. Preview adds **AI** and **Terminal** for 17
+  screens; `src/preview/workbench.ts` blocks recording and credentials.
+
+Native builds select `Yami.Native-<source-hash>.exe` through an atomic
+`host-manifest.json`. This permits builds while the old app remains open. Never
+close the user's app merely to replace a binary. Legacy packages without a
+manifest can use `Yami.Native.exe`. See [workspace support limits](workspace.md).
 
 Vite output under `dist/` and Electron output under `dist-electron/` are bundled into the app. The package includes `package.json` plus those outputs and copies the compiled native executable and scripts to a `native` resource directory. User-facing wallpaper, city data, and app icons are copied to `assets`. Electron-builder’s Windows target is `portable`, product name is `Yami`, app ID is `in.yami.desktop`, and executable signing is disabled in current configuration.
 

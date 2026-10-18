@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "../App";
 import { Island } from "../Island";
@@ -7,6 +7,7 @@ import { CaptionOverlay } from "../Caption";
 import { Spirit } from "../ui";
 import { emit, installPreviewBridge } from "./bridge";
 import "./preview.css";
+const TerminalWindow = lazy(() => import("../TerminalWindow"));
 const screens = [
   "Home",
   "Bond",
@@ -23,6 +24,8 @@ const screens = [
   "Power",
   "Stray",
   "Caption",
+  "AI",
+  "Terminal",
 ];
 const overlays = ["Stray", "Caption"];
 function Preview() {
@@ -32,7 +35,15 @@ function Preview() {
     screens.includes(requested) ? requested : "Home",
   );
   const frame = useRef<HTMLIFrameElement>(null);
-  const island = screens.indexOf(screen) >= 5;
+  const island = ![
+    "Home",
+    "Bond",
+    "Soul",
+    "Desk",
+    "Settings",
+    "AI",
+    "Terminal",
+  ].includes(screen);
   useEffect(() => {
     history.replaceState(null, "", `?screen=${encodeURIComponent(screen)}`);
   }, [screen]);
@@ -87,7 +98,18 @@ export function startPreview() {
   if (params.get("stage") === "1") {
     const screen = params.get("screen") || "Home",
       overlay = overlays.includes(screen),
-      utility = !overlay && screens.indexOf(screen) >= 6,
+      utility =
+        !overlay &&
+        ![
+          "Home",
+          "Bond",
+          "Soul",
+          "Desk",
+          "Settings",
+          "AI",
+          "Terminal",
+          "Island",
+        ].includes(screen),
       island = utility || screen === "Island";
     document.documentElement.dataset.window = overlay
       ? screen.toLowerCase()
@@ -97,7 +119,11 @@ export function startPreview() {
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
     createRoot(document.getElementById("root")!).render(
-      screen === "Stray" ? (
+      screen === "Terminal" ? (
+        <Suspense fallback={<p>Opening demo terminal…</p>}>
+          <TerminalWindow />
+        </Suspense>
+      ) : screen === "Stray" ? (
         <Stray />
       ) : screen === "Caption" ? (
         <CaptionOverlay />

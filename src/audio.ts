@@ -1,5 +1,6 @@
 import { api } from "./api";
 import type { Settings } from "./shared";
+import { encodeBytes, pcmWav } from "./pcm-capture";
 const base64 = (buffer: ArrayBuffer) => {
   const b = new Uint8Array(buffer);
   let text = "";
@@ -107,6 +108,16 @@ export class AudioEngine {
           try {
             const blob = new Blob(chunks, { type: mimeType });
             if (blob.size < 500) return;
+            if (settings.dictationEngine === "windows") {
+              const decoder = new AudioContext({ sampleRate: 16000 });
+              try {
+                const audio = await decoder.decodeAudioData(await blob.arrayBuffer());
+                const pcm = new Int16Array(audio.length), channel = audio.getChannelData(0);
+                for (let i = 0; i < pcm.length; i++) pcm[i] = Math.max(-1, Math.min(1, channel[i])) * 32767;
+                await api("dictation", { data: encodeBytes(pcmWav([new Uint8Array(pcm.buffer)])), mimeType: "audio/wav", target });
+              } finally { await decoder.close(); }
+              return;
+            }
             await api("dictation", {
               data: base64(await blob.arrayBuffer()),
               mimeType: "audio/webm",
