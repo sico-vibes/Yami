@@ -183,6 +183,17 @@ test("hook install/remove preserves unrelated settings and rejects changed previ
     dir,
   );
   assert.ok(plan.after.includes("echo keep"));
+  const opencode = wb.hookPlan(
+    "opencode",
+    true,
+    "C:/Basem's/$literal/agent-relay.json",
+    dir,
+  );
+  assert.match(opencode.after, /export default \{/);
+  assert.match(opencode.after, /id: 'yami\.activity'/);
+  assert.match(opencode.after, /ctx\.event\.subscribe/);
+  assert.match(opencode.after, /execute\.before/);
+  assert.doesNotMatch(opencode.after, /export const YamiPlugin/);
   const applied = wb.applyHookPlan(
     "claude",
     true,
