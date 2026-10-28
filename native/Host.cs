@@ -150,6 +150,10 @@ class Host {
             case "wallpaperSet": { string path=Path.GetFullPath(Str(a,"path")); if(!File.Exists(path)) throw new Exception("Wallpaper file does not exist."); if(!SystemParametersInfo(20,0,path,3)) throw new Exception("Windows could not apply this wallpaper."); return path; }
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
+            case "remoteClick": return RemoteInput.Click(Convert.ToDouble(a["x"]), Convert.ToDouble(a["y"]), Str(a,"button")=="right");
+            case "remoteScroll": return RemoteInput.Scroll(Num(a,"notches"));
+            case "remoteKey": return RemoteInput.Press(Str(a,"key"));
+            case "remoteType": return RemoteInput.Type(Str(a,"text"));
             case "audioSessionSet": return AudioSessions.Set(Num(a,"pid"), a.ContainsKey("volume") ? Num(a,"volume") : -1, a.ContainsKey("muted") ? (Flag(a,"muted") ? 1 : 0) : -1);
             case "volume": { var audio=Audio(); float value=Math.Max(0,Math.Min(100,Num(a,"value")))/100f; audio.SetMasterVolumeLevelScalar(value,Guid.Empty); return value*100; }
             case "mute": { Audio().SetMute(Flag(a,"value"),Guid.Empty); return true; }

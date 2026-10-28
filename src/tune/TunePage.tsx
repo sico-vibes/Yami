@@ -9,7 +9,6 @@ import {
 } from "../tune-types";
 import { Icon, Modal, Toggle } from "../ui";
 import { DnsSection } from "./DnsSection";
-import { WindhawkSection } from "./WindhawkSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -106,7 +105,6 @@ export default function TunePage({
         </section>
       ))}
       <DnsSection report={report} />
-      <WindhawkSection report={report} />
       <section>
         <h3 className="group-title">Startup apps</h3>
         <p className="setting-note">

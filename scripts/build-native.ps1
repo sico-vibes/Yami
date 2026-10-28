@@ -11,7 +11,8 @@ $sources = @(
   (Join-Path $projectRoot 'native\Host.cs'),
   (Join-Path $projectRoot 'native\ProcessJobs.cs'),
   (Join-Path $projectRoot 'native\Wheel.cs'),
-  (Join-Path $projectRoot 'native\AudioSessions.cs')
+  (Join-Path $projectRoot 'native\AudioSessions.cs'),
+  (Join-Path $projectRoot 'native\RemoteInput.cs')
 )
 $fingerprint = ($sources | ForEach-Object { [IO.File]::ReadAllText($_) }) -join "`n"
 $hasher = [Security.Cryptography.SHA256]::Create()

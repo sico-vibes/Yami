@@ -158,7 +158,7 @@ export function installPreviewBridge() {
       )
         return previewWorkbench(method, a, emit);
       if (
-        /^(modules|setup|packs|tune|feeds|agentlink|remote|bridges|mailcatcher)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|remote|mailcatcher)\./.test(
           method,
         )
       )

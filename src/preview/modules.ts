@@ -296,57 +296,6 @@ export function previewModules(
           allowed: state.settings.remoteAllow.includes(name),
         })),
       };
-    case "bridges.rustdesk":
-      return {
-        installed: true,
-        id: "123 456 789",
-        idServer: "hbbs.home.lan",
-        relayServer: "",
-        hasKey: true,
-      };
-    case "bridges.windhawk":
-      return {
-        installed: true,
-        mods: [
-          {
-            id: "taskbar-clock-customization",
-            name: "Taskbar Clock Customization",
-            version: "1.5",
-            disabled: false,
-          },
-        ],
-        curated: [
-          {
-            id: "windows-11-taskbar-styler",
-            name: "Windows 11 Taskbar Styler",
-          },
-          {
-            id: "taskbar-clock-customization",
-            name: "Taskbar Clock Customization",
-          },
-        ],
-      };
-    case "mailcatcher.status":
-    case "mailcatcher.stop":
-      return { running: false, smtp: "127.0.0.1:1025", count: 1 };
-    case "mailcatcher.start":
-      throw new Error("Preview only — the mail catcher was not started.");
-    case "mailcatcher.list":
-    case "mailcatcher.remove":
-    case "mailcatcher.clear":
-      return method === "mailcatcher.list" ? [previewMail] : [];
-    case "mailcatcher.read":
-      return {
-        ...previewMail,
-        date: "Wed, 28 Oct 2026 19:30:00 +0200",
-        text: "Hi Ana,\n\nClick the link below to reset your password.\n\nThe demo app",
-        attachments: [],
-      };
-    case "mailcatcher.open":
-      throw new Error("Preview only — no mail app was opened.");
-    case "bridges.rustdesk.open":
-    case "bridges.windhawk.open":
-      throw new Error("Preview only — nothing was started.");
     case "tune.dns":
       return [
         {

@@ -37,7 +37,7 @@ import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
-import { createBridges } from "../bridges";
+import { createScreenShare as screenShare } from "../remote/screen";
 import { MailCatcher } from "../workbench/mail-catcher";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
@@ -63,7 +63,13 @@ type Browser = {
   linked: ReturnType<typeof createLinked>;
   filters: FilterLists;
 };
-const remoteAbilities: RemoteAbility[] = ["approvals", "media", "clipboard"];
+const remoteAbilities: RemoteAbility[] = [
+  "approvals",
+  "media",
+  "clipboard",
+  "screen",
+  "control",
+];
 const agentName = (id: string) =>
   agentClis.find((c) => c.id === id)?.name || id;
 const agentToolNames = [
@@ -160,7 +166,6 @@ export function createModuleHost(deps: Deps) {
     deps.broadcast({ type: "modules", modules: registry.list() }),
   );
 
-  let bridges: ReturnType<typeof createBridges> | undefined;
   let mail: MailCatcher | undefined;
   const registry = new ModuleRegistry({
     settings: () => store.state.settings as unknown as Record<string, unknown>,
@@ -314,6 +319,7 @@ export function createModuleHost(deps: Deps) {
                 clipboard.writeText(text);
                 deps.notify("Text from your phone is on the clipboard.");
               },
+              ...screenShare({ native, notify: deps.notify }),
             }),
             error: "",
           };
@@ -485,7 +491,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|bridges|mailcatcher)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|mailcatcher)\./.test(
           method,
         )
       );
@@ -510,15 +516,6 @@ export function createModuleHost(deps: Deps) {
           if (error) throw new Error(error);
           return true;
         }
-        throw new Error("Unknown request.");
-      }
-      if (method.startsWith("bridges.")) {
-        bridges ||= createBridges();
-        if (method === "bridges.rustdesk") return bridges.rustdesk();
-        if (method === "bridges.rustdesk.open")
-          return bridges.openRustdesk(a.config);
-        if (method === "bridges.windhawk") return bridges.windhawk();
-        if (method === "bridges.windhawk.open") return bridges.openWindhawk();
         throw new Error("Unknown request.");
       }
       if (method === "modules.set") {

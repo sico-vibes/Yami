@@ -4,7 +4,8 @@ import { timingSafeEqual } from "node:crypto";
 import { remotePage } from "./page.ts";
 
 export const remotePort = 47822;
-export type RemoteAbility = "approvals" | "media" | "clipboard";
+export type RemoteAbility =
+  "approvals" | "media" | "clipboard" | "screen" | "control";
 
 /** The first private IPv4 address of this PC on the home network. */
 export function lanAddress(
@@ -28,6 +29,9 @@ type Deps = {
   approve: (id: string, decision: "allow" | "deny") => void;
   media: (action: string) => Promise<object>;
   clipboard: (text: string) => void;
+  /** A JPEG of the primary screen. */
+  frame: () => Promise<Buffer>;
+  input: (body: unknown) => Promise<void>;
 };
 
 /**
@@ -37,7 +41,8 @@ type Deps = {
  */
 export function startRemote(
   deps: Deps,
-  host = lanAddress(),
+  // The desktop checks use loopback so no firewall prompt appears.
+  host = process.env.YAMI_REMOTE_HOST || lanAddress(),
   port = remotePort,
 ) {
   const server = http.createServer((req, res) => {
@@ -53,7 +58,7 @@ export function startRemote(
         "Referrer-Policy": "no-referrer",
         ...(type.startsWith("text/html") && {
           "Content-Security-Policy":
-            "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:",
+            "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data: blob:",
         }),
       });
       res.end(
@@ -89,6 +94,17 @@ export function startRemote(
         const a = body ? JSON.parse(body) : {};
         if (req.method === "GET" && url.pathname === "/api/state")
           return send(200, await deps.state());
+        if (req.method === "GET" && url.pathname === "/api/screen") {
+          if (!deps.allowed("screen"))
+            return send(403, { error: "Screen view is off." });
+          const jpeg = await deps.frame();
+          res.writeHead(200, {
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "no-store",
+            "X-Content-Type-Options": "nosniff",
+          });
+          return res.end(jpeg);
+        }
         if (req.method !== "POST") return send(405);
         if (url.pathname === "/api/approve") {
           if (!deps.allowed("approvals"))
@@ -102,6 +118,12 @@ export function startRemote(
           if (!deps.allowed("media"))
             return send(403, { error: "Media control is off." });
           return send(200, await deps.media(String(a.action || "")));
+        }
+        if (url.pathname === "/api/input") {
+          if (!deps.allowed("screen") || !deps.allowed("control"))
+            return send(403, { error: "Control from the phone is off." });
+          await deps.input(a);
+          return send(200, { ok: true });
         }
         if (url.pathname === "/api/clipboard") {
           if (!deps.allowed("clipboard"))

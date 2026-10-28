@@ -22,6 +22,14 @@ const abilityText: Record<string, [string, string]> = {
     "Send to the clipboard",
     "Text you send lands on the PC's clipboard.",
   ],
+  screen: [
+    "View the screen",
+    "See this PC's main screen on the phone, refreshed about once a second while you watch. Yami says so on the PC when viewing starts.",
+  ],
+  control: [
+    "Control the PC",
+    "With View the screen on: tap to click, scroll, type and press a few keys. Windows does not accept input for windows running as administrator.",
+  ],
 };
 
 /** A QR code as plain SVG squares, drawn from the qrcode matrix. */

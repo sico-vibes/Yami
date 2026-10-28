@@ -121,3 +121,79 @@ test("without a home-network address the remote says why", async () => {
   );
   await assert.rejects(link.ready, /no home-network address/);
 });
+
+test("screen view and control are separate abilities with checked input", async () => {
+  const { parseRemoteInput } = await import("../electron/remote/input.ts");
+  assert.deepEqual(parseRemoteInput({ kind: "click", x: 0.5, y: 0.25 }), {
+    method: "remoteClick",
+    args: { x: 0.5, y: 0.25, button: "left" },
+  });
+  assert.equal(
+    parseRemoteInput({ kind: "key", key: "enter" }).args.key,
+    "enter",
+  );
+  assert.throws(
+    () => parseRemoteInput({ kind: "click", x: 2, y: 0 }),
+    /inside/,
+  );
+  assert.throws(
+    () => parseRemoteInput({ kind: "key", key: "f4" }),
+    /not offered/,
+  );
+  assert.throws(() => parseRemoteInput({ kind: "scroll", notches: 50 }), /ten/);
+  assert.throws(() => parseRemoteInput({ kind: "type", text: "" }), /2,000/);
+  assert.throws(
+    () => parseRemoteInput({ kind: "run", command: "calc" }),
+    /Unknown/,
+  );
+  const inputs = [];
+  let allowed = new Set();
+  const link = startRemote(
+    {
+      token: () => "t0k3n",
+      allowed: (n) => allowed.has(n),
+      state: async () => ({}),
+      approve: () => {},
+      media: async () => ({}),
+      clipboard: () => {},
+      frame: async () => Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+      input: async (body) => {
+        inputs.push(parseRemoteInput(body));
+      },
+    },
+    "127.0.0.1",
+    47899,
+  );
+  await link.ready;
+  try {
+    const base = "http://127.0.0.1:47899";
+    const auth = { Authorization: "Bearer t0k3n" };
+    const tap = () =>
+      fetch(base + "/api/input", {
+        method: "POST",
+        headers: auth,
+        body: JSON.stringify({ kind: "click", x: 0.1, y: 0.2 }),
+      });
+    assert.equal(
+      (await fetch(base + "/api/screen", { headers: auth })).status,
+      403,
+    );
+    assert.equal((await fetch(base + "/api/screen")).status, 401);
+    allowed = new Set(["screen"]);
+    const shot = await fetch(base + "/api/screen", { headers: auth });
+    assert.equal(shot.headers.get("content-type"), "image/jpeg");
+    assert.equal((await shot.arrayBuffer()).byteLength, 4);
+    assert.equal((await tap()).status, 403, "viewing does not allow control");
+    allowed = new Set(["screen", "control"]);
+    assert.equal((await tap()).status, 200);
+    assert.equal(inputs[0].method, "remoteClick");
+    const bad = await fetch(base + "/api/input", {
+      method: "POST",
+      headers: auth,
+      body: JSON.stringify({ kind: "key", key: "delete-everything" }),
+    });
+    assert.equal(bad.status, 400);
+  } finally {
+    await link.close();
+  }
+});

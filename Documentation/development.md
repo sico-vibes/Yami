@@ -116,10 +116,11 @@ Workspace verification commands:
   EasyPrivacy (about 3.4 MB, network read only), checks the rule count, that a local
   `news.localhost` page's ad script is cancelled and its `.ad-slot` box hidden, and that
   Remove deletes the lists; prints the build time and main-process memory.
-- `node scripts/verify-bridges.mjs`: two isolated profiles; reports whether RustDesk and
-  Windhawk are installed on this PC (starting neither), then uses a fake install to check the
-  RustDesk ID and server in Settings › Phone, a refused config string, and the Windhawk mod
-  and curated links on the Tune page.
+- `node scripts/verify-remote-screen.mjs`: isolated profile, Yami Remote on loopback
+  (`YAMI_REMOTE_HOST`, no firewall prompt); checks screen view and control are off by default,
+  fetches a real frame, and refuses control while only viewing is on. It sends a tap, text and
+  Backspace to Yami's own chat box only when Windows reports Yami's window as the foreground
+  window, and otherwise skips input.
 - `node scripts/verify-mailcatcher.mjs`: isolated profile; starts Yami's mail catcher from
   Dev › Projects, sends one message to `127.0.0.1:1025` over SMTP, checks it is listed and opens
   as text, then stops it and checks the port is closed.

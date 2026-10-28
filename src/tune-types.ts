@@ -3,7 +3,12 @@
 // applies, so Undo puts back what was there, including "not set".
 
 export type TuneCategory =
-  "Explorer" | "Taskbar and Start" | "Privacy" | "Gaming" | "Comfort";
+  | "Look and feel"
+  | "Explorer"
+  | "Taskbar and Start"
+  | "Privacy"
+  | "Gaming"
+  | "Comfort";
 
 export type RegValue = {
   /** Under HKEY_CURRENT_USER, e.g. `Software\Microsoft\…\Advanced`. */
@@ -104,8 +109,125 @@ const advanced =
   "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
 const content =
   "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager";
+const explorer = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer";
 
 export const tweaks: Tweak[] = [
+  // Yami's own versions of popular Explorer and taskbar mods: settings
+  // Windows already reads, so nothing is injected into Explorer.
+  {
+    id: "hideSearchBox",
+    name: "Hide the taskbar search box",
+    detail: "Start search still works when you press the Windows key and type.",
+    category: "Look and feel",
+    values: [
+      {
+        key: "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        name: "SearchboxTaskbarMode",
+        type: "REG_DWORD",
+        data: "0",
+      },
+    ],
+  },
+  {
+    id: "hideTaskView",
+    name: "Hide the Task View button",
+    detail: "Win+Tab still opens Task View.",
+    category: "Look and feel",
+    values: [
+      {
+        key: advanced,
+        name: "ShowTaskViewButton",
+        type: "REG_DWORD",
+        data: "0",
+      },
+    ],
+  },
+  {
+    id: "neverCombine",
+    name: "Never combine taskbar buttons",
+    detail: "Each window gets its own labelled button.",
+    category: "Look and feel",
+    values: [
+      {
+        key: advanced,
+        name: "TaskbarGlomLevel",
+        type: "REG_DWORD",
+        data: "2",
+      },
+    ],
+  },
+  {
+    id: "compactExplorer",
+    name: "Compact File Explorer",
+    detail: "Tighter rows and less padding, like Windows 10.",
+    category: "Look and feel",
+    values: [
+      {
+        key: advanced,
+        name: "UseCompactMode",
+        type: "REG_DWORD",
+        data: "1",
+      },
+    ],
+  },
+  {
+    id: "fullPathTitle",
+    name: "Full path in the title bar",
+    detail: "File Explorer's title shows the whole folder path.",
+    category: "Look and feel",
+    values: [
+      {
+        key: explorer + "\\CabinetState",
+        name: "FullPath",
+        type: "REG_DWORD",
+        data: "1",
+      },
+    ],
+  },
+  {
+    id: "checkboxes",
+    name: "Selection checkboxes",
+    detail: "Tick files in File Explorer to select several without Ctrl.",
+    category: "Look and feel",
+    values: [
+      {
+        key: advanced,
+        name: "AutoCheckSelect",
+        type: "REG_DWORD",
+        data: "1",
+      },
+    ],
+  },
+  {
+    id: "noRecentFiles",
+    name: "No recent files in Home",
+    detail:
+      "File Explorer's Home and Quick access stop listing recently opened files.",
+    category: "Look and feel",
+    values: [
+      {
+        key: explorer,
+        name: "ShowRecent",
+        type: "REG_DWORD",
+        data: "0",
+      },
+    ],
+  },
+  {
+    id: "noSnapFlyout",
+    name: "No snap layouts on the maximize button",
+    detail:
+      "Hovering the maximize button no longer opens the layout picker; Win+Z still does.",
+    category: "Look and feel",
+    values: [
+      {
+        key: advanced,
+        name: "EnableSnapAssistFlyout",
+        type: "REG_DWORD",
+        data: "0",
+      },
+    ],
+  },
   {
     id: "fileExtensions",
     name: "Show file extensions",
@@ -308,6 +430,7 @@ export const tweaks: Tweak[] = [
  * page asked you.
  */
 export const tuneCategories: TuneCategory[] = [
+  "Look and feel",
   "Explorer",
   "Taskbar and Start",
   "Privacy",
