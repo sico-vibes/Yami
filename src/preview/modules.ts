@@ -259,6 +259,27 @@ export function previewModules(
           }),
         ),
       };
+    // A demo pairing; nothing listens in preview.
+    case "remote.info":
+    case "remote.allow":
+    case "remote.rotate":
+      if (method === "remote.allow")
+        state.settings.remoteAllow = [
+          ...state.settings.remoteAllow.filter((n) => n !== a.name),
+          ...(a.allowed ? [a.name] : []),
+        ];
+      return {
+        enabled: state.settings.remoteEnabled,
+        url: "http://192.168.1.20:47822/",
+        pairing: state.settings.remoteEnabled
+          ? "http://192.168.1.20:47822/#k=preview-not-a-real-pairing"
+          : "",
+        error: "",
+        abilities: ["approvals", "media", "clipboard"].map((name) => ({
+          name,
+          allowed: state.settings.remoteAllow.includes(name),
+        })),
+      };
     case "tune.dns":
       return [
         {

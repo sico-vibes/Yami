@@ -44,5 +44,7 @@ export const defaults: Settings = {
   lyricsEnabled: false,
   agentLinkEnabled: false,
   agentLinkTools: ["notify", "ask_user", "list_projects"],
+  remoteEnabled: false,
+  remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

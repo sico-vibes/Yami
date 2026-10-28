@@ -134,7 +134,7 @@ export function installPreviewBridge() {
     async invoke(method, args = {}) {
       const a = args;
       if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting|dev)\./.test(method)) return previewWorkbench(method, a, emit);
-      if (/^(modules|setup|packs|tune|feeds|agentlink)\./.test(method)) return previewModules(method, a, state, emit, changed);
+      if (/^(modules|setup|packs|tune|feeds|agentlink|remote)\./.test(method)) return previewModules(method, a, state, emit, changed);
       switch (method) {
         case "state":
           return structuredClone(state);

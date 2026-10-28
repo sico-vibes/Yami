@@ -62,6 +62,9 @@ export type Settings = {
   agentLinkEnabled: boolean;
   /** Yami tools coding agents may call through the agent link. */
   agentLinkTools: string[];
+  remoteEnabled: boolean;
+  /** What a paired phone may do: approvals, media, clipboard. */
+  remoteAllow: string[];
   setupDone: boolean;
 };
 export type Task = {

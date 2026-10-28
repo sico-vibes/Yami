@@ -11,6 +11,7 @@ export type ModuleId =
   | "tune"
   | "feeds"
   | "agentLink"
+  | "remote"
   | "clipboard"
   | "weather"
   | "roam";
@@ -145,6 +146,18 @@ export const modules: ModuleSpec[] = [
     permissions: ["network"],
     packs: [],
     presets: ["developer", "everything"],
+  },
+  {
+    id: "remote",
+    name: "Yami Remote",
+    blurb:
+      "Approve agents, control music and send text to the clipboard from your phone, on your home network.",
+    icon: "device-mobile",
+    setting: "remoteEnabled",
+    cost: "low",
+    permissions: ["network"],
+    packs: [],
+    presets: ["everything"],
   },
   {
     id: "clipboard",

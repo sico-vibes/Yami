@@ -151,6 +151,17 @@ Turn on **Feeds inbox** in Settings › Modules (or the Developer preset) and De
 
 Feeds are read when the Inbox opens, and only for sources not read in the last ten minutes, or when you press refresh. There is no background timer. Each read sends the saved ETag and Last-Modified, waits at most 15 seconds, accepts at most 2 MB, refuses a redirect to plain HTTP, keeps the previous items when a read fails, and stores up to 50 items per source in `feeds.json`. Titles and summaries are shown as plain text, and only http(s) links are kept. Up to 50 sources. On 2026-10-28, Hacker News, GitHub releases and Reddit's public `.rss` feeds all answered. On 2026-10-28 a Bluesky profile and a Mastodon account also answered; Reddit may answer HTTP 429 when it is read several times in a few minutes, which the Inbox shows as "asked Yami to slow down". **Mail** sits at the top of the Inbox: up to five accounts (Gmail, Fastmail, iCloud Mail, Yahoo Mail or any IMAP server on port 993). Each shows its unread and total count and the five newest senders and subjects, read when the Inbox opens. You sign in with an app password, which is checked once when you add the account and then kept with Yami's DPAPI-encrypted credentials, never in `mail.json`. Yami opens INBOX with `EXAMINE` and reads headers with `BODY.PEEK`, so nothing is marked as read, moved, deleted or sent, and no message body or image is loaded. The protocol is unit-tested against a scripted server, and a real Gmail server answered TLS and refused a fake sign-in on 2026-10-28; reading a **real mailbox is not verified**. Outlook.com needs Microsoft OAuth, which is not built. Home timelines that need sign-in and a "Brief me" digest are not built yet.
 
+## Yami Remote (phone)
+
+Turn on **Yami Remote** in Settings › Phone and scan the pairing code with your phone's camera. Yami serves a small Nightglow page at `http://<this PC's home-network address>:47822/`, listening only on that private address and only while the module is on. The page shows agents that are working, and:
+- **Approve agents** (on by default): a coding agent's permission request appears with **Deny** and **Allow once**, the same decision as the card on the PC.
+- **Control music** (on by default): back, play/pause and next for what is playing on the PC.
+- **Send to the clipboard** (off by default): text you send lands on the PC's clipboard, up to 10,000 characters.
+
+Each ability has its own switch. The pairing code carries a token in the address's `#` part, which the phone keeps and removes from the address bar. Every request needs it, and **New pairing code** unpairs every phone. The page loads nothing from the internet, sets its text without HTML, and refreshes every four seconds only while it is visible. Yami Remote never shows the screen or controls the mouse, and it has no relay: away from home, use your own VPN such as Tailscale. Windows may ask once to let Yami through the firewall on private networks.
+
+The server, its token and ability checks, and the phone page (pairing, an approval, HTML safety) were checked against a loopback address on 2026-10-28. Listening on the home network and a real phone were **not exercised**, to avoid a firewall prompt during unattended checks. The RustDesk bridge and Mailpit catcher from the plan are not built.
+
 ## Tune (Windows tune-up)
 
 Turn on **Windows tune-up** in Settings › Modules (or the Tinkerer preset) and a **Tune** tab joins the dock. It lists fourteen per-user tweaks in five groups:

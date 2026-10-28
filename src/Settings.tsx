@@ -3,6 +3,7 @@ import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
 import { ModulesSettings } from "./setup/ModulesSettings";
+import { RemotePanel } from "./RemotePanel";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 import { Select, StatusChip } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
@@ -17,6 +18,7 @@ const groups = [
   ["terminal-window", "Workspace"],
   ["circles-four", "File wheel"],
   ["puzzle-piece", "Modules"],
+  ["device-mobile", "Phone"],
 ];
 export function Settings({
   state,
@@ -163,6 +165,7 @@ export function Settings({
     Privacy: "Choose what Yami can see and do.",
     "File wheel": "Drag a file, tap a modifier, and drop it on a petal.",
     Modules: "Wake the features you use. The rest stay asleep.",
+    Phone: "Approve agents and control music from your phone.",
   };
   const all = !!search;
   return (
@@ -199,10 +202,14 @@ export function Settings({
             <WorkbenchPage embedded initial="Workspace" report={report} />
           </Suspense>
         )}
-        {section !== "Workspace" && <><h1>{all ? "Search settings" : section}</h1>
-        <p className="page-description">
-          {all ? `Results for “${search}”` : titles[section]}
-        </p></>}
+        {section !== "Workspace" && (
+          <>
+            <h1>{all ? "Search settings" : section}</h1>
+            <p className="page-description">
+              {all ? `Results for “${search}”` : titles[section]}
+            </p>
+          </>
+        )}
         {(section === "Yami" || all) && (
           <>
             <h3 className="group-title">Your companion</h3>
@@ -374,7 +381,9 @@ export function Settings({
                 `Version ${diagnostics?.app || "0.1.0"} · Windows ${diagnostics?.windows || ""}`,
                 <StatusChip
                   status={
-                    diagnostics?.native?.ok ? "Windows connected" : "Connecting…"
+                    diagnostics?.native?.ok
+                      ? "Windows connected"
+                      : "Connecting…"
                   }
                 />,
               )}
@@ -454,7 +463,9 @@ export function Settings({
                 <Select
                   label="Clipboard retention"
                   value={String(s.clipboardDays)}
-                  onChange={(days) => void patch({ clipboardDays: Number(days) })}
+                  onChange={(days) =>
+                    void patch({ clipboardDays: Number(days) })
+                  }
                   options={[1, 7, 14, 30].map((n) => ({
                     value: String(n),
                     label: n === 1 ? "1 day" : `${n} days`,
@@ -617,10 +628,12 @@ export function Settings({
               {row(
                 "Send to menu",
                 "Adds Yami to the Windows Send to menu.",
-                button("Install Send to", () =>
-                  void api("wheel.sendTo")
-                    .then(() => report("Send to shortcut installed."))
-                    .catch((error) => report(error.message)),
+                button(
+                  "Install Send to",
+                  () =>
+                    void api("wheel.sendTo")
+                      .then(() => report("Send to shortcut installed."))
+                      .catch((error) => report(error.message)),
                 ),
               )}
             </div>
@@ -633,6 +646,7 @@ export function Settings({
           </>
         )}
         {section === "Modules" && !all && <ModulesSettings report={report} />}
+        {section === "Phone" && !all && <RemotePanel report={report} />}
       </section>
       {keyModal && (
         <Modal

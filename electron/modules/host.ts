@@ -1,6 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { dialog, screen, type BrowserWindow, type WebContents } from "electron";
+import {
+  clipboard,
+  dialog,
+  screen,
+  type BrowserWindow,
+  type WebContents,
+} from "electron";
 import type { Store } from "../store";
 import type { Native } from "../native";
 import type { Assistant } from "../assistant";
@@ -21,6 +27,11 @@ import { DnsController } from "../tune/dns";
 import { helperPath } from "../workbench/terminal";
 import { agentLinkPort, startAgentLink } from "../agentlink/server";
 import { agentTools } from "../agentlink/tools";
+import { startRemote, type RemoteAbility } from "../remote/server";
+import { activeAgents } from "../../src/agent-rank";
+import { agentClis } from "../../src/dev-types";
+import { mediaAction, nativeScript } from "../platform";
+import os from "node:os";
 import { randomBytes } from "node:crypto";
 
 type Tune = {
@@ -30,6 +41,10 @@ type Tune = {
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
+type Remote = ReturnType<typeof startRemote> & { error: string };
+const remoteAbilities: RemoteAbility[] = ["approvals", "media", "clipboard"];
+const agentName = (id: string) =>
+  agentClis.find((c) => c.id === id)?.name || id;
 const agentToolNames = ["notify", "ask_user", "list_projects", "open_terminal"];
 import { execFile, spawn } from "node:child_process";
 
@@ -180,6 +195,78 @@ export function createModuleHost(deps: Deps) {
         },
         dispose: () => {},
       },
+      remote: {
+        load: (): Remote => {
+          if (!store.key("provider:remote"))
+            store.setKeys({
+              "provider:remote": randomBytes(24).toString("hex"),
+            });
+          const allowed = (name: string) =>
+            Array.isArray(store.state.settings.remoteAllow) &&
+            store.state.settings.remoteAllow.includes(name);
+          const link: Remote = {
+            ...startRemote({
+              token: () => store.key("provider:remote"),
+              allowed,
+              state: async () => {
+                const wb = registry.peek<Workbench>("workbench");
+                return {
+                  pc: os.hostname(),
+                  allow: Object.fromEntries(
+                    remoteAbilities.map((n) => [n, allowed(n)]),
+                  ),
+                  agents: wb
+                    ? activeAgents(wb.data.state.sessions).map(
+                        ({ agent, project, phase, detail }) => ({
+                          agent: agentName(agent),
+                          project,
+                          phase,
+                          detail: detail.slice(0, 300),
+                        }),
+                      )
+                    : [],
+                  requests:
+                    wb && allowed("approvals")
+                      ? wb.data.state.requests
+                          .filter(
+                            (r) =>
+                              r.kind === "permission" &&
+                              r.expiresAt > Date.now(),
+                          )
+                          .map(({ id, agent, title, detail }) => ({
+                            id,
+                            agent: agentName(agent),
+                            title,
+                            detail: detail.slice(0, 2000),
+                          }))
+                      : [],
+                  media: allowed("media")
+                    ? await nativeScript("Media").catch(() => null)
+                    : null,
+                };
+              },
+              approve: (id, decision) => {
+                const wb = registry.peek<Workbench>("workbench");
+                if (!wb) throw new Error("No agent is waiting.");
+                // The phone showed the request, which counts as seen.
+                wb.agents.acknowledge(id);
+                wb.agents.finish(id, decision);
+              },
+              media: (action) => mediaAction(action),
+              clipboard: (text) => {
+                clipboard.writeText(text);
+                deps.notify("Text from your phone is on the clipboard.");
+              },
+            }),
+            error: "",
+          };
+          link.ready.catch((e: Error) => {
+            link.error = e.message;
+          });
+          return link;
+        },
+        dispose: (link: Remote) => void link.close(),
+      },
       agentLink: {
         load: (): AgentLink => {
           let token = store.key("provider:agentlink");
@@ -243,6 +330,8 @@ export function createModuleHost(deps: Deps) {
     // The agent endpoint must listen before any agent calls it.
     if (registry.enabled("agentLink") && !registry.loaded("agentLink"))
       registry.get("agentLink");
+    if (registry.enabled("remote") && !registry.loaded("remote"))
+      registry.get("remote");
     if (!registry.enabled("workbench") || registry.loaded("workbench")) return;
     const { settings, connections } = speechCore().data.state;
     if (workbenchDuties(settings, connections, store.state.settings.hotkeys))
@@ -262,7 +351,9 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette)\./.test(method)
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote)\./.test(
+          method,
+        )
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
@@ -297,6 +388,41 @@ export function createModuleHost(deps: Deps) {
           : [];
       if (method.startsWith("palette."))
         throw new Error("Unknown launcher request.");
+      if (method.startsWith("remote.")) {
+        const settings = store.state.settings;
+        const allow = () =>
+          Array.isArray(settings.remoteAllow) ? settings.remoteAllow : [];
+        if (method === "remote.allow") {
+          const name = String(a.name);
+          if (!remoteAbilities.includes(name as RemoteAbility))
+            throw new Error("Unknown phone ability.");
+          if (typeof a.allowed !== "boolean")
+            throw new Error("Choose on or off.");
+          settings.remoteAllow = [
+            ...allow().filter((n) => n !== name),
+            ...(a.allowed ? [name] : []),
+          ];
+          deps.changed();
+        } else if (method === "remote.rotate") {
+          registry.get("remote");
+          store.setKeys({ "provider:remote": randomBytes(24).toString("hex") });
+        } else if (method !== "remote.info")
+          throw new Error("Unknown remote request.");
+        const link = registry.enabled("remote")
+          ? registry.get<Remote>("remote")
+          : undefined;
+        const token = link ? store.key("provider:remote") : "";
+        return {
+          enabled: !!link,
+          url: link?.url || "",
+          pairing: link?.url && token ? `${link.url}#k=${token}` : "",
+          error: link?.error || "",
+          abilities: remoteAbilities.map((name) => ({
+            name,
+            allowed: allow().includes(name),
+          })),
+        };
+      }
       if (method.startsWith("agentlink.")) {
         const settings = store.state.settings;
         const current = () =>
