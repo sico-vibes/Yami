@@ -67,7 +67,7 @@ The Apps tab of the island drawer is also a small command palette. As you type, 
 - **Module actions:** the file wheel's drop shelf and Yami Terminal.
 - **Projects** from the AI workspace, which open a terminal there. The list is read without loading the workspace.
 
-Results follow your modules, so Tune and AI appear only while they are on. **Enter** opens the first result (a Yami item, else the first app, else the first file). Units, quicklinks, agents and Windows Search results from the plan are not built.
+Results follow your modules, so Tune and AI appear only while they are on. **Enter** opens the first result (a Yami item, else the first app, else the first file). **Units:** `5 km to mi`, `72 f in c`, `2 gb to mb`, `3 cups in ml`, `90 min to h` or `100 km/h to mph` (length, weight, volume, data, time, speed and temperature; Enter copies the answer). **Web:** a typed address such as `github.com/xtermjs`, or a `!bang` such as `!w Kyoto`, opens straight away, in Yami Browser when that module is on and otherwise in your browser; when nothing else matches, the last row searches the web. **Agents:** an installed agent's name followed by a project, such as `claude yami`, starts that agent in a Yami Terminal tab in the project. Windows Search results from the plan are not built.
 
 ## Music and media
 

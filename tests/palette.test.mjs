@@ -41,9 +41,13 @@ test("palette results follow the query and the modules that are on", () => {
     method: "dev.launch",
     args: { project: "p1" },
   });
-  assert.equal(
-    paletteItems("yami", { ...settings, workbenchEnabled: false }, projects)
-      .length,
-    0,
+  // With the workspace off no project is offered (only a web search is).
+  assert.deepEqual(
+    paletteItems(
+      "yami",
+      { ...settings, workbenchEnabled: false },
+      projects,
+    ).map((i) => i.id),
+    ["search"],
   );
 });

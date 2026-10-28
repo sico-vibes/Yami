@@ -1,4 +1,7 @@
 import { calculate, formatResult } from "./calc.ts";
+import { convertUnits } from "./units.ts";
+import { resolveInput } from "./browser-rules.ts";
+import { agentClis } from "./dev-types.ts";
 import type { Settings, Tab } from "./shared";
 
 export type PaletteItem = {
@@ -74,6 +77,8 @@ export function paletteItems(
   query: string,
   settings: Settings,
   projects: { id: string; name: string; path: string }[] = [],
+  /** Installed agent CLIs, by id, for "claude myproject". */
+  agents: string[] = [],
 ): PaletteItem[] {
   const q = query.trim();
   if (!q) return [];
@@ -87,6 +92,32 @@ export function paletteItems(
       hint: "Enter copies the result",
       icon: "calculator",
       run: { copy: text },
+    });
+  }
+  const unit = convertUnits(q);
+  if (unit)
+    out.push({
+      id: "units",
+      title: `${unit.from} = ${unit.text}`,
+      hint: "Enter copies the result",
+      icon: "ruler",
+      run: { copy: unit.text },
+    });
+  // A typed address or a !bang opens straight away, in Yami Browser if on.
+  const bang = /(?:^|\s)![a-z]+(?:\s|$)/i.test(q);
+  const address = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+(:\d+)?(\/\S*)?$/i.test(q);
+  if (bang || address) {
+    const url = resolveInput(q);
+    out.push({
+      id: "web",
+      title: bang ? q : url.replace(/^https?:\/\//, ""),
+      hint: settings.browserEnabled
+        ? "Open in Yami Browser"
+        : "Open in your browser",
+      icon: bang ? "magnifying-glass" : "globe",
+      run: settings.browserEnabled
+        ? { method: "browser.show", args: { url } }
+        : { method: "open.external", args: { url } },
     });
   }
   for (const p of pages)
@@ -135,6 +166,40 @@ export function paletteItems(
           icon: "folder-simple",
           run: { method: "dev.launch", args: { project: p.id } },
         });
+    // "claude yami": the agent's command or name, then a project's name.
+    const [first, ...rest] = q.toLowerCase().split(/\s+/);
+    const cli = agentClis.find(
+      (c) =>
+        agents.includes(c.id) &&
+        (c.id === first ||
+          c.command === first ||
+          c.name.toLowerCase().startsWith(first)),
+    );
+    if (cli && rest.length)
+      for (const p of projects)
+        if (matches(rest.join(" "), p.name))
+          out.unshift({
+            id: `agent:${cli.id}:${p.id}`,
+            title: `${cli.name} in ${p.name}`,
+            hint: "Start the agent in a Yami Terminal tab",
+            icon: "robot",
+            run: {
+              method: "dev.launch",
+              args: { project: p.id, agent: cli.id },
+            },
+          });
   }
+  if (!out.length && !bang && !address && q.length > 1)
+    out.push({
+      id: "search",
+      title: `Search the web for “${q}”`,
+      hint: settings.browserEnabled
+        ? "Open in Yami Browser"
+        : "Open in your browser",
+      icon: "magnifying-glass",
+      run: settings.browserEnabled
+        ? { method: "browser.show", args: { url: resolveInput(q) } }
+        : { method: "open.external", args: { url: resolveInput(q) } },
+    });
   return out.slice(0, 8);
 }

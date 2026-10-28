@@ -18,7 +18,8 @@ export function Launcher({
     [text, setText] = useState(""),
     [projects, setProjects] = useState<
       { id: string; name: string; path: string }[]
-    >([]);
+    >([]),
+    [agents, setAgents] = useState<string[]>([]);
   useEffect(() => {
     api("apps")
       .then(setApps)
@@ -26,6 +27,10 @@ export function Launcher({
     api("palette.projects")
       .then(setProjects)
       .catch(() => {});
+    if (state.settings.workbenchEnabled)
+      api("dev.agents")
+        .then((list: { id: string }[]) => setAgents(list.map((a) => a.id)))
+        .catch(() => {});
   }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -53,7 +58,7 @@ export function Launcher({
           filtered.filter((a) => !state.favorites.includes(a.path)),
         ],
       ] as const);
-  const commands = paletteItems(query, state.settings, projects);
+  const commands = paletteItems(query, state.settings, projects, agents);
   const run = ({ run: action }: PaletteItem) => {
     const done =
       "copy" in action
