@@ -110,7 +110,7 @@ test("the endpoint needs the token, refuses web pages and answers JSON-RPC", asy
       403,
     );
     const list = await (await post(rpc("tools/list"), auth)).json();
-    assert.equal(list.result.tools.length, 4);
+    assert.equal(list.result.tools.length, 6);
     assert.equal(
       (
         await post(

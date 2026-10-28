@@ -45,6 +45,7 @@ export const defaults: Settings = {
   agentLinkEnabled: false,
   agentLinkTools: ["notify", "ask_user", "list_projects"],
   remoteEnabled: false,
+  browserEnabled: false,
   remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

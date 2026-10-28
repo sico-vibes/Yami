@@ -12,6 +12,7 @@ const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =
   {
     main: () => import("./App").then((m) => ({ default: m.App })),
     terminal: () => import("./TerminalWindow"),
+    browser: () => import("./browser/BrowserApp"),
     island: () => import("./Island").then((m) => ({ default: m.Island })),
     lasso: () => import("./Lasso").then((m) => ({ default: m.Lasso })),
     effect: () => import("./Effects").then((m) => ({ default: m.Effects })),

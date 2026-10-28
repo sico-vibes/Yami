@@ -78,6 +78,7 @@ electron/        main process
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
   modules/         optional modules: registry.ts (pure, tested), host.ts (lazy build/dispose, modules.* IPC)
+  browser/         Yami Browser (WebContentsView tabs) and the encrypted bookmark Vault
   remote/          Yami Remote: phone page + token API on the private LAN address
   agentlink/       MCP endpoint for coding agents (loopback, token, per-tool switches)
   feeds/           Desk inbox: RSS/Atom/JSON Feed reader and on-request cache (feeds.json)

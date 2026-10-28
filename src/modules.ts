@@ -12,6 +12,7 @@ export type ModuleId =
   | "feeds"
   | "agentLink"
   | "remote"
+  | "browser"
   | "clipboard"
   | "weather"
   | "roam";
@@ -155,6 +156,18 @@ export const modules: ModuleSpec[] = [
     icon: "device-mobile",
     setting: "remoteEnabled",
     cost: "low",
+    permissions: ["network"],
+    packs: [],
+    presets: ["everything"],
+  },
+  {
+    id: "browser",
+    name: "Yami Browser",
+    blurb:
+      "A light browser with tabs, bangs and your imported bookmarks, kept in its own profile on this PC. Agents can open and read pages when you allow it.",
+    icon: "globe",
+    setting: "browserEnabled",
+    cost: "medium",
     permissions: ["network"],
     packs: [],
     presets: ["everything"],

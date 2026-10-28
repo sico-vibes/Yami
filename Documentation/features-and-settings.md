@@ -151,6 +151,20 @@ Turn on **Feeds inbox** in Settings › Modules (or the Developer preset) and De
 
 Feeds are read when the Inbox opens, and only for sources not read in the last ten minutes, or when you press refresh. There is no background timer. Each read sends the saved ETag and Last-Modified, waits at most 15 seconds, accepts at most 2 MB, refuses a redirect to plain HTTP, keeps the previous items when a read fails, and stores up to 50 items per source in `feeds.json`. Titles and summaries are shown as plain text, and only http(s) links are kept. Up to 50 sources. On 2026-10-28, Hacker News, GitHub releases and Reddit's public `.rss` feeds all answered. On 2026-10-28 a Bluesky profile and a Mastodon account also answered; Reddit may answer HTTP 429 when it is read several times in a few minutes, which the Inbox shows as "asked Yami to slow down". **Mail** sits at the top of the Inbox: up to five accounts (Gmail, Fastmail, iCloud Mail, Yahoo Mail or any IMAP server on port 993). Each shows its unread and total count and the five newest senders and subjects, read when the Inbox opens. You sign in with an app password, which is checked once when you add the account and then kept with Yami's DPAPI-encrypted credentials, never in `mail.json`. Yami opens INBOX with `EXAMINE` and reads headers with `BODY.PEEK`, so nothing is marked as read, moved, deleted or sent, and no message body or image is loaded. The protocol is unit-tested against a scripted server, and a real Gmail server answered TLS and refused a fake sign-in on 2026-10-28; reading a **real mailbox is not verified**. Outlook.com needs Microsoft OAuth, which is not built. Home timelines that need sign-in and a "Brief me" digest are not built yet.
 
+## Yami Browser and Vault
+
+Turn on **Yami Browser** in Settings › Modules, then open it from the launcher (type "browser"). It is Electron's own Chromium in one window, with a vertical tab rail, back, forward and reload, and an address bar that takes addresses, searches (DuckDuckGo) and bangs (`!g`, `!ddg`, `!b`, `!w`, `!yt`, `!gh`, `!npm`, `!r`, `!mdn`).
+- **Isolation:** pages run in their own `persist:yami-browser` profile in Yami's data folder, sandboxed, with no access to Yami or Node.
+- **No device access:** every camera, microphone, location and notification request is refused.
+- **Web pages only:** only http and https pages load; `javascript:`, `file:` and other addresses become a search.
+- **Tabs:** a link that opens a new window opens a new tab instead, up to twelve tabs. A tab left in the background for five minutes is closed to free memory and reloads when you return to it ("asleep" in the rail).
+
+The **Vault** imports bookmarks from Chrome, Edge, Brave, Vivaldi or Helium on this PC, read from each browser's plain `Bookmarks` file, and keeps them encrypted with Windows DPAPI in `vault.bin`. The new-tab page lists and filters them. Yami never decrypts other browsers' passwords or cookies.
+
+With **Yami for your agents** on, the `browser_open` and `browser_read` tools (both off by default) let an agent open an address and read the current tab's title, address and visible text, while a "Reading this page for an agent" bar shows.
+
+Checked on Windows on 2026-10-28 against a local test page: tabs, the page view's placement, background-tab sleep and wake, refusing `javascript:`, and an agent reading over MCP. The plan's remaining parts are **not built**: content blocking, reader mode, history and password import, autofill, Linked browser mode for Google sign-in, and agent clicking or typing.
+
 ## Yami Remote (phone)
 
 Turn on **Yami Remote** in Settings › Phone and scan the pairing code with your phone's camera. Yami serves a small Nightglow page at `http://<this PC's home-network address>:47822/`, listening only on that private address and only while the module is on. The page shows agents that are working, and:

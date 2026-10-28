@@ -118,6 +118,9 @@ Workspace verification commands:
 - `node scripts/verify-agentlink.mjs`: isolated profile; turns on Yami for your
   agents, then speaks MCP to the endpoint as an agent would: token refusal, notify,
   ask_user through the visible approval card, tool switches and token rotation.
+- `node scripts/verify-browser.mjs`: a local test page, no internet; checks tabs, the page
+  view's placement, refused `javascript:`, background-tab sleep and an agent reading the
+  page over MCP.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

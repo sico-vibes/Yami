@@ -98,6 +98,17 @@ export function paletteItems(
         icon: p.icon,
         run: { method: "show", args: { tab: p.tab } },
       });
+  if (
+    settings.browserEnabled &&
+    matches(q, "browser web tabs bookmarks internet")
+  )
+    out.push({
+      id: "browser",
+      title: "Yami Browser",
+      hint: "Open the browser",
+      icon: "globe",
+      run: { method: "browser.show" },
+    });
   if (settings.fileWheelEnabled && matches(q, "drop shelf file wheel convert"))
     out.push({
       id: "shelf",

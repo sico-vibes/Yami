@@ -3,8 +3,9 @@ import path from "node:path";
 import {
   clipboard,
   dialog,
+  safeStorage,
   screen,
-  type BrowserWindow,
+  BrowserWindow,
   type WebContents,
 } from "electron";
 import type { Store } from "../store";
@@ -28,6 +29,8 @@ import { helperPath } from "../workbench/terminal";
 import { agentLinkPort, startAgentLink } from "../agentlink/server";
 import { agentTools } from "../agentlink/tools";
 import { startRemote, type RemoteAbility } from "../remote/server";
+import { createBrowser } from "../browser/browser";
+import { Vault } from "../browser/vault";
 import { activeAgents } from "../../src/agent-rank";
 import { agentClis } from "../../src/dev-types";
 import { mediaAction, nativeScript } from "../platform";
@@ -42,10 +45,18 @@ type Tune = {
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
 type Remote = ReturnType<typeof startRemote> & { error: string };
+type Browser = { browser: ReturnType<typeof createBrowser>; vault: Vault };
 const remoteAbilities: RemoteAbility[] = ["approvals", "media", "clipboard"];
 const agentName = (id: string) =>
   agentClis.find((c) => c.id === id)?.name || id;
-const agentToolNames = ["notify", "ask_user", "list_projects", "open_terminal"];
+const agentToolNames = [
+  "notify",
+  "ask_user",
+  "list_projects",
+  "open_terminal",
+  "browser_open",
+  "browser_read",
+];
 import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
@@ -195,6 +206,17 @@ export function createModuleHost(deps: Deps) {
         },
         dispose: () => {},
       },
+      browser: {
+        load: (): Browser => ({
+          browser: createBrowser({ makeWindow: deps.makeWindow }),
+          vault: new Vault(path.join(path.dirname(store.file), "vault.bin"), {
+            encrypt: (text) => safeStorage.encryptString(text),
+            decrypt: (data) => safeStorage.decryptString(data),
+            available: () => safeStorage.isEncryptionAvailable(),
+          }),
+        }),
+        dispose: (b: Browser) => b.browser.dispose(),
+      },
       remote: {
         load: (): Remote => {
           if (!store.key("provider:remote"))
@@ -291,6 +313,13 @@ export function createModuleHost(deps: Deps) {
                   ),
                 projects: () => speechCore().data.state.projects,
                 openTerminal: (project) => workbench().dev.launch({ project }),
+                browserOpen: (url) => {
+                  const { browser } = registry.get<Browser>("browser");
+                  browser.show();
+                  browser.open(url);
+                },
+                browserRead: () =>
+                  registry.get<Browser>("browser").browser.read(),
               }),
             }),
             error: "",
@@ -351,7 +380,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault)\./.test(
           method,
         )
       );
@@ -388,6 +417,50 @@ export function createModuleHost(deps: Deps) {
           : [];
       if (method.startsWith("palette."))
         throw new Error("Unknown launcher request.");
+      if (method.startsWith("browser.") || method.startsWith("vault.")) {
+        const { browser, vault } = registry.get<Browser>("browser");
+        const local = process.env.LOCALAPPDATA || "";
+        switch (method) {
+          case "browser.show":
+            browser.show();
+            if (a.url) browser.open(String(a.url));
+            return true;
+          case "browser.state":
+            return browser.state();
+          case "browser.window": {
+            const w = sender && BrowserWindow.fromWebContents(sender);
+            if (!w || !browser.owns(sender)) return false;
+            if (a.action === "minimize") w.minimize();
+            else if (a.action === "close") w.close();
+            return true;
+          }
+          case "browser.open":
+            return browser.open(String(a.input ?? ""));
+          case "browser.select":
+            return browser.select(String(a.id));
+          case "browser.navigate":
+            return browser.navigate(String(a.id), String(a.input ?? ""));
+          case "browser.go":
+            if (!["back", "forward", "reload", "stop"].includes(a.step))
+              throw new Error("Unknown browser step.");
+            return browser.go(String(a.id), a.step);
+          case "browser.close":
+            return browser.close(String(a.id));
+          case "browser.layout":
+            return browser.layout(a);
+          case "vault.bookmarks":
+            return vault.list();
+          case "vault.sources":
+            return vault.sources(local);
+          case "vault.import":
+            return vault.import(String(a.id), local);
+          case "vault.remove":
+            return vault.remove(String(a.url));
+          case "vault.clear":
+            return vault.clear();
+        }
+        throw new Error("Unknown browser request.");
+      }
       if (method.startsWith("remote.")) {
         const settings = store.state.settings;
         const allow = () =>
@@ -595,7 +668,12 @@ export function createModuleHost(deps: Deps) {
         const live = registry.peek<Workbench>("workbench");
         const dir = path.dirname(store.file);
         // Tune and feeds keep their own files whether or not they are loaded.
-        for (const file of ["tune.json", "feeds.json", "mail.json"])
+        for (const file of [
+          "tune.json",
+          "feeds.json",
+          "mail.json",
+          "vault.bin",
+        ])
           fs.rmSync(path.join(dir, file), { force: true });
         if (live) return live.clearData();
         if (shared) shared.data.deleted = true;
