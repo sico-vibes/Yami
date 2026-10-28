@@ -107,6 +107,8 @@ Workspace verification commands:
 - `node scripts/verify-projects.mjs`: isolated profile; adds this repository as a
   project, checks its git branch and the detected agent CLIs, refuses unknown and
   uninstalled agents, and opens a terminal tab there. It never starts an agent CLI.
+  In a throwaway repository it also adds a task worktree, checks that removing it is
+  refused while it has changes, and removes it once clean, keeping the branch.
 - `node scripts/verify-tune.mjs`: applies and undoes every Tune tweak with real
   `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the

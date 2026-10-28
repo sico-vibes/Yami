@@ -147,5 +147,15 @@ export type Editor = "vscode" | "cursor";
  * `dev.projects.update` { id, agent?, name? }; `dev.projects.remove` { id };
  * `dev.launch` { project?, cwd?, agent? } opens a Yami Terminal tab there and
  * starts the agent; `dev.open` { id, target: "explorer" | Editor };
- * `dev.editors` → Editor[] (editors registered for their link scheme).
+ * `dev.editors` → Editor[] (editors registered for their link scheme);
+ * `dev.worktrees` { id } → Worktree[]; `dev.task` { id, name, agent? } adds
+ * a worktree on `yami/<name>` and opens it; `dev.task.remove` { id, path }.
  */
+
+export type Worktree = {
+  path: string;
+  branch: string;
+  head: string;
+  /** The project's own checkout, which is never removed. */
+  main: boolean;
+};

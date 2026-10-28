@@ -110,3 +110,47 @@
 html[data-reduced="true"] .agent-launch {
   transition: none;
 }
+.project-tasks {
+  display: grid;
+  gap: var(--space-2);
+  margin-left: 50px;
+}
+.project-tasks > .text-button {
+  justify-self: start;
+  padding: 2px 0;
+}
+.task-new {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.task-new input {
+  flex: 1;
+  min-width: 0;
+}
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--line);
+}
+.task-row > i {
+  color: var(--glow);
+}
+.task-row > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.task-row strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.task-row small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

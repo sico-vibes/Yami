@@ -84,3 +84,61 @@ export function sameFolder(a: string, b: string) {
 export function editorLink(scheme: "vscode" | "cursor", folder: string) {
   return `${scheme}://file/${encodeURI(path.resolve(folder).replace(/\\/g, "/"))}`;
 }
+
+export type Worktree = {
+  path: string;
+  branch: string;
+  head: string;
+  main: boolean;
+};
+
+/** Reads `git worktree list --porcelain`; the first entry is the main one. */
+export function parseWorktrees(text: string): Worktree[] {
+  const out: Worktree[] = [];
+  for (const block of text.split(/\r?\n\r?\n/)) {
+    const lines = block.split(/\r?\n/);
+    const tree = lines.find((l) => l.startsWith("worktree "));
+    if (!tree) continue;
+    const branch = lines.find((l) => l.startsWith("branch "));
+    out.push({
+      path: path.normalize(tree.slice(9).trim()),
+      branch: branch
+        ? branch
+            .slice(7)
+            .trim()
+            .replace(/^refs\/heads\//, "")
+        : lines.includes("detached")
+          ? "detached"
+          : "",
+      head: (lines.find((l) => l.startsWith("HEAD ")) || "").slice(5, 17),
+      main: !out.length,
+    });
+  }
+  return out;
+}
+
+/**
+ * Where a new task's worktree goes: a `<project>.worktrees` folder beside the
+ * project, on a `yami/<name>` branch. Names are kept to safe characters.
+ */
+export function worktreePlan(project: string, name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+  if (!slug) throw new Error("Name the task with letters or numbers.");
+  const root = path.resolve(project);
+  const folder = path.join(
+    path.dirname(root),
+    path.basename(root) + ".worktrees",
+    slug,
+  );
+  const branch = "yami/" + slug;
+  return {
+    branch,
+    folder,
+    args: ["-C", root, "worktree", "add", "-b", branch, folder],
+  };
+}

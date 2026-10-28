@@ -593,6 +593,9 @@ export class Workbench {
     if (method === "dev.launch") return this.dev.launch(a);
     if (method === "dev.editors") return this.dev.editors();
     if (method === "dev.open") return this.dev.open(a);
+    if (method === "dev.worktrees") return this.dev.worktrees(String(a.id));
+    if (method === "dev.task") return this.dev.newTask(a);
+    if (method === "dev.task.remove") return this.dev.removeTask(a);
     throw new Error("Unknown Dev request.");
   }
   prepareChat(a: any) {

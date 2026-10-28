@@ -10,11 +10,11 @@ import { engines } from "../electron/wheel/engine-catalog.ts";
 import { modules } from "../src/modules.ts";
 
 test("Whistle runs with the documented runner flags only", () => {
-  assert.deepEqual(whistleArgs("C:\m\whistle.cact", "C:\t\a.wav"), [
+  assert.deepEqual(whistleArgs("C:\\m\\whistle.cact", "C:\\t\\a.wav"), [
     "--model",
-    "C:\m\whistle.cact",
+    "C:\\m\\whistle.cact",
     "--audio",
-    "C:\t\a.wav",
+    "C:\\t\\a.wav",
   ]);
 });
 

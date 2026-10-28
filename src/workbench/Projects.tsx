@@ -9,6 +9,7 @@ import {
   type ProjectInfo,
 } from "../dev-types";
 import { Empty, Icon, IconButton } from "../ui";
+import { ProjectTasks } from "./ProjectTasks";
 import type { WorkbenchState } from "../workbench-types";
 
 const editorNames: Record<Editor, string> = {
@@ -212,6 +213,13 @@ export function Projects({
                         </button>
                       ))}
                     </div>
+                  )}
+                  {p.git && (
+                    <ProjectTasks
+                      project={p}
+                      agents={installed}
+                      report={report}
+                    />
                   )}
                   <footer className="entry-foot">
                     <button

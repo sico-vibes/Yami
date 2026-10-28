@@ -14,7 +14,7 @@ import { agentClis } from "../src/dev-types.ts";
 test("agent CLIs prefer a real .exe over npm shims and search extra folders", () => {
   const home = "C:\\Users\\demo";
   const folders = agentFolders(
-    { PATH: "C:\\Tools;\"C:\\Quoted\"", APPDATA: "C:\\Roaming" },
+    { PATH: 'C:\\Tools;"C:\\Quoted"', APPDATA: "C:\\Roaming" },
     home,
   );
   assert.ok(folders.includes("C:\\Quoted"), "quotes are stripped");
@@ -42,10 +42,7 @@ test("agent CLIs prefer a real .exe over npm shims and search extra folders", ()
 
 test("the catalogue has unique ids, commands and two-letter marks", () => {
   assert.equal(new Set(agentClis.map((c) => c.id)).size, agentClis.length);
-  assert.equal(
-    new Set(agentClis.map((c) => c.command)).size,
-    agentClis.length,
-  );
+  assert.equal(new Set(agentClis.map((c) => c.command)).size, agentClis.length);
   for (const c of agentClis) {
     assert.match(c.command, /^[a-z][a-z-]*$/, "a plain command, no arguments");
     assert.equal(c.mark.length, 2);
@@ -88,4 +85,50 @@ test("folders compare like Windows and open as editor links", () => {
       editorLink("vscode", "D:\\Basem's\\My Code"),
       "vscode://file/D:/Basem's/My%20Code",
     );
+});
+
+test("worktrees list with the main checkout first and plans stay beside it", async () => {
+  const { parseWorktrees, worktreePlan } =
+    await import("../electron/workbench/dev-rules.ts");
+  const list = parseWorktrees(
+    [
+      "worktree D:/Code/yami",
+      "HEAD 1234567890abcdef1234",
+      "branch refs/heads/main",
+      "",
+      "worktree D:/Code/yami.worktrees/fix-login",
+      "HEAD abcdef1234567890abcd",
+      "branch refs/heads/yami/fix-login",
+      "",
+      "worktree D:/Code/yami.worktrees/old",
+      "HEAD 0000000000000000",
+      "detached",
+      "",
+    ].join("\n"),
+  );
+  assert.deepEqual(
+    list.map((w) => [w.branch, w.main, w.head.length]),
+    [
+      ["main", true, 12],
+      ["yami/fix-login", false, 12],
+      ["detached", false, 12],
+    ],
+  );
+  const plan = worktreePlan("D:\\Code\\yami", "  Fix Login / OAuth!! ");
+  assert.equal(plan.branch, "yami/fix-login-oauth");
+  assert.equal(
+    plan.folder,
+    path.join("D:\\Code", "yami.worktrees", "fix-login-oauth"),
+  );
+  assert.deepEqual(plan.args.slice(2), [
+    "worktree",
+    "add",
+    "-b",
+    plan.branch,
+    plan.folder,
+  ]);
+  assert.throws(
+    () => worktreePlan("D:\\Code\\yami", "!!!"),
+    /letters or numbers/,
+  );
 });

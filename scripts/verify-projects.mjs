@@ -91,6 +91,76 @@ try {
     true,
   );
   assert.deepEqual((await call(main, "dev.projects")).value, []);
+  // Parallel tasks in a throwaway repository: add a worktree, refuse to
+  // remove it while it has changes, then remove it once clean.
+  const sandbox = path.join(profile, "task-repo");
+  fs.mkdirSync(sandbox, { recursive: true });
+  const git = (...args) =>
+    execFileSync("git", ["-C", sandbox, ...args], { encoding: "utf8" });
+  git("init", "-q", "-b", "main");
+  fs.writeFileSync(path.join(sandbox, "README.md"), "demo\n");
+  git("add", ".");
+  git(
+    "-c",
+    "user.name=Yami",
+    "-c",
+    "user.email=yami@example.invalid",
+    "commit",
+    "-qm",
+    "init",
+  );
+  const taskRepo = (await call(main, "dev.projects.add", { path: sandbox }))
+    .value;
+  const task = (
+    await call(main, "dev.task", { id: taskRepo.id, name: "Fix Login" })
+  ).value;
+  assert.equal(task.branch, "yami/fix-login");
+  assert.ok(fs.existsSync(path.join(task.path, "README.md")));
+  assert.match(
+    (await call(main, "dev.task", { id: taskRepo.id, name: "fix login" }))
+      .error,
+    /already/,
+  );
+  let trees = (await call(main, "dev.worktrees", { id: taskRepo.id })).value;
+  assert.deepEqual(
+    trees.map((t) => [t.branch, t.main]),
+    [
+      ["main", true],
+      ["yami/fix-login", false],
+    ],
+  );
+  fs.writeFileSync(path.join(task.path, "change.txt"), "work in progress\n");
+  assert.match(
+    (await call(main, "dev.task.remove", { id: taskRepo.id, path: task.path }))
+      .error,
+    /not committed/,
+  );
+  fs.rmSync(path.join(task.path, "change.txt"));
+  // The task opened a terminal tab in its folder; end it so Windows lets the
+  // folder go.
+  for (const tab of await terminal.locator("[data-session]").all())
+    await call(terminal, "terminal.end", {
+      session: await tab.getAttribute("data-session"),
+    });
+  const removed = await call(main, "dev.task.remove", {
+    id: taskRepo.id,
+    path: task.path,
+  });
+  assert.ok(removed.value, removed.error);
+  trees = removed.value;
+  assert.equal(trees.length, 1);
+  assert.equal(fs.existsSync(task.path), false);
+  assert.match(
+    git("branch", "--list", "yami/fix-login"),
+    /yami\/fix-login/,
+    "branch kept",
+  );
+  assert.match(
+    (await call(main, "dev.task.remove", { id: taskRepo.id, path: sandbox }))
+      .error,
+    /gone|main checkout/,
+  );
+  await call(main, "dev.projects.remove", { id: taskRepo.id });
   const saved = JSON.parse(
     fs.readFileSync(path.join(profile, "workbench.json"), "utf8"),
   );

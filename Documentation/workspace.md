@@ -39,6 +39,16 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   its files. The tiles show two-letter marks, not brand logos. The command names were
   checked against installs on one PC (Claude Code, Codex, OpenCode, Gemini CLI and
   Crush); the others follow each project's documentation and are **not verified** here.
+- **Parallel tasks.** A git project's card has a **Parallel tasks** list, read only
+  when you open it. **New task** runs `git worktree add -b yami/<name>` into a
+  `<project>.worktrees/<name>` folder beside the project and opens a Yami Terminal tab
+  there, starting the chosen agent if you picked one, so several agents can work side
+  by side without touching your checkout. Each task shows its branch and folder, with
+  a terminal button and **Remove**, which asks first and runs `git worktree remove`.
+  Git refuses when the folder has uncommitted changes, and Windows refuses while a
+  terminal or editor still has it open; Yami says which. The branch and its commits
+  stay. Comparing agents' diffs and sending one prompt to several agents (Orca's
+  "fan out") are not built yet.
 - **Usage.** Allowance alerts and background refresh are two toggles. Each provider
   that has been read gets a card with its account, source, status word, and each
   limit as a label, a meter, a percentage and a reset time, grouped by account.

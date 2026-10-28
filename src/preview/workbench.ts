@@ -295,6 +295,14 @@ export function previewWorkbench(
 }
 
 // Dev hub stand-ins: synthetic folders and git counts; nothing is read or run.
+let previewTasks = [
+  {
+    path: "C:\\Demo\\yami-demo.worktrees\\fix-login",
+    branch: "yami/fix-login",
+    head: "9f8e7d6c5b4a",
+    main: false,
+  },
+];
 function previewDev(method: string, a: any, changed: () => void): any {
   if (method === "dev.agents")
     return ["claude", "codex", "opencode", "gemini"].map((id) => ({
@@ -341,6 +349,32 @@ function previewDev(method: string, a: any, changed: () => void): any {
     throw new Error(
       `Preview only: ${cli ? cli.name + " would start" : "a terminal would open"} in that folder.`,
     );
+  }
+  if (method === "dev.worktrees")
+    return [
+      {
+        path: "C:\\Demo\\yami-demo",
+        branch: "main",
+        head: "1a2b3c4d5e6f",
+        main: true,
+      },
+      ...previewTasks,
+    ];
+  if (method === "dev.task") {
+    const slug = String(a.name || "task")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-");
+    previewTasks.push({
+      path: "C:\\Demo\\yami-demo.worktrees\\" + slug,
+      branch: "yami/" + slug,
+      head: "1a2b3c4d5e6f",
+      main: false,
+    });
+    return { branch: "yami/" + slug, path: previewTasks.at(-1)!.path };
+  }
+  if (method === "dev.task.remove") {
+    previewTasks = previewTasks.filter((t) => t.path !== a.path);
+    return previewDev("dev.worktrees", a, changed);
   }
   throw new Error("Desktop-only Dev action: " + method);
 }

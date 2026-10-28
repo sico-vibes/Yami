@@ -18,8 +18,10 @@ import {
   editorLink,
   findCommand,
   parseGitStatus,
+  parseWorktrees,
   projectName,
   sameFolder,
+  worktreePlan,
 } from "./dev-rules.ts";
 
 const exec = promisify(execFile);
@@ -189,6 +191,76 @@ export class DevController {
       throw new Error("That editor is not installed.");
     await shell.openExternal(editorLink(a.target, project.path));
     return true;
+  }
+
+  /** The project's worktrees; the main checkout comes first. */
+  async worktrees(id: string) {
+    const project = this.project(id);
+    try {
+      const { stdout } = await exec(
+        "git",
+        ["-C", project.path, "worktree", "list", "--porcelain"],
+        { windowsHide: true, timeout: 5000, maxBuffer: 1024 * 1024 },
+      );
+      return parseWorktrees(stdout);
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * A new task: a worktree on its own `yami/<name>` branch beside the
+   * project, then a terminal tab there, with the agent if one was chosen.
+   */
+  async newTask(a: { id: string; name: unknown; agent?: unknown }) {
+    const project = this.project(a.id);
+    const plan = worktreePlan(project.path, String(a.name ?? ""));
+    if (fs.existsSync(plan.folder))
+      throw new Error("A task with that name already has a folder.");
+    try {
+      await exec("git", plan.args, { windowsHide: true, timeout: 30000 });
+    } catch (error) {
+      const text = String((error as { stderr?: string }).stderr || "");
+      throw new Error(
+        /not a git repository/i.test(text)
+          ? "This project is not a git repository."
+          : /already exists/i.test(text)
+            ? `The branch ${plan.branch} already exists.`
+            : text.trim().split(/\r?\n/).pop() ||
+              "git could not add the worktree.",
+      );
+    }
+    this.launch({ cwd: plan.folder, agent: a.agent || undefined });
+    return { branch: plan.branch, path: plan.folder };
+  }
+
+  /** Removes a task worktree; git refuses when it has uncommitted changes. */
+  async removeTask(a: { id: string; path: unknown }) {
+    const project = this.project(a.id);
+    const tree = (await this.worktrees(a.id)).find((w) =>
+      sameFolder(w.path, String(a.path ?? "")),
+    );
+    if (!tree) throw new Error("That worktree is gone.");
+    if (tree.main) throw new Error("The main checkout cannot be removed.");
+    try {
+      await exec("git", ["-C", project.path, "worktree", "remove", tree.path], {
+        windowsHide: true,
+        timeout: 30000,
+      });
+    } catch (error) {
+      const text = String((error as { stderr?: string }).stderr || "");
+      throw new Error(
+        /modified or untracked|is dirty/i.test(text)
+          ? "This worktree has changes that are not committed. Commit or discard them first."
+          : /permission denied|being used|resource busy|Invalid argument/i.test(
+                text,
+              )
+            ? "Something still has this folder open. Close its terminal tabs and editors, then try again."
+            : text.trim().split(/\r?\n/).pop() ||
+              "git could not remove the worktree.",
+      );
+    }
+    return this.worktrees(a.id);
   }
 
   private async git(folder: string) {
