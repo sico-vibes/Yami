@@ -5,8 +5,7 @@ export type EngineId =
   | "sevenExtra"
   | "exiftool"
   | "needle"
-  | "whistle"
-  | "mailpit";
+  | "whistle";
 export type EngineSpec = {
   id: EngineId;
   version: string;
@@ -102,16 +101,5 @@ export const engines: EngineSpec[] = [
     exe: "whistle.cact",
     source:
       "https://huggingface.co/Cactus-Compute/whistle/tree/741118687e1f008f06d1351a402a731274789790",
-  },
-  {
-    // Digest from GitHub's release asset metadata, checked 2026-10-28.
-    id: "mailpit",
-    version: "1.31.5",
-    license: "MIT (Mailpit by Ralph Slooten)",
-    url: "https://github.com/axllent/mailpit/releases/download/v1.31.5/mailpit-windows-amd64.zip",
-    sha256: "9637e21c02b33185fe69268ba05317152a5d8ac7877115e8a70e29b7e199e8dc",
-    format: "zip",
-    exe: "mailpit.exe",
-    source: "https://github.com/axllent/mailpit/releases/tag/v1.31.5",
   },
 ];

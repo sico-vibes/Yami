@@ -19,7 +19,15 @@ const sizes: Record<PackId, number> = {
   exiftool: 26_000_000,
   needle: 1_570_816,
   whistle: 16_919_407,
-  mailpit: 10_639_460,
+};
+// One caught message for the Dev mail catcher.
+const previewMail = {
+  id: "00000000-0000-4000-8000-000000000001",
+  from: "app@demo.test",
+  to: "ana@demo.test",
+  subject: "Reset your password",
+  at: Date.now() - 4 * 60_000,
+  size: 1840,
 };
 const packs = new Map<PackId, PackStatus>();
 // "Show file extensions" starts as already set before Yami, to show the lock.
@@ -320,14 +328,22 @@ export function previewModules(
       };
     case "mailcatcher.status":
     case "mailcatcher.stop":
-      return {
-        installed: true,
-        running: false,
-        smtp: "127.0.0.1:1025",
-        web: "http://127.0.0.1:8025",
-      };
+      return { running: false, smtp: "127.0.0.1:1025", count: 1 };
     case "mailcatcher.start":
-      throw new Error("Preview only — Mailpit was not started.");
+      throw new Error("Preview only — the mail catcher was not started.");
+    case "mailcatcher.list":
+    case "mailcatcher.remove":
+    case "mailcatcher.clear":
+      return method === "mailcatcher.list" ? [previewMail] : [];
+    case "mailcatcher.read":
+      return {
+        ...previewMail,
+        date: "Wed, 28 Oct 2026 19:30:00 +0200",
+        text: "Hi Ana,\n\nClick the link below to reset your password.\n\nThe demo app",
+        attachments: [],
+      };
+    case "mailcatcher.open":
+      throw new Error("Preview only — no mail app was opened.");
     case "bridges.rustdesk.open":
     case "bridges.windhawk.open":
       throw new Error("Preview only — nothing was started.");

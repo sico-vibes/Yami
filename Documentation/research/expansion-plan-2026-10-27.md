@@ -23,6 +23,8 @@ Yami already ships a lot of this, so the plan extends what exists rather than re
 - **Every feature is optional.** Users pick features at first run and can install, enable, disable or remove any of them later.
 - Add a **Yami Browser**: light, local-only, with MCP-style agent control and a local vault for data imported from other browsers.
 
+**Owner decision (2026-10-28): native, not third-party.** Yami does not install, bundle or download other programs. Where this plan names one (Mailpit, RustDesk, Windhawk, AdGuard Home), Yami builds its own lightweight version, borrowing ideas, hooks and calls but not the program. The Whistle speech model is the exception. So the Mailpit pack was replaced by Yami's own SMTP mail catcher; the RustDesk and Windhawk items become Yami-native remote screen control and Explorer tweaks. The sections below are kept as written, for the record.
+
 **Measured today:** idle is 165–172 MB private across 8 processes (`Documentation/performance.md`). That sits inside the new budget with about 30 MB of headroom. So every new feature must be **lazy, toggleable, and zero-cost when off**. That is what Phase 0 builds.
 
 ---

@@ -495,14 +495,21 @@ export function createModuleHost(deps: Deps) {
       if (method.startsWith("mailcatcher.")) {
         mail ||= new MailCatcher({
           dataDir: path.dirname(store.file),
-          exe: async () =>
-            engines.list().find((e) => e.id === "mailpit")?.installed
-              ? engines.ensure("mailpit")
-              : "",
+          caught: (m) => deps.broadcast({ type: "mailcatcher", mail: m }),
         });
+        const id = String(a.id || "");
         if (method === "mailcatcher.status") return mail.status();
         if (method === "mailcatcher.start") return mail.start();
         if (method === "mailcatcher.stop") return mail.stop();
+        if (method === "mailcatcher.list") return mail.list();
+        if (method === "mailcatcher.read") return mail.read(id);
+        if (method === "mailcatcher.remove") return mail.remove(id);
+        if (method === "mailcatcher.clear") return mail.clear();
+        if (method === "mailcatcher.open") {
+          const error = await shell.openPath(mail.path(id));
+          if (error) throw new Error(error);
+          return true;
+        }
         throw new Error("Unknown request.");
       }
       if (method.startsWith("bridges.")) {

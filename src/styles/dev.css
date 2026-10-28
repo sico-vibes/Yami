@@ -202,3 +202,48 @@ html[data-reduced="true"] .agent-launch {
 .mail-catcher {
   margin-top: var(--space-6);
 }
+.mail-row {
+  padding-inline: var(--space-4);
+}
+.mail-open {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.mail-open:focus-visible {
+  outline: 2px solid var(--glow);
+  outline-offset: 2px;
+}
+.mail-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-sm);
+}
+.mail-meta dt {
+  color: var(--muted);
+}
+.mail-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.mail-text {
+  max-height: 50vh;
+  overflow: auto;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--ink-0);
+  font: inherit;
+  font-size: var(--fs-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

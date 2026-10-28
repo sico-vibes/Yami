@@ -120,9 +120,9 @@ Workspace verification commands:
   Windhawk are installed on this PC (starting neither), then uses a fake install to check the
   RustDesk ID and server in Settings › Phone, a refused config string, and the Windhawk mod
   and curated links on the Tune page.
-- `node scripts/verify-mailcatcher.mjs`: isolated profile; downloads the Mailpit pack through
-  the pinned downloader (about 11 MB), checks it is installed and that Dev › Projects offers
-  Start. It does not start Mailpit.
+- `node scripts/verify-mailcatcher.mjs`: isolated profile; starts Yami's mail catcher from
+  Dev › Projects, sends one message to `127.0.0.1:1025` over SMTP, checks it is listed and opens
+  as text, then stops it and checks the port is closed.
 - `node scripts/verify-whistle.mjs`: isolated profile; downloads the pinned Needle runner and
   Whistle model (about 18 MB), dictates a sentence synthesized by Windows into Yami's own chat
   box (never another app), and checks the words and a Your words replacement. Restores the
