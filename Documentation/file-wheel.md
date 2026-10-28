@@ -47,6 +47,10 @@ Copy path writes the paths to the clipboard. Copy asks PowerShell to put the fil
 HEIC is still absent from the convert wheel. The first time a convert wheel opens, if ffmpeg is already installed, Yami reads `ffmpeg -encoders` and `ffmpeg -muxers`. The HEIC petal appears only when both an HEVC encoder and an HEIC or HEIF muxer are listed. This build does not claim the pinned Gyan or ImageMagick packages can write HEIC. The probe was not run here.
 
 
+## Batch rename
+
+With two or more files selected, the tools wheel has **Rename**. It opens a tool window with a pattern such as `trip-{n}` or `{name} copy {n}` (`{n}` is a number padded to the count, `{name}` the old name), a first number, and a preview of every new name before anything changes. Extensions stay, and the order is the order you selected the files. Yami refuses names Windows cannot use, names that would clash, and anything that would overwrite a file outside the selection. Renaming goes through temporary names first, so files can swap names, and a failure puts everything back. Checked on Windows on 2026-10-28.
+
 ## Copy text from an image
 
 For one image, the tools wheel has **Copy text**. Windows' own OCR engine (`Windows.Media.Ocr`, through `native/Ocr.ps1`) reads the text in your Windows display languages, with no download or upload, and puts it on the clipboard with a note of how many lines it copied. If Windows has no OCR language, Yami says which setting adds one. Checked on Windows on 2026-10-28 with a drawn sample image.
@@ -65,7 +69,7 @@ Folders work on the wheel too: drag one, select it in File Explorer and use the 
 - **Find duplicates** groups identical files by size and then SHA-256, bounded like Folder size, and copies the list to the clipboard with how much space repeats. Nothing is deleted.
 - **Add as project**, for one folder, adds it to the AI workspace's Projects.
 
-Batch rename, flatten and folder icons from the plan are not built.
+Flatten and folder icons from the plan are not built.
 
 ## Phase status
 

@@ -1,8 +1,14 @@
 import fs from "node:fs";
+import { renameFiles } from "./rename-files.ts";
 import path from "node:path";
 import { shell } from "electron";
 import { extensionOf, kindOf } from "../../src/wheel/catalog";
-import { allocateFile, allocateFolder, stemOf, toolBase } from "../../src/wheel/naming";
+import {
+  allocateFile,
+  allocateFolder,
+  stemOf,
+  toolBase,
+} from "../../src/wheel/naming";
 import {
   compressAudioCommand,
   compressImageCommand,
@@ -16,7 +22,14 @@ import {
   type CompressPreset,
 } from "../../src/wheel/plans";
 import type { WheelFile } from "../../src/wheel/types";
-import { packGzip, packTar, packZip, unpackGzip, unpackTar, unpackZip } from "./archive.ts";
+import {
+  packGzip,
+  packTar,
+  packZip,
+  unpackGzip,
+  unpackTar,
+  unpackZip,
+} from "./archive.ts";
 import { convertOffice, isOfficeKind } from "./convert-docs.ts";
 import { cachedHeic } from "./heic-probe.ts";
 import type { EngineStore } from "./engines.ts";
@@ -34,7 +47,10 @@ function enqueue<T>(work: () => Promise<T>) {
   return run;
 }
 
-async function writeEntries(folder: string, entries: { name: string; data: Buffer }[]) {
+async function writeEntries(
+  folder: string,
+  entries: { name: string; data: Buffer }[],
+) {
   for (const entry of entries) {
     const target = path.resolve(folder, ...entry.name.split("/"));
     const relative = path.relative(folder, target);
@@ -73,7 +89,11 @@ async function performNow(input: {
         shell.showItemInFolder(saved[0]);
       } catch {}
     }
-    notify(saved.length === 1 ? `Saved ${path.basename(saved[0])}` : `Saved ${saved.length} files.`);
+    notify(
+      saved.length === 1
+        ? `Saved ${path.basename(saved[0])}`
+        : `Saved ${saved.length} files.`,
+    );
     return saved;
   };
   const tooled = await performTool(input, finish);
@@ -81,22 +101,46 @@ async function performNow(input: {
   if (input.petalId.startsWith("to:")) {
     const target = input.petalId.slice(3);
     for (const file of files) {
-      if (extensionOf(file.name) === target || (target === "jpg" && extensionOf(file.name) === "jpeg"))
+      if (
+        extensionOf(file.name) === target ||
+        (target === "jpg" && extensionOf(file.name) === "jpeg")
+      )
         continue;
-      const output = allocateFile(path.dirname(file.path), stemOf(file.name), target, fs.existsSync);
-      if (isOfficeKind(file.name)) await convertOffice(file.path, file.name, output, target, notify);
+      const output = allocateFile(
+        path.dirname(file.path),
+        stemOf(file.name),
+        target,
+        fs.existsSync,
+      );
+      if (isOfficeKind(file.name))
+        await convertOffice(file.path, file.name, output, target, notify);
       else {
         const allowHeic = target === "heic" ? await cachedHeic(engines) : false;
-        const command = convertCommand(kindOf(file.name), target, file.path, output, allowHeic);
+        const command = convertCommand(
+          kindOf(file.name),
+          target,
+          file.path,
+          output,
+          allowHeic,
+        );
         const exe = await engines.ensure(command.engine);
         notify(`Converting ${file.name}`);
         await runChecked(exe, command.args, file.name, notify);
       }
       outputs.push(output);
     }
-    if (!outputs.length) throw new Error("Those files are already in that format.");
+    if (!outputs.length)
+      throw new Error("Those files are already in that format.");
     return finish(outputs);
   }
+  if (input.petalId === "tool:rename")
+    return finish(
+      await renameFiles(
+        input.files,
+        String(input.options?.pattern || ""),
+        Number(input.options?.start ?? 1),
+      ),
+    );
   if (input.petalId === "tool:compress") return finish(await compress(input));
   if (input.petalId === "tool:metadata") return finish(await metadata(input));
   if (input.petalId === "tool:extract") return finish(await extract(input));
@@ -111,26 +155,56 @@ async function compress(input: {
   engines: EngineStore;
   notify: (message: string) => void;
 }) {
-  const preset = (["smaller", "balanced", "smallest"].includes(input.options?.preset)
-    ? input.options.preset
-    : "balanced") as CompressPreset;
+  const preset = (
+    ["smaller", "balanced", "smallest"].includes(input.options?.preset)
+      ? input.options.preset
+      : "balanced"
+  ) as CompressPreset;
   const percent = Number(input.options?.percent) || 100;
   const outputs: string[] = [];
   for (const file of input.files) {
     const kind = kindOf(file.name);
     const directory = path.dirname(file.path);
     if (kind === "image" || kind === "gif") {
-      const output = allocateFile(directory, toolBase(file.name, "Compressed"), file.ext || "jpg", fs.existsSync);
+      const output = allocateFile(
+        directory,
+        toolBase(file.name, "Compressed"),
+        file.ext || "jpg",
+        fs.existsSync,
+      );
       const command = compressImageCommand(file.path, output, preset, percent);
-      await runChecked(await input.engines.ensure("magick"), command.args, file.name, input.notify);
+      await runChecked(
+        await input.engines.ensure("magick"),
+        command.args,
+        file.name,
+        input.notify,
+      );
       outputs.push(output);
-    } else if (kind === "audio" && !["wav", "flac", "aiff"].includes(file.ext)) {
-      const output = allocateFile(directory, toolBase(file.name, "Compressed"), file.ext, fs.existsSync);
+    } else if (
+      kind === "audio" &&
+      !["wav", "flac", "aiff"].includes(file.ext)
+    ) {
+      const output = allocateFile(
+        directory,
+        toolBase(file.name, "Compressed"),
+        file.ext,
+        fs.existsSync,
+      );
       const command = compressAudioCommand(file.path, output, preset);
-      await runChecked(await input.engines.ensure("ffmpeg"), command.args, file.name, input.notify);
+      await runChecked(
+        await input.engines.ensure("ffmpeg"),
+        command.args,
+        file.name,
+        input.notify,
+      );
       outputs.push(output);
     } else if (kind === "video") {
-      const output = allocateFile(directory, toolBase(file.name, "Compressed"), file.ext, fs.existsSync);
+      const output = allocateFile(
+        directory,
+        toolBase(file.name, "Compressed"),
+        file.ext,
+        fs.existsSync,
+      );
       const target = Number(input.options?.targetMb);
       let command = compressVideoCommand(file.path, output, preset);
       if (target > 0) {
@@ -148,13 +222,27 @@ async function compress(input: {
           ]);
           const duration = Number(info.stdout.trim());
           if (duration > 0)
-            command = compressVideoTargetCommand(file.path, output, videoTargetBitrate(target * 1_000_000, duration));
+            command = compressVideoTargetCommand(
+              file.path,
+              output,
+              videoTargetBitrate(target * 1_000_000, duration),
+            );
         }
       }
-      await runChecked(await input.engines.ensure(command.engine), command.args, file.name, input.notify);
+      await runChecked(
+        await input.engines.ensure(command.engine),
+        command.args,
+        file.name,
+        input.notify,
+      );
       outputs.push(output);
     } else {
-      const output = allocateFile(directory, toolBase(file.name, "Compressed"), "zip", fs.existsSync);
+      const output = allocateFile(
+        directory,
+        toolBase(file.name, "Compressed"),
+        "zip",
+        fs.existsSync,
+      );
       const data = await fs.promises.readFile(file.path);
       await fs.promises.writeFile(output, packZip([{ name: file.name, data }]));
       outputs.push(output);
@@ -180,38 +268,68 @@ async function metadata(input: {
     const command = input.options?.edits?.length
       ? editMetadataCommand(file.path, output, input.options.edits)
       : stripMetadataCommand(kindOf(file.name), file.path, output);
-    await runChecked(await input.engines.ensure(command.engine), command.args, file.name, input.notify);
+    await runChecked(
+      await input.engines.ensure(command.engine),
+      command.args,
+      file.name,
+      input.notify,
+    );
     outputs.push(output);
   }
   return outputs;
 }
 
-async function extract(input: { files: WheelFile[]; engines: EngineStore; notify: (message: string) => void }) {
+async function extract(input: {
+  files: WheelFile[];
+  engines: EngineStore;
+  notify: (message: string) => void;
+}) {
   const folders: string[] = [];
   for (const file of input.files) {
-    const folder = allocateFolder(path.dirname(file.path), `${stemOf(file.name)} Extracted`, fs.existsSync);
+    const folder = allocateFolder(
+      path.dirname(file.path),
+      `${stemOf(file.name)} Extracted`,
+      fs.existsSync,
+    );
     await fs.promises.mkdir(folder, { recursive: true });
     const kind = extractKind(file.ext);
     if (kind === "zip") {
-      await writeEntries(folder, unpackZip(await fs.promises.readFile(file.path)));
+      await writeEntries(
+        folder,
+        unpackZip(await fs.promises.readFile(file.path)),
+      );
     } else if (kind === "tar") {
-      await writeEntries(folder, unpackTar(await fs.promises.readFile(file.path)));
+      await writeEntries(
+        folder,
+        unpackTar(await fs.promises.readFile(file.path)),
+      );
     } else if (kind === "gzip") {
       const raw = unpackGzip(await fs.promises.readFile(file.path));
       if (file.ext === "gz" && !file.name.toLowerCase().endsWith(".tar.gz")) {
         const inner = file.name.replace(/\.gz$/i, "");
-        await fs.promises.writeFile(path.join(folder, path.basename(inner)), raw);
+        await fs.promises.writeFile(
+          path.join(folder, path.basename(inner)),
+          raw,
+        );
       } else await writeEntries(folder, unpackTar(raw));
     } else {
       const exe = await input.engines.ensure("sevenExtra");
-      await runChecked(exe, ["x", file.path, `-o${folder}`, "-y"], file.name, input.notify);
+      await runChecked(
+        exe,
+        ["x", file.path, `-o${folder}`, "-y"],
+        file.name,
+        input.notify,
+      );
     }
     folders.push(folder);
   }
   return folders;
 }
 
-async function mergedPdf(input: { files: WheelFile[]; options?: { order?: string[] } }) {
+async function mergedPdf(input: {
+  files: WheelFile[];
+  options?: { order?: string[] };
+}) {
   const output = allocateFile(
     path.dirname(input.files[0].path),
     toolBase(input.files[0].name, "Merged"),
@@ -238,12 +356,17 @@ async function pagesPdf(input: { files: WheelFile[] }) {
     "pdf",
     fs.existsSync,
   );
-  await imagesToPdf(input.files.map((file) => file.path), output);
+  await imagesToPdf(
+    input.files.map((file) => file.path),
+    output,
+  );
   return output;
 }
 
 export async function readMetadata(engines: EngineStore, file: string) {
-  const installed = engines.list().find((item) => item.id === "exiftool")?.installed;
+  const installed = engines
+    .list()
+    .find((item) => item.id === "exiftool")?.installed;
   if (!installed) throw new Error("ExifTool is not on this PC yet.");
   const exe = await engines.ensure("exiftool");
   const result = await runProcess(exe, ["-j", "-G", file]);

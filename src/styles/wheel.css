@@ -399,3 +399,33 @@ html[data-reduced="true"] .shelf-root {
   transition: none;
   animation: none;
 }
+.rename-preview {
+  display: grid;
+  gap: 2px;
+  max-height: 260px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  font-size: var(--fs-2xs);
+}
+.rename-preview li {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-sm, 8px);
+  background: var(--surface-1);
+}
+.rename-preview span,
+.rename-preview b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rename-preview span {
+  color: var(--muted);
+}
+.rename-preview b {
+  font-weight: 500;
+}

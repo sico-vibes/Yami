@@ -21,6 +21,7 @@ export const PETAL_ICON: Record<string, string> = {
   "tool:collage": "squares-four",
   "tool:qr": "qr-code",
   "tool:ocr": "text-t",
+  "tool:rename": "textbox",
   "tool:trim": "scissors",
   "tool:video-crop": "crop",
   "tool:speed": "gauge",

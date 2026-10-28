@@ -123,6 +123,36 @@ try {
   );
   await call("watch.remove", { id: watches[0].id });
   assert.deepEqual(await call("watch.list"), []);
+  // Batch rename through the tool window.
+  const shots = path.join(profile, "work", "shots");
+  fs.mkdirSync(shots, { recursive: true });
+  fs.writeFileSync(path.join(shots, "IMG_9.txt"), "a");
+  fs.writeFileSync(path.join(shots, "IMG_3.txt"), "b");
+  await call("wheel.shelf.drop", {
+    paths: [path.join(shots, "IMG_9.txt"), path.join(shots, "IMG_3.txt")],
+  });
+  await call("wheel.swap", { mode: "tools" });
+  assert.deepEqual(await call("wheel.choose", { petalId: "tool:rename" }), {
+    tool: "tool:rename",
+  });
+  let toolWindow;
+  for (let i = 0; i < 100 && !toolWindow; i++) {
+    toolWindow = app.windows().find((p) => p.url().includes("window=tool"));
+    if (!toolWindow) await new Promise((r) => setTimeout(r, 100));
+  }
+  await toolWindow.getByLabel("Name pattern").fill("trip-{n}");
+  await toolWindow.getByRole("button", { name: "Rename 2 files" }).click();
+  for (
+    let i = 0;
+    i < 40 && !fs.existsSync(path.join(shots, "trip-02.txt"));
+    i++
+  )
+    await new Promise((r) => setTimeout(r, 100));
+  assert.deepEqual(fs.readdirSync(shots).sort(), [
+    "trip-01.txt",
+    "trip-02.txt",
+  ]);
+  assert.equal(fs.readFileSync(path.join(shots, "trip-01.txt"), "utf8"), "a");
   const projects = (await call("workbench.state")).projects;
   assert.equal(projects[0].path, site);
   assert.deepEqual(errors, []);

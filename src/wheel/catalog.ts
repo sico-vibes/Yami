@@ -167,6 +167,7 @@ function toolPetals(kind: FileKind, count: number): Petal[] {
   const common = [
     one("tool:compress", "Compress"),
     one("tool:metadata", "Details"),
+    ...(count > 1 ? [one("tool:rename", "Rename")] : []),
   ];
   if (count > 1 && (kind === "image" || kind === "gif"))
     return [

@@ -25,7 +25,11 @@ export function ToolShell({
           </span>
           <h1>{title}</h1>
         </div>
-        <IconButton icon="x" label="Close" onClick={() => void api("wheel.close")} />
+        <IconButton
+          icon="x"
+          label="Close"
+          onClick={() => void api("wheel.close")}
+        />
       </header>
       {children}
       {note && <p className="tool-note">{note}</p>}
@@ -36,9 +40,11 @@ export function ToolShell({
 export function Save({
   label,
   onClick,
+  disabled = false,
 }: {
   label: string;
   onClick: () => Promise<unknown> | void;
+  disabled?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   return (
@@ -47,7 +53,7 @@ export function Save({
       <button
         type="button"
         className="primary-button"
-        disabled={busy}
+        disabled={busy || disabled}
         onClick={() => {
           setBusy(true);
           void Promise.resolve(onClick()).finally(() => setBusy(false));
