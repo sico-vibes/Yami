@@ -132,7 +132,7 @@ Workspace verification commands:
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the
   command each stand-in received, the refusals (one agent, an uninstalled one, a
-  repeat), and removing both worktrees.
+  repeat), the Compare view for their two different changes, and removing both worktrees.
 - `node scripts/verify-tune.mjs`: applies and undoes every Tune tweak with real
   `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the

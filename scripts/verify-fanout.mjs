@@ -104,6 +104,61 @@ try {
     "utf8",
   );
   assert.equal(exclude.split("/.yami-task.md").length, 2, "excluded once");
+  // Compare: each "agent" changed something different.
+  const [claudeTask, codexTask] = started.value;
+  fs.writeFileSync(
+    path.join(claudeTask.path, "README.md"),
+    "demo\nfixed by claude\n",
+  );
+  fs.writeFileSync(
+    path.join(codexTask.path, "login.js"),
+    "export const ok = 1;\n",
+  );
+  const compared = await call(main, "dev.compare", {
+    id: project.id,
+    paths: [claudeTask.path, codexTask.path],
+  });
+  assert.ok(compared.value, compared.error);
+  const byBranch = Object.fromEntries(
+    compared.value.map((c) => [c.branch, c.files.map((f) => f.file)]),
+  );
+  assert.deepEqual(byBranch["yami/fix-login-claude"], [
+    "agent-ran.txt",
+    "README.md",
+  ]);
+  assert.deepEqual(byBranch["yami/fix-login-codex"], [
+    "agent-ran.txt",
+    "login.js",
+  ]);
+  const readme = await call(main, "dev.compare.file", {
+    id: project.id,
+    path: claudeTask.path,
+    file: "README.md",
+  });
+  assert.match(readme.value, /^\+fixed by claude$/m);
+  assert.match(
+    (
+      await call(main, "dev.compare.file", {
+        id: project.id,
+        path: codexTask.path,
+        file: "../README.md",
+      })
+    ).error,
+    /outside the task/,
+  );
+  // The same view in Dev › Projects.
+  await call(main, "show", { tab: "ai" });
+  await main.getByRole("button", { name: "Projects" }).first().click();
+  await main
+    .getByRole("button", { name: /Parallel tasks/ })
+    .first()
+    .click();
+  await main.getByRole("button", { name: "Compare" }).click();
+  await main.locator(".compare-col").nth(1).waitFor();
+  await main.getByRole("button", { name: /README\.md/ }).click();
+  await main.getByText("+fixed by claude").waitFor();
+  await main.getByText("This task did not change this file.").waitFor();
+  await main.getByRole("button", { name: "Close" }).last().click();
   // Clean up the way a user would: end the tabs, then remove each task.
   const terminal = await windowFor("terminal");
   for (const tab of await terminal.locator("[data-session]").all())
@@ -113,6 +168,8 @@ try {
   await wait(500);
   for (const s of started.value) {
     fs.rmSync(path.join(s.path, "agent-ran.txt"));
+    git(s.path, "checkout", "--", ".");
+    git(s.path, "clean", "-fdq");
     const removed = await call(main, "dev.task.remove", {
       id: project.id,
       path: s.path,

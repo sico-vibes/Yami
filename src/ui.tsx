@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import type { State, YamiEvent } from "./shared";
 import { api } from "./api";
 export function Icon({
@@ -128,11 +129,17 @@ export function Modal({
   children,
   onClose,
   className = "",
+  portal = false,
 }: {
   title: string;
   children: ReactNode;
   onClose: () => void;
   className?: string;
+  /**
+   * Render into the page body, for a wide dialog opened from inside a card:
+   * a card's backdrop filter would otherwise box the fixed scrim in.
+   */
+  portal?: boolean;
 }) {
   const container = useRef<HTMLElement>(null),
     close = useRef(onClose);
@@ -170,7 +177,7 @@ export function Modal({
       previous?.focus();
     };
   }, []);
-  return (
+  const dialog = (
     <div
       className="scrim"
       onMouseDown={(e) => {
@@ -192,4 +199,5 @@ export function Modal({
       </section>
     </div>
   );
+  return portal ? createPortal(dialog, document.body) : dialog;
 }

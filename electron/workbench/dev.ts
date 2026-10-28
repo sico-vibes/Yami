@@ -14,6 +14,7 @@ import {
 } from "../../src/dev-types.ts";
 import type { WorkbenchStorage } from "./storage";
 import type { TerminalController } from "./terminal";
+import { taskChanges, taskFileDiff } from "./task-compare";
 import {
   agentFolders,
   editorLink,
@@ -316,6 +317,34 @@ export class DevController {
       (text && !text.endsWith("\n") ? "\n" : "") +
         `# Yami fan-out task files\n${line}\n`,
     );
+  }
+
+  /** What each chosen task changed, for the compare view. */
+  async compare(a: { id: string; paths: unknown }) {
+    const project = this.project(a.id);
+    const trees = (await this.worktrees(a.id)).filter((w) => !w.main);
+    const wanted = Array.isArray(a.paths) ? a.paths.map(String) : [];
+    const chosen = trees.filter((t) =>
+      wanted.some((p) => sameFolder(p, t.path)),
+    );
+    if (chosen.length < 2 || chosen.length > 4)
+      throw new Error("Choose two to four tasks to compare.");
+    return Promise.all(
+      chosen.map(async (t) => ({
+        path: t.path,
+        branch: t.branch,
+        ...(await taskChanges(project.path, t.path)),
+      })),
+    );
+  }
+
+  async compareFile(a: { id: string; path: unknown; file: unknown }) {
+    const project = this.project(a.id);
+    const tree = (await this.worktrees(a.id)).find(
+      (w) => !w.main && sameFolder(String(a.path ?? ""), w.path),
+    );
+    if (!tree) throw new Error("That task is gone.");
+    return taskFileDiff(project.path, tree.path, String(a.file ?? ""));
   }
 
   /** Removes a task worktree; git refuses when it has uncommitted changes. */

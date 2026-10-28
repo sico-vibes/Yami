@@ -296,6 +296,25 @@ export function previewModules(
           allowed: state.settings.remoteAllow.includes(name),
         })),
       };
+    case "mailcatcher.status":
+    case "mailcatcher.stop":
+      return { running: false, smtp: "127.0.0.1:1025", count: 1 };
+    case "mailcatcher.start":
+      throw new Error("Preview only — the mail catcher was not started.");
+    case "mailcatcher.list":
+      return [previewMail];
+    case "mailcatcher.remove":
+    case "mailcatcher.clear":
+      return [];
+    case "mailcatcher.read":
+      return {
+        ...previewMail,
+        date: "Wed, 28 Oct 2026 19:30:00 +0200",
+        text: "Hi Ana,\n\nClick the link below to reset your password.\n\nThe demo app",
+        attachments: [],
+      };
+    case "mailcatcher.open":
+      throw new Error("Preview only — no mail app was opened.");
     case "tune.dns":
       return [
         {

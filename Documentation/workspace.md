@@ -60,8 +60,12 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   (`--prompt`). Crush has no prompt option for its interactive mode, and the CLIs not
   installed here were not checked, so they are left out. If one worktree fails, the
   ones already started keep running and the message says how many. Remove the tasks
-  from the same list once you have picked a result. Comparing the agents' diffs side by
-  side is not built yet. On 2026-10-28 a one-file task was fanned out to the real Claude Code and
+  from the same list once you have picked a result. **Compare** (Parallel tasks, with two or more
+  tasks) puts two to four tasks side by side: each column lists what that worktree changed against
+  your checkout's current commit, committed or not, with new files marked and line counts, and
+  choosing a file shows its diff in every task that touched it (or says a task left it alone).
+  Git runs only while the view asks, a diff stops at 200 KB, and only paths inside the task are
+  read. Checked on Windows on 2026-10-28 in `scripts/verify-fanout.mjs`, in Dev › Projects. On 2026-10-28 a one-file task was fanned out to the real Claude Code and
   Codex in a throwaway repository: both started in their own worktrees with the fixed first prompt,
   read `.yami-task.md`, and wrote `HELLO.txt` containing *hello*. Each agent first asks whether
   to trust the new worktree folder (Claude Code's default answer is *No, exit*), so expect one

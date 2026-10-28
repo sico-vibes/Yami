@@ -177,3 +177,16 @@ test("fan out plans one worktree per agent and types no task text", () => {
   for (const c of agentClis.filter((c) => c.prompt))
     assert.doesNotMatch(promptCommand(c), /['$`;&|<>%]/, c.id);
 });
+
+test("task comparisons read git's numbers and refuse paths outside the task", async () => {
+  const { parseNumstat, safeRelative } =
+    await import("../electron/workbench/dev-rules.ts");
+  assert.deepEqual(parseNumstat("3\t1\tsrc/login.ts\n-\t-\tlogo.png\n\n"), [
+    { file: "src/login.ts", added: 3, removed: 1 },
+    { file: "logo.png", added: 0, removed: 0 },
+  ]);
+  assert.equal(safeRelative("src/login.ts"), true);
+  assert.equal(safeRelative("../secrets.txt"), false);
+  assert.equal(safeRelative("C:/Windows/win.ini"), false);
+  assert.equal(safeRelative("/etc/passwd"), false);
+});

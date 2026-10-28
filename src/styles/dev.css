@@ -247,3 +247,103 @@ html[data-reduced="true"] .agent-launch {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.compare-modal {
+  width: min(1180px, 100%);
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.compare-col {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--ink-0);
+}
+.compare-col header {
+  display: grid;
+}
+.compare-col header small {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+}
+.compare-col ul {
+  display: grid;
+  gap: 2px;
+  max-height: 160px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+.compare-file {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text-soft);
+  font: inherit;
+  font-size: var(--fs-xs);
+  text-align: left;
+  cursor: pointer;
+}
+.compare-file span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compare-file small {
+  flex: none;
+  color: var(--muted);
+}
+.compare-file:hover,
+.compare-file.selected {
+  background: var(--ink-2);
+  color: var(--text);
+}
+.compare-file:focus-visible {
+  outline: 2px solid var(--glow);
+}
+.compare-diff {
+  display: grid;
+  max-height: 46vh;
+  margin: 0;
+  overflow: auto;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: var(--fs-2xs);
+  line-height: 1.5;
+}
+.diff-line {
+  padding: 0 var(--space-1);
+  white-space: pre;
+}
+.diff-line.add,
+.diff-add-count {
+  color: var(--mint);
+}
+.diff-line.add {
+  background: color-mix(in srgb, var(--mint) 10%, transparent);
+}
+.diff-line.del,
+.diff-del-count {
+  color: var(--danger);
+}
+.diff-line.del {
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+.diff-line.hunk {
+  color: var(--glow);
+}
+.diff-line.meta {
+  color: var(--muted);
+}

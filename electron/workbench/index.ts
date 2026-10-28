@@ -603,6 +603,8 @@ export class Workbench {
     if (method === "dev.worktrees") return this.dev.worktrees(String(a.id));
     if (method === "dev.task") return this.dev.newTask(a);
     if (method === "dev.fanout") return this.dev.fanOut(a);
+    if (method === "dev.compare") return this.dev.compare(a);
+    if (method === "dev.compare.file") return this.dev.compareFile(a);
     if (method === "dev.task.remove") return this.dev.removeTask(a);
     throw new Error("Unknown Dev request.");
   }

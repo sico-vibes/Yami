@@ -389,6 +389,30 @@ function previewDev(method: string, a: any, changed: () => void): any {
       return { agent, branch, path: previewTasks.at(-1)!.path };
     });
   }
+  if (method === "dev.compare")
+    return (a.paths as string[]).map((p, i) => ({
+      path: p,
+      branch: previewTasks.find((t) => t.path === p)?.branch || p,
+      files: [
+        { file: "src/login.ts", added: 12 + i * 5, removed: 3 },
+        ...(i
+          ? [
+              {
+                file: "src/login.test.ts",
+                added: 40,
+                removed: 0,
+                untracked: true,
+              },
+            ]
+          : []),
+      ],
+      added: 12 + i * 45,
+      removed: 3,
+    }));
+  if (method === "dev.compare.file")
+    return a.file === "src/login.ts"
+      ? 'diff --git a/src/login.ts b/src/login.ts\n@@ -8,7 +8,9 @@ export function login(form) {\n   const email = form.email;\n-  form.reset();\n+  // Keep the email after a wrong password.\n+  form.password = "";\n+  showError("Wrong password");\n   return false;\n }'
+      : 'new file src/login.test.ts\n+import { login } from "./login";\n+test("keeps the email", () => {});';
   if (method === "dev.task.remove") {
     previewTasks = previewTasks.filter((t) => t.path !== a.path);
     return previewDev("dev.worktrees", a, changed);

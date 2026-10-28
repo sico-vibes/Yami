@@ -3,6 +3,7 @@ import { api } from "../api";
 import { Select } from "../controls";
 import type { AgentCli, Worktree } from "../dev-types";
 import { Icon, IconButton, Modal } from "../ui";
+import { TaskCompare } from "./TaskCompare";
 
 /**
  * Parallel tasks for one project: each is a git worktree on its own
@@ -24,7 +25,8 @@ export function ProjectTasks({
     [agent, setAgent] = useState(project.agent || ""),
     [busy, setBusy] = useState(false),
     [removing, setRemoving] = useState<Worktree | null>(null),
-    [fanning, setFanning] = useState(false);
+    [fanning, setFanning] = useState(false),
+    [comparing, setComparing] = useState(false);
   const fail = (e: Error) => report(e.message);
   const load = () =>
     void api("dev.worktrees", { id: project.id }).then(setTrees).catch(fail);
@@ -97,6 +99,15 @@ export function ProjectTasks({
               <Icon name="tree-structure" size={16} />
               Fan out
             </button>
+            {tasks.length >= 2 && (
+              <button
+                className="soft-button"
+                onClick={() => setComparing(true)}
+              >
+                <Icon name="git-diff" size={16} />
+                Compare
+              </button>
+            )}
           </div>
           {trees && !tasks.length && (
             <p className="setting-note">
@@ -126,6 +137,14 @@ export function ProjectTasks({
             </div>
           ))}
         </>
+      )}
+      {comparing && (
+        <TaskCompare
+          project={project}
+          tasks={tasks}
+          onClose={() => setComparing(false)}
+          report={report}
+        />
       )}
       {fanning && (
         <FanOut

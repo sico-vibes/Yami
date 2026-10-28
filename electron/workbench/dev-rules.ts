@@ -179,3 +179,37 @@ export function fanOutPlan(project: string, name: string, clis: AgentCli[]) {
     ...worktreePlan(project, `${base}-${cli.id}`),
   }));
 }
+
+export type ChangedFile = {
+  file: string;
+  added: number;
+  removed: number;
+  /** New and not yet added to git. */
+  untracked?: boolean;
+};
+
+/** `git diff --numstat` lines; binary files report "-" for both counts. */
+export function parseNumstat(text: string): ChangedFile[] {
+  const out: ChangedFile[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    const m = /^(\d+|-)\t(\d+|-)\t(.+)$/.exec(line);
+    if (!m) continue;
+    out.push({
+      file: m[3],
+      added: m[1] === "-" ? 0 : Number(m[1]),
+      removed: m[2] === "-" ? 0 : Number(m[2]),
+    });
+  }
+  return out;
+}
+
+/** A path from git output that is safe to ask git about again. */
+export function safeRelative(file: string) {
+  const clean = file.replace(/\\/g, "/");
+  return (
+    !!clean &&
+    !clean.startsWith("/") &&
+    !/^[A-Za-z]:/.test(clean) &&
+    !clean.split("/").includes("..")
+  );
+}
