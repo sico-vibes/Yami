@@ -1,5 +1,6 @@
-import * as si from "systeminformation";
 import os from "node:os";
+// Loaded on first use; Stats and Controls are the only readers.
+const system = () => import("systeminformation");
 
 // Stats are served from what is already known so the tab opens instantly.
 // CPU load and memory come straight from Node; the slow Windows queries
@@ -53,12 +54,12 @@ export function createMetrics() {
   }
   function refreshSlow() {
     refresh("cpu", AGE.cpuName, async () => {
-      const cpu = await si.cpu();
+      const cpu = await (await system()).cpu();
       slow.cpuName = `${cpu.manufacturer} ${cpu.brand}`.trim() || slow.cpuName;
       slow.speed = cpu.speed || slow.speed;
     });
     refresh("gpu", AGE.gpu, async () => {
-      const gpu = await si.graphics();
+      const gpu = await (await system()).graphics();
       slow.gpu = gpu.controllers.map((g) => ({
         name: g.model,
         load: g.utilizationGpu ?? null,
@@ -67,20 +68,20 @@ export function createMetrics() {
       }));
     });
     refresh("disks", AGE.disks, async () => {
-      slow.disks = (await si.fsSize()).map((d) => ({
+      slow.disks = (await (await system()).fsSize()).map((d) => ({
         name: d.mount,
         used: d.used,
         total: d.size,
       }));
     });
     refresh("network", AGE.network, async () => {
-      slow.network = (await si.networkStats()).reduce(
+      slow.network = (await (await system()).networkStats()).reduce(
         (a, n) => ({ rx: a.rx + (n.rx_sec || 0), tx: a.tx + (n.tx_sec || 0) }),
         { rx: 0, tx: 0 },
       );
     });
     refresh("processes", AGE.processes, async () => {
-      const list = await si.processes();
+      const list = await (await system()).processes();
       slow.processCount = list.all;
       slow.processes = list.list
         .sort((a, b) => b.memRss - a.memRss)

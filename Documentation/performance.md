@@ -57,6 +57,8 @@ Three changes landed together: each window loads only its own screen, optional m
 
 With **Start hidden** on, roaming on and clipboard, context and weather off, the source build measured **183.8–213.8 MB** private working set across 9 processes before the main-window change, and **161.4–163.8 MB** across 8 processes after it, at 0% sampled CPU. With roaming off it measured **140.7 MB** across 7 processes. The process counts include a `cmd.exe` and `conhost.exe` (about 9 MB) that Playwright's launcher adds on this machine. These are short runs on the [source build](evidence/performance-2026-10-28-modules.json), not a packaged measurement, task peak or soak test; they sit inside the 100–200 MB idle budget. When the main window is open it costs its renderer again (about 35–40 MB in the earlier runs).
 
+Loading `@google/genai` and `systeminformation` on first use instead of at startup was then measured at 160.1–163.7 MB in two runs: no measurable idle change, within run-to-run spread. It is kept because it skips evaluating about 2 MB of library code at startup; startup time was not measured.
+
 ## Current sources of background work
 
 The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript

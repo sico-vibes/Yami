@@ -7,35 +7,87 @@
     {
       "change": "before: optional modules and per-window screens, main window still created hidden",
       "roam": true,
-      "privateWorkingSetMB": [207.5, 201.0, 183.8],
+      "privateWorkingSetMB": [
+        207.5,
+        201,
+        183.8
+      ],
       "processes": 9
     },
     {
       "change": "before (repeat)",
       "roam": true,
-      "privateWorkingSetMB": [213.8, 206.2, 206.2],
+      "privateWorkingSetMB": [
+        213.8,
+        206.2,
+        206.2
+      ],
       "processes": 9
     },
     {
       "change": "after: main window created only when shown",
       "roam": true,
-      "privateWorkingSetMB": [161.7, 161.4, 161.5],
+      "privateWorkingSetMB": [
+        161.7,
+        161.4,
+        161.5
+      ],
       "processes": 8,
-      "cpuPercentOfMachine": [0, 0, 0]
+      "cpuPercentOfMachine": [
+        0,
+        0,
+        0
+      ]
     },
     {
       "change": "after (repeat)",
       "roam": true,
-      "privateWorkingSetMB": [163.7, 163.8, 163.8],
+      "privateWorkingSetMB": [
+        163.7,
+        163.8,
+        163.8
+      ],
       "processes": 8,
-      "cpuPercentOfMachine": [0, 0, 0]
+      "cpuPercentOfMachine": [
+        0,
+        0,
+        0
+      ]
     },
     {
       "change": "after, roaming off",
       "roam": false,
-      "privateWorkingSetMB": [140.7, 140.7, 140.7],
+      "privateWorkingSetMB": [
+        140.7,
+        140.7,
+        140.7
+      ],
       "processes": 7,
-      "cpuPercentOfMachine": [0, 0, 0]
+      "cpuPercentOfMachine": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "change": "after lazy @google/genai and systeminformation",
+      "roam": true,
+      "privateWorkingSetMB": [
+        160.1,
+        160.2,
+        160.1
+      ],
+      "processes": 8
+    },
+    {
+      "change": "after lazy SDKs (repeat)",
+      "roam": true,
+      "privateWorkingSetMB": [
+        163.7,
+        163.6,
+        163.6
+      ],
+      "processes": 8
     }
   ],
   "limits": "Short source-build runs, not a packaged build, task peak or soak test. Display scale and power mode were not recorded."

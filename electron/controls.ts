@@ -1,6 +1,6 @@
-import * as si from "systeminformation";
 import type { Native } from "./native";
 import { nativeScript } from "./platform";
+const system = () => import("systeminformation");
 
 // Windows quick controls shared by the Controls panel and model tools.
 export async function windowsBrightness(
@@ -23,7 +23,9 @@ export async function windowsBrightness(
 export async function windowsControls(native: Native) {
   const [base, wifi, radios] = await Promise.all([
     native.call("controls"),
-    si.wifiConnections().catch(() => []),
+    system()
+      .then((si) => si.wifiConnections())
+      .catch(() => []),
     nativeScript("Radios").catch(() => ({})),
   ]);
   return {
