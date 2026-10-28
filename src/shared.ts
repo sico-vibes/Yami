@@ -64,6 +64,8 @@ export type Settings = {
   agentLinkTools: string[];
   remoteEnabled: boolean;
   browserEnabled: boolean;
+  /** Cancel requests to known ad and tracker hosts in the Yami Browser. */
+  browserBlocking: boolean;
   /** The user's own Spotify app (public client ID; PKCE, no secret). */
   spotifyClientId: string;
   /** Hide recognisable credentials before chat text reaches Gemini. */

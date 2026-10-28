@@ -226,3 +226,20 @@ html[data-window="browser"] body {
 .browser-linked .setting-note {
   margin: var(--space-1) 0 0;
 }
+.browser-shield {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 34px;
+  padding: 0 var(--space-3);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+.browser-shield.on {
+  color: var(--mint);
+}
+.browser-shield:hover {
+  background: var(--surface-1);
+}

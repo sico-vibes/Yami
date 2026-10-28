@@ -218,7 +218,10 @@ export function createModuleHost(deps: Deps) {
       },
       browser: {
         load: (): Browser => ({
-          browser: createBrowser({ makeWindow: deps.makeWindow }),
+          browser: createBrowser({
+            makeWindow: deps.makeWindow,
+            blocking: () => store.state.settings.browserBlocking,
+          }),
           vault: new Vault(path.join(path.dirname(store.file), "vault.bin"), {
             encrypt: (text) => safeStorage.encryptString(text),
             decrypt: (data) => safeStorage.decryptString(data),

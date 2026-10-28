@@ -26,6 +26,8 @@ const host = (url: string) => {
 /** The Yami Browser window: tabs on the left, the page on the right. */
 export default function BrowserApp() {
   const [tabs, setTabs] = useState<Tab[]>([]),
+    [blocked, setBlocked] = useState(0),
+    [blocking, setBlocking] = useState(true),
     [active, setActive] = useState(""),
     [driving, setDriving] = useState(""),
     [address, setAddress] = useState(""),
@@ -35,11 +37,20 @@ export default function BrowserApp() {
   const fail = (e: Error) => setError(e.message);
   const current = tabs.find((t) => t.id === active);
   useEffect(() => {
-    const apply = (s: { tabs: Tab[]; active: string; driving: string }) => {
+    const apply = (s: {
+      tabs: Tab[];
+      active: string;
+      driving: string;
+      blocked?: number;
+    }) => {
       setTabs(s.tabs);
       setActive(s.active);
       setDriving(s.driving);
+      setBlocked(s.blocked || 0);
     };
+    void api("state")
+      .then((st) => setBlocking(st.settings.browserBlocking))
+      .catch(() => {});
     void api("browser.state").then(apply).catch(fail);
     return window.yami.on((e) => e.type === "browser-state" && apply(e as any));
   }, []);
@@ -173,6 +184,23 @@ export default function BrowserApp() {
               onChange={(e) => setAddress(e.target.value)}
             />
           </form>
+          <button
+            className={"browser-shield" + (blocking ? " on" : "")}
+            aria-pressed={blocking}
+            data-tip={
+              blocking
+                ? `Blocking known ads and trackers (${blocked} so far). Press to allow them.`
+                : "Ads and trackers are allowed. Press to block them."
+            }
+            onClick={() =>
+              void api("settings", { browserBlocking: !blocking })
+                .then(() => setBlocking(!blocking))
+                .catch(fail)
+            }
+          >
+            <Icon name={blocking ? "shield-check" : "shield-slash"} size={16} />
+            {blocking && blocked > 0 && <span>{blocked}</span>}
+          </button>
           <div className="browser-window">
             <IconButton
               icon="minus"

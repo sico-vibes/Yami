@@ -6,6 +6,7 @@ import {
 } from "electron";
 import { randomUUID } from "node:crypto";
 import { newTab, resolveInput, webOnly } from "../../src/browser-rules.ts";
+import { isBlockedHost } from "../../src/blocklist.ts";
 
 export type BrowserTab = {
   id: string;
@@ -27,6 +28,8 @@ const discardAfter = Number(process.env.YAMI_TAB_DISCARD_MS) || 5 * 60_000;
  * device permissions, and only http(s) navigation.
  */
 export function createBrowser(deps: {
+  /** Read on every request, so the switch applies at once. */
+  blocking: () => boolean;
   makeWindow: (
     mode: string,
     options: Electron.BrowserWindowConstructorOptions,
@@ -41,6 +44,7 @@ export function createBrowser(deps: {
   let active = "";
   let bounds = { x: 0, y: 0, width: 0, height: 0 };
   let driving = "";
+  let blocked = 0;
 
   const publish = () =>
     win?.webContents.send("yami:event", {
@@ -48,6 +52,7 @@ export function createBrowser(deps: {
       tabs: tabs.map(({ view: _v, timer: _t, ...t }) => t),
       active,
       driving,
+      blocked,
     });
   const ownSession = () => {
     if (profile) return profile;
@@ -56,6 +61,16 @@ export function createBrowser(deps: {
       done(false),
     );
     profile.setPermissionCheckHandler(() => false);
+    // Known ad and tracker hosts never get a request.
+    profile.webRequest.onBeforeRequest((details, done) => {
+      let host = "";
+      try {
+        host = new URL(details.url).hostname;
+      } catch {}
+      const cancel = deps.blocking() && !!host && isBlockedHost(host);
+      if (cancel) blocked++;
+      done({ cancel });
+    });
     return profile;
   };
   const tab = (id: string) => tabs.find((t) => t.id === id);
@@ -234,6 +249,7 @@ export function createBrowser(deps: {
         tabs: tabs.map(({ view: _v, timer: _t, ...t }) => t),
         active,
         driving,
+        blocked,
       };
     },
     /** For agents: the active page's title, address and visible text. */

@@ -143,3 +143,13 @@ test("the vault stays encrypted on disk and merges imports without duplicates", 
     /encryption is unavailable/,
   );
 });
+
+test("tracker hosts and their subdomains are blocked, look-alikes are not", async () => {
+  const { isBlockedHost } = await import("../src/blocklist.ts");
+  assert.equal(isBlockedHost("doubleclick.net"), true);
+  assert.equal(isBlockedHost("stats.g.doubleclick.net"), true);
+  assert.equal(isBlockedHost("www.google-analytics.com."), true);
+  assert.equal(isBlockedHost("notdoubleclick.net"), false);
+  assert.equal(isBlockedHost("doubleclick.net.example.com"), false);
+  assert.equal(isBlockedHost("github.com"), false);
+});

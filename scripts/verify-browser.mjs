@@ -12,7 +12,10 @@ const site = http.createServer((req, res) => {
   res.end(
     req.url === "/two"
       ? "<title>Second page</title><p>two</p>"
-      : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
+      : req.url === "/tracker"
+        ? // A request to a listed tracker host; blocking cancels it locally.
+          "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
+        : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
   );
 });
 await new Promise((r) => site.listen(47896, "127.0.0.1", r));
@@ -122,6 +125,23 @@ try {
     false,
     "woken",
   );
+  // Known trackers are cancelled before they leave the PC.
+  const trackerTab = await call("browser.open", {
+    input: "http://127.0.0.1:47896/tracker",
+  });
+  let trackerTitle = "";
+  for (
+    let i = 0;
+    i < 40 && !/^tracker (blocked|reached)$/.test(trackerTitle);
+    i++
+  ) {
+    await wait(200);
+    trackerTitle =
+      (await call("browser.state")).tabs.find((t) => t.id === trackerTab)
+        ?.title || "";
+  }
+  assert.equal(trackerTitle, "tracker blocked");
+  assert.ok((await call("browser.state")).blocked >= 1, "counted");
   // Linked browser mode: an installed Chromium browser, headless here, with
   // its own profile inside this test profile. The agent tool reads it.
   const linked = await call("browser.linked");
