@@ -326,3 +326,11 @@ html[data-reduced="true"] .media-peek,
 html[data-reduced="true"] .island-scroll-hint {
   animation: none;
 }
+.island-count {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

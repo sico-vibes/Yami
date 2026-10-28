@@ -5,7 +5,12 @@ import { Island } from "../Island";
 import { Stray } from "../Stray";
 import { CaptionOverlay } from "../Caption";
 import { Spirit } from "../ui";
-import { emit, installPreviewBridge, previewFirstRun } from "./bridge";
+import {
+  emit,
+  installPreviewBridge,
+  previewAgents,
+  previewFirstRun,
+} from "./bridge";
 import "./preview.css";
 const TerminalWindow = lazy(() => import("../TerminalWindow"));
 const screens = [
@@ -130,6 +135,7 @@ export function startPreview() {
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
     if (screen === "Setup") previewFirstRun();
+    if (screen === "Island") previewAgents();
     if (screen === "File wheel" || screen === "Background") {
       void import("../wheel/entry").then((entry) =>
         entry.mountWheel(screen === "Background" ? "tool" : "wheel"),

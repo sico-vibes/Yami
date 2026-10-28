@@ -58,6 +58,13 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   sliders.
 - **Connections and Context.** Connections are one card per service showing its state
   and quota items. Context lists attached items as cards, and window context is a row.
+- **Island pill.** Under the collapsed island, a pill shows the most urgent active
+  agent: one waiting for you, then an error from the last 15 minutes, then ones
+  working or thinking. With two or more active, it shows a count (for example 1/3)
+  and moves to the next every four seconds; scrolling over it steps by hand and
+  hovering holds it. Cycling stops when fewer than two agents are active, while the
+  drawer is open, and while Yami's own activity is shown. A newly most-urgent agent
+  shows at once.
 - **Island drawer, AI tab.** Two columns. On the left, Agent activity lists the five
   latest sessions with their status words. On the right, Open Yami Terminal is the
   primary button, Open AI workspace is soft, and an Allowance card shows up to three

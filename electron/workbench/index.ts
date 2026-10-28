@@ -33,6 +33,7 @@ import { assetRoot } from "../windows";
 import { Meetings } from "./meetings";
 import { TranscriptWatcher } from "./transcripts";
 import { DevController } from "./dev";
+import { activeAgents } from "../../src/agent-rank";
 type Context = {
   store: Store;
   native: Native;
@@ -127,12 +128,12 @@ export class Workbench {
       type: "workbench-state",
       state: this.data.publicState(),
     });
-    const active =
-      this.data.state.sessions.find((s) => s.phase === "waiting") ||
-      this.data.state.sessions.find((s) =>
-        ["working", "thinking"].includes(s.phase),
-      );
-    this.ctx.broadcast({ type: "agent-activity", session: active || null });
+    const active = activeAgents(this.data.state.sessions);
+    this.ctx.broadcast({
+      type: "agent-activity",
+      session: active[0] || null,
+      sessions: active.slice(0, 8),
+    });
     const request = this.data.state.requests.find(
       (r) => !this.announced.has(r.id),
     );

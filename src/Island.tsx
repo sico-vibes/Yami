@@ -8,8 +8,17 @@ import { MediaPeek } from "./MediaPeek";
 import { skinFor } from "./yami/skins";
 import { TooltipLayer } from "./controls";
 import type { AgentSession } from "./workbench-types";
+import { agentClis } from "./dev-types";
+const agentName = (id: string) =>
+  agentClis.find((c) => c.id === id)?.name || id;
 export function Island() {
-  const [agent, setAgent] = useState<AgentSession | null>(null);
+  // Active agents, most urgent first; the pill cycles while two or more work.
+  const [agents, setAgents] = useState<AgentSession[]>([]),
+    [turn, setTurn] = useState(0),
+    [pillHover, setPillHover] = useState(false);
+  const agent = agents.length ? agents[turn % agents.length] : null;
+  const lead = agents[0] || null;
+  const leadId = useRef<string | undefined>(undefined);
   const [open, setOpen] = useState(false),
     [tab, setTab] = useState<UtilityTab>("Controls"),
     [status, setStatus] = useState("idle"),
@@ -68,8 +77,13 @@ export function Island() {
     setMode("");
   };
   const event = (e: YamiEvent) => {
-    if (e.type === "agent-activity") setAgent(e.session);
-    else if (e.type === "panel") {
+    if (e.type === "agent-activity") {
+      const next: AgentSession[] = e.sessions || (e.session ? [e.session] : []);
+      // A new most-urgent agent (say, one now waiting) shows at once.
+      if (leadId.current !== next[0]?.id) setTurn(0);
+      leadId.current = next[0]?.id;
+      setAgents(next);
+    } else if (e.type === "panel") {
       openRef.current = e.open;
       setOpen(e.open);
       setClosing(false);
@@ -177,7 +191,7 @@ export function Island() {
     !mode &&
     status === "idle" &&
     !activity &&
-    !agent &&
+    !lead &&
     !toast &&
     !peek &&
     !notchHover &&
@@ -200,13 +214,24 @@ export function Island() {
         message: `${state.settings.ability === "collapse" ? "Collapse" : "Sidearm"} ready · ${state.settings.abilityButton}`,
       });
   };
+  const cycling = agents.length >= 2 && !open && !pillHover && !activity;
+  useEffect(() => {
+    if (!cycling) return;
+    const id = setInterval(() => setTurn((t) => t + 1), 4000);
+    return () => clearInterval(id);
+  }, [cycling]);
   if (!state) return null;
   const currentActivity =
     activity ||
     (agent
       ? {
-          icon: agent.phase === "waiting" ? "hand" : "robot",
-          label: `${agent.agent} · ${agent.detail}`,
+          icon:
+            agent.phase === "waiting"
+              ? "hand"
+              : agent.phase === "error"
+                ? "warning"
+                : "robot",
+          label: `${agentName(agent.agent)} · ${agent.detail}`,
         }
       : null);
   return (
@@ -261,8 +286,8 @@ export function Island() {
               mode === "dictation"
                 ? "listening"
                 : status === "idle" &&
-                    agent &&
-                    ["thinking", "working"].includes(agent.phase)
+                    lead &&
+                    ["thinking", "working"].includes(lead.phase)
                   ? "thinking"
                   : status
             }
@@ -282,9 +307,33 @@ export function Island() {
         )}
       </div>
       {!open && currentActivity && !toast && (
-        <div className="island-activity" role="status">
+        <div
+          key={activity ? "activity" : agent?.id}
+          className="island-activity"
+          role="status"
+          onMouseEnter={() => {
+            setPillHover(true);
+            void api("island.mouse", { ignore: false });
+          }}
+          onMouseLeave={() => {
+            setPillHover(false);
+            if (!open) void api("island.mouse", { ignore: true });
+          }}
+          onWheel={(e) => {
+            if (activity || agents.length < 2) return;
+            setTurn((t) => t + (e.deltaY > 0 ? 1 : agents.length - 1));
+          }}
+        >
           <Icon name={currentActivity.icon} size={12} />
           <span>{currentActivity.label}</span>
+          {!activity && agents.length >= 2 && (
+            <b
+              className="island-count"
+              aria-label={`Agent ${(turn % agents.length) + 1} of ${agents.length}`}
+            >
+              {(turn % agents.length) + 1}/{agents.length}
+            </b>
+          )}
         </div>
       )}
       {!open && peek && media?.active && (

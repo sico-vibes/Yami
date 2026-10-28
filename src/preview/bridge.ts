@@ -63,6 +63,28 @@ function wheelSession() {
 export function previewFirstRun() {
   state.settings.setupDone = false;
 }
+/** The Island preview shows two demo agents so the pill can cycle. */
+export function previewAgents() {
+  const demo = (id: string, agent: string, phase: string, detail: string) => ({
+    id,
+    agent,
+    project: "Demo workspace",
+    cwd: "Demo folder",
+    phase,
+    detail,
+    at: Date.now(),
+    source: "hook",
+    files: [],
+  });
+  const sessions = [
+    demo("demo-wait", "claude", "waiting", "Wants to run a test (demo)"),
+    demo("demo-work", "codex", "working", "Reviewing a change (demo)"),
+  ];
+  setTimeout(
+    () => emit({ type: "agent-activity", session: sessions[0], sessions }),
+    300,
+  );
+}
 export function resetPreview() {
   state = createFixture();
   changed();
