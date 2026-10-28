@@ -41,7 +41,7 @@ The selected terminal, local notes, Windows dictation, AI workspace and file whe
 **Nightglow gaps (open, 2026-10-18).** The Nightglow redesign is on `main` and was checked only in the browser preview at 1160×790 and 850×610. Still open:
 
 - The native date and time picker in Plans is still the Windows control; only its icon is tinted.
-- Nightglow has not been run in the packaged Windows app.
+- Nightglow was checked in the packaged Windows app on 2026-10-28 (main window and Settings, from `npx electron-builder --win --dir`).
 - Idle memory has not been re-measured since the redesign.
 
 A roadmap idea should move into shipped documentation only after its code, settings, permission behavior, privacy impact, platform support, tests or manual verification, and asset/dependency licensing are available in the repository. Preserve local user data and provider keys during changes. State platform limits and provider costs/quotas directly.

@@ -288,8 +288,8 @@ file wheel was merged. The preview now has 19 screens (adding File wheel and
 Background). That run has not been repeated after the merge.
 
 The Nightglow redesign of these pages (2026-10-18) changed presentation only. Its
-checks are in the [verification history](reference/verification-history.md). It has
-not been run in the packaged Windows app. The AI workspace and terminal screenshots
+checks are in the [verification history](reference/verification-history.md). It was
+checked in the packaged Windows app on 2026-10-28. The AI workspace and terminal screenshots
 were regenerated from synthetic preview fixtures with `capture-workbench.mjs`.
 
 Live provider accounts, live service credentials, each installed agent release,
