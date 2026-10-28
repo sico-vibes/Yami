@@ -17,11 +17,17 @@ import { FeedsController } from "../feeds/feeds";
 import { MailAccounts } from "../feeds/mail-accounts";
 import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
+import { DnsController } from "../tune/dns";
+import { helperPath } from "../workbench/terminal";
 import { agentLinkPort, startAgentLink } from "../agentlink/server";
 import { agentTools } from "../agentlink/tools";
 import { randomBytes } from "node:crypto";
 
-type Tune = { tweaks: TuneController; startup: StartupController };
+type Tune = {
+  tweaks: TuneController;
+  startup: StartupController;
+  dns: DnsController;
+};
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
 const agentToolNames = ["notify", "ask_user", "list_projects", "open_terminal"];
@@ -169,6 +175,7 @@ export function createModuleHost(deps: Deps) {
                 ),
               sandbox ? undefined : readMachineKey,
             ),
+            dns: new DnsController(helperPath("Dns.ps1")),
           };
         },
         dispose: () => {},
@@ -339,7 +346,9 @@ export function createModuleHost(deps: Deps) {
         throw new Error("Unknown feeds request.");
       }
       if (method.startsWith("tune.")) {
-        const { tweaks: tune, startup } = registry.get<Tune>("tune");
+        const { tweaks: tune, startup, dns } = registry.get<Tune>("tune");
+        if (method === "tune.dns") return dns.list();
+        if (method === "tune.dns.set") return dns.set(a.index, a.profile);
         if (method === "tune.list") return tune.list();
         if (method === "tune.apply") return tune.apply(a.ids);
         if (method === "tune.undo") return tune.undo(a.ids);

@@ -26,6 +26,60 @@ export type Tweak = {
   restartExplorer?: boolean;
 };
 
+/** DNS choices; "automatic" means the router's DNS (DHCP). */
+export const dnsProfiles: {
+  id: string;
+  name: string;
+  detail: string;
+  servers: string[];
+}[] = [
+  {
+    id: "automatic",
+    name: "Automatic",
+    detail: "Your router or provider's DNS",
+    servers: [],
+  },
+  {
+    id: "cloudflare",
+    name: "Cloudflare",
+    detail: "Fast, no filtering",
+    servers: ["1.1.1.1", "1.0.0.1"],
+  },
+  {
+    id: "cloudflareFamily",
+    name: "Cloudflare for Families",
+    detail: "Blocks malware and adult sites",
+    servers: ["1.1.1.3", "1.0.0.3"],
+  },
+  {
+    id: "quad9",
+    name: "Quad9",
+    detail: "Blocks known malicious domains",
+    servers: ["9.9.9.9", "149.112.112.112"],
+  },
+  {
+    id: "adguard",
+    name: "AdGuard DNS",
+    detail: "Blocks ads and trackers",
+    servers: ["94.140.14.14", "94.140.15.15"],
+  },
+  {
+    id: "google",
+    name: "Google Public DNS",
+    detail: "No filtering",
+    servers: ["8.8.8.8", "8.8.4.4"],
+  },
+];
+
+export type DnsAdapter = {
+  index: number;
+  name: string;
+  description: string;
+  servers: string[];
+  /** A profile id, or "custom" for servers Yami does not know. */
+  profile: string;
+};
+
 /** An app that starts with Windows. Only your own entries can be switched. */
 export type StartupApp = {
   id: string;

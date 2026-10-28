@@ -259,6 +259,25 @@ export function previewModules(
           }),
         ),
       };
+    case "tune.dns":
+      return [
+        {
+          index: 7,
+          name: "Ethernet",
+          description: "Demo adapter",
+          servers: ["192.168.1.1"],
+          profile: "custom",
+        },
+        {
+          index: 12,
+          name: "Wi-Fi",
+          description: "Demo adapter",
+          servers: ["9.9.9.9", "149.112.112.112"],
+          profile: "quad9",
+        },
+      ];
+    case "tune.dns.set":
+      throw new Error("Preview only — DNS was not changed.");
     case "tune.startup":
       return [...previewStartup];
     case "tune.startup.set": {

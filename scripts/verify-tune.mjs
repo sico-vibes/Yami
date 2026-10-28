@@ -115,6 +115,23 @@ try {
   // The page renders the rows from the live states.
   await main.getByRole("button", { name: "Tune", exact: true }).click();
   await main.getByText("Classic right-click menu").waitFor();
+  // DNS is read only here; changing it would touch the real network.
+  const adapters = await call("tune.dns");
+  assert.ok(Array.isArray(adapters));
+  for (const a of adapters) assert.ok(Number.isInteger(a.index) && a.name);
+  await assert.rejects(
+    call("tune.dns.set", { index: 99999, profile: "quad9" }),
+    /not connected/,
+  );
+  await assert.rejects(
+    call("tune.dns.set", { index: "7; rm", profile: "quad9" }),
+    /adapter/,
+  );
+  if (adapters[0])
+    await assert.rejects(
+      call("tune.dns.set", { index: adapters[0].index, profile: "evil" }),
+      /DNS profile/,
+    );
   // Startup apps: switching off writes StartupApproved; the entry stays.
   let apps = await call("tune.startup");
   assert.deepEqual(apps.map((a) => [a.id, a.enabled]).sort(), [

@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $targetDir = Join-Path $projectRoot 'native\bin'
 New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-foreach ($script in @('Media.ps1', 'Radios.ps1', 'ExplorerSelection.ps1', 'SendToLink.ps1')) {
+foreach ($script in @('Media.ps1', 'Radios.ps1', 'ExplorerSelection.ps1', 'SendToLink.ps1', 'Dns.ps1')) {
   Copy-Item -LiteralPath (Join-Path $projectRoot "native\$script") -Destination $targetDir -Force
 }
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
