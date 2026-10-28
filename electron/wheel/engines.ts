@@ -27,7 +27,12 @@ function findExe(files: string[], name: string) {
   );
 }
 
+export type EngineProgress = (received: number, total: number) => void;
+
 export class EngineStore {
+  // One download per engine, shared by the wheel and Settings › Modules.
+  private pending = new Map<EngineId, Promise<string>>();
+
   constructor(
     private readonly root: string,
     private readonly specs: EngineSpec[] = defaultEngines,
@@ -44,23 +49,74 @@ export class EngineStore {
     }));
   }
 
-  async ensure(id: EngineId): Promise<string> {
+  busy(id: EngineId) {
+    return this.pending.has(id);
+  }
+
+  ensure(id: EngineId, options: { signal?: AbortSignal; progress?: EngineProgress } = {}) {
+    const spec = this.spec(id);
+    const cached = this.readyExe(spec);
+    if (cached) return Promise.resolve(cached);
+    let job = this.pending.get(id);
+    if (!job) {
+      job = this.download(spec, options).finally(() => this.pending.delete(id));
+      this.pending.set(id, job);
+    }
+    return job;
+  }
+
+  /** Installs from a file the user downloaded; the same pin applies. */
+  async installFile(id: EngineId, file: string) {
+    const spec = this.spec(id);
+    if (this.pending.has(id)) throw new Error(`${spec.id} is already downloading.`);
+    const bytes = await fs.promises.readFile(file);
+    const job = this.install(spec, bytes).finally(() => this.pending.delete(id));
+    this.pending.set(id, job);
+    return job;
+  }
+
+  async remove(id: EngineId) {
+    const spec = this.spec(id);
+    if (this.pending.has(id)) throw new Error(`Wait for ${spec.id} to finish downloading.`);
+    await fs.promises.rm(path.join(this.root, spec.id), { recursive: true, force: true });
+  }
+
+  private spec(id: EngineId) {
     const spec = this.specs.find((item) => item.id === id);
     if (!spec) throw new Error("Unknown engine.");
-    const cached = this.readyExe(spec);
-    if (cached) return cached;
+    return spec;
+  }
+
+  private async download(
+    spec: EngineSpec,
+    options: { signal?: AbortSignal; progress?: EngineProgress },
+  ) {
+    const response = await this.fetchImpl(spec.url, { signal: options.signal });
+    if (!response.ok) throw new Error(`${spec.id} download failed (${response.status}).`);
+    const total = Number(response.headers.get("content-length")) || 0;
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    const reader = response.body?.getReader();
+    if (reader)
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        options.progress?.(received, total);
+      }
+    else chunks.push(new Uint8Array(await response.arrayBuffer()));
+    return this.install(spec, Buffer.concat(chunks));
+  }
+
+  private async install(spec: EngineSpec, bytes: Buffer): Promise<string> {
     const dir = path.join(this.root, spec.id, spec.version);
     const payload = path.join(dir, "payload");
+    const hash = createHash("sha256").update(bytes).digest("hex");
+    if (hash !== spec.sha256)
+      throw new Error(`${spec.id} did not match its pinned checksum. It was not run.`);
     await fs.promises.rm(dir, { recursive: true, force: true });
     await fs.promises.mkdir(dir, { recursive: true });
-    const response = await this.fetchImpl(spec.url);
-    if (!response.ok) throw new Error(`${spec.id} download failed (${response.status}).`);
-    const bytes = Buffer.from(await response.arrayBuffer());
-    const hash = createHash("sha256").update(bytes).digest("hex");
-    if (hash !== spec.sha256) {
-      await fs.promises.rm(dir, { recursive: true, force: true });
-      throw new Error(`${spec.id} did not match its pinned checksum. It was not run.`);
-    }
     await fs.promises.writeFile(payload, bytes);
     const filesDir = path.join(dir, "files");
     await fs.promises.mkdir(filesDir, { recursive: true });

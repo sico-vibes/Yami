@@ -53,7 +53,7 @@ Every optional feature is a module, listed once in `src/modules.ts` with its nam
 
 Dictation is core, not part of the AI workspace. Its rules and Windows speech engine use the workspace data file through a shared storage object, so dictation rules and offline dictation keep working when the AI workspace is asleep or off.
 
-A new profile opens **Choose your Yami** (`src/setup/Setup.tsx`) even when Yami starts hidden. A profile saved before setup existed is marked done by `setupDoneForExisting` in `src/migrations.ts`. The tray's **Choose features…** and **Settings › Modules** reopen the same cards. Pack downloads from setup are validated but not started yet; see the [expansion plan](research/expansion-plan-2026-10-27.md).
+A new profile opens **Choose your Yami** (`src/setup/Setup.tsx`) even when Yami starts hidden. A profile saved before setup existed is marked done by `setupDoneForExisting` in `src/migrations.ts`. The tray's **Choose features…** and **Settings › Modules** reopen the same cards. `electron/modules/packs.ts` queues pack downloads one at a time through the file wheel's pinned `EngineStore` (`electron/wheel/engines.ts`), which the wheel and Settings share so one download serves both. Progress events are coalesced to at most four a second, a download can be cancelled, and the checksum is verified before an existing install is replaced. Packs come only from the pins compiled into the release. With `YAMI_DATA_DIR` set, downloads go under that profile's `engines` folder instead of `%LOCALAPPDATA%Yamiengines`.
 
 ## Provider architecture and extension limits
 

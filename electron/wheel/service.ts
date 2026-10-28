@@ -32,6 +32,8 @@ type Deps = {
     fileWheelEnabled?: boolean;
   };
   getWallpapers?: () => string[];
+  /** Shared with Settings › Modules so one download serves both. */
+  engines?: EngineStore;
 };
 
 export function createWheel(deps: Deps) {
@@ -42,7 +44,7 @@ export function createWheel(deps: Deps) {
   let toolSession: { tool: string; files: WheelFile[] } | null = null;
   let floatWindow: BrowserWindow | undefined;
   let floatFiles: WheelFile[] = [];
-  const engines = new EngineStore(engineRoot());
+  const engines = deps.engines || new EngineStore(engineRoot());
   let chosen = false;
   let releaseTimer: NodeJS.Timeout | undefined;
 
@@ -499,6 +501,8 @@ async function installSendTo() {
 }
 
 export function engineRoot() {
+  // Isolated test profiles keep their downloads with the rest of their data.
+  if (process.env.YAMI_DATA_DIR) return path.join(process.env.YAMI_DATA_DIR, "engines");
   const base = process.env.LOCALAPPDATA || path.join(os.homedir(), ".local", "share");
   return path.join(base, "Yami", "engines");
 }

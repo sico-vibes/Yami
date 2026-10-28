@@ -135,7 +135,7 @@ The source declares the voice and text defaults as `gemini-3.8-live` and `gemini
 
 A new profile opens **Choose your Yami**. Presets (Essentials, Developer, Tinkerer, Everything) or Custom switch the five modules: AI workspace, File wheel, Clipboard history, Weather and Roaming Yami. Each card shows what the module does, how much background work it costs, the permissions it uses, and its optional downloads. A module that is off never loads. Profiles saved before setup existed skip it and keep their choices. **Settings › Modules** switches modules any time and shows whether each one is awake; the tray's **Choose features…** reopens setup. The AI workspace sleeps until its page, an agent hook, a background refresh or its terminal shortcut needs it. While it is off, the AI tab is hidden from the dock and the island drawer.
 
-Optional downloads (the file wheel's FFmpeg, ImageMagick, 7-Zip and ExifTool) still download on first use. The download controls on the cards are not connected yet.
+Optional downloads (the file wheel's FFmpeg, ImageMagick, 7-Zip and ExifTool) can be queued in setup or from Settings › Modules, which shows progress and offers Cancel, Remove, Try again and **From file** (a file you downloaded yourself, checked against the same pinned checksum). Anything not downloaded still downloads the first time a tool needs it. Downloads run one at a time; removing one keeps your settings and files.
 
 ## Data controls
 

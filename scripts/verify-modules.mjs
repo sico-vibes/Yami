@@ -116,6 +116,31 @@ const status = (list, id) => list.find((m) => m.id === id);
       (await call(main, "wheel.engines")).error,
       /File wheel is turned off/,
     );
+    assert.match(
+      (await call(main, "packs.install", { id: "whistle" })).error,
+      /Unknown download/,
+    );
+    // Opt-in: downloads the pinned 7-Zip console (about 0.6 MB) into this
+    // isolated profile, then removes it.
+    if (process.argv.includes("--download")) {
+      await call(main, "modules.set", { id: "fileWheel", enabled: true });
+      const pack = async () =>
+        status(
+          (await call(main, "modules.list")).value,
+          "fileWheel",
+        ).packs.find((p) => p.id === "sevenZip");
+      assert.equal((await pack()).state, "missing");
+      await call(main, "packs.install", { id: "sevenZip" });
+      for (let i = 0; i < 600 && (await pack()).state !== "installed"; i++) {
+        assert.notEqual((await pack()).state, "failed", (await pack()).error);
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      assert.equal((await pack()).state, "installed");
+      assert.ok(fs.existsSync(path.join(profile, "engines", "sevenZip")));
+      await call(main, "packs.remove", { id: "sevenZip" });
+      assert.equal((await pack()).state, "missing");
+      await call(main, "modules.set", { id: "fileWheel", enabled: false });
+    }
     const saved = JSON.parse(
       fs.readFileSync(path.join(profile, "data.json"), "utf8"),
     );

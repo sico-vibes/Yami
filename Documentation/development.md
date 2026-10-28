@@ -101,7 +101,9 @@ Workspace verification commands:
 - `node scripts/verify-modules.mjs`: two isolated profiles. A new profile opens
   Choose your Yami and saves a preset; an existing profile skips setup, keeps its
   chat, wakes the AI workspace on its first request and disposes it when switched off.
-  Other desktop checks start past setup through `scripts/test-profile.mjs`.
+  `--download` also fetches the pinned 7-Zip console (about 0.6 MB) into the
+  isolated profile and removes it. Other desktop checks start past setup through
+  `scripts/test-profile.mjs`.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

@@ -11,6 +11,8 @@ import {
 } from "../modules";
 import { Icon, Toggle } from "../ui";
 
+export type PackCommand = "install" | "cancel" | "remove" | "installFile";
+
 const costLabel: Record<ModuleCost, string> = {
   low: "Light",
   medium: "Some background work",
@@ -46,7 +48,7 @@ export function ModuleCard({
   packs?: PackStatus[];
   chosen?: PackId[];
   onChoose?: (id: PackId, value: boolean) => void;
-  onPack?: (action: "install" | "cancel" | "remove", id: PackId) => void;
+  onPack?: (action: PackCommand, id: PackId) => void;
 }) {
   const [open, setOpen] = useState(false);
   const status = (id: PackId) => packs?.find((p) => p.id === id);
@@ -158,7 +160,7 @@ function PackAction({
 }: {
   state?: PackStatus["state"];
   id: PackId;
-  onPack: (action: "install" | "cancel" | "remove", id: PackId) => void;
+  onPack: (action: PackCommand, id: PackId) => void;
 }) {
   if (state === "installed")
     return (
@@ -173,9 +175,19 @@ function PackAction({
       </button>
     );
   return (
-    <button className="soft-button" onClick={() => onPack("install", id)}>
-      <Icon name="download-simple" size={14} />
-      {state === "failed" ? "Try again" : "Download"}
-    </button>
+    <span className="pack-actions">
+      <button
+        className="text-button"
+        aria-label={`Install ${packLabels[id]} from a file`}
+        data-tip="Use a file you downloaded yourself. It must match the pinned checksum."
+        onClick={() => onPack("installFile", id)}
+      >
+        From file
+      </button>
+      <button className="soft-button" onClick={() => onPack("install", id)}>
+        <Icon name="download-simple" size={14} />
+        {state === "failed" ? "Try again" : "Download"}
+      </button>
+    </span>
   );
 }

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { screen, type BrowserWindow, type WebContents } from "electron";
+import { dialog, screen, type BrowserWindow, type WebContents } from "electron";
 import type { Store } from "../store";
 import type { Native } from "../native";
 import type { Assistant } from "../assistant";
@@ -9,7 +9,9 @@ import { WorkbenchStorage } from "../workbench/storage";
 import { SpeechController } from "../workbench/speech";
 import { createWheel, engineRoot } from "../wheel/service";
 import { EngineStore } from "../wheel/engines.ts";
+import { modules } from "../../src/modules.ts";
 import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
+import { PackManager } from "./packs";
 
 type Wheel = ReturnType<typeof createWheel>;
 type Deps = {
@@ -48,6 +50,9 @@ export function createModuleHost(deps: Deps) {
   deps.assistant.dictationTransform = (text, target) =>
     speechCore().speech.transform(text, target);
   const engines = new EngineStore(engineRoot());
+  const packs = new PackManager(engines, () =>
+    deps.broadcast({ type: "modules", modules: registry.list() }),
+  );
 
   const registry = new ModuleRegistry({
     settings: () => store.state.settings as unknown as Record<string, unknown>,
@@ -59,13 +64,7 @@ export function createModuleHost(deps: Deps) {
       });
     },
     broadcast: deps.broadcast,
-    packs: () =>
-      engines.list().map((e) => ({
-        id: e.id,
-        version: e.version,
-        license: e.license,
-        state: e.installed ? "installed" : "missing",
-      })),
+    packs: () => packs.list(),
     loaders: {
       workbench: {
         load: () => new Workbench({ ...deps, ...speechCore() }),
@@ -84,6 +83,7 @@ export function createModuleHost(deps: Deps) {
             native,
             getSettings: () => store.state.settings,
             getWallpapers: () => store.state.wallpapers,
+            engines,
           }),
         dispose: (w: Wheel) => w.dispose(),
       },
@@ -110,7 +110,9 @@ export function createModuleHost(deps: Deps) {
       if (process.argv.includes("--file-wheel")) host.acceptArgv(process.argv);
     },
     handles(method: string) {
-      return Workbench.handles(method) || /^(modules|setup)\./.test(method);
+      return (
+        Workbench.handles(method) || /^(modules|setup|packs)\./.test(method)
+      );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
       if (method === "modules.list") return registry.list();
@@ -120,12 +122,34 @@ export function createModuleHost(deps: Deps) {
         return list;
       }
       if (method === "setup.complete") {
-        validPacks(a.packs);
-        const list = await registry.apply(a.enabled, () => {
+        const wanted = validPacks(a.packs);
+        await registry.apply(a.enabled, () => {
           store.state.settings.setupDone = true;
         });
         wake();
-        return list;
+        // Only packs of modules that ended up on are downloaded.
+        packs.install(
+          wanted.filter((p) =>
+            modules.some((m) => registry.enabled(m.id) && m.packs.includes(p)),
+          ),
+        );
+        return registry.list();
+      }
+      if (method.startsWith("packs.")) {
+        const [id] = validPacks([a.id]);
+        if (method === "packs.install") packs.install([id]);
+        else if (method === "packs.cancel") packs.cancel(id);
+        else if (method === "packs.remove") await packs.remove(id);
+        else if (method === "packs.installFile") {
+          const choice = await dialog.showOpenDialog({
+            title: "Choose the downloaded file",
+            properties: ["openFile"],
+            filters: [{ name: "Download", extensions: ["zip", "7z", "exe"] }],
+          });
+          if (!choice.filePaths[0]) return registry.list();
+          await packs.installFile(id, choice.filePaths[0]);
+        } else throw new Error("Unknown download request.");
+        return registry.list();
       }
       if (method.startsWith("setup."))
         throw new Error("Unknown setup request.");
@@ -212,6 +236,7 @@ export function createModuleHost(deps: Deps) {
       return registry.peek<Workbench>("workbench")?.confirmQuit() ?? true;
     },
     dispose() {
+      packs.dispose();
       registry.dispose();
       shared?.data.dispose();
     },
