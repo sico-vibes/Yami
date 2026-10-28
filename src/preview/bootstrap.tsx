@@ -5,7 +5,7 @@ import { Island } from "../Island";
 import { Stray } from "../Stray";
 import { CaptionOverlay } from "../Caption";
 import { Spirit } from "../ui";
-import { emit, installPreviewBridge } from "./bridge";
+import { emit, installPreviewBridge, previewFirstRun } from "./bridge";
 import "./preview.css";
 const TerminalWindow = lazy(() => import("../TerminalWindow"));
 const screens = [
@@ -28,6 +28,7 @@ const screens = [
   "Terminal",
   "File wheel",
   "Background",
+  "Setup",
 ];
 const overlays = ["Stray", "Caption"];
 function Preview() {
@@ -45,6 +46,7 @@ function Preview() {
     "Settings",
     "AI",
     "Terminal",
+    "Setup",
   ].includes(screen);
   useEffect(() => {
     history.replaceState(null, "", `?screen=${encodeURIComponent(screen)}`);
@@ -113,6 +115,7 @@ export function startPreview() {
           "AI",
           "Terminal",
           "Island",
+          "Setup",
         ].includes(screen),
       island = utility || screen === "Island";
     document.documentElement.dataset.window = overlay
@@ -126,6 +129,7 @@ export function startPreview() {
             : "main";
     document.documentElement.classList.add("preview-frame");
     installPreviewBridge();
+    if (screen === "Setup") previewFirstRun();
     if (screen === "File wheel" || screen === "Background") {
       void import("../wheel/entry").then((entry) =>
         entry.mountWheel(screen === "Background" ? "tool" : "wheel"),

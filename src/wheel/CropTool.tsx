@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { paintStill, sourceSize, useStill } from "./stage";
 import { Save, ToolShell, savePng } from "./ToolShell";
 import type { WheelFile } from "./types";
+import { token } from "./palette";
 
 type Box = { x: number; y: number; w: number; h: number };
 
@@ -14,7 +15,7 @@ export function CropTool({ files }: { files: WheelFile[] }) {
     if (!canvas.current || !image) return;
     const ctx = paintStill(canvas.current, image, 720);
     if (!ctx) return;
-    ctx.strokeStyle = "#bcaaff";
+    ctx.strokeStyle = token("--paint-glow");
     ctx.lineWidth = 2;
     ctx.strokeRect(box.x * canvas.current.width, box.y * canvas.current.height, box.w * canvas.current.width, box.h * canvas.current.height);
   }, [image, box]);

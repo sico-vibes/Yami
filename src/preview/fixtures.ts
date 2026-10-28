@@ -8,6 +8,7 @@ export function createFixture(): State {
       location: "Kyoto",
       clipboardEnabled: false,
       weatherEnabled: true,
+      setupDone: true,
     },
     todos: [
       { id: "todo-1", title: "Plan a quiet afternoon", done: false },

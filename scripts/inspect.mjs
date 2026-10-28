@@ -1,11 +1,13 @@
 import { _electron as electron } from "playwright";
 import fs from "node:fs";
 import path from "node:path";
+import { skipSetup } from "./test-profile.mjs";
 const env = {
   ...process.env,
   YAMI_DATA_DIR: path.resolve(".artifacts/inspection-data"),
 };
 delete env.ELECTRON_RUN_AS_NODE;
+skipSetup(env.YAMI_DATA_DIR);
 const app = await electron.launch({ args: [path.resolve(".")], env });
 const errors = [];
 await app.firstWindow();

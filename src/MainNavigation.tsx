@@ -14,9 +14,12 @@ const tabs: [Tab, string, string][] = [
 export function MainNavigation({
   tab,
   onNavigate,
+  workbench = true,
 }: {
   tab: Tab;
   onNavigate: (tab: Tab) => void;
+  /** False hides AI while the AI workspace module is off. */
+  workbench?: boolean;
 }) {
   const dock = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -33,23 +36,32 @@ export function MainNavigation({
     const observer = new ResizeObserver(update);
     observer.observe(nav);
     return () => observer.disconnect();
-  }, [tab]);
+  }, [tab, workbench]);
   return (
     <nav ref={dock} className="bottom-dock" aria-label="Main navigation">
       <span className="dock-selection" aria-hidden="true" />
-      {tabs.map(([id, icon, label]) => (
-        <button
-          key={id}
-          className={tab === id ? "selected" : ""}
-          aria-label={label}
-          aria-current={tab === id ? "page" : undefined}
-          data-tip={tab === id ? undefined : label}
-          onClick={() => { if (window.dispatchEvent(new Event("yami-before-navigate", { cancelable: true }))) onNavigate(id); }}
-        >
-          <Icon name={icon} size={22} />
-          {tab === id && <span>{label}</span>}
-        </button>
-      ))}
+      {tabs
+        .filter(([id]) => workbench || id !== "ai")
+        .map(([id, icon, label]) => (
+          <button
+            key={id}
+            className={tab === id ? "selected" : ""}
+            aria-label={label}
+            aria-current={tab === id ? "page" : undefined}
+            data-tip={tab === id ? undefined : label}
+            onClick={() => {
+              if (
+                window.dispatchEvent(
+                  new Event("yami-before-navigate", { cancelable: true }),
+                )
+              )
+                onNavigate(id);
+            }}
+          >
+            <Icon name={icon} size={22} />
+            {tab === id && <span>{label}</span>}
+          </button>
+        ))}
     </nav>
   );
 }

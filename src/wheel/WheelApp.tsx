@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
+import { Select } from "../controls";
 import { emptyHint, petalsFor, PREVIEW_SAMPLES } from "./catalog";
 import type { WheelFile, WheelMode, WheelSession } from "./types";
 import { WheelView } from "./WheelView";
@@ -94,23 +95,17 @@ export function WheelApp() {
       }}
     >
       {preview && (
-        <label className="wheel-sample">
-          Sample
-          <select
-            aria-label="Preview file sample"
+        <div className="wheel-sample">
+          <Select
+            label="Preview file sample"
             value={sample}
-            onChange={(event) => {
-              setSample(event.target.value);
-              void api("wheel.sample", { id: event.target.value });
+            options={PREVIEW_SAMPLES.map((item) => ({ value: item.id, label: item.label }))}
+            onChange={(next) => {
+              setSample(next);
+              void api("wheel.sample", { id: next });
             }}
-          >
-            {PREVIEW_SAMPLES.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
+          />
+        </div>
       )}
       <WheelView
         mode={session.mode}

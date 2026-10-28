@@ -3,7 +3,8 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { api } from "./api";
-import { Icon, IconButton } from "./ui";
+import { Icon, IconButton, Modal } from "./ui";
+import { cssToken } from "./css-token";
 import { TooltipLayer } from "./controls";
 import type { WorkbenchState, WorkbenchSettings } from "./workbench-types";
 type View = {
@@ -23,6 +24,7 @@ export default function TerminalWindow() {
   const [list, setList] = useState<{ id: string; shell: string }[]>([]),
     [selected, setSelected] = useState(""),
     [error, setError] = useState(""),
+    [ending, setEnding] = useState(false),
     [data, setData] = useState<WorkbenchState | null>(null),
     [background, setBackground] = useState("");
   const backlog = useRef(new Map<string, any[]>()),
@@ -77,14 +79,7 @@ export default function TerminalWindow() {
         scrollback: (settings || data?.settings)?.terminalScrollback || 3000,
         fontFamily: '"Cascadia Mono", Consolas, monospace',
         fontSize: 14,
-        theme: {
-          background: "#00000000",
-          foreground: "#f3f1ff",
-          cursor: "#bcaaff",
-          selectionBackground: "#bcaaff55",
-          black: "#0b0a22",
-          blue: "#8dccff",
-        },
+        theme: terminalTheme(),
       });
       const fit = new FitAddon();
       terminal.loadAddon(fit);
@@ -194,16 +189,14 @@ export default function TerminalWindow() {
       views.current.clear();
     };
   }, []);
-  async function end() {
+  async function end(confirmed = false) {
     const view = views.current.get(selected);
     if (!view) return;
-    if (
-      !view.exited &&
-      !window.confirm(
-        "End this shell and its running processes? Hide the window instead to keep them running.",
-      )
-    )
+    if (!view.exited && !confirmed) {
+      setEnding(true);
       return;
+    }
+    setEnding(false);
     try {
       if (!view.orphaned) await api("terminal.end", { session: selected });
       view.terminal.dispose();
@@ -248,16 +241,18 @@ export default function TerminalWindow() {
         </div>
       </header>
       <nav className="terminal-tabs" aria-label="Terminal sessions">
-        {list.map((v, i) => (
-          <button
-            key={v.id}
-            data-session={v.id}
-            className={selected === v.id ? "selected" : ""}
-            onClick={() => select(v.id)}
-          >
-            {v.shell} {i + 1}
-          </button>
-        ))}
+        <div className="terminal-sessions">
+          {list.map((v, i) => (
+            <button
+              key={v.id}
+              data-session={v.id}
+              className={selected === v.id ? "selected" : ""}
+              onClick={() => select(v.id)}
+            >
+              {v.shell} {i + 1}
+            </button>
+          ))}
+        </div>
         <IconButton
           icon="plus"
           label="New terminal session"
@@ -274,6 +269,7 @@ export default function TerminalWindow() {
               .catch(report)
           }
         />
+        <span className="spacer" />
         <button
           className="text-button"
           disabled={!selected}
@@ -304,10 +300,58 @@ export default function TerminalWindow() {
         </div>
       )}
       <div className="terminal-host" ref={host} />
+      {ending && (
+        <Modal title="End this session?" onClose={() => setEnding(false)}>
+          <p className="setting-note">
+            The shell and everything it started will stop. Hide the window
+            instead to keep them running.
+          </p>
+          <div className="dialog-actions">
+            <button className="soft-button" onClick={() => setEnding(false)}>
+              Keep running
+            </button>
+            <button
+              className="primary-button"
+              autoFocus
+              onClick={() => void end(true)}
+            >
+              End session
+            </button>
+          </div>
+        </Modal>
+      )}
       <footer className="terminal-footer">
         {views.current.get(selected)?.cwd || "Open a shell to begin"}
         <span>Ctrl+Shift+C / V · Closing this window hides it</span>
       </footer>
     </div>
   );
+}
+
+// xterm needs literal colours, so the Nightglow terminal tokens are read here.
+function terminalTheme() {
+  const t = (name: string) => cssToken("--term-" + name);
+  return {
+    background: "rgba(0, 0, 0, 0)",
+    foreground: t("fg"),
+    cursor: t("cursor"),
+    cursorAccent: cssToken("--ink-1"),
+    selectionBackground: t("selection"),
+    black: t("black"),
+    red: t("red"),
+    green: t("green"),
+    yellow: t("yellow"),
+    blue: t("blue"),
+    magenta: t("magenta"),
+    cyan: t("cyan"),
+    white: t("white"),
+    brightBlack: t("bright-black"),
+    brightRed: t("bright-red"),
+    brightGreen: t("bright-green"),
+    brightYellow: t("bright-yellow"),
+    brightBlue: t("bright-blue"),
+    brightMagenta: t("bright-magenta"),
+    brightCyan: t("bright-cyan"),
+    brightWhite: t("bright-white"),
+  };
 }

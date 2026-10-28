@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import type { Petal, WheelFile, WheelMode } from "./types";
 import { bytes } from "../api";
+import { Icon } from "../ui";
+import { PETAL_ICON } from "./icons";
 
 const MODE_LABEL: Record<WheelMode, string> = {
   convert: "Convert",
@@ -88,13 +90,17 @@ export function WheelView({
             aria-checked={petal.id === activeId}
             data-id={petal.id}
             className={`wheel-chip${dense ? " dense" : ""}`}
-            style={{
-              transform: `translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px)`,
-            }}
+            style={
+              {
+                transform: `translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px)`,
+                "--i": index,
+              } as React.CSSProperties
+            }
             onMouseEnter={() => onActive(petal.id)}
             onFocus={() => onActive(petal.id)}
             onClick={() => onChoose(petal.id)}
           >
+            {PETAL_ICON[petal.id] && <Icon name={PETAL_ICON[petal.id]} size={dense ? 14 : 16} />}
             {petal.label}
           </button>
         );

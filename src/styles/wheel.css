@@ -1,3 +1,5 @@
+/* File wheel, drop shelf, float shelf and tool windows. These windows sit
+   straight on the desktop, so surfaces are opaque ink (no backdrop blur). */
 html[data-window="tool"],
 html[data-window="tool"] body {
   background: var(--ink-1);
@@ -18,7 +20,10 @@ html[data-window="tool"] body {
 .wheel-stage {
   position: absolute;
   inset: 0;
+  outline: 0;
 }
+
+/* Centre: the file being carried, ringed in the spirit's colour. */
 .wheel-center,
 .wheel-chip {
   position: absolute;
@@ -29,34 +34,36 @@ html[data-window="tool"] body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(14, 12, 38, 0.78);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 18px 40px rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(18px);
+  border: 1px solid var(--line-strong);
+  background: var(--ink-panel);
+  box-shadow: var(--highlight), var(--shadow-soft);
 }
 .wheel-center {
   width: 168px;
   height: 168px;
   margin: -84px 0 0 -84px;
   border-radius: 50%;
-  padding: 18px;
-  gap: 4px;
+  padding: var(--space-5);
+  gap: var(--space-1);
   pointer-events: none;
+  background:
+    radial-gradient(closest-side at 50% 120%, color-mix(in srgb, var(--soul, var(--glow)) 26%, transparent), transparent),
+    var(--ink-0);
+  box-shadow: var(--highlight), var(--ring-soul), var(--shadow-float);
 }
 .wheel-kicker {
   margin: 0;
-  color: var(--accent);
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  color: var(--glow);
+  font-size: var(--fs-micro);
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .wheel-name {
   margin: 0;
   max-width: 132px;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-body);
+  font-weight: 500;
   line-height: 1.25;
   overflow: hidden;
   display: -webkit-box;
@@ -67,41 +74,73 @@ html[data-window="tool"] body {
 .wheel-hint {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .wheel-hint {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 18px;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: var(--space-5);
   text-align: center;
 }
+
+/* Petals: ink pills that light up lavender for the current drop target. */
 .wheel-chip {
   width: 112px;
-  height: 58px;
-  margin: -29px 0 0 -56px;
-  border-radius: 18px;
-  padding: 6px 10px;
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
+  height: 56px;
+  margin: -28px 0 0 -56px;
+  border-radius: var(--r-md);
+  padding: var(--space-1) var(--space-3);
+  gap: 2px;
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  font-weight: 500;
   line-height: 1.2;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast),
+    border-color var(--dur-fast),
+    box-shadow var(--dur) var(--ease-fluid),
+    scale var(--dur) var(--ease-fluid);
+  animation: petal-in var(--dur) var(--ease-fluid) both;
+  animation-delay: calc(var(--i, 0) * 14ms);
+}
+.wheel-chip i {
+  font-size: var(--fs-h3);
+  color: var(--glow);
 }
 .wheel-chip.dense {
-  width: 92px;
-  height: 46px;
-  margin: -23px 0 0 -46px;
-  border-radius: 14px;
-  font-size: 12px;
+  width: 96px;
+  height: 52px;
+  margin: -26px 0 0 -48px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-xs);
+}
+.wheel-chip:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--selected-line);
+  background: var(--ink-3);
 }
 .wheel-chip[aria-checked="true"],
-.wheel-chip:hover:not(:disabled) {
-  border-color: rgba(188, 170, 255, 0.9);
-  background: rgba(40, 32, 84, 0.88);
+.wheel-chip[aria-checked="true"]:hover:not(:disabled) {
+  color: var(--on-glow);
+  border-color: transparent;
+  background: var(--grad-glow);
+  box-shadow: var(--lit-shadow), var(--shadow-soft);
+  scale: 1.06;
+}
+.wheel-chip[aria-checked="true"] i {
+  color: var(--on-glow);
 }
 .wheel-chip:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--glow);
   outline-offset: 3px;
+}
+@keyframes petal-in {
+  from {
+    opacity: 0;
+    scale: 0.86;
+  }
 }
 .wheel-empty {
   position: absolute;
@@ -111,85 +150,137 @@ html[data-window="tool"] body {
   width: min(280px, 70%);
   color: var(--muted);
   text-align: center;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
+
+/* Preview-only sample picker. */
 .wheel-sample {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
-.wheel-sample select {
-  min-height: 32px;
-  padding: 4px 8px;
+
+/* Preview only: the tool picker sits above the tool page. */
+.tool-preview-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--ink-1);
 }
+.tool-preview-frame > .tool-root {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+.tool-sample {
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Drop shelf and float shelf. */
 .shelf-root,
 .float-root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(14, 12, 38, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 22px;
-  backdrop-filter: blur(18px);
+  background: var(--ink-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  box-shadow: var(--highlight);
+  transition: border-color var(--dur-fast);
+}
+.shelf-root.hot {
+  border-color: var(--selected-line);
+  box-shadow: var(--highlight), var(--ring-soul);
 }
 .shelf-card,
 .float-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 22px;
+  gap: var(--space-2);
+  padding: var(--space-6);
   text-align: center;
+}
+.shelf-card > i {
+  font-size: 28px;
+  color: var(--glow);
+}
+
+/* Tool windows: one Nightglow page in a small window. */
+.tool-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background:
+    var(--aurora),
+    var(--ink-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  overflow: auto;
+}
+.tool-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.tool-head .tool-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--selected);
+  color: var(--glow);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.tool-head .tool-title {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-width: 0;
 }
 .shelf-card h1,
 .tool-root h1,
 .float-card h1 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.tool-head small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .shelf-card p,
 .float-card p,
 .tool-note {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-}
-.shelf-root.hot {
-  border-color: rgba(188, 170, 255, 0.8);
-}
-.tool-root {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 18px 18px 16px;
-  background: rgba(14, 12, 38, 0.96);
-  border-radius: 22px;
-  overflow: auto;
-}
-.tool-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.tool-head button {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  font-size: var(--fs-sm);
 }
 .tool-preview {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 220px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
   overflow: hidden;
 }
 .tool-preview canvas,
@@ -201,85 +292,110 @@ html[data-window="tool"] body {
 .tool-row {
   display: grid;
   grid-template-columns: 92px 1fr auto;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: center;
   min-height: 36px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
 }
 .tool-row input[type="range"] {
   width: 100%;
   padding: 0;
   background: transparent;
+  border: 0;
+  accent-color: var(--glow);
 }
 .swatches {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 .swatches button {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--r-xs);
+  border: 1px solid var(--line-strong);
 }
 .swatches button[aria-pressed="true"] {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--glow);
   outline-offset: 2px;
 }
-.segmented {
-  display: flex;
-  gap: 6px;
-}
-.segmented button {
-  min-height: 32px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-}
-.segmented button[aria-pressed="true"] {
-  background: rgba(188, 170, 255, 0.18);
-  color: var(--text);
-}
-.tool-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: auto;
-}
-.tool-actions button,
-.float-card button {
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-}
-.tool-actions .primary {
-  background: var(--grad-glow);
-  color: var(--on-glow);
-  font-weight: 600;
-}
+
+/* Choice rails: the same recessed track and lit pill as the drawer tabs. */
+.tool-root .segmented,
 .markup-tools,
 .field-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  border: 1px solid var(--line);
+  box-shadow: var(--track-shadow);
 }
+.tool-root .segmented button,
 .markup-tools button,
 .field-list button {
-  min-height: 32px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  transition:
+    color var(--dur-fast),
+    background var(--dur-fast);
 }
+.tool-root .segmented button:hover:not(:disabled),
+.markup-tools button:hover:not(:disabled),
+.field-list button:hover:not(:disabled) {
+  color: var(--text);
+}
+.tool-root .segmented button[aria-pressed="true"],
 .markup-tools button[aria-pressed="true"] {
-  background: rgba(188, 170, 255, 0.2);
+  color: var(--on-glow);
+  font-weight: 500;
+  background: var(--grad-glow);
+  box-shadow: var(--lit-shadow);
 }
+.tool-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: auto;
+}
+.float-card button,
+.tool-actions > button:not(.primary-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+}
+.float-card button:hover,
+.tool-actions > button:not(.primary-button):hover {
+  background: var(--surface-3);
+  border-color: var(--line-strong);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wheel-chip,
+  .shelf-root,
   .tool-root button {
     transition: none;
+    animation: none;
   }
 }
-html[data-reduced="1"] .wheel-chip {
+.wheel-stage[data-reduced="1"] .wheel-chip,
+html[data-reduced="true"] .wheel-chip,
+html[data-reduced="true"] .shelf-root {
   transition: none;
+  animation: none;
 }

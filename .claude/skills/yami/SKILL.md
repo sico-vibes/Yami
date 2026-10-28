@@ -76,10 +76,11 @@ electron/        main process
   activity.ts      friendly labels for tool calls  policy.ts  permission and URL checks
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
+  modules/         optional modules: registry.ts (pure, tested), host.ts (lazy build/dispose, modules.* IPC)
   workbench/       AI workspace: sessions/hooks, quota, connections, terminal PTY, local model, MCP, context, speech/notes
   wheel/           file wheel: service window, engine downloads, command plans, PDF/archive/document conversion
   native-path.ts   resolves the content-hashed native host from host-manifest.json
-src/             renderer (one bundle, chosen by `?window=` in main.tsx)
+src/             renderer (main.tsx imports only the `?window=` screen)
   App.tsx          main window (Home, Bond = memory, Soul = loadout, Desk = plans, Settings)
   Island.tsx       top-centre notch + drawer (Utilities.tsx tabs, Today.tsx, MediaPeek.tsx)
   Stray.tsx        roaming Yami        Caption.tsx  bottom caption pill
@@ -87,6 +88,8 @@ src/             renderer (one bundle, chosen by `?window=` in main.tsx)
   Loadout.tsx + LoadoutHub.tsx   loadout catalogue and orbit hub
   yami/            YamiSpirit.tsx (renderer), motion.ts (pure maths), skins.ts, features.ts
   shared.ts        State/Settings types   default-settings.ts   migrations.ts
+  modules.ts       module catalogue: settings key, cost, permissions, packs, presets
+  setup/           Choose your Yami and Settings › Modules cards
   ui.tsx           Icon, IconButton, Toggle, Modal, useYami, Spirit re-export
   controls.tsx     Select, TooltipLayer, StatusChip, Meter, shortTime/relativeTime
   status-tone.ts   status word → colour family (tested)   island-bounds.ts  island size per tab

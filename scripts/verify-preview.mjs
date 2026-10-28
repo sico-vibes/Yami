@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+const origin = `http://127.0.0.1:${Number(process.env.YAMI_PREVIEW_PORT) || 5174}/`;
 const browser = await chromium.launch({ channel: "msedge", headless: true });
 const page = await browser.newPage({
   viewport: { width: 1460, height: 1040 },
@@ -12,13 +13,13 @@ const errors = [],
   external = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("request", (r) => {
-  if (/^https?:/.test(r.url()) && !r.url().startsWith("http://127.0.0.1:5174/"))
+  if (/^https?:/.test(r.url()) && !r.url().startsWith(origin))
     external.push(r.url());
 });
 const target = "Documentation/assets/screenshots";
 fs.mkdirSync(target, { recursive: true });
 try {
-  await page.goto("http://127.0.0.1:5174/");
+  await page.goto(origin);
   await page.frameLocator("#preview-frame").locator(".bottom-dock").waitFor();
   const selector = page.getByLabel("Preview screen");
   for (const screen of [

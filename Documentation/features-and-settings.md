@@ -131,6 +131,12 @@ The table lists source defaults; a user can change most values in Settings. Sett
 
 The source declares the voice and text defaults as `gemini-3.8-live` and `gemini-3.8-flash`, respectively. Provider model catalogs change; setup can choose a compatible model returned for the user’s API key. The saved model names are visible and changeable through settings/model discovery when supported.
 
+## Modules and first-run setup
+
+A new profile opens **Choose your Yami**. Presets (Essentials, Developer, Tinkerer, Everything) or Custom switch the five modules: AI workspace, File wheel, Clipboard history, Weather and Roaming Yami. Each card shows what the module does, how much background work it costs, the permissions it uses, and its optional downloads. A module that is off never loads. Profiles saved before setup existed skip it and keep their choices. **Settings › Modules** switches modules any time and shows whether each one is awake; the tray's **Choose features…** reopens setup. The AI workspace sleeps until its page, an agent hook, a background refresh or its terminal shortcut needs it. While it is off, the AI tab is hidden from the dock and the island drawer.
+
+Optional downloads (the file wheel's FFmpeg, ImageMagick, 7-Zip and ExifTool) still download on first use. The download controls on the cards are not connected yet.
+
 ## Data controls
 
 Settings includes provider-key replacement/removal, Tavily account usage display, clipboard history toggle/retention/clear, conversation history clearing, data export, and confirmed full-data deletion. Export omits credentials and clipboard; full deletion also removes keys. See [Security and provider data flow](security-and-providers.md#local-storage) for exact storage locations and protection.

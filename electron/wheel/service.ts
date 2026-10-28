@@ -275,19 +275,11 @@ export function createWheel(deps: Deps) {
       void openWithPaths(files, "sendto", point.x, point.y, "convert", "Choose a petal.", false);
       return true;
     },
-    trayItems(): Electron.MenuItemConstructorOptions[] {
-      return [
-        {
-          label: "File wheel",
-          click: () => {
-            const point = screen.getCursorScreenPoint();
-            void selection().then((paths) =>
-              openWithPaths(paths, "hotkey", point.x, point.y, "convert", "Choose a petal.", false),
-            );
-          },
-        },
-        { label: "Drop shelf", click: () => api.openShelf() },
-      ];
+    /** Opens the wheel at a point for the files selected in Explorer. */
+    openAt(x: number, y: number) {
+      return selection().then((paths) =>
+        openWithPaths(paths, "hotkey", x, y, "convert", "Choose a petal.", false),
+      );
     },
     openShelf() {
       if (shelf && !shelf.isDestroyed()) {
@@ -313,6 +305,14 @@ export function createWheel(deps: Deps) {
         if (shelf === current) shelf = undefined;
       });
       current.once("ready-to-show", () => current.show());
+    },
+    /** Closes every wheel window when the module is switched off. */
+    dispose() {
+      closeWheel();
+      closeTool();
+      for (const w of [shelf, floatWindow]) if (w && !w.isDestroyed()) w.close();
+      shelf = floatWindow = undefined;
+      floatFiles = [];
     },
     async handle(method: string, args: any = {}, _sender?: Electron.WebContents) {
       switch (method) {
@@ -458,7 +458,6 @@ export function createWheel(deps: Deps) {
     },
   };
 
-  if (process.argv.includes("--file-wheel")) api.acceptArgv(process.argv);
   return api;
 }
 
@@ -499,7 +498,7 @@ async function installSendTo() {
   return { shortcut };
 }
 
-function engineRoot() {
+export function engineRoot() {
   const base = process.env.LOCALAPPDATA || path.join(os.homedir(), ".local", "share");
   return path.join(base, "Yami", "engines");
 }

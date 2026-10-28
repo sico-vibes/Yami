@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { paintStill, useStill } from "./stage";
 import { Save, ToolShell, savePng } from "./ToolShell";
 import type { WheelFile } from "./types";
+import { markInks } from "./palette";
 
 type Kind = "arrow" | "box" | "ellipse" | "text" | "label" | "lens";
 type Mark = {
@@ -14,13 +15,13 @@ type Mark = {
   color: string;
 };
 
-const COLORS = ["#17140b", "#bba057", "#c44b3c", "#f4f1ea"];
 
 export function MarkupTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const { image, note, setNote } = useStill(files[0]);
   const [kind, setKind] = useState<Kind>("arrow");
-  const [color, setColor] = useState(COLORS[1]);
+  const [inks] = useState(markInks);
+  const [color, setColor] = useState(() => inks[0].color);
   const [text, setText] = useState("Note");
   const [marks, setMarks] = useState<Mark[]>([]);
   const draft = useRef<Mark | null>(null);
@@ -82,8 +83,8 @@ export function MarkupTool({ files }: { files: WheelFile[] }) {
         <span />
       </label>
       <div className="swatches" aria-label="Ink">
-        {COLORS.map((ink) => (
-          <button key={ink} type="button" aria-label={ink} aria-pressed={color === ink} style={{ background: ink }} onClick={() => setColor(ink)} />
+        {inks.map((ink) => (
+          <button key={ink.name} type="button" aria-label={ink.name} data-tip={ink.name} aria-pressed={color === ink.color} style={{ background: ink.color }} onClick={() => setColor(ink.color)} />
         ))}
       </div>
       <div className="tool-actions">

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
+import { ModulesSettings } from "./setup/ModulesSettings";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 import { Select, StatusChip } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
@@ -15,6 +16,7 @@ const groups = [
   ["shield-check", "Privacy"],
   ["terminal-window", "Workspace"],
   ["circles-four", "File wheel"],
+  ["puzzle-piece", "Modules"],
 ];
 export function Settings({
   state,
@@ -137,7 +139,7 @@ export function Settings({
       className="key-binding"
       onClick={() => setCapturing(key)}
       aria-label={"Change " + String(key)}
-      title="Click, then press a shortcut. Esc cancels."
+      data-tip="Click, then press a shortcut. Esc cancels."
     >
       {capturing === key
         ? "Press shortcut…"
@@ -160,6 +162,7 @@ export function Settings({
     "Your data": "Everything you keep here stays on this PC.",
     Privacy: "Choose what Yami can see and do.",
     "File wheel": "Drag a file, tap a modifier, and drop it on a petal.",
+    Modules: "Wake the features you use. The rest stay asleep.",
   };
   const all = !!search;
   return (
@@ -624,6 +627,7 @@ export function Settings({
             </p>
           </>
         )}
+        {section === "Modules" && !all && <ModulesSettings report={report} />}
       </section>
       {keyModal && (
         <Modal

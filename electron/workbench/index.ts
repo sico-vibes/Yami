@@ -40,6 +40,9 @@ type Context = {
   showMain: (tab?: string) => void;
   setPanel: (open: boolean, tab?: string) => void;
   confirm: (title: string, detail: string) => Promise<boolean>;
+  /** Shared with dictation, which keeps working while this module sleeps. */
+  data: WorkbenchStorage;
+  speech: SpeechController;
 };
 export class Workbench {
   data: WorkbenchStorage;
@@ -58,7 +61,7 @@ export class Workbench {
   private usageTimer?: NodeJS.Timeout;
   private captureUntil = 0;
   constructor(private ctx: Context) {
-    this.data = new WorkbenchStorage(ctx.store);
+    this.data = ctx.data;
     const changed = () => this.changed();
     const notify = (body: string) => {
       if (Notification.isSupported())
@@ -85,15 +88,8 @@ export class Workbench {
     this.usage = new UsageController(this.data, changed, notify);
     this.connections = new Connections(this.data, changed, notify);
     this.local = new LocalModel(this.data, ctx.broadcast);
-    this.speech = new SpeechController(
-      this.data,
-      ctx.assistant,
-      ctx.native,
-      changed,
-    );
+    this.speech = ctx.speech;
     this.meetings = new Meetings(this.speech);
-    ctx.assistant.dictationTransform = (text, target) =>
-      this.speech.transform(text, target);
     this.mcp = new McpClient(this.data, ctx.confirm);
     try {
       this.sync();
@@ -278,7 +274,7 @@ export class Workbench {
     this.changed();
     return this.data.publicState();
   }
-  handles(method: string) {
+  static handles(method: string) {
     return /^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting)\./.test(
       method,
     );
@@ -599,23 +595,6 @@ export class Workbench {
     this.meetings.dispose();
     for (const file of [this.data.file, this.agents.configFile])
       if (fs.existsSync(file)) fs.unlinkSync(file);
-  }
-  async offlineDictation(a: any) {
-    const text = await this.speech.transform(
-      await this.speech.transcribe(
-        String(a.data),
-        String(a.mimeType),
-        "windows",
-      ),
-      Number(a.target) || 0,
-    );
-    await this.ctx.native.call("insertText", { text, target: a.target || 0 });
-    this.ctx.store.usage("dictations");
-    this.ctx.store.usage("words", text.split(/\s+/).length);
-    this.ctx.store.message("user", text);
-    this.ctx.broadcast({ type: "dictation-result", text });
-    this.ctx.broadcast({ type: "state", state: this.ctx.store.publicState() });
-    return text;
   }
   confirmQuit() {
     return (

@@ -93,6 +93,21 @@ Backdrop blur only works inside a window. The island and overlays are
 transparent windows over the real desktop, where Windows does not blur, so they
 stay opaque (`--ink-0`/`--ink-1`) instead of pretending to be frosted.
 
+| Token | Value | Use |
+| --- | --- | --- |
+| `--track` | white 3.5% | Recessed rails: drawer tabs, terminal sessions, setup presets, tool choices |
+| `--track-shadow` | inset 1px 3px ink 30% | The sunken edge of a rail |
+| `--lit-shadow` | inset white top edge + lavender glow | The lit pill inside a rail, the current wheel petal |
+| `--ink-panel` | `--ink-1` at 97% | File wheel petals, drop and float shelves |
+| `--ring-soul` | hairline + soft skin-colour glow | The wheel centre and a hot drop shelf |
+
+### Terminal and canvas colours
+
+xterm and canvas tools need literal colours, so they read tokens at runtime
+(`src/css-token.ts`). `--term-*` holds the sixteen ANSI colours plus
+foreground, cursor and selection, tuned to Nightglow. `--paint-*` holds the
+mark colours offered in Markup and the ink used by Redact and Collage.
+
 ### Sky
 
 `--aurora` is three large radial washes (violet top-left, blue right, plum
@@ -413,7 +428,11 @@ continuous animation at idle; Yami's own motion budget is described in the
 3. Keep stylesheet files under 1,000 lines by responsibility: `tokens`,
    `base`, `controls`, `home`, `sidebar-pages`, `loadout` (Soul, Bond, Desk),
    `island`, `drawer-tabs`, `overlays`, `today`, `responsive`, `workbench`,
-   `cards`, `wheel`.
+   `cards`, `wheel`, `setup`.
+5. Run `npm run check:ui`. It fails on a native `<select>`, a `title` tooltip on
+   an HTML element or `window.confirm` in a shipped screen. Raw colours are a
+   ratchet in `scripts/ui-baseline.json`: a file may lose them, never gain
+   them. After a cleanup, lower the ratchet with `node scripts/check-ui.mjs --update`.
 4. Check the screen in the preview at 1160×790 and 850×610, with reduced
    motion on and off, then on Windows.
 
@@ -433,6 +452,8 @@ continuous animation at idle; Yami's own motion budget is described in the
 | `src/styles/today.css` | Today tab |
 | `src/styles/overlays.css` | Caption, roaming bubble, activity and media pills |
 | `src/styles/workbench.css` | Workspace basics and Yami Terminal |
+| `src/styles/wheel.css` | File wheel, drop and float shelves, tool windows |
+| `src/styles/setup.css` | Choose your Yami, Settings › Modules, module cards |
 | `src/controls.tsx` | Select, TooltipLayer, StatusChip, Meter, time helpers |
 | `src/status-tone.ts` | Status word → colour family |
 | `src/island-bounds.ts` | Island window size per tab |

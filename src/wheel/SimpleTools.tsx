@@ -89,7 +89,7 @@ export function MetadataTool({ files }: { files: WheelFile[] }) {
         <button type="button" onClick={() => void api("wheel.tool.apply", { tool: "tool:metadata", edits: [{ tag, value }] }).catch((error: Error) => setNote(error.message))}>
           Save field
         </button>
-        <button type="button" className="primary" onClick={() => void api("wheel.tool.apply", { tool: "tool:metadata", removeAll: true }).catch((error: Error) => setNote(error.message))}>
+        <button type="button" className="primary-button" onClick={() => void api("wheel.tool.apply", { tool: "tool:metadata", removeAll: true }).catch((error: Error) => setNote(error.message))}>
           Remove all
         </button>
       </div>

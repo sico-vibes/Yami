@@ -17,7 +17,8 @@
     "preview:web": "node scripts/preview-web.mjs",
     "docs": "node scripts/build-docs.mjs",
     "check:lines": "node scripts/check-lines.mjs",
-    "check": "npm run check:lines && npm run typecheck && npm run build:native && npm test",
+    "check:ui": "node scripts/check-ui.mjs",
+    "check": "npm run check:lines && npm run check:ui && npm run typecheck && npm run build:native && npm test",
     "notices": "node scripts/collect-notices.mjs"
   },
   "build": {

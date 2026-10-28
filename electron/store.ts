@@ -4,7 +4,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { State, Settings } from "../src/shared";
 import { defaults } from "../src/default-settings";
-import { migrateState } from "../src/migrations";
+import { migrateState, setupDoneForExisting } from "../src/migrations";
 export { defaults } from "../src/default-settings";
 export class Store {
   file = path.join(app.getPath("userData"), "data.json");
@@ -46,7 +46,7 @@ export class Store {
       usage: {},
       ...saved,
       clipboard,
-      settings: { ...defaults, ...saved.settings },
+      settings: { ...defaults, ...setupDoneForExisting(saved.settings) },
       keys: { gemini: false, tavily: false, tavilyHint: "" },
     };
     migrateState(this.state);

@@ -92,6 +92,11 @@ in the docs.
   scripts must `delete env.ELECTRON_RUN_AS_NODE` (an empty string still counts).
 - **Versioned native host:** resolve `host-manifest.json` with `nativeHostPath` in
   tests/scripts; do not hardcode or replace a running `Yami.Native.exe`.
+- **Optional modules:** a new optional feature is a module. Add it to
+  `src/modules.ts` with a boolean setting; if it has main-process code, give it a
+  loader in `electron/modules/host.ts` so it is built on first request and
+  disposed when switched off. Never construct it eagerly in `main.ts`. Desktop
+  checks that are not about setup call `skipSetup` from `scripts/test-profile.mjs`.
 - **Workspace:** optional features stay off until configured. Use
   `electron/workbench/` controllers and safe `src/preview/workbench.ts` fixtures.
   Never read real account credentials just to test UI. The PTY helper is lazy,

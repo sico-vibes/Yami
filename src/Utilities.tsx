@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
-import { Empty, Icon, IconButton } from "./ui";
+import { Empty, Icon, IconButton, Modal } from "./ui";
 import { Launcher } from "./Launcher";
 import { shortTime } from "./controls";
 import { Today } from "./Today";
@@ -30,6 +30,10 @@ export function Utilities({
   onClose?: () => void;
 }) {
   const [hint, setHint] = useState(true);
+  const tabs = state.settings.workbenchEnabled
+    ? utilityTabs
+    : utilityTabs.filter((t) => t !== "AI");
+  if (!tabs.includes(tab)) tab = "Controls";
   useEffect(() => {
     const id = setTimeout(() => setHint(false), 2600);
     return () => clearTimeout(id);
@@ -48,7 +52,7 @@ export function Utilities({
         <div className="scroll-hint">Scroll ↑ to tuck away</div>
       )}
       <nav className="utility-tabs">
-        {utilityTabs.map((t) => (
+        {tabs.map((t) => (
           <button
             className={tab === t ? "selected" : ""}
             key={t}
@@ -277,7 +281,8 @@ function formatTime(t: number) {
 function Stats({ report }: { report: (m: string) => void }) {
   const [data, setData] = useState<any>(null),
     [speed, setSpeed] = useState<any>(null),
-    [testing, setTesting] = useState(false);
+    [testing, setTesting] = useState(false),
+    [consent, setConsent] = useState(false);
   useEffect(() => {
     const refresh = () =>
       api("metrics")
@@ -312,6 +317,42 @@ function Stats({ report }: { report: (m: string) => void }) {
         <span className="stat-chip">{sub}</span>
       </div>
     );
+  }
+  async function runSpeedTest() {
+    setTesting(true);
+    try {
+      const module: any = await import("@m-lab/ndt7");
+      const ndt7 = module.default || module;
+      await ndt7.test(
+        {
+          userAcceptedDataPolicy: true,
+          downloadworkerfile: new URL("ndt7-download-worker.js", location.href)
+            .href,
+          uploadworkerfile: new URL("ndt7-upload-worker.js", location.href)
+            .href,
+        },
+        {
+          downloadMeasurement: (r: any) => {
+            if (r.Source === "client")
+              setSpeed((s: any) => ({
+                ...s,
+                download: r.Data?.MeanClientMbps,
+              }));
+          },
+          uploadMeasurement: (r: any) => {
+            if (r.Source === "client")
+              setSpeed((s: any) => ({
+                ...s,
+                upload: r.Data?.MeanClientMbps,
+              }));
+          },
+        },
+      );
+    } catch (e) {
+      report((e as Error).message);
+    } finally {
+      setTesting(false);
+    }
   }
   return data ? (
     <div className="stats-layout">
@@ -385,63 +426,43 @@ function Stats({ report }: { report: (m: string) => void }) {
         <button
           className="gold-button"
           disabled={testing}
-          onClick={async () => {
+          onClick={() => {
             if (import.meta.env.VITE_YAMI_PREVIEW === "true") {
               report(
                 "Speed tests run only in the Windows app. No network test was started.",
               );
               return;
             }
-            if (
-              !window.confirm(
-                "M-Lab publishes speed-test results, including your IP address, in an open dataset. The test transfers real data. Agree and run?",
-              )
-            )
-              return;
-            setTesting(true);
-            try {
-              const module: any = await import("@m-lab/ndt7");
-              const ndt7 = module.default || module;
-              await ndt7.test(
-                {
-                  userAcceptedDataPolicy: true,
-                  downloadworkerfile: new URL(
-                    "ndt7-download-worker.js",
-                    location.href,
-                  ).href,
-                  uploadworkerfile: new URL(
-                    "ndt7-upload-worker.js",
-                    location.href,
-                  ).href,
-                },
-                {
-                  downloadMeasurement: (r: any) => {
-                    if (r.Source === "client")
-                      setSpeed((s: any) => ({
-                        ...s,
-                        download: r.Data?.MeanClientMbps,
-                      }));
-                  },
-                  uploadMeasurement: (r: any) => {
-                    if (r.Source === "client")
-                      setSpeed((s: any) => ({
-                        ...s,
-                        upload: r.Data?.MeanClientMbps,
-                      }));
-                  },
-                },
-              );
-            } catch (e) {
-              report((e as Error).message);
-            } finally {
-              setTesting(false);
-            }
+            setConsent(true);
           }}
         >
           <Icon name={testing ? "circle-notch" : "play"} size={12} />
           {testing ? "Testing…" : "Run speed test"}
         </button>
       </div>
+      {consent && (
+        <Modal title="Run a speed test?" onClose={() => setConsent(false)}>
+          <p className="setting-note">
+            M-Lab publishes speed-test results, including your IP address, in an
+            open dataset. The test transfers real data.
+          </p>
+          <div className="dialog-actions">
+            <button className="soft-button" onClick={() => setConsent(false)}>
+              Cancel
+            </button>
+            <button
+              className="primary-button"
+              autoFocus
+              onClick={() => {
+                setConsent(false);
+                void runSpeedTest();
+              }}
+            >
+              Agree and run
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   ) : (
     <div className="loading">Reading your PC…</div>
@@ -491,7 +512,8 @@ function Wallpapers({
             key={p}
             className={selected === p ? "selected" : ""}
             style={{ "--order": i } as React.CSSProperties}
-            title={"Apply " + p.split(/[\\/]/).pop()}
+            aria-label={"Apply " + p.split(/[\\/]/).pop()}
+            data-tip={"Apply " + p.split(/[\\/]/).pop()}
             disabled={applying}
             onClick={async () => {
               setApplying(true);

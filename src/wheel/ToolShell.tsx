@@ -1,5 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { api } from "../api";
+import { Icon, IconButton } from "../ui";
+import { PETAL_ICON } from "./icons";
+
+/** The open tool's petal id, so every tool header shows its own icon. */
+export const ToolIdContext = createContext("");
 
 export function ToolShell({
   title,
@@ -10,13 +15,17 @@ export function ToolShell({
   note: string;
   children: ReactNode;
 }) {
+  const icon = PETAL_ICON[useContext(ToolIdContext)] || "wrench";
   return (
     <div className="tool-root">
       <header className="tool-head">
-        <h1>{title}</h1>
-        <button type="button" aria-label="Close" onClick={() => void api("wheel.close")}>
-          ×
-        </button>
+        <div className="tool-title">
+          <span className="tool-icon">
+            <Icon name={icon} size={18} />
+          </span>
+          <h1>{title}</h1>
+        </div>
+        <IconButton icon="x" label="Close" onClick={() => void api("wheel.close")} />
       </header>
       {children}
       {note && <p className="tool-note">{note}</p>}
@@ -37,7 +46,7 @@ export function Save({
       <span />
       <button
         type="button"
-        className="primary"
+        className="primary-button"
         disabled={busy}
         onClick={() => {
           setBusy(true);

@@ -27,7 +27,7 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 | `npm run check` | Run the line-limit check, TypeScript check, and tests. |
 | `npm run package` | Build and create an unsigned Windows portable executable with electron-builder under `release/`. |
 
-`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power, Stray (roaming Yami), Caption (the bottom caption pill), AI, Terminal, File wheel and Background (the file wheel tool window), which is 19 screens in total; `?stage=1&screen=<name>` renders one screen on its own; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
+`npm run preview:web` binds a Vite development server to `127.0.0.1:5174`; set `YAMI_PREVIEW_PORT` to use another port for both the server and `scripts/verify-preview.mjs` when 5174 is taken. Its preview toolbar lets you switch among Home, Bond, Soul, Desk, Settings, Island, Controls, Today, Stats, Clipboard, Apps, Wallpaper, Power, Stray (roaming Yami), Caption (the bottom caption pill), AI, Terminal, File wheel, Background (the file wheel tool window) and Setup (Choose your Yami), which is 20 screens in total; `?stage=1&screen=<name>` renders one screen on its own; **Reset demo** restores the in-memory fixture state. A toolbar link opens the generated documentation viewer. Preview changes are temporary and are not written to desktop data. It does not prove IPC, native actions, microphone capture, scheduling, provider behavior, or privacy behavior. Gemini and Tavily keys are not accepted. The direct M-Lab speed-test control is explicitly blocked in preview; it runs only in the Windows desktop app after its disclosure is accepted. Validate actual behavior in a Windows build.
 
 ## Source map
 
@@ -82,7 +82,7 @@ Pick relevant checks; do not treat them as interchangeable:
 - For provider changes, use mocked contract tests first. A live request requires a user-owned key entered in Yami and must avoid exposing that key in logs or captured evidence. Clearly separate live results from fixtures.
 - Do not run disruptive power or network operations as part of automated verification. Restore changed system state after any focused test.
 
-Verification scripts in the repository include `scripts/verify-dev.mjs`, `scripts/verify-app.mjs`, `scripts/verify-native-input.mjs`, `scripts/verify-wallpaper.mjs`, `scripts/verify-catalogue.mjs`, and `scripts/verify-packaged.mjs`. Read each script before running it: some checks can change the wallpaper, use clipboard state, or start the full app. The checks have fixture and cleanup behavior, but review it against the machine before use.
+Verification scripts in the repository include `scripts/verify-dev.mjs`, `scripts/verify-app.mjs`, `scripts/verify-modules.mjs`, `scripts/verify-native-input.mjs`, `scripts/verify-wallpaper.mjs`, `scripts/verify-catalogue.mjs`, and `scripts/verify-packaged.mjs`. Read each script before running it: some checks can change the wallpaper, use clipboard state, or start the full app. The checks have fixture and cleanup behavior, but review it against the machine before use.
 
 ## Web preview behavior
 
@@ -98,6 +98,10 @@ Check the screen in the preview at the default window size, 1160×790, and at th
 
 Workspace verification commands:
 
+- `node scripts/verify-modules.mjs`: two isolated profiles. A new profile opens
+  Choose your Yami and saves a preset; an existing profile skips setup, keeps its
+  chat, wakes the AI workspace on its first request and disposes it when switched off.
+  Other desktop checks start past setup through `scripts/test-profile.mjs`.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

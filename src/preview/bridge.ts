@@ -4,6 +4,7 @@ import type { WheelMode } from "../wheel/types";
 import { createFixture, demoApps, demoMetrics } from "./fixtures";
 import { previewOverlay } from "./overlays";
 import { previewWorkbench } from "./workbench";
+import { previewModules } from "./modules";
 import { islandSize, peekSize } from "../island-bounds";
 let state = createFixture();
 let wheelSample = "image";
@@ -58,6 +59,10 @@ function wheelSession() {
     y: 0,
   };
 }
+/** The Setup preview screen starts as a brand-new profile. */
+export function previewFirstRun() {
+  state.settings.setupDone = false;
+}
 export function resetPreview() {
   state = createFixture();
   changed();
@@ -76,6 +81,7 @@ export function installPreviewBridge() {
     async invoke(method, args = {}) {
       const a = args;
       if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting)\./.test(method)) return previewWorkbench(method, a, emit);
+      if (/^(modules|setup|packs)\./.test(method)) return previewModules(method, a, state, emit, changed);
       switch (method) {
         case "state":
           return structuredClone(state);

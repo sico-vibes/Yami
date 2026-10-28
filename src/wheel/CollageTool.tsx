@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStills } from "./stage";
 import { Save, ToolShell, savePng } from "./ToolShell";
 import type { WheelFile } from "./types";
+import { token } from "./palette";
 
 export function CollageTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -47,7 +48,7 @@ function paintCollage(
   canvas.height = rows * cell + gap * (rows + 1);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  ctx.fillStyle = "#17140b";
+  ctx.fillStyle = token("--paint-ink");
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   images.forEach((image, index) => {
     const x = gap + (index % cols) * (cell + gap);

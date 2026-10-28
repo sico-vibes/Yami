@@ -16,6 +16,15 @@
   position: relative;
   z-index: 1;
 }
+/* The page fade would clip the full-window catalogue to the page area, and
+   the title bar's drag region would swallow clicks on its header. */
+.main-content:has(.catalogue-open) {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.catalogue-open .picker-head {
+  -webkit-app-region: no-drag;
+}
 .loadout-page.catalogue-open {
   position: fixed;
   inset: 0;

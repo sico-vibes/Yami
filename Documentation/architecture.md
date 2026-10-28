@@ -29,7 +29,7 @@ In a web preview, a browser-side fixture bridge substitutes for `window.yami`. I
 
 `src/MainNavigation.tsx` measures the selected dock button when navigation changes and observes dock resizing (including font loading). CSS transitions move its single highlight; a keyed main element runs a finite incoming-page fade. There is no animation loop or polling for navigation, and both transitions honor the app and OS reduced-motion preferences.
 
-The terminal (`src/TerminalWindow.tsx`) and the AI workspace (`src/workbench/`) load lazily, so xterm.js and the workspace screens cost nothing until they are opened. The file wheel and its tool windows (`src/wheel/`) load only in their own transparent windows.
+`src/main.tsx` imports only the screen its window needs, so the always-on island does not parse the main app. The terminal (`src/TerminalWindow.tsx`) and the AI workspace (`src/workbench/`) load lazily, so xterm.js and the workspace screens cost nothing until they are opened. The file wheel and its tool windows (`src/wheel/`) load only in their own transparent windows.
 
 Shared renderer pieces are small modules. `src/ui.tsx` holds Icon, IconButton, Toggle, Empty and Modal. `src/controls.tsx` holds `Select`, `TooltipLayer`, `StatusChip`, `Meter` and the time helpers `shortTime` and `relativeTime`. `src/status-tone.ts` maps a status word to its colour family and is unit-tested. `src/island-bounds.ts` holds the island window size for the notch, the media card and each drawer tab.
 
@@ -42,6 +42,18 @@ Stylesheets are split by responsibility. `src/style.css` imports `styles/tokens.
 `electron/main.ts` owns app lifetime, the main window, the transparent top-center island, tray behavior, the launcher, lasso capture, state updates, schedules, app discovery, and confirmation prompts. `electron/requests.ts` builds the IPC request handler and contains feature request dispatch. `electron/windows.ts` creates sandboxed windows. `electron/overlays.ts` owns the roaming stray window and the caption window, and labels tool activity for the island using `electron/activity.ts`. `electron/focus-timer.ts` owns the Today focus countdown. The file wheel is a separate transparent window created for one drag or shortcut and destroyed afterwards (`electron/wheel/service.ts`); its scripts load only in that window. The main process coordinates those modules with the native child process and assistant service.
 
 The AI workspace (`electron/workbench/`) keeps its own routed controllers for agent hooks, quota readers, connectors, local model, MCP, terminal, speech and notes. The file wheel (`electron/wheel/`) is covered under build layout. The assistant and provider policy live in `electron/assistant.ts` and `electron/policy.ts`. `electron/platform.ts` owns reusable PowerShell and native-script helpers; `electron/metrics.ts` samples local hardware; `electron/weather.ts` handles opt-in weather lookup. `electron/store.ts` reads and writes persistent state; it strips key metadata from `data.json`, encrypts API credentials in `credentials.bin`, and encrypts unpinned clipboard text before saving. Writes to the state file use a temporary file followed by rename.
+
+## Optional modules
+
+Every optional feature is a module, listed once in `src/modules.ts` with its name, settings key, cost class, permissions and optional downloads (packs). `electron/modules/registry.ts` answers `modules.list`, `modules.set` and `setup.complete`, validates module ids and on/off values, and broadcasts a `modules` event when a module switches or wakes. `electron/modules/host.ts` builds a module's main-process code on its first request and disposes it when the module is switched off:
+
+- **AI workspace** (`workbenchEnabled`). It is built at startup only when it has work to do without its page open: the agent relay (`monitor`), background usage or connection refreshes, or a terminal shortcut with shortcuts on. Otherwise its first `workbench.*`, `terminal.*`, `agents.*` or similar request builds it. Turning it off disposes the controllers, closes terminals and unregisters its shortcut; it refuses while a meeting recording is open. Export and Delete all data still reach its data while it sleeps.
+- **File wheel** (`fileWheelEnabled`). The service and its windows exist only after the first drag, shortcut, Send to launch or tray click. Turning it off closes its windows; the native drag hook was already gated by the same setting.
+- **Clipboard history, weather and roaming Yami** are settings-only modules: their existing code already checks the setting before doing any work.
+
+Dictation is core, not part of the AI workspace. Its rules and Windows speech engine use the workspace data file through a shared storage object, so dictation rules and offline dictation keep working when the AI workspace is asleep or off.
+
+A new profile opens **Choose your Yami** (`src/setup/Setup.tsx`) even when Yami starts hidden. A profile saved before setup existed is marked done by `setupDoneForExisting` in `src/migrations.ts`. The tray's **Choose features…** and **Settings › Modules** reopen the same cards. Pack downloads from setup are validated but not started yet; see the [expansion plan](research/expansion-plan-2026-10-27.md).
 
 ## Provider architecture and extension limits
 

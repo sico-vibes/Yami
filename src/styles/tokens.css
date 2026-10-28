@@ -38,6 +38,44 @@
   --shadow-soft: 0 10px 30px rgba(4, 2, 22, 0.35);
   --shadow-float: 0 24px 70px rgba(4, 2, 22, 0.55);
   --blur: blur(22px) saturate(1.35);
+  /* Recessed tracks (tab rails, segmented choices) and the lit pill inside. */
+  --track: rgba(255, 255, 255, 0.035);
+  --track-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --lit-shadow: inset 0 1px 0 #ffffff66, 0 3px 12px rgba(160, 150, 255, 0.3);
+  /* Opaque ink panels for windows drawn straight over the desktop, where
+     backdrop blur cannot reach. */
+  --ink-panel: rgba(11, 10, 34, 0.97);
+  --ring-soul: 0 0 0 1px var(--line-strong), 0 0 28px
+      color-mix(in srgb, var(--soul, var(--glow)) 22%, transparent);
+
+  /* Terminal ANSI palette, tuned to Nightglow. */
+  --term-fg: var(--text);
+  --term-cursor: var(--glow);
+  --term-selection: rgba(188, 170, 255, 0.33);
+  --term-black: #0b0a22;
+  --term-red: #ff9e9e;
+  --term-green: #93e2c6;
+  --term-yellow: #f1d69c;
+  --term-blue: #93a9ff;
+  --term-magenta: #f1a7d6;
+  --term-cyan: #8dd8f0;
+  --term-white: #d6d2f0;
+  --term-bright-black: #77729c;
+  --term-bright-red: #ffbcbc;
+  --term-bright-green: #b4efd9;
+  --term-bright-yellow: #f8e6bd;
+  --term-bright-blue: #b8c6ff;
+  --term-bright-magenta: #f8c8e6;
+  --term-bright-cyan: #b6e9f7;
+  --term-bright-white: #f3f1ff;
+
+  /* Drawing palette for canvas tools (markup, redact, collage). */
+  --paint-ink: #0b0a22;
+  --paint-glow: #bcaaff;
+  --paint-rose: #f1a7d6;
+  --paint-mint: #93e2c6;
+  --paint-moon: #f1d69c;
+  --paint-paper: #f3f1ff;
 
   /* Legacy names kept so older rules keep resolving. */
   --accent: var(--glow);

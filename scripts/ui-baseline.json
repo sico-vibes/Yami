@@ -1,0 +1,19 @@
+{
+  "src/Effects.tsx": 5,
+  "src/Lasso.tsx": 3,
+  "src/Loadout.tsx": 15,
+  "src/LoadoutHub.tsx": 2,
+  "src/styles/base.css": 19,
+  "src/styles/cards.css": 8,
+  "src/styles/controls.css": 19,
+  "src/styles/drawer-tabs.css": 9,
+  "src/styles/home.css": 14,
+  "src/styles/island.css": 37,
+  "src/styles/loadout.css": 28,
+  "src/styles/overlays.css": 25,
+  "src/styles/responsive.css": 2,
+  "src/styles/sidebar-pages.css": 11,
+  "src/styles/today.css": 6,
+  "src/TerminalWindow.tsx": 1,
+  "src/Utilities.tsx": 3
+}

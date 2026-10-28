@@ -9,6 +9,9 @@ import { MainNavigation } from "./MainNavigation";
 import { skinFor } from "./yami/skins";
 import { TooltipLayer } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
+const Setup = lazy(() =>
+  import("./setup/Setup").then((m) => ({ default: m.Setup })),
+);
 export function App() {
   const [tab, setTab] = useState<Tab>("home"),
     [toast, setToast] = useState(""),
@@ -71,6 +74,11 @@ export function App() {
         state.settings.reducedMotion,
       );
   }, [state?.settings.reducedMotion]);
+  const firstRun = !!state && !state.settings.setupDone;
+  const workbenchOff = !!state && !state.settings.workbenchEnabled;
+  useEffect(() => {
+    if (workbenchOff && tab === "ai") setTab("home");
+  }, [workbenchOff, tab]);
   if (!state)
     return (
       <div className="boot">
@@ -109,8 +117,19 @@ export function App() {
           />
         </div>
       </header>
-      <main key={tab} className={"main-content page-" + tab}>
-        {tab === "ai" ? (
+      <main
+        key={firstRun ? "setup" : tab}
+        className={"main-content page-" + (firstRun ? "setup" : tab)}
+      >
+        {firstRun || tab === "setup" ? (
+          <Suspense fallback={null}>
+            <Setup
+              state={state}
+              report={report}
+              onDone={() => setTab("home")}
+            />
+          </Suspense>
+        ) : tab === "ai" ? (
           <Suspense
             fallback={<p className="empty-state">Opening workspace…</p>}
           >
@@ -144,7 +163,13 @@ export function App() {
           />
         )}
       </main>
-      <MainNavigation tab={tab} onNavigate={setTab} />
+      {!firstRun && (
+        <MainNavigation
+          tab={tab}
+          onNavigate={setTab}
+          workbench={state.settings.workbenchEnabled}
+        />
+      )}
       {toast && (
         <div className="toast" role="status">
           {toast}

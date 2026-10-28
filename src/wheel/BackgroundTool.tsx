@@ -9,6 +9,7 @@ import {
   type BackgroundSettings,
 } from "./paint";
 import type { WheelFile } from "./types";
+import { ToolShell } from "./ToolShell";
 
 export function BackgroundTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -75,13 +76,7 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
   }, [settings, choices]);
   const patch = (next: Partial<BackgroundSettings>) => setSettings((current) => ({ ...current, ...next }));
   return (
-    <div className="tool-root">
-      <header className="tool-head">
-        <h1>Background</h1>
-        <button type="button" aria-label="Close" onClick={() => void api("wheel.close")}>
-          ×
-        </button>
-      </header>
+    <ToolShell title="Background" note={note}>
       <div className="tool-preview">
         <canvas ref={canvas} />
       </div>
@@ -164,14 +159,13 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
           ))}
         </div>
       </div>
-      {note && <p className="tool-note">{note}</p>}
       <div className="tool-actions">
         <button type="button" onClick={() => setSettings(backgroundDefaults)}>
           Reset
         </button>
         <button
           type="button"
-          className="primary"
+          className="primary-button"
           disabled={busy}
           onClick={() => {
             setBusy(true);
@@ -184,6 +178,6 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
           {busy ? "Saving…" : "Save with background"}
         </button>
       </div>
-    </div>
+    </ToolShell>
   );
 }

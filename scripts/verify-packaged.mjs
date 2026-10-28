@@ -1,4 +1,5 @@
 import { _electron } from "playwright";
+import { skipSetup } from "./test-profile.mjs";
 import { spawn } from "node:child_process";
 import readline from "node:readline";
 import fs from "node:fs";
@@ -30,6 +31,7 @@ const env = {
   YAMI_DATA_DIR: path.resolve(".artifacts/packaged-check-" + Date.now()),
 };
 delete env.ELECTRON_RUN_AS_NODE;
+skipSetup(env.YAMI_DATA_DIR);
 let app, original, backup;
 try {
   await native("configure", { hotkeys: false });

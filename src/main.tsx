@@ -4,38 +4,42 @@ import "@fontsource-variable/rubik";
 import "@phosphor-icons/web/regular";
 import "@phosphor-icons/web/fill";
 import "./style.css";
-import { App } from "./App";
-import { Island } from "./Island";
-import { Lasso } from "./Lasso";
-import { Effects } from "./Effects";
-import { Stray } from "./Stray";
-import { CaptionOverlay } from "./Caption";
 const mode = new URLSearchParams(location.search).get("window") || "main";
-const TerminalWindow = lazy(() => import("./TerminalWindow"));
 document.documentElement.dataset.window = mode;
+// Each window loads only its own screen, so the always-on island and the small
+// overlays never parse the main app's code.
+const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =
+  {
+    main: () => import("./App").then((m) => ({ default: m.App })),
+    terminal: () => import("./TerminalWindow"),
+    island: () => import("./Island").then((m) => ({ default: m.Island })),
+    lasso: () => import("./Lasso").then((m) => ({ default: m.Lasso })),
+    effect: () => import("./Effects").then((m) => ({ default: m.Effects })),
+    stray: () => import("./Stray").then((m) => ({ default: m.Stray })),
+    caption: () =>
+      import("./Caption").then((m) => ({ default: m.CaptionOverlay })),
+  };
 function renderDesktop() {
-  if (mode === "wheel" || mode === "shelf" || mode === "tool" || mode === "float") {
+  if (
+    mode === "wheel" ||
+    mode === "shelf" ||
+    mode === "tool" ||
+    mode === "float"
+  ) {
     void import("./wheel/entry").then((entry) => entry.mountWheel(mode));
     return;
   }
+  const Screen = lazy(screens[mode] || screens.main);
   createRoot(document.getElementById("root")!).render(
-    mode === "terminal" ? (
-      <Suspense fallback={<div className="boot">Opening terminal…</div>}>
-        <TerminalWindow />
-      </Suspense>
-    ) : mode === "island" ? (
-      <Island />
-    ) : mode === "lasso" ? (
-      <Lasso />
-    ) : mode === "effect" ? (
-      <Effects />
-    ) : mode === "stray" ? (
-      <Stray />
-    ) : mode === "caption" ? (
-      <CaptionOverlay />
-    ) : (
-      <App />
-    ),
+    <Suspense
+      fallback={
+        mode === "terminal" ? (
+          <div className="boot">Opening terminal…</div>
+        ) : null
+      }
+    >
+      <Screen />
+    </Suspense>,
   );
 }
 if (import.meta.env.VITE_YAMI_PREVIEW === "true" && !window.yami) {

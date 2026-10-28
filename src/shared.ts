@@ -1,4 +1,11 @@
-export type Tab = "home" | "bond" | "soul" | "desk" | "ai" | "settings";
+export type Tab =
+  | "home"
+  | "bond"
+  | "soul"
+  | "desk"
+  | "ai"
+  | "settings"
+  | "setup";
 export type UtilityTab =
   | "Controls"
   | "Today"
@@ -46,6 +53,8 @@ export type Settings = {
   fileWheelHotkey: string;
   fileWheelReveal: boolean;
   fileWheelSound: boolean;
+  workbenchEnabled: boolean;
+  setupDone: boolean;
 };
 export type Task = {
   id: string;

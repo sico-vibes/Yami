@@ -38,6 +38,10 @@ then stops.
    accessible names. Follow `Documentation/adaptation.md`.
 7. **Check two sizes.** Preview at 1160×790 and 850×610, reduced motion on and
    off; drawer tabs must fit their height in `src/island-bounds.ts`.
+8. **Run `npm run check:ui`.** No native `<select>`, HTML `title` tooltip or
+   `window.confirm` in shipped screens; raw colours may only fall (ratchet in
+   `scripts/ui-baseline.json`). Canvas and xterm read `--paint-*`/`--term-*`
+   through `src/css-token.ts`. Rails use `--track` with a `--lit-shadow` pill.
 
 ## Key values
 

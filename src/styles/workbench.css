@@ -245,25 +245,51 @@
 .terminal-shell .titlebar {
   height: 56px;
   min-height: 56px;
-  background: #06051a44;
+  background: color-mix(in srgb, var(--ink-0) 27%, transparent);
 }
+/* Sessions sit on the same recessed track as the drawer tabs. */
 .terminal-tabs {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   overflow-x: auto;
-  background: #06051a33;
+  scrollbar-width: none;
 }
-.terminal-tabs > button {
+.terminal-sessions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  border: 1px solid var(--line);
+  box-shadow: var(--track-shadow);
+}
+.terminal-sessions:empty {
+  display: none;
+}
+.terminal-sessions > button {
   white-space: nowrap;
-  padding: 8px 12px;
-  border-radius: 22px;
-  font-size: 12px;
+  padding: 5px var(--space-3);
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  transition:
+    color var(--dur-fast),
+    background var(--dur-fast);
 }
-.terminal-tabs > button.selected {
-  background: var(--selected);
-  box-shadow: inset 0 0 0 1px var(--selected-line);
+.terminal-sessions > button:hover:not(:disabled) {
+  color: var(--text);
+}
+.terminal-sessions > button.selected {
+  color: var(--on-glow);
+  font-weight: 500;
+  background: var(--grad-glow);
+  box-shadow: var(--lit-shadow);
+}
+.terminal-tabs .spacer {
+  flex: 1;
 }
 .terminal-host {
   flex: 1;
@@ -289,8 +315,8 @@
   gap: 16px;
   padding: 8px 16px;
   color: var(--text-soft);
-  font-size: 11px;
-  background: #06051a55;
+  font-size: var(--fs-2xs);
+  background: color-mix(in srgb, var(--ink-0) 33%, transparent);
 }
 .terminal-error {
   padding: 8px 16px;
@@ -298,8 +324,8 @@
   align-items: center;
   justify-content: space-between;
   color: var(--moon);
-  font-size: 12px;
-  background: rgba(241, 214, 156, 0.08);
+  font-size: var(--fs-xs);
+  background: color-mix(in srgb, var(--moon) 8%, transparent);
 }
 @media (max-width: 950px) {
   .workbench-layout {
@@ -323,4 +349,10 @@
   .workbench-layout .settings-content {
     animation: none;
   }
+  .terminal-sessions > button {
+    transition: none;
+  }
+}
+html[data-reduced="true"] .terminal-sessions > button {
+  transition: none;
 }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { Select, TooltipLayer } from "../controls";
+import { ToolIdContext } from "./ToolShell";
 import { AdjustTool } from "./AdjustTool";
 import { BackgroundTool } from "./BackgroundTool";
 import { CollageTool } from "./CollageTool";
@@ -61,30 +63,28 @@ export function ToolApp() {
       setFiles(session.files || []);
     });
   }, []);
-  const body = bodyFor(tool, files);
+  const body = (
+    <ToolIdContext.Provider value={tool}>
+      {bodyFor(tool, files)}
+      <TooltipLayer />
+    </ToolIdContext.Provider>
+  );
   if (!preview) return body;
   return (
-    <div>
-      <label className="wheel-sample">
-        Tool
-        <select
-          aria-label="Preview tool"
+    <div className="tool-preview-frame">
+      <div className="tool-sample">
+        <Select
+          label="Preview tool"
           value={tool}
-          onChange={(event) => {
-            const next = event.target.value;
+          options={previewTools.map(([value, label]) => ({ value, label }))}
+          onChange={(next) => {
             setTool(next);
             void api("wheel.tool.sample", { tool: next }).then(() => api("wheel.tool.get")).then((session) => {
               if (session) setFiles(session.files || []);
             });
           }}
-        >
-          {previewTools.map(([id, label]) => (
-            <option key={id} value={id}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
+        />
+      </div>
       {body}
     </div>
   );

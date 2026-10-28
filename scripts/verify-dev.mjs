@@ -2,6 +2,7 @@ import { createServer } from "vite";
 import { _electron } from "playwright";
 import path from "node:path";
 import assert from "node:assert/strict";
+import { skipSetup } from "./test-profile.mjs";
 const server = await createServer({ server: { port: 5173 } });
 await server.listen();
 const env = {
@@ -10,6 +11,7 @@ const env = {
   YAMI_DATA_DIR: path.resolve(".artifacts/development-check"),
 };
 delete env.ELECTRON_RUN_AS_NODE;
+skipSetup(env.YAMI_DATA_DIR);
 let app;
 try {
   app = await _electron.launch({ args: [path.resolve(".")], env });

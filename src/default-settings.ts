@@ -37,4 +37,6 @@ export const defaults: Settings = {
   fileWheelHotkey: "Ctrl+Alt+Y",
   fileWheelReveal: false,
   fileWheelSound: false,
+  workbenchEnabled: true,
+  setupDone: false,
 };

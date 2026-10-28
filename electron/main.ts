@@ -15,7 +15,6 @@ import {
 } from "electron";
 import { spawn } from "node:child_process";
 import { runPowerShell, nativeScript } from "./platform";
-import { createWheel } from "./wheel/service";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -29,7 +28,7 @@ import { Assistant } from "./assistant";
 import { assetRoot, makeWindow, windows } from "./windows";
 import { createOverlays } from "./overlays";
 import { createFocusTimer } from "./focus-timer";
-import { Workbench } from "./workbench";
+import { createModuleHost } from "./modules/host";
 import { windowsBrightness, windowsControls } from "./controls";
 import {
   assertFile,
@@ -53,9 +52,9 @@ if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
 let store: Store, native: Native, assistant: Assistant;
 let overlays: ReturnType<typeof createOverlays> | undefined;
-let workbench: Workbench | undefined;
-let wheel: ReturnType<typeof createWheel> | undefined;
-let trayMenu: Electron.Menu | undefined;
+let modules: ReturnType<typeof createModuleHost> | undefined;
+let trayMenu: Electron.Menu | undefined,
+  trayWheel = false;
 const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
   broadcast: (event) => broadcast(event),
@@ -95,10 +94,40 @@ function changed() {
   void native.call("wake", next ? { at: next.at } : {}).catch(() => {});
   // Keep the tray checkbox in step with the Settings toggle.
   const roam = trayMenu?.getMenuItemById("roam");
-  if (roam && roam.checked !== store.state.settings.roam) {
+  if (trayMenu && trayWheel !== store.state.settings.fileWheelEnabled)
+    buildTray();
+  else if (roam && roam.checked !== store.state.settings.roam) {
     roam.checked = store.state.settings.roam;
     tray.setContextMenu(trayMenu!);
   }
+}
+function buildTray() {
+  trayWheel = store.state.settings.fileWheelEnabled;
+  trayMenu = Menu.buildFromTemplate([
+    { label: "Open Yami", click: () => showMain() },
+    { label: "Settings", click: () => showMain("settings") },
+    { label: "Choose features…", click: () => showMain("setup") },
+    {
+      id: "roam",
+      label: "Let Yami roam",
+      type: "checkbox",
+      checked: store.state.settings.roam,
+      click: (item) => {
+        store.state.settings.roam = item.checked;
+        changed();
+      },
+    },
+    ...(modules?.trayItems() || []),
+    { type: "separator" },
+    {
+      label: "Quit Yami",
+      click: () => {
+        quitting = true;
+        app.quit();
+      },
+    },
+  ]);
+  tray.setContextMenu(trayMenu);
 }
 function notify(message: string) {
   broadcast({ type: "toast", message });
@@ -585,7 +614,7 @@ async function effect(kind: string, before?: any, after?: any) {
   });
 }
 async function nativeEvent(e: any) {
-  if (wheel?.onNative(e)) return;
+  if (modules?.onNative(e)) return;
   if (e.eventName === "foreground") {
     const aliases: Record<string, string> = {
       chrome: "Google Chrome",
@@ -661,7 +690,7 @@ const weather = () => readWeather(store, assetRoot);
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on("second-instance", (_event, argv) => {
-    if (!wheel?.acceptArgv(argv)) showMain();
+    if (!modules?.acceptArgv(argv)) showMain();
   });
   app
     .whenReady()
@@ -734,9 +763,11 @@ else {
         }
       });
       main.once("ready-to-show", () => {
+        // First run shows "Choose your Yami" even when starting hidden.
         if (
-          !store.state.settings.startHidden &&
-          !process.argv.includes("--hidden")
+          !store.state.settings.setupDone ||
+          (!store.state.settings.startHidden &&
+            !process.argv.includes("--hidden"))
         )
           main.show();
       });
@@ -759,55 +790,27 @@ else {
         fullscreen: () => native.call("fullscreen").catch(() => false),
       });
       overlays.syncStray();
-      wheel = createWheel({
-        makeWindow,
-        broadcast,
-        notify,
+      modules = createModuleHost({
+        store,
         native,
-        getSettings: () => store.state.settings,
-        getWallpapers: () => store.state.wallpapers,
+        assistant,
+        broadcast,
+        changed,
+        notify,
+        showMain,
+        setPanel,
+        confirm,
+        makeWindow,
       });
       const icon = nativeImage
         .createFromPath(path.join(assetRoot(), "yami-icon.png"))
         .resize({ width: 20, height: 20 });
       tray = new Tray(icon);
       tray.setToolTip("Yami");
-      trayMenu = Menu.buildFromTemplate([
-        { label: "Open Yami", click: () => showMain() },
-        { label: "Settings", click: () => showMain("settings") },
-        {
-          id: "roam",
-          label: "Let Yami roam",
-          type: "checkbox",
-          checked: store.state.settings.roam,
-          click: (item) => {
-            store.state.settings.roam = item.checked;
-            changed();
-          },
-        },
-        ...(wheel?.trayItems() || []),
-        { type: "separator" },
-        {
-          label: "Quit Yami",
-          click: () => {
-            quitting = true;
-            app.quit();
-          },
-        },
-      ]);
-      tray.setContextMenu(trayMenu);
+      buildTray();
       tray.on("double-click", () => showMain());
-      workbench = new Workbench({
-        store,
-        native,
-        assistant,
-        broadcast,
-        showMain,
-        setPanel,
-        confirm,
-      });
       const invoke = createRequestHandler({
-        workbench,
+        workbench: modules.data,
         store,
         native,
         assistant,
@@ -892,7 +895,7 @@ else {
         set panelOpen(value) {
           panelOpen = value;
         },
-        wheel: (method, args, sender) => wheel!.handle(method, args, sender),
+        wheel: modules.wheel,
       });
       ipcMain.handle("yami:invoke", async (event, method, args) => {
         if (
@@ -901,20 +904,21 @@ else {
           )
         )
           throw new Error("Untrusted renderer.");
-        if (workbench?.handles(method))
-          return workbench.invoke(method, args, event.sender);
+        const host = modules!;
+        if (host.handles(method))
+          return host.invoke(method, args, event.sender);
         if (method === "shortcuts.capture")
-          workbench?.captureShortcuts(!!args?.active);
-        if (method === "chat") args = workbench?.prepareChat(args) || args;
+          host.captureShortcuts(!!args?.active);
+        if (method === "chat") args = host.prepareChat(args);
         if (
           method === "dictation" &&
           store.state.settings.dictationEngine === "windows"
         )
-          return workbench?.offlineDictation(args);
+          return host.offlineDictation(args);
         if (overlays?.handles(method)) return overlays.invoke(method, args);
         if (focusTimer.handles(method)) return focusTimer.invoke(method, args);
         const result = await invoke(method, args, event.sender);
-        if (method === "settings") workbench?.captureShortcuts(false);
+        if (method === "settings") host.afterSettings();
         return result;
       });
       await native.call("configure", {
@@ -926,6 +930,7 @@ else {
       void discoverApps();
       void indexFiles();
       changed();
+      modules.start();
       screen.on("display-metrics-changed", () => setPanel(panelOpen));
     })
     .catch((e) => {
@@ -935,13 +940,17 @@ else {
     });
 }
 app.on("before-quit", (event) => {
-  if (workbench && !workbench.confirmQuit()) { event.preventDefault(); quitting = false; return; }
+  if (modules && !modules.confirmQuit()) {
+    event.preventDefault();
+    quitting = false;
+    return;
+  }
   quitting = true;
   clearInterval(taskTimer);
   clearInterval(clipboardTimer);
   assistant?.stopLive();
   overlays?.dispose();
   focusTimer.dispose();
-  workbench?.dispose();
+  modules?.dispose();
   native?.close();
 });

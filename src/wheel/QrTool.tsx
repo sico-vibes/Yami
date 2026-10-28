@@ -33,7 +33,7 @@ export function QrTool({ files }: { files: WheelFile[] }) {
         <span />
         <button
           type="button"
-          className="primary"
+          className="primary-button"
           disabled={!text}
           onClick={() => void api("wheel.copyText", { text }).catch((error: Error) => setNote(error.message))}
         >

@@ -2,11 +2,13 @@ import { _electron as electron } from "playwright";
 import assert from "node:assert/strict";
 import path from "node:path";
 import fs from "node:fs";
+import { skipSetup } from "./test-profile.mjs";
 const env = {
   ...process.env,
   YAMI_DATA_DIR: path.resolve(".artifacts/e2e-" + Date.now()),
 };
 delete env.ELECTRON_RUN_AS_NODE;
+skipSetup(env.YAMI_DATA_DIR);
 let app;
 let checks = 0;
 const errors = [];

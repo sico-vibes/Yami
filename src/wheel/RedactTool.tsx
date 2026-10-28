@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { paintStill, useStill } from "./stage";
 import { Save, ToolShell, savePng } from "./ToolShell";
 import type { WheelFile } from "./types";
+import { token } from "./palette";
 
 type Box = { x: number; y: number; w: number; h: number; mode: "solid" | "blur" };
 
@@ -92,7 +93,7 @@ function redraw(
       ctx.drawImage(canvas, x, y, w, h, x, y, w, h);
       ctx.restore();
     } else {
-      ctx.fillStyle = "#17140b";
+      ctx.fillStyle = token("--paint-ink");
       ctx.fillRect(x, y, w, h);
     }
   }

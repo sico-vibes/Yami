@@ -10,3 +10,15 @@ export function migrateState<
     ];
   return state;
 }
+
+// Profiles saved before first-run setup existed already chose their features,
+// so they skip "Choose your Yami". A brand-new profile has no saved settings.
+export function setupDoneForExisting<T extends { setupDone?: boolean }>(
+  settings: T | undefined,
+): T | undefined {
+  if (!settings || typeof settings !== "object" || Array.isArray(settings))
+    return settings;
+  return settings.setupDone === undefined
+    ? { ...settings, setupDone: true }
+    : settings;
+}
