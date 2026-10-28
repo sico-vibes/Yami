@@ -61,6 +61,10 @@ Loading `@google/genai` and `systeminformation` on first use instead of at start
 
 The **packaged** build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged`) measured **165.1–166.3 MB** private working set across 8 processes at 0% sampled CPU in two runs with roaming on, and **139.1–139.2 MB** across 7 processes with roaming off. Optional modules were at their defaults (Tune, Feeds and Offline dictation off). That is inside the 100–200 MB idle budget; it is still a short run, not a soak test, and the active-task ceiling remains unmeasured.
 
+## After the evening's features (2026-10-28)
+
+After folder icons, DNS over HTTPS, terminal shell integration, fan-out, the desk widget, filter lists, the RustDesk and Windhawk bridges and the mail catcher landed (each off or idle by default), `node scripts/measure-performance.mjs` on the source build measured **165.3–165.7 MB** private working set across 8 processes at 0–1% sampled CPU, the same as before them. Short run, not a packaged or soak measurement.
+
 ## Desk widget (2026-10-28)
 
 The optional desk widget adds one renderer process. With the widget on (media playing, no agents) the desktop check read that renderer at **36–39 MB** private bytes from `app.getAppMetrics()` in four source-build runs. The whole-tree number in the same runs moved by ±15 MB with the main window and Playwright attached, so it is not a usable delta; a packaged idle measurement with the widget on has not been run. It is off by default, and switching it off closes the window.
