@@ -159,3 +159,12 @@ html[data-reduced="true"] .inbox-item {
   flex: 1;
   min-width: 160px;
 }
+.inbox-brief {
+  margin-bottom: var(--space-4);
+}
+.inbox-brief .workbench-prose {
+  margin-left: 50px;
+  white-space: pre-wrap;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}

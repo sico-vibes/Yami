@@ -224,6 +224,13 @@ export function previewModules(
     case "feeds.mail.add":
     case "feeds.mail.remove":
       throw new Error("Preview only — no mail account was touched.");
+    case "feeds.brief":
+      return [
+        "- Demo brief: a tiny offline speech model is trending on Hacker News.",
+        "- r/rust asks what people are building this week.",
+        "- Electron shipped a new release.",
+        "(Preview text; Gemini was not called.)",
+      ].join("\n");
     case "feeds.add":
       throw new Error("Preview only — no feed was added or read.");
     case "feeds.remove":

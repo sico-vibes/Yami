@@ -18,7 +18,9 @@ export default function Inbox({
     [kind, setKind] = useState<FeedKind>("reddit"),
     [value, setValue] = useState(""),
     [only, setOnly] = useState(""),
-    [reading, setReading] = useState(false);
+    [reading, setReading] = useState(false),
+    [brief, setBrief] = useState(""),
+    [briefing, setBriefing] = useState(false);
   const fail = (e: Error) => report(e.message);
   const refresh = (id?: string) => {
     setReading(true);
@@ -61,13 +63,48 @@ export default function Inbox({
             Feeds and mail, read when you look. Nothing is posted or sent.
           </p>
         </div>
-        <IconButton
-          icon="arrows-clockwise"
-          label={reading ? "Reading feeds…" : "Read feeds again"}
-          disabled={reading || !view?.sources.length}
-          onClick={() => void refresh()}
-        />
+        <div className="workbench-actions">
+          <IconButton
+            icon="arrows-clockwise"
+            label={reading ? "Reading feeds…" : "Read feeds again"}
+            disabled={reading || !view?.sources.length}
+            onClick={() => void refresh()}
+          />
+          <button
+            className="soft-button"
+            disabled={briefing || !view?.items.length}
+            onClick={() => {
+              setBriefing(true);
+              void api("feeds.brief")
+                .then(setBrief)
+                .catch(fail)
+                .finally(() => setBriefing(false));
+            }}
+          >
+            <Icon name="sparkle" size={16} />
+            {briefing ? "Briefing…" : "Brief me"}
+          </button>
+        </div>
       </div>
+      {brief && (
+        <section className="workbench-entry inbox-brief">
+          <header className="entry-head">
+            <span className="entry-icon">
+              <Icon name="sparkle" />
+            </span>
+            <div className="entry-heading">
+              <strong>Your brief</strong>
+              <small>From the newest 40 headlines, by Gemini</small>
+            </div>
+            <IconButton
+              icon="x"
+              label="Close the brief"
+              onClick={() => setBrief("")}
+            />
+          </header>
+          <div className="workbench-prose">{brief}</div>
+        </section>
+      )}
       <MailGlance report={report} />
       <h3 className="group-title">Feeds</h3>
       <div className="inbox-add">
