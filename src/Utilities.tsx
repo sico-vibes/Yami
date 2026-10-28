@@ -4,7 +4,7 @@ import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
 import { Empty, Icon, IconButton, Modal } from "./ui";
 import { Launcher } from "./Launcher";
-import { shortTime } from "./controls";
+import { Select, shortTime } from "./controls";
 import { Today } from "./Today";
 import { AppVolumes } from "./AppVolumes";
 import { mediaControl, repeatLabel, type MediaAction } from "./media";
@@ -552,6 +552,21 @@ function Wallpapers({
           My folder
         </button>
         <small>{files.length} pictures</small>
+        <Select
+          label="Change wallpaper automatically"
+          value={state.settings.wallpaperRotate}
+          onChange={(wallpaperRotate) =>
+            void api("settings", {
+              wallpaperRotate,
+              wallpaperRotatedAt: Date.now(),
+            }).catch((e) => report(e.message))
+          }
+          options={[
+            { value: "off", label: "Keep this one", icon: "image" },
+            { value: "hourly", label: "New one every hour", icon: "clock" },
+            { value: "daily", label: "New one every day", icon: "calendar" },
+          ]}
+        />
         <IconButton
           icon="folder-open"
           label="Choose wallpaper folder"

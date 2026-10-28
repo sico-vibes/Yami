@@ -9,6 +9,8 @@ export const defaults: Settings = {
   roam: true,
   deskWidget: false,
   deskWidgetAt: "",
+  wallpaperRotate: "off",
+  wallpaperRotatedAt: 0,
   livingFlame: false,
   hotkeys: true,
   microphone: "",

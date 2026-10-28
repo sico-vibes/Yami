@@ -38,6 +38,7 @@ import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
 import { createScreenShare as screenShare } from "../remote/screen";
+import { createWallpaperRotation } from "../wallpaper-rotation";
 import { MailCatcher } from "../workbench/mail-catcher";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
@@ -406,6 +407,11 @@ export function createModuleHost(deps: Deps) {
   // Light and dark on a schedule: one timeout to the next switch. The theme
   // is applied when the schedule changes and at each switch, so a manual
   // change in between is left alone until the next switch.
+  const rotation = createWallpaperRotation({
+    store,
+    native,
+    changed: deps.changed,
+  });
   let themeTimer: NodeJS.Timeout | undefined,
     themeKey = "";
   const syncTheme = (fired = false) => {
@@ -485,6 +491,7 @@ export function createModuleHost(deps: Deps) {
     start() {
       wake();
       syncTheme();
+      rotation.sync();
       syncWatch();
       if (process.argv.includes("--file-wheel")) host.acceptArgv(process.argv);
     },
@@ -843,6 +850,7 @@ export function createModuleHost(deps: Deps) {
       registry.sync();
       wake();
       syncTheme();
+      rotation.sync();
       syncWatch();
       registry.peek<Workbench>("workbench")?.captureShortcuts(false);
     },
@@ -963,6 +971,7 @@ export function createModuleHost(deps: Deps) {
     },
     dispose() {
       clearTimeout(themeTimer);
+      rotation.dispose();
       mail?.stop();
       watchers?.dispose();
       packs.dispose();
