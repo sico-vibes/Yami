@@ -121,10 +121,14 @@ test("the vault stays encrypted on disk and merges imports without duplicates", 
       .map((s) => s.id),
     ["edge"],
   );
-  assert.deepEqual(vault.import("edge", local), { added: 1, total: 1 });
+  assert.deepEqual(vault.import("edge", local), {
+    added: 1,
+    total: 1,
+    history: 0,
+  });
   assert.deepEqual(
     vault.import("edge", local),
-    { added: 0, total: 1 },
+    { added: 0, total: 1, history: 0 },
     "no duplicates",
   );
   assert.ok(
@@ -132,7 +136,7 @@ test("the vault stays encrypted on disk and merges imports without duplicates", 
     "encrypted on disk",
   );
   assert.equal(new Vault(file, crypto).list()[0].url, "https://a.example/");
-  assert.throws(() => vault.import("chrome", local), /no bookmarks file/);
+  assert.throws(() => vault.import("chrome", local), /no bookmarks or history/);
   assert.throws(() => vault.import("nope", local), /Choose a browser/);
   assert.equal(vault.remove("https://a.example/").length, 0);
   vault.clear();
@@ -159,8 +163,18 @@ test("agent clicks that submit, pay, post or delete need approval", async () => 
   assert.equal(riskyAction({ found: true, label: "More info" }), false);
   assert.equal(riskyAction({ found: true, label: "Place order" }), true);
   assert.equal(riskyAction({ found: true, label: "Delete repository" }), true);
-  assert.equal(riskyAction({ found: true, label: "Next", submits: true }), true);
+  assert.equal(
+    riskyAction({ found: true, label: "Next", submits: true }),
+    true,
+  );
   // The page code is a single expression that parses.
-  assert.doesNotThrow(() => new Function("return " + pageScript({ text: "Go" }, "click", "find")));
-  assert.doesNotThrow(() => new Function("return " + pageScript({ selector: "#q" }, "type", "type", 'a"b')));
+  assert.doesNotThrow(
+    () => new Function("return " + pageScript({ text: "Go" }, "click", "find")),
+  );
+  assert.doesNotThrow(
+    () =>
+      new Function(
+        "return " + pageScript({ selector: "#q" }, "type", "type", 'a"b'),
+      ),
+  );
 });

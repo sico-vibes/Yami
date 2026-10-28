@@ -294,6 +294,9 @@ function NewTab({
     [recent, setRecent] = useState<
       { url: string; title: string; at: number }[]
     >([]),
+    [imported, setImported] = useState<
+      { url: string; title: string; at: number; from: string }[]
+    >([]),
     [linked, setLinked] = useState<{
       browsers: { id: string; name: string }[];
       open: string;
@@ -306,6 +309,9 @@ function NewTab({
       .then(setRecent)
       .catch(() => {});
     void api("vault.bookmarks").then(setBookmarks).catch(fail);
+    void api("vault.history")
+      .then(setImported)
+      .catch(() => {});
     void api("vault.sources")
       .then(setSources)
       .catch(() => {});
@@ -379,7 +385,7 @@ function NewTab({
               }
             >
               <Icon name="download-simple" size={16} />
-              Import {s.name} bookmarks
+              Import from {s.name}
             </button>
           ))}
       </div>
@@ -410,6 +416,43 @@ function NewTab({
                 <small>{host(r.url)}</small>
               </button>
             ))}
+          </div>
+        </section>
+      )}
+      {imported.length > 0 && (
+        <section className="browser-recent">
+          <div className="mail-head">
+            <h3 className="group-title">From your other browsers</h3>
+            <button
+              className="text-button"
+              onClick={() =>
+                void api("vault.history.clear").then(setImported).catch(fail)
+              }
+            >
+              Clear
+            </button>
+          </div>
+          <div className="browser-bookmarks">
+            {imported
+              .filter((v) =>
+                (v.title + " " + v.url)
+                  .toLowerCase()
+                  .includes(query.toLowerCase()),
+              )
+              .slice(0, query ? 24 : 8)
+              .map((v) => (
+                <button
+                  key={v.url}
+                  className="browser-bookmark"
+                  data-tip={v.url}
+                  onClick={() => open(v.url)}
+                >
+                  <b>{v.title}</b>
+                  <small>
+                    {host(v.url)} · {v.from}
+                  </small>
+                </button>
+              ))}
           </div>
         </section>
       )}

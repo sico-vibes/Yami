@@ -697,9 +697,13 @@ export function createModuleHost(deps: Deps) {
           case "vault.bookmarks":
             return vault.list();
           case "vault.sources":
-            return vault.sources(local);
+            return vault.sources(local, process.env.APPDATA || "");
           case "vault.import":
-            return vault.import(String(a.id), local);
+            return vault.import(String(a.id), local, process.env.APPDATA || "");
+          case "vault.history":
+            return vault.history().slice(0, 300);
+          case "vault.history.clear":
+            return vault.clearHistory();
           case "vault.remove":
             return vault.remove(String(a.url));
           case "vault.clear":

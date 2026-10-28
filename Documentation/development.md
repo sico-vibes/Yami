@@ -128,6 +128,9 @@ Workspace verification commands:
   Whistle model (about 18 MB), dictates a sentence synthesized by Windows into Yami's own chat
   box (never another app), and checks the words and a Your words replacement. Restores the
   clipboard.
+- `node scripts/verify-history-import.mjs`: isolated profile with `LOCALAPPDATA` and `APPDATA`
+  pointed at fixture Chrome and Firefox databases (the PC's real ones are never read); imports
+  both and checks the new-tab page lists them.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

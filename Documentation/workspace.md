@@ -77,8 +77,8 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   Codex again in Connections updates an older install. Codex then asks you to review the changed
   hooks once before it runs them. On the test PC the seven corrected hooks were reviewed in Codex's own
   hook screen and trusted (only Yami's entries were under review), after which a real Codex run
-  showed every SessionStart and UserPromptSubmit hook completing, and each of the seven commands
-  exited 0 when run through PowerShell 7 with its event.
+  that called a tool showed every hook completing (SessionStart, UserPromptSubmit, PreToolUse,
+  PostToolUse and Stop, Yami's and Orca's alike).
 - **Agents calling Yami (MCP page).** Turn on **Yami for your agents** and Yami serves
   an MCP endpoint at `http://127.0.0.1:47821/mcp` (streamable HTTP, JSON replies,
   protocol 2025-06-18). It listens on this PC only, needs a bearer token kept with
