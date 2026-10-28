@@ -3,6 +3,7 @@ import { api } from "../api";
 import { bangList, newTab } from "../browser-rules";
 import { TooltipLayer } from "../controls";
 import { Empty, Icon, IconButton } from "../ui";
+import { FilterListsCard } from "./FilterListsCard";
 
 type Tab = {
   id: string;
@@ -363,6 +364,7 @@ function NewTab({
           </div>
         </section>
       )}
+      <FilterListsCard fail={fail} />
       <div className="browser-import">
         {sources
           .filter((s) => s.found)

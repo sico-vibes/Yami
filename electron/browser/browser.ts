@@ -8,6 +8,11 @@ import { randomUUID } from "node:crypto";
 import { newTab, resolveInput, webOnly } from "../../src/browser-rules.ts";
 import { isBlockedHost } from "../../src/blocklist.ts";
 import {
+  pageNamesScript,
+  type FilterLists,
+  type PageNames,
+} from "./filter-lists.ts";
+import {
   pageScript,
   riskyAction,
   type Found,
@@ -36,6 +41,8 @@ const discardAfter = Number(process.env.YAMI_TAB_DISCARD_MS) || 5 * 60_000;
 export function createBrowser(deps: {
   /** Read on every request, so the switch applies at once. */
   blocking: () => boolean;
+  /** EasyList and EasyPrivacy, once the user has downloaded them. */
+  filters?: FilterLists;
   makeWindow: (
     mode: string,
     options: Electron.BrowserWindowConstructorOptions,
@@ -74,7 +81,10 @@ export function createBrowser(deps: {
       try {
         host = new URL(details.url).hostname;
       } catch {}
-      const cancel = deps.blocking() && !!host && isBlockedHost(host);
+      const cancel =
+        deps.blocking() &&
+        !!host &&
+        (isBlockedHost(host) || !!deps.filters?.blocks(details));
       if (cancel) blocked++;
       done({ cancel });
     });
@@ -132,6 +142,18 @@ export function createBrowser(deps: {
     wc.on("will-redirect", (e, url) => {
       if (!webOnly(url)) e.preventDefault();
     });
+    // Hide ad slots the lists name, with plain CSS (no page scripts).
+    wc.on("dom-ready", async () => {
+      const filters = deps.filters;
+      if (!deps.blocking() || !filters?.active) return;
+      // World 998 is Yami's own; the page cannot see or change the result.
+      const names: PageNames | undefined = await wc
+        .executeJavaScriptInIsolatedWorld(998, [{ code: pageNamesScript }])
+        .catch(() => undefined);
+      if (wc.isDestroyed()) return;
+      const css = filters.hidingCss(wc.getURL(), names);
+      if (css) void wc.insertCSS(css, { cssOrigin: "user" }).catch(() => {});
+    });
     for (const event of [
       "did-start-loading",
       "did-stop-loading",
@@ -159,6 +181,9 @@ export function createBrowser(deps: {
 
   const api = {
     show() {
+      // Loads saved lists into memory and refreshes a week-old copy.
+      void deps.filters?.get();
+      deps.filters?.refreshIfStale();
       if (win && !win.isDestroyed()) {
         win.show();
         win.focus();

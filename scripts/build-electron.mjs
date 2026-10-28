@@ -18,6 +18,14 @@ await build({
   target: "node22",
 });
 await build({
+  entryPoints: ["electron/browser/filter-build.ts"],
+  bundle: true,
+  platform: "node",
+  format: "cjs",
+  outfile: "dist-electron/filter-build.cjs",
+  target: "node22",
+});
+await build({
   entryPoints: ["electron/preload.ts"],
   bundle: true,
   platform: "node",

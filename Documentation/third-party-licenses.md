@@ -18,6 +18,7 @@ This initial inventory records direct packages from the application manifest. It
 | `motion` | UI animation | MIT; [Motion repository](https://github.com/motiondivision/motion). |
 | `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-search` | Interactive terminal renderer, fit and scrollback search addons | MIT notices in the generated versioned inventory. |
 | `node-pty`, `node-addon-api` | Windows PTY bridge/native addon | MIT notices, including winpty and Microsoft ConPTY; bundled binaries remain under their upstream terms. |
+| `@ghostery/adblocker` 2.20.1 and its `@ghostery/*`, `@remusao/*` dependencies, `tldts-experimental` | Yami Browser's full filter lists: parses EasyList and EasyPrivacy, matches requests and returns element-hiding CSS | MPL-2.0 (the `@ghostery` and `@remusao` packages; used unmodified, source at [ghostery/adblocker](https://github.com/ghostery/adblocker)) and MIT (`tldts`). Notices in the generated versioned inventory. The filter lists themselves are downloaded by the user, not shipped. |
 | `systeminformation` | Hardware and process metrics | MIT; [systeminformation repository](https://github.com/sebhildebrandt/systeminformation). |
 | `pdf-lib` | PDF merge, split, organize, and image pages, run in the main process when a job needs them | MIT; [pdf-lib repository](https://github.com/Hopding/pdf-lib). |
 | `jsqr` | QR reading in the file wheel's tool window, loaded only when that tool opens | Apache-2.0; [jsQR repository](https://github.com/cozmo/jsQR). |

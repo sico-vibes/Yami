@@ -36,6 +36,7 @@ import { startRemote, type RemoteAbility } from "../remote/server";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
+import { FilterLists } from "../browser/filter-lists";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
 import { darkAt, nextSwitch } from "../../src/theme-schedule";
@@ -58,6 +59,7 @@ type Browser = {
   browser: ReturnType<typeof createBrowser>;
   vault: Vault;
   linked: ReturnType<typeof createLinked>;
+  filters: FilterLists;
 };
 const remoteAbilities: RemoteAbility[] = ["approvals", "media", "clipboard"];
 const agentName = (id: string) =>
@@ -222,18 +224,25 @@ export function createModuleHost(deps: Deps) {
         dispose: () => {},
       },
       browser: {
-        load: (): Browser => ({
-          browser: createBrowser({
-            makeWindow: deps.makeWindow,
-            blocking: () => store.state.settings.browserBlocking,
-          }),
-          vault: new Vault(path.join(path.dirname(store.file), "vault.bin"), {
-            encrypt: (text) => safeStorage.encryptString(text),
-            decrypt: (data) => safeStorage.decryptString(data),
-            available: () => safeStorage.isEncryptionAvailable(),
-          }),
-          linked: createLinked({ profileRoot: path.dirname(store.file) }),
-        }),
+        load: (): Browser => {
+          const filters = new FilterLists(
+            path.join(path.dirname(store.file), "filters"),
+          );
+          return {
+            filters,
+            browser: createBrowser({
+              makeWindow: deps.makeWindow,
+              blocking: () => store.state.settings.browserBlocking,
+              filters,
+            }),
+            vault: new Vault(path.join(path.dirname(store.file), "vault.bin"), {
+              encrypt: (text) => safeStorage.encryptString(text),
+              decrypt: (data) => safeStorage.decryptString(data),
+              available: () => safeStorage.isEncryptionAvailable(),
+            }),
+            linked: createLinked({ profileRoot: path.dirname(store.file) }),
+          };
+        },
         dispose: (b: Browser) => {
           b.linked.close();
           b.browser.dispose();
@@ -585,7 +594,8 @@ export function createModuleHost(deps: Deps) {
         throw new Error("Unknown Spotify request.");
       }
       if (method.startsWith("browser.") || method.startsWith("vault.")) {
-        const { browser, vault, linked } = registry.get<Browser>("browser");
+        const { browser, vault, linked, filters } =
+          registry.get<Browser>("browser");
         const local = process.env.LOCALAPPDATA || "";
         switch (method) {
           case "browser.show":
@@ -594,6 +604,12 @@ export function createModuleHost(deps: Deps) {
             return true;
           case "browser.state":
             return browser.state();
+          case "browser.filters":
+            return filters.status();
+          case "browser.filters.update":
+            return filters.update();
+          case "browser.filters.remove":
+            return filters.remove();
           case "browser.window": {
             const w = sender && BrowserWindow.fromWebContents(sender);
             if (!w || !browser.owns(sender)) return false;
@@ -758,7 +774,8 @@ export function createModuleHost(deps: Deps) {
       if (method.startsWith("tune.")) {
         const { tweaks: tune, startup, dns } = registry.get<Tune>("tune");
         if (method === "tune.dns") return dns.list();
-        if (method === "tune.dns.set") return dns.set(a.index, a.profile, a.encrypted);
+        if (method === "tune.dns.set")
+          return dns.set(a.index, a.profile, a.encrypted);
         if (method === "tune.list") return tune.list();
         if (method === "tune.apply") return tune.apply(a.ids);
         if (method === "tune.undo") return tune.undo(a.ids);

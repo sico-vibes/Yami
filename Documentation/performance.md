@@ -65,6 +65,10 @@ The **packaged** build (`npx electron-builder --win --dir`, then `node scripts/m
 
 The optional desk widget adds one renderer process. With the widget on (media playing, no agents) the desktop check read that renderer at **36–39 MB** private bytes from `app.getAppMetrics()` in four source-build runs. The whole-tree number in the same runs moved by ±15 MB with the main window and Playwright attached, so it is not a usable delta; a packaged idle measurement with the widget on has not been run. It is off by default, and switching it off closes the window.
 
+## Browser filter lists (2026-10-28)
+
+Parsing EasyList and EasyPrivacy (131,795 rules) inside the main process raised its private bytes from about 111 MB to 243 MB, and they stayed there 15 seconds later. A worker thread gave the same numbers, since the memory stays with the process. The build now runs in a short-lived `ELECTRON_RUN_AS_NODE` child process that writes the compact engine file and exits: the main process went 108 → 145 MB right after the build and back to 112 MB 15 seconds later. On a later start, loading the saved engine when the browser opens added 14–16 MB to the main process (114 → 128–130 MB). Source build, short runs; these figures are the Electron main process only, not the full tree.
+
 ## Current sources of background work
 
 The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript

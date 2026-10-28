@@ -267,3 +267,11 @@ html[data-window="browser"] body {
 .browser-recent {
   margin-bottom: var(--space-5);
 }
+.browser-filters strong {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.browser-filters strong i {
+  color: var(--mint);
+}

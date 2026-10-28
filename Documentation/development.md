@@ -112,6 +112,10 @@ Workspace verification commands:
 - `node scripts/verify-desk-widget.mjs`: isolated profile; checks the desk widget is off by
   default, opens with the clock when switched on, fits its window to the card, saves where it
   was moved and closes when switched off, and prints its renderer's private memory.
+- `node scripts/verify-filter-lists.mjs`: isolated profile; downloads the real EasyList and
+  EasyPrivacy (about 3.4 MB, network read only), checks the rule count, that a local
+  `news.localhost` page's ad script is cancelled and its `.ad-slot` box hidden, and that
+  Remove deletes the lists; prints the build time and main-process memory.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

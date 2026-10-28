@@ -194,16 +194,23 @@ try {
       id: pick.id,
       url: "http://127.0.0.1:47896/two",
     });
-    let viaLinked = "";
+    let viaLinked = "",
+      lastUrl = "";
     for (let i = 0; i < 30 && viaLinked !== "Second page"; i++) {
       const r = await rpc("tools/call", {
         name: "browser_read",
         arguments: {},
       });
-      viaLinked = JSON.parse(r.result.content[0].text || "{}").title || "";
+      const read = JSON.parse(r.result.content[0].text || "{}");
+      viaLinked = read.title || "";
+      if (viaLinked !== "Second page") lastUrl = read.url;
       if (viaLinked !== "Second page") await wait(300);
     }
-    assert.equal(viaLinked, "Second page", "read through the linked browser");
+    assert.equal(
+      viaLinked,
+      "Second page",
+      `read through the linked browser (${lastUrl})`,
+    );
     await call("browser.linked.close");
     linkedChecked = pick.name;
   }
