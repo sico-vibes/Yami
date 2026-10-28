@@ -33,6 +33,7 @@ import { startRemote, type RemoteAbility } from "../remote/server";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
+import { maskSecrets } from "../mask";
 import { activeAgents } from "../../src/agent-rank";
 import { agentClis } from "../../src/dev-types";
 import { mediaAction, nativeScript } from "../platform";
@@ -625,9 +626,20 @@ export function createModuleHost(deps: Deps) {
       registry.peek<Workbench>("workbench")?.captureShortcuts(active);
     },
     prepareChat(a: any) {
-      return Array.isArray(a?.attachments) && a.attachments.length
-        ? workbench().prepareChat(a)
-        : a;
+      const prepared =
+        Array.isArray(a?.attachments) && a.attachments.length
+          ? workbench().prepareChat(a)
+          : a;
+      // Credentials in the message or its attached context never leave.
+      if (
+        !store.state.settings.maskSecrets ||
+        typeof prepared?.text !== "string"
+      )
+        return prepared;
+      const { text, found } = maskSecrets(prepared.text);
+      if (found.length)
+        deps.notify(`Hidden before sending: ${found.join(", ")}.`);
+      return { ...prepared, text };
     },
     async offlineDictation(a: any) {
       const { speech } = speechCore();

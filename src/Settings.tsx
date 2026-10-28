@@ -529,6 +529,11 @@ export function Settings({
                 toggle("weatherEnabled", "Location & weather"),
               )}
               {row(
+                "Hide secrets before sending",
+                "API keys, tokens, private keys, passwords and card numbers in a message or attached context are replaced before Gemini sees them.",
+                toggle("maskSecrets", "Hide secrets before sending"),
+              )}
+              {row(
                 "Lyrics",
                 "Show the current line of a playing song. Sends only its artist, title and length to LRCLIB (lrclib.net), a free lyrics database.",
                 toggle("lyricsEnabled", "Lyrics"),

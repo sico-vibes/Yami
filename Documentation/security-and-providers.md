@@ -43,6 +43,10 @@ Yami configures the SDK with the user’s key and does not override its base URL
 
 For Tavily, current source issues one basic-depth search for a quick query and three advanced-depth searches for deep research. It counts two credits per deep search and one credit after successful extraction, for an implementation estimate of seven credits when extraction succeeds. The in-app copy currently describes 1,000 monthly free credits with no card; confirm current country eligibility, plan, and account usage directly with Tavily. The provider is authoritative for actual usage and plan rules. If extraction fails, the search may still return with fewer credits. Without a Tavily key, search goes to `https://en.wikipedia.org/w/api.php` using query parameters for Wikipedia search and returns up to five snippets. Wikipedia-derived public news context may also be loaded once per local day when AI context is enabled.
 
+## Secret masking
+
+With **Hide secrets before sending** on (Settings › Privacy, on by default), the main process replaces recognisable credentials in a chat message and its attached context before the Gemini request is built. That covers Anthropic, OpenAI, GitHub, Google, AWS, Slack and Stripe keys, JWTs, private key blocks, `password=`/`token=`-style values, and Luhn-valid card numbers. Each becomes a labelled placeholder such as `[hidden GitHub token]`, and a notice says what was hidden. The masked text is also what is kept in history. Pattern matching cannot catch every secret, so treat it as a safety net, not a guarantee. (Adapted from the idea in Magpie; no code was used.)
+
 ## Gemini request lifecycle
 
 1. The app verifies that a Gemini key exists in the main-process store, then creates a `GoogleGenAI` client from `@google/genai` with that key. Request retry options are configured for up to three attempts.

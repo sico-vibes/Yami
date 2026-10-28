@@ -129,6 +129,21 @@ const status = (list, id) => list.find((m) => m.id === id);
       (await call(main, "packs.install", { id: "not-a-pack" })).error,
       /Unknown download/,
     );
+    // A token in a chat message is hidden before any request is built.
+    const notices = [];
+    await main.exposeFunction("__notice", (m) => notices.push(m));
+    await main.evaluate(() =>
+      window.yami.on((e) => e.type === "toast" && window.__notice(e.message)),
+    );
+    await call(main, "chat", {
+      text: "deploy with ghp_0123456789abcdefghijklmnopqrstuvwxyzAB please",
+    });
+    for (let i = 0; i < 30 && !notices.length; i++)
+      await new Promise((r) => setTimeout(r, 100));
+    assert.ok(
+      notices.some((n) => /Hidden before sending: GitHub token/.test(n)),
+      notices.join(" | "),
+    );
     // Spotify stays disconnected, and a bad client ID never opens a browser.
     assert.equal((await call(main, "spotify.status")).value.connected, false);
     assert.match(

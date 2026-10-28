@@ -47,6 +47,7 @@ export const defaults: Settings = {
   remoteEnabled: false,
   browserEnabled: false,
   spotifyClientId: "",
+  maskSecrets: true,
   remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

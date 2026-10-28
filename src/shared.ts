@@ -66,6 +66,8 @@ export type Settings = {
   browserEnabled: boolean;
   /** The user's own Spotify app (public client ID; PKCE, no secret). */
   spotifyClientId: string;
+  /** Hide recognisable credentials before chat text reaches Gemini. */
+  maskSecrets: boolean;
   /** What a paired phone may do: approvals, media, clipboard. */
   remoteAllow: string[];
   setupDone: boolean;
