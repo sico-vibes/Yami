@@ -536,7 +536,7 @@ export function installPreviewBridge() {
           toast("Preview only — text was not copied to the desktop clipboard.");
           return false;
         default:
-          if (/^(stray|caption)\./.test(method))
+          if (/^(stray|caption|widget)\./.test(method))
             return previewOverlay(method, a, emit);
           throw new Error(`Desktop-only action: ${method}`);
       }

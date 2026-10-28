@@ -2,6 +2,7 @@ import { BrowserWindow, powerMonitor, screen } from "electron";
 import type { Store } from "./store";
 import { makeWindow } from "./windows";
 import { toolActivity } from "./activity";
+import { createDeskWidget } from "./desk-widget";
 
 // The roaming Yami window ("stray") and the bottom-of-screen caption pill.
 // Neither runs a timer at idle: the stray only moves after a hover, a drag,
@@ -37,6 +38,7 @@ export function createOverlays({
     busy = false,
     activityId = 0,
     captionData = emptyCaption();
+  const desk = createDeskWidget(store);
   const alive = (w?: BrowserWindow): w is BrowserWindow =>
     !!w && !w.isDestroyed();
   const send = (w: BrowserWindow | undefined, event: any) => {
@@ -270,12 +272,16 @@ export function createOverlays({
   }
 
   return {
-    syncStray,
+    syncStray() {
+      syncStray();
+      desk.sync();
+    },
     // Called for every broadcast event.
     observe(e: any) {
       switch (e.type) {
         case "state":
-          return syncStray();
+          syncStray();
+          return desk.sync();
         case "foreground":
           return void checkCover();
         case "voice-start":
@@ -322,9 +328,11 @@ export function createOverlays({
         broadcast({ type: "activity", id, done: true });
       }
     },
-    handles: (method: string) => /^(stray|caption)\./.test(method),
+    handles: (method: string) => /^(stray|caption|widget)\./.test(method),
     async invoke(method: string, a: any = {}) {
       switch (method) {
+        case "widget.fit":
+          return desk.fit(Number(a.height));
         case "caption.data":
           return captionData;
         case "caption.notice":

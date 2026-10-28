@@ -136,7 +136,8 @@
 }
 .preview-frame[data-window="island"] body,
 .preview-frame[data-window="stray"] body,
-.preview-frame[data-window="caption"] body {
+.preview-frame[data-window="caption"] body,
+.preview-frame[data-window="widget"] body {
   background:
     linear-gradient(#1e343930, #15231d60),
     url("/wallpapers/starter-01.jpg") center/cover;
@@ -149,4 +150,11 @@
   top: 0;
   width: 240px;
   height: 180px;
+}
+/* The desk widget's window is 320px wide in the top-right corner. */
+.preview-frame[data-window="widget"] .desk-widget {
+  top: 24px;
+  right: 24px;
+  left: auto;
+  width: 320px;
 }

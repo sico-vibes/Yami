@@ -109,6 +109,9 @@ Workspace verification commands:
   uninstalled agents, and opens a terminal tab there. It never starts an agent CLI.
   In a throwaway repository it also adds a task worktree, checks that removing it is
   refused while it has changes, and removes it once clean, keeping the branch.
+- `node scripts/verify-desk-widget.mjs`: isolated profile; checks the desk widget is off by
+  default, opens with the clock when switched on, fits its window to the card, saves where it
+  was moved and closes when switched off, and prints its renderer's private memory.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

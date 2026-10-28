@@ -15,7 +15,8 @@ export type ModuleId =
   | "browser"
   | "clipboard"
   | "weather"
-  | "roam";
+  | "roam"
+  | "widget";
 export type ModuleCost = "low" | "medium" | "high";
 export type ModulePermission =
   "network" | "microphone" | "screen" | "clipboard" | "admin" | "files";
@@ -204,6 +205,18 @@ export const modules: ModuleSpec[] = [
     permissions: [],
     packs: [],
     presets: ["essentials", "tinkerer", "everything"],
+  },
+  {
+    id: "widget",
+    name: "Desk widget",
+    blurb:
+      "A small card on your desktop with the time, weather, what is playing and your agents.",
+    icon: "cards",
+    setting: "deskWidget",
+    cost: "low",
+    permissions: [],
+    packs: [],
+    presets: ["tinkerer", "everything"],
   },
 ];
 

@@ -17,6 +17,8 @@ const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =
     lasso: () => import("./Lasso").then((m) => ({ default: m.Lasso })),
     effect: () => import("./Effects").then((m) => ({ default: m.Effects })),
     stray: () => import("./Stray").then((m) => ({ default: m.Stray })),
+    widget: () =>
+      import("./DeskWidget").then((m) => ({ default: m.DeskWidget })),
     caption: () =>
       import("./Caption").then((m) => ({ default: m.CaptionOverlay })),
   };

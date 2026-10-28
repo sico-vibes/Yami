@@ -4,6 +4,7 @@ import { App } from "../App";
 import { Island } from "../Island";
 import { Stray } from "../Stray";
 import { CaptionOverlay } from "../Caption";
+import { DeskWidget } from "../DeskWidget";
 import { Spirit } from "../ui";
 import {
   emit,
@@ -29,6 +30,7 @@ const screens = [
   "Power",
   "Stray",
   "Caption",
+  "Desk widget",
   "AI",
   "Terminal",
   "File wheel",
@@ -36,7 +38,7 @@ const screens = [
   "Setup",
   "Tune",
 ];
-const overlays = ["Stray", "Caption"];
+const overlays = ["Stray", "Caption", "Desk widget"];
 function Preview() {
   const requested =
     new URLSearchParams(location.search).get("screen") || "Home";
@@ -127,7 +129,9 @@ export function startPreview() {
         ].includes(screen),
       island = utility || screen === "Island";
     document.documentElement.dataset.window = overlay
-      ? screen.toLowerCase()
+      ? screen === "Desk widget"
+        ? "widget"
+        : screen.toLowerCase()
       : screen === "File wheel"
         ? "wheel"
         : screen === "Background"
@@ -154,6 +158,8 @@ export function startPreview() {
         <Stray />
       ) : screen === "Caption" ? (
         <CaptionOverlay />
+      ) : screen === "Desk widget" ? (
+        <DeskWidget />
       ) : island ? (
         <Island />
       ) : (

@@ -24,6 +24,9 @@ export type Settings = {
   alwaysOnTop: boolean;
   reducedMotion: boolean;
   roam: boolean;
+  /** The desk widget card; its spot is "x,y", empty for the default. */
+  deskWidget: boolean;
+  deskWidgetAt: string;
   livingFlame: boolean;
   hotkeys: boolean;
   microphone: string;

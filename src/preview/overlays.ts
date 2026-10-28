@@ -62,6 +62,9 @@ export function previewOverlay(
   emit: (e: YamiEvent) => void,
 ) {
   switch (method) {
+    // The desk widget sizes its window; the preview frame just shows it.
+    case "widget.fit":
+      return true;
     case "stray.flee": {
       const ax = 120 - ((Number(a.x) || 0) - pos.x),
         ay = 112 - ((Number(a.y) || 0) - pos.y),

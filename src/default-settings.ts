@@ -7,6 +7,8 @@ export const defaults: Settings = {
   alwaysOnTop: false,
   reducedMotion: false,
   roam: true,
+  deskWidget: false,
+  deskWidgetAt: "",
   livingFlame: false,
   hotkeys: true,
   microphone: "",

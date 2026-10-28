@@ -2,39 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import type { State, Task } from "./shared";
 import { api, time } from "./api";
 import { Icon, IconButton } from "./ui";
+import { weatherLook } from "./weather-look";
 
 const PRESETS = [1, 5, 10, 15, 30];
 const DAY = 86_400_000;
 const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
 // MET Norway symbol codes, e.g. "partlycloudy_day" or "lightrainshowers_night".
-function weatherLook(code = "") {
-  const night = code.endsWith("_night"),
-    base = code.replace(/_(day|night|polartwilight)$/, "");
-  const icon = /thunder/.test(base)
-    ? "cloud-lightning"
-    : /snow|sleet/.test(base)
-      ? "snowflake"
-      : /rain|drizzle/.test(base)
-        ? "cloud-rain"
-        : /fog/.test(base)
-          ? "cloud-fog"
-          : base === "cloudy"
-            ? "cloud"
-            : base === "clearsky"
-              ? night
-                ? "moon-stars"
-                : "sun"
-              : night
-                ? "cloud-moon"
-                : "cloud-sun";
-  const label = base
-    .replace(/heavy|light/, (m) => m + " ")
-    .replace(/partly|clear/, (m) => m + " ")
-    .replace(/showers|and/, (m) => " " + m + " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return { icon, label: label ? label[0].toUpperCase() + label.slice(1) : "" };
-}
 function occursOn(task: Task, day: Date) {
   const at = new Date(task.at);
   if (task.repeat === "daily") return at.getTime() < day.getTime() + DAY;

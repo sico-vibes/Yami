@@ -334,3 +334,116 @@ html[data-reduced="true"] .island-scroll-hint {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+/* Desk widget: an opaque card, since blur does not reach the real desktop. */
+html[data-window="widget"],
+html[data-window="widget"] body {
+  background: transparent;
+  overflow: hidden;
+}
+.desk-widget {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--ink-0);
+  color: var(--text);
+  -webkit-app-region: drag;
+  user-select: none;
+}
+.desk-widget button {
+  -webkit-app-region: no-drag;
+}
+.desk-widget header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.desk-widget header > div {
+  display: grid;
+}
+.desk-clock {
+  font-size: var(--fs-h1);
+  font-weight: 300;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.desk-widget small {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+}
+.desk-weather {
+  justify-items: end;
+  color: var(--text-soft);
+}
+.desk-weather b {
+  font-size: var(--fs-h3);
+  font-weight: 500;
+}
+.desk-media {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.desk-media > i {
+  color: var(--glow);
+}
+.desk-media > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.desk-media strong,
+.desk-media small,
+.desk-agents p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.desk-media strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.desk-agents {
+  display: grid;
+  gap: var(--space-1);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.desk-agents p,
+.desk-quiet {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: var(--fs-xs);
+}
+.desk-agents b {
+  color: var(--text);
+  font-weight: 500;
+}
+.desk-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--glow);
+}
+.desk-agents [data-phase="waiting"] .desk-dot {
+  background: var(--gold);
+}
+.desk-agents [data-phase="error"] .desk-dot {
+  background: var(--danger);
+}
+.desk-quiet {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
