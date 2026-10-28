@@ -59,6 +59,8 @@ With **Start hidden** on, roaming on and clipboard, context and weather off, the
 
 Loading `@google/genai` and `systeminformation` on first use instead of at startup was then measured at 160.1–163.7 MB in two runs: no measurable idle change, within run-to-run spread. It is kept because it skips evaluating about 2 MB of library code at startup; startup time was not measured.
 
+The **packaged** build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged`) measured **165.1–166.3 MB** private working set across 8 processes at 0% sampled CPU in two runs with roaming on, and **139.1–139.2 MB** across 7 processes with roaming off. Optional modules were at their defaults (Tune, Feeds and Offline dictation off). That is inside the 100–200 MB idle budget; it is still a short run, not a soak test, and the active-task ceiling remains unmeasured.
+
 ## Current sources of background work
 
 The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript

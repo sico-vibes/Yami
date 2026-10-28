@@ -88,6 +88,49 @@
         163.6
       ],
       "processes": 8
+    },
+    {
+      "change": "packaged (electron-builder --win --dir), all modules at their defaults",
+      "build": "packaged",
+      "roam": true,
+      "privateWorkingSetMB": [
+        166.1,
+        166.3,
+        166.3
+      ],
+      "processes": 8,
+      "cpuPercentOfMachine": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "change": "packaged (repeat)",
+      "build": "packaged",
+      "roam": true,
+      "privateWorkingSetMB": [
+        165.1,
+        165.3,
+        165.3
+      ],
+      "processes": 8,
+      "cpuPercentOfMachine": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "change": "packaged, roaming off",
+      "build": "packaged",
+      "roam": false,
+      "privateWorkingSetMB": [
+        139.1,
+        139.2,
+        139.2
+      ],
+      "processes": 7
     }
   ],
   "limits": "Short source-build runs, not a packaged build, task peak or soak test. Display scale and power mode were not recorded."
