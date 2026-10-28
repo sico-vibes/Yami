@@ -47,6 +47,10 @@ Copy path writes the paths to the clipboard. Copy asks PowerShell to put the fil
 HEIC is still absent from the convert wheel. The first time a convert wheel opens, if ffmpeg is already installed, Yami reads `ffmpeg -encoders` and `ffmpeg -muxers`. The HEIC petal appears only when both an HEVC encoder and an HEIC or HEIF muxer are listed. This build does not claim the pinned Gyan or ImageMagick packages can write HEIC. The probe was not run here.
 
 
+## Copy text from an image
+
+For one image, the tools wheel has **Copy text**. Windows' own OCR engine (`Windows.Media.Ocr`, through `native/Ocr.ps1`) reads the text in your Windows display languages, with no download or upload, and puts it on the clipboard with a note of how many lines it copied. If Windows has no OCR language, Yami says which setting adds one. Checked on Windows on 2026-10-28 with a drawn sample image.
+
 ## Folders
 
 Folders work on the wheel too: drag one, select it in File Explorer and use the shortcut, use Send to, or drop it on the shelf. Converting and tools need files, so a selection with a folder offers the actions wheel:

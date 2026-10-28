@@ -3,6 +3,7 @@
 // project. Everything happens inside an isolated profile under .artifacts.
 import { _electron } from "playwright";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { skipSetup } from "./test-profile.mjs";
@@ -67,6 +68,26 @@ try {
     toasts.some((t) => /Added site to Projects/.test(t)),
     toasts.join(" | "),
   );
+  // Copy text from an image with Windows OCR; the clipboard is restored.
+  const image = path.join(profile, "work", "sign.png");
+  execFileSync("powershell.exe", [
+    "-NoProfile",
+    "-Command",
+    `Add-Type -AssemblyName System.Drawing; $b = New-Object System.Drawing.Bitmap 900,140; $g = [System.Drawing.Graphics]::FromImage($b); $g.Clear([System.Drawing.Color]::White); $g.DrawString('Yami copies this text', (New-Object System.Drawing.Font 'Segoe UI',40), [System.Drawing.Brushes]::Black, 20, 30); $g.Dispose(); $b.Save('${image.replace(/'/g, "''")}'); $b.Dispose()`,
+  ]);
+  const saved = await app.evaluate(({ clipboard }) => clipboard.readText());
+  try {
+    await call("wheel.shelf.drop", { paths: [image] });
+    await call("wheel.swap", { mode: "tools" });
+    await call("wheel.choose", { petalId: "tool:ocr" });
+    const copied = await app.evaluate(({ clipboard }) => clipboard.readText());
+    assert.equal(copied, "Yami copies this text");
+  } finally {
+    await app.evaluate(
+      ({ clipboard }, text) => clipboard.writeText(text),
+      saved,
+    );
+  }
   const projects = (await call("workbench.state")).projects;
   assert.equal(projects[0].path, site);
   assert.deepEqual(errors, []);

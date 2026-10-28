@@ -10,6 +10,7 @@ import { petalsFor, wheelNames } from "../../src/wheel/catalog";
 import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
 import { runFileAction } from "./file-actions.ts";
+import { readImageText } from "./ocr.ts";
 import { cachedHeic } from "./heic-probe.ts";
 import { pageCount } from "./pdf-pages.ts";
 import { performWheel, readMetadata } from "./perform.ts";
@@ -353,6 +354,18 @@ export function createWheel(deps: Deps) {
             openFloat(files);
             closeWheel();
             return { tool: "float" };
+          }
+          if (petal.id === "tool:ocr") {
+            const text = (await readImageText(files[0].path)).trim();
+            closeWheel();
+            if (!text) {
+              deps.notify("No text was found in that image.");
+              return { action: petal.id };
+            }
+            clipboard.writeText(text.slice(0, 100000));
+            const lines = text.split(/\r?\n/).length;
+            deps.notify(`Copied ${lines} ${lines === 1 ? "line" : "lines"} of text.`);
+            return { action: petal.id };
           }
           if (petal.id.startsWith("action:")) {
             await runFileAction(petal.id, files, deps.notify, {

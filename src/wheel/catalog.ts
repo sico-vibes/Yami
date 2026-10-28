@@ -184,6 +184,7 @@ function toolPetals(kind: FileKind, count: number): Petal[] {
       one("tool:crop", "Crop"),
       one("tool:redact", "Redact"),
       one("tool:qr", "QR code"),
+      one("tool:ocr", "Copy text", false),
     ];
   if (kind === "video" && count > 1)
     return [
