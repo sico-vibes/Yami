@@ -121,6 +121,9 @@ Workspace verification commands:
 - `node scripts/verify-browser.mjs`: a local test page, no internet; checks tabs, the page
   view's placement, refused `javascript:`, background-tab sleep and an agent reading the
   page over MCP.
+- `node scripts/verify-media.mjs`: plays a silent page in the Yami Browser so it owns a
+  Windows media session ("Yami media check"), then sends play/pause, next and seek only
+  while that is the current session. Your own player is never acted on.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by
