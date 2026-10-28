@@ -40,5 +40,6 @@ export const defaults: Settings = {
   workbenchEnabled: true,
   whistleEnabled: false,
   tuneEnabled: false,
+  feedsEnabled: false,
   setupDone: false,
 };

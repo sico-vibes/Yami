@@ -52,7 +52,7 @@ const status = (list, id) => list.find((m) => m.id === id);
     await main.getByRole("heading", { name: "Choose your Yami" }).waitFor();
     assert.equal(await main.locator(".bottom-dock").count(), 0);
     const list = (await call(main, "modules.list")).value;
-    assert.equal(list.length, 7);
+    assert.equal(list.length, 8);
     assert.equal(status(list, "workbench").loaded, false, "workspace asleep");
     await main.getByRole("radio", { name: "Developer" }).click();
     await main.getByRole("button", { name: "Start with Yami" }).click();

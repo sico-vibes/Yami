@@ -131,6 +131,12 @@ The table lists source defaults; a user can change most values in Settings. Sett
 
 The source declares the voice and text defaults as `gemini-3.8-live` and `gemini-3.8-flash`, respectively. Provider model catalogs change; setup can choose a compatible model returned for the user’s API key. The saved model names are visible and changeable through settings/model discovery when supported.
 
+## Feeds inbox
+
+Turn on **Feeds inbox** in Settings › Modules (or the Developer preset) and Desk gains a **Plans | Inbox** switch. Add a subreddit (`r/rust`), Hacker News, a GitHub repository's releases (`owner/repo`), a YouTube channel ID or any HTTPS RSS, Atom or JSON Feed address. Items from every source are listed newest first; a chip per source filters the list, shows its last error on hover, and removes it. Opening an item opens your browser.
+
+Feeds are read when the Inbox opens, and only for sources not read in the last ten minutes, or when you press refresh. There is no background timer. Each read sends the saved ETag and Last-Modified, waits at most 15 seconds, accepts at most 2 MB, refuses a redirect to plain HTTP, keeps the previous items when a read fails, and stores up to 50 items per source in `feeds.json`. Titles and summaries are shown as plain text, and only http(s) links are kept. Up to 50 sources. On 2026-10-28, Hacker News, GitHub releases and Reddit's public `.rss` feeds all answered. Mail, Bluesky, Mastodon timelines and a "Brief me" digest from the plan are not built yet; Mastodon's public `@user.rss` feeds work as "Any feed".
+
 ## Tune (Windows tune-up)
 
 Turn on **Windows tune-up** in Settings › Modules (or the Tinkerer preset) and a **Tune** tab joins the dock. It lists fourteen per-user tweaks in five groups:

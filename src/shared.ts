@@ -57,6 +57,7 @@ export type Settings = {
   workbenchEnabled: boolean;
   whistleEnabled: boolean;
   tuneEnabled: boolean;
+  feedsEnabled: boolean;
   setupDone: boolean;
 };
 export type Task = {

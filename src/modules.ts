@@ -9,6 +9,7 @@ export type ModuleId =
   | "workbench"
   | "whistle"
   | "tune"
+  | "feeds"
   | "clipboard"
   | "weather"
   | "roam";
@@ -119,6 +120,18 @@ export const modules: ModuleSpec[] = [
     permissions: [],
     packs: [],
     presets: ["tinkerer", "everything"],
+  },
+  {
+    id: "feeds",
+    name: "Feeds inbox",
+    blurb:
+      "Reddit, Hacker News, GitHub releases, YouTube channels and any RSS or Atom feed, in an Inbox on Desk. Read when you open it.",
+    icon: "rss",
+    setting: "feedsEnabled",
+    cost: "low",
+    permissions: ["network"],
+    packs: [],
+    presets: ["developer", "everything"],
   },
   {
     id: "clipboard",

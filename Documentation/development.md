@@ -111,6 +111,8 @@ Workspace verification commands:
   `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the
   sandbox. It never restarts Explorer.
+- `node scripts/verify-feeds.mjs`: needs the internet. Reads Hacker News, the
+  electron/electron releases feed and r/rust in an isolated profile, then opens the Inbox.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

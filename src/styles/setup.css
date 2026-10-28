@@ -10,7 +10,8 @@
 .setup-page .page-head .spirit {
   flex-shrink: 0;
 }
-.setup-presets {
+.setup-presets,
+.page-rail {
   display: flex;
   gap: 2px;
   width: fit-content;
@@ -23,7 +24,8 @@
   overflow-x: auto;
   scrollbar-width: none;
 }
-.setup-presets button {
+.setup-presets button,
+.page-rail button {
   padding: 7px var(--space-4);
   border-radius: var(--r-pill);
   color: var(--muted);
@@ -33,11 +35,14 @@
     color var(--dur-fast),
     background var(--dur-fast);
 }
-.setup-presets button:hover:not(:disabled) {
+.setup-presets button:hover:not(:disabled),
+.page-rail button:hover:not(:disabled) {
   color: var(--text);
 }
 .setup-presets button.selected,
-.setup-presets button.selected:hover {
+.setup-presets button.selected:hover,
+.page-rail button.selected,
+.page-rail button.selected:hover {
   color: var(--on-glow);
   font-weight: 500;
   background: var(--grad-glow);
@@ -141,11 +146,13 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .setup-presets button,
+  .page-rail button,
   .module-card {
     transition: none;
   }
 }
 html[data-reduced="true"] .setup-presets button,
+html[data-reduced="true"] .page-rail button,
 html[data-reduced="true"] .module-card {
   transition: none;
 }

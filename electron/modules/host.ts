@@ -13,6 +13,7 @@ import { modules } from "../../src/modules.ts";
 import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
 import { TuneController } from "../tune/tune";
+import { FeedsController } from "../feeds/feeds";
 import { regExe } from "../tune/registry";
 import { execFile, spawn } from "node:child_process";
 
@@ -118,6 +119,13 @@ export function createModuleHost(deps: Deps) {
             ? "Finish or discard the recording before turning off the AI workspace."
             : undefined,
       },
+      feeds: {
+        load: () =>
+          new FeedsController(
+            path.join(path.dirname(store.file), "feeds.json"),
+          ),
+        dispose: () => {},
+      },
       tune: {
         load: () =>
           new TuneController(
@@ -164,7 +172,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune)\./.test(method)
+        /^(modules|setup|packs|tune|feeds)\./.test(method)
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
@@ -187,6 +195,15 @@ export function createModuleHost(deps: Deps) {
           ),
         );
         return registry.list();
+      }
+      if (method.startsWith("feeds.")) {
+        const feeds = registry.get<FeedsController>("feeds");
+        if (method === "feeds.list") return feeds.view();
+        if (method === "feeds.refresh")
+          return feeds.refresh(a.id ? String(a.id) : undefined);
+        if (method === "feeds.add") return feeds.add(a.kind, a.value);
+        if (method === "feeds.remove") return feeds.remove(String(a.id));
+        throw new Error("Unknown feeds request.");
       }
       if (method.startsWith("tune.")) {
         const tune = registry.get<TuneController>("tune");
@@ -306,10 +323,13 @@ export function createModuleHost(deps: Deps) {
       },
       clearData() {
         const live = registry.peek<Workbench>("workbench");
+        const dir = path.dirname(store.file);
+        // Tune and feeds keep their own files whether or not they are loaded.
+        for (const file of ["tune.json", "feeds.json"])
+          fs.rmSync(path.join(dir, file), { force: true });
         if (live) return live.clearData();
         if (shared) shared.data.deleted = true;
-        const dir = path.dirname(store.file);
-        for (const file of ["workbench.json", "agent-relay.json", "tune.json"])
+        for (const file of ["workbench.json", "agent-relay.json"])
           fs.rmSync(path.join(dir, file), { force: true });
       },
     },

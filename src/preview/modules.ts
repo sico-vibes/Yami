@@ -9,6 +9,7 @@ import {
   type PackStatus,
 } from "../modules";
 import { tweaks } from "../tune-types";
+import type { FeedItem, FeedSource, FeedsView } from "../feeds-types";
 
 const sizes: Record<PackId, number> = {
   ffmpeg: 101_000_000,
@@ -29,6 +30,73 @@ const tuneStates = () =>
     undoable: applied.has(t.id) && t.id !== "fileExtensions",
   }));
 const timers = new Map<PackId, ReturnType<typeof setInterval>>();
+const feedSources: FeedSource[] = [
+  {
+    id: "demo-rust",
+    kind: "reddit",
+    name: "r/rust",
+    url: "https://www.reddit.com/r/rust/.rss",
+    added: 0,
+  },
+  {
+    id: "demo-hn",
+    kind: "hackernews",
+    name: "Hacker News",
+    url: "https://news.ycombinator.com/rss",
+    added: 0,
+  },
+  {
+    id: "demo-gh",
+    kind: "github",
+    name: "electron/electron",
+    url: "https://github.com/electron/electron/releases.atom",
+    added: 0,
+  },
+];
+const feedItems: FeedItem[] = [
+  {
+    id: "1",
+    source: "demo-hn",
+    title: "Show HN: A tiny offline speech model (demo item)",
+    link: "https://example.com/1",
+    at: Date.now() - 20 * 60_000,
+    author: "demo",
+  },
+  {
+    id: "2",
+    source: "demo-rust",
+    title: "What are you building this week? (demo item)",
+    link: "https://example.com/2",
+    at: Date.now() - 55 * 60_000,
+    summary:
+      "Synthetic preview text. No feed was read; this stands in for a post's first lines.",
+    author: "u/demo",
+  },
+  {
+    id: "3",
+    source: "demo-gh",
+    title: "v44.1.0 (demo item)",
+    link: "https://example.com/3",
+    at: Date.now() - 5 * 3600_000,
+    summary: "Release notes would appear here.",
+  },
+  {
+    id: "4",
+    source: "demo-hn",
+    title: "Designing quiet desktop software (demo item)",
+    link: "https://example.com/4",
+    at: Date.now() - 26 * 3600_000,
+  },
+];
+const feedView = (): FeedsView => ({
+  sources: [...feedSources],
+  items: feedItems.filter((i) => feedSources.some((s) => s.id === i.source)),
+  status: feedSources.map((s) => ({
+    id: s.id,
+    state: "fresh",
+    fetchedAt: Date.now(),
+  })),
+});
 
 function pack(id: PackId): PackStatus {
   return (
@@ -95,6 +163,15 @@ export function previewModules(
     case "packs.installFile":
       emit({ type: "toast", message: "Preview only — no file was read." });
       return pack(a.id);
+    // Feeds read nothing in preview; items are synthetic.
+    case "feeds.list":
+    case "feeds.refresh":
+      return feedView();
+    case "feeds.add":
+      throw new Error("Preview only — no feed was added or read.");
+    case "feeds.remove":
+      feedSources.splice(feedSources.findIndex((s) => s.id === a.id) >>> 0, 1);
+      return feedView();
     // Tune changes nothing in preview; it only flips demo states.
     case "tune.list":
       return tuneStates();

@@ -1,6 +1,6 @@
 # Expansion plan (2026-10-27)
 
-Status: **approved plan; Phase 0 module registry, first-run setup, pack downloads and Phase 1 revamp landed on branch `yami-expansion` (2026-10-28); idle measurements and later phases not shipped.** This page records the owner-approved direction and phase order from 2026-10-27. Sources were checked on that date; items marked **verify** have not been confirmed on Windows. Shipped behaviour is described only in [Features and settings](../features-and-settings.md) and the [roadmap](../roadmap.md).
+Status: **approved plan; Phase 0 module registry, first-run setup, pack downloads, on-demand main window, Phase 1 revamp, Dev hub projects and agent launcher, island agent cycling, Whistle dictation (unverified run), Tune (HKCU tweaks) and the Feeds inbox landed on branch `yami-expansion` (2026-10-28); idle measurements and later phases not shipped.** This page records the owner-approved direction and phase order from 2026-10-27. Sources were checked on that date; items marked **verify** have not been confirmed on Windows. Shipped behaviour is described only in [Features and settings](../features-and-settings.md) and the [roadmap](../roadmap.md).
 
 
 ## Context

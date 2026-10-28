@@ -4,7 +4,7 @@ import { api, asset } from "./api";
 import { Empty, Icon, IconButton, Modal, Spirit, useYami } from "./ui";
 import { Settings } from "./Settings";
 import { Loadout } from "./Loadout";
-import { Plans } from "./Plans";
+import { Desk } from "./Desk";
 import { MainNavigation } from "./MainNavigation";
 import { skinFor } from "./yami/skins";
 import { TooltipLayer } from "./controls";
@@ -155,7 +155,7 @@ export function App() {
         ) : tab === "soul" ? (
           <Loadout state={state} report={report} />
         ) : tab === "desk" ? (
-          <Plans state={state} report={report} />
+          <Desk state={state} report={report} />
         ) : tab === "bond" ? (
           <Memory state={state} report={report} />
         ) : (
