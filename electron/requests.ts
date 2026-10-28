@@ -1,3 +1,4 @@
+import { findLyrics } from "./lyrics";
 import { mediaAction } from "./platform";
 import {
   app,
@@ -57,7 +58,11 @@ export type RequestContext = {
   apps: AppItem[];
   launcherFiles: { name: string; path: string }[];
   panelOpen: any;
-  wheel?: (method: string, args: any, sender?: Electron.WebContents) => Promise<any>;
+  wheel?: (
+    method: string,
+    args: any,
+    sender?: Electron.WebContents,
+  ) => Promise<any>;
 };
 export function createRequestHandler(ctx: RequestContext) {
   const {
@@ -458,6 +463,16 @@ export function createRequestHandler(ctx: RequestContext) {
       }
       case "media":
         return nativeScript("Media");
+      case "lyrics":
+        if (!store.state.settings.lyricsEnabled)
+          throw new Error(
+            "Lyrics are off. Turn them on in Settings › Privacy.",
+          );
+        return findLyrics(
+          String(a.artist || ""),
+          String(a.title || ""),
+          Number(a.duration) || 0,
+        );
       case "media.action":
         return mediaAction(String(a.action), Number(a.seconds) || 0);
       case "effect.data":

@@ -637,3 +637,7 @@
   color: var(--on-glow);
   background: var(--grad-glow);
 }
+.media-peek-body > span.media-peek-lyric {
+  color: var(--glow);
+  font-style: italic;
+}

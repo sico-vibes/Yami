@@ -41,5 +41,6 @@ export const defaults: Settings = {
   whistleEnabled: false,
   tuneEnabled: false,
   feedsEnabled: false,
+  lyricsEnabled: false,
   setupDone: false,
 };

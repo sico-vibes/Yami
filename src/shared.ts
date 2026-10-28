@@ -58,6 +58,7 @@ export type Settings = {
   whistleEnabled: boolean;
   tuneEnabled: boolean;
   feedsEnabled: boolean;
+  lyricsEnabled: boolean;
   setupDone: boolean;
 };
 export type Task = {

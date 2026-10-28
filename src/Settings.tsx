@@ -515,6 +515,11 @@ export function Settings({
                 toggle("weatherEnabled", "Location & weather"),
               )}
               {row(
+                "Lyrics",
+                "Show the current line of a playing song. Sends only its artist, title and length to LRCLIB (lrclib.net), a free lyrics database.",
+                toggle("lyricsEnabled", "Lyrics"),
+              )}
+              {row(
                 "Screen access",
                 "Only a screenshot you explicitly select is sent to Gemini.",
                 <span className="value-pill">

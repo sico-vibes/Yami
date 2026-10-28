@@ -339,6 +339,7 @@ export function Island() {
       {!open && peek && media?.active && (
         <MediaPeek
           media={media}
+          lyrics={!!state.settings.lyricsEnabled}
           onMedia={setMedia}
           onOpen={() => {
             setPeek(false);
