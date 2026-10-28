@@ -21,7 +21,8 @@ export type RequestContext = {
   store: Store;
   native: Native;
   assistant: Assistant;
-  main: BrowserWindow;
+  /** The main window, or undefined while it is released to save memory. */
+  main: () => BrowserWindow | undefined;
   island: BrowserWindow;
   changed: () => void;
   broadcast: (event: any) => void;
@@ -62,7 +63,7 @@ export function createRequestHandler(ctx: RequestContext) {
     store,
     native,
     assistant,
-    main,
+    main: mainWindow,
     island,
     changed,
     broadcast,
@@ -115,7 +116,7 @@ export function createRequestHandler(ctx: RequestContext) {
               ? ["--hidden"]
               : [app.getAppPath(), "--hidden"],
           });
-        main.setAlwaysOnTop(store.state.settings.alwaysOnTop);
+        mainWindow()?.setAlwaysOnTop(store.state.settings.alwaysOnTop);
         await native.call("configure", {
           ...store.state.settings,
           abilityArmed: false,
@@ -246,10 +247,10 @@ export function createRequestHandler(ctx: RequestContext) {
         showMain(a.tab);
         return true;
       case "minimize":
-        main.minimize();
+        mainWindow()?.minimize();
         return true;
       case "hide":
-        main.hide();
+        mainWindow()?.hide();
         return true;
       case "panel":
         setPanel(!!a.open, a.tab);
@@ -397,9 +398,13 @@ export function createRequestHandler(ctx: RequestContext) {
         throw new Error("Snippet not found.");
       }
       case "wallpapers.folder": {
-        const r = await dialog.showOpenDialog(main, {
+        const options: Electron.OpenDialogOptions = {
           properties: ["openDirectory"],
-        });
+        };
+        const parent = mainWindow();
+        const r = await (parent
+          ? dialog.showOpenDialog(parent, options)
+          : dialog.showOpenDialog(options));
         if (r.canceled) return null;
         const dir = r.filePaths[0];
         store.state.wallpaperFolder = dir;
@@ -564,10 +569,14 @@ export function createRequestHandler(ctx: RequestContext) {
       case "open.external":
         return shell.openExternal(safeWebUrl(a.url));
       case "data.export": {
-        const r = await dialog.showSaveDialog(main, {
+        const options: Electron.SaveDialogOptions = {
           defaultPath: "yami-data.json",
           filters: [{ name: "JSON", extensions: ["json"] }],
-        });
+        };
+        const parent = mainWindow();
+        const r = await (parent
+          ? dialog.showSaveDialog(parent, options)
+          : dialog.showSaveDialog(options));
         if (r.canceled || !r.filePath) return false;
         const data = {
           ...store.publicState(),

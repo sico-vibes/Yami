@@ -232,6 +232,10 @@ export function createModuleHost(deps: Deps) {
           fs.rmSync(path.join(dir, file), { force: true });
       },
     },
+    /** True while a module needs the main window kept, such as a recording. */
+    busy() {
+      return !!registry.peek<Workbench>("workbench")?.meetings.active;
+    },
     confirmQuit() {
       return registry.peek<Workbench>("workbench")?.confirmQuit() ?? true;
     },

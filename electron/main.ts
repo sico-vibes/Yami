@@ -29,6 +29,7 @@ import { assetRoot, makeWindow, windows } from "./windows";
 import { createOverlays } from "./overlays";
 import { createFocusTimer } from "./focus-timer";
 import { createModuleHost } from "./modules/host";
+import { createMainWindow } from "./main-window";
 import { windowsBrightness, windowsControls } from "./controls";
 import {
   assertFile,
@@ -59,8 +60,7 @@ const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
   broadcast: (event) => broadcast(event),
 });
-let main: BrowserWindow,
-  island: BrowserWindow,
+let island: BrowserWindow,
   lasso: BrowserWindow | undefined,
   tray: Tray;
 let launcherFiles: { name: string; path: string }[] = [];
@@ -80,9 +80,23 @@ const approvals = new Map<
   string,
   { resolve: (v: boolean) => void; timer: NodeJS.Timeout }
 >();
+const mainWindow = createMainWindow({
+  create: () =>
+    makeWindow("main", {
+      width: 1160,
+      height: 790,
+      minWidth: 850,
+      minHeight: 610,
+      transparent: false,
+      alwaysOnTop: store.state.settings.alwaysOnTop,
+    }),
+  quitting: () => quitting,
+  busy: () => approvals.size > 0 || !!modules?.busy(),
+});
 function broadcast(event: any) {
   for (const w of windows)
-    if (!w.isDestroyed()) w.webContents.send("yami:event", event);
+    if (mainWindow.owns(w)) mainWindow.send(event);
+    else if (!w.isDestroyed()) w.webContents.send("yami:event", event);
   overlays?.observe(event);
 }
 function changed() {
@@ -133,10 +147,7 @@ function notify(message: string) {
   broadcast({ type: "toast", message });
 }
 function showMain(tab?: string) {
-  if (main.isMinimized()) main.restore();
-  main.show();
-  main.focus();
-  if (tab) main.webContents.send("yami:event", { type: "navigate", tab });
+  mainWindow.show(tab);
 }
 function islandBounds(width: number, height: number) {
   const d = screen.getPrimaryDisplay();
@@ -748,29 +759,14 @@ else {
       electronSession.defaultSession.setPermissionRequestHandler(
         (_wc, permission, callback) => callback(permission === "media"),
       );
-      main = makeWindow("main", {
-        width: 1160,
-        height: 790,
-        minWidth: 850,
-        minHeight: 610,
-        transparent: false,
-        alwaysOnTop: store.state.settings.alwaysOnTop,
-      });
-      main.on("close", (e) => {
-        if (!quitting) {
-          e.preventDefault();
-          main.hide();
-        }
-      });
-      main.once("ready-to-show", () => {
-        // First run shows "Choose your Yami" even when starting hidden.
-        if (
-          !store.state.settings.setupDone ||
-          (!store.state.settings.startHidden &&
-            !process.argv.includes("--hidden"))
-        )
-          main.show();
-      });
+      // The main window is created only when shown. First run shows
+      // "Choose your Yami" even when starting hidden.
+      if (
+        !store.state.settings.setupDone ||
+        (!store.state.settings.startHidden &&
+          !process.argv.includes("--hidden"))
+      )
+        showMain();
       island = makeWindow("island", {
         ...islandBounds(220, 96),
         transparent: true,
@@ -814,7 +810,7 @@ else {
         store,
         native,
         assistant,
-        main,
+        main: mainWindow.current,
         island,
         changed,
         broadcast,
@@ -904,6 +900,7 @@ else {
           )
         )
           throw new Error("Untrusted renderer.");
+        if (method === "window.ready") return mainWindow.ready(event.sender);
         const host = modules!;
         if (host.handles(method))
           return host.invoke(method, args, event.sender);
@@ -951,6 +948,7 @@ app.on("before-quit", (event) => {
   assistant?.stopLive();
   overlays?.dispose();
   focusTimer.dispose();
+  mainWindow.dispose();
   modules?.dispose();
   native?.close();
 });

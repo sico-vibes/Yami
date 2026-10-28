@@ -62,6 +62,10 @@ export function App() {
     else if (e.type === "transcript") setTranscript(e.text);
   }
   const { state, error, setError } = useYami(event);
+  // useYami is listening by now; events sent while this page loaded follow.
+  useEffect(() => {
+    void api("window.ready").catch(() => {});
+  }, []);
   useEffect(() => {
     if (error) {
       report(error);

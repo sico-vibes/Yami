@@ -15,12 +15,12 @@ const quiet = {
   weatherEnabled: false,
 };
 
-async function launch(name, data) {
+async function launch(name, data, extra = {}) {
   const profile = path.join(base, name);
   fs.mkdirSync(profile, { recursive: true });
   if (data)
     fs.writeFileSync(path.join(profile, "data.json"), JSON.stringify(data));
-  const env = { ...process.env, YAMI_DATA_DIR: profile };
+  const env = { ...process.env, YAMI_DATA_DIR: profile, ...extra };
   delete env.ELECTRON_RUN_AS_NODE;
   const app = await _electron.launch({ args: [path.resolve(".")], env });
   const errors = [];
@@ -74,12 +74,21 @@ const status = (list, id) => list.find((m) => m.id === id);
 // 2. An existing profile skips setup and keeps its data; the workspace wakes
 // on first request and is disposed when switched off.
 {
-  const { app, main, errors, profile } = await launch("existing", {
-    settings: quiet,
-    messages: [
-      { id: "keep", role: "user", text: "Kept", at: new Date().toISOString() },
-    ],
-  });
+  const { app, main, errors, profile } = await launch(
+    "existing",
+    {
+      settings: quiet,
+      messages: [
+        {
+          id: "keep",
+          role: "user",
+          text: "Kept",
+          at: new Date().toISOString(),
+        },
+      ],
+    },
+    { YAMI_MAIN_RELEASE_MS: "1500" },
+  );
   try {
     await main.locator(".bottom-dock").waitFor();
     assert.equal(
@@ -147,6 +156,20 @@ const status = (list, id) => list.find((m) => m.id === id);
     assert.equal(saved.settings.workbenchEnabled, false);
     assert.equal(saved.settings.fileWheelEnabled, false);
     assert.ok(saved.messages.some((m) => m.text === "Kept"));
+    // A hidden main window releases its renderer, then comes back on the
+    // page it was asked for, through the queued navigate event.
+    const island = app.windows().find((p) => p.url().includes("window=island"));
+    await call(main, "hide");
+    for (let i = 0; i < 100 && app.windows().includes(main); i++)
+      await new Promise((r) => setTimeout(r, 100));
+    assert.equal(app.windows().includes(main), false, "main window released");
+    await call(island, "show", { tab: "settings" });
+    let again;
+    for (let i = 0; i < 100 && !again; i++) {
+      again = app.windows().find((p) => p.url().includes("window=main"));
+      if (!again) await new Promise((r) => setTimeout(r, 100));
+    }
+    await again.locator(".settings-sidebar").waitFor({ timeout: 15000 });
     assert.deepEqual(errors, []);
   } finally {
     await app.close();

@@ -68,6 +68,7 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
 ```
 electron/        main process
   main.ts          app lifetime, windows, tray, IPC routing, schedules (near 1,000 lines)
+  main-window.ts   main window on demand; released a minute after hiding; queued events until `window.ready`
   requests.ts      most IPC request handlers (`window.yami.invoke(method, args)`)
   overlays.ts      roaming "stray" window, caption pill window, tool-activity events
   focus-timer.ts   Today focus countdown        controls.ts  volume/brightness/radios

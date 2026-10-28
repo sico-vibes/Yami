@@ -30,7 +30,7 @@ Cat-spirit companion with roaming mode; spirit island with action card; on-scree
 - Use Phosphor web icons; the cat spirit is a project-authored SVG with Yami's own names and copy.
 - Adapt features through Yami's existing UI components and interaction patterns while preserving their functional and backend behavior. Record upstream revision, license and parity checks under the [adaptation rules](../adaptation.md).
 - Keep operating-system actions in the Windows integration boundary and ask for confirmation on sensitive actions.
-- Keep idle cost near zero. No idle polling, no idle animation, no background work that the user did not enable. Measure packaged builds against the [performance budgets](../performance.md).
+- Keep idle cost near zero. No idle polling, no idle animation, no background work that the user did not enable. Measure packaged builds against the [performance budgets](../performance.md): 100–200 MB private working set at idle for the whole process tree, 600–700 MB during ordinary tasks. Optional modules cost nothing while off.
 - Make every new feature optional, with an off state that costs nothing. Anything that uses the network, microphone, camera, or screen is off by default.
 - Never invent system readings or claim an action succeeded without a successful result.
 - Keep local conversations, settings, plans, memories, and provider keys intact across ordinary updates.

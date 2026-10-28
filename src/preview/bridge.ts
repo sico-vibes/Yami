@@ -85,6 +85,8 @@ export function installPreviewBridge() {
       switch (method) {
         case "state":
           return structuredClone(state);
+        case "window.ready":
+          return true;
         case "settings":
           Object.assign(state.settings, a);
           changed();

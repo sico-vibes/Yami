@@ -6,8 +6,10 @@ Yami is designed to sit quietly on a Windows desktop for long periods. The app s
 
 | State | Working set target | CPU target | Status |
 | --- | ---: | --- | --- |
-| Idle with island and tray, no request active | 50–100 MB total for the Yami process tree | Near-zero sustained CPU, with short event-driven wakeups | **Idle memory target not met** in the first short production-source sample. Packaged follow-up also misses the idle target; longer-duration testing remains pending. |
+| Idle with island and tray, no request active | 100–200 MB private working set for the Yami process tree | Near-zero sustained CPU, with short event-driven wakeups | Earlier samples (165–172 MB private) fall inside this budget; they were short runs, not soak tests. Every optional module must still cost nothing while off. |
 | Active feature use | Keep the Yami process tree below 600–700 MB when practical | Bound expensive polling and release temporary media/capture buffers | Ceiling target; provider, Electron renderer, and selected feature can create short-lived spikes. |
+
+The owner raised the idle budget from 50–100 MB to 100–200 MB on 2026-10-27 so optional modules have room; the dated measurements below were recorded against the earlier 50–100 MB target and say so.
 
 Targets refer to aggregate resident working set for the Electron main process, renderer/utility processes, and `Yami.Native.exe`. Task Manager’s per-process rows must be summed carefully and should not be compared to private bytes, commit size, or package size. Report sample conditions and use consistent Windows builds and hardware. Do not publish a resource assertion until repeatable measurements pass.
 
@@ -48,6 +50,12 @@ Across eight processes, private working set was **164.6–168.2 MB**, shared-inc
 Focused Edge and Windows Electron checks also confirmed that the dock highlight and incoming-page fade have no running animations after settling, rapid navigation retargets correctly, and both the OS and Yami reduced-motion preferences suppress the new motion. The idle bar keeps the existing one-time eight-second sleep timer; its shoulder fix changes only CSS geometry.
 
 The merged build on `main` (commit `0c850a0`, packaged as `release/Yami 0.2.1.exe`) has not been measured with the procedure below. Run `node scripts/measure-performance.mjs --packaged` before quoting figures for it.
+
+## Optional modules and on-demand main window (2026-10-28)
+
+Three changes landed together: each window loads only its own screen, optional modules (the AI workspace and the file wheel) are built on first use, and the main window is created only when it is shown. A hidden main window is destroyed after one minute (`electron/main-window.ts`), unless a meeting recording or an approval prompt is open; showing it again builds a fresh one and replays the events sent while its page loaded.
+
+With **Start hidden** on, roaming on and clipboard, context and weather off, the source build measured **183.8–213.8 MB** private working set across 9 processes before the main-window change, and **161.4–163.8 MB** across 8 processes after it, at 0% sampled CPU. With roaming off it measured **140.7 MB** across 7 processes. The process counts include a `cmd.exe` and `conhost.exe` (about 9 MB) that Playwright's launcher adds on this machine. These are short runs on the [source build](evidence/performance-2026-10-28-modules.json), not a packaged measurement, task peak or soak test; they sit inside the 100–200 MB idle budget. When the main window is open it costs its renderer again (about 35–40 MB in the earlier runs).
 
 ## Current sources of background work
 
@@ -96,7 +104,7 @@ The Nightglow redesign changed tokens, shared controls (Select, tooltip layer, s
 - The dock, select menus, the home composer, the Soul slots and modal scrims use backdrop blur (`--blur` or a fixed 8–30px blur). Blur costs GPU time while those surfaces are visible. That cost has not been measured. Settings and workbench cards are translucent fills without blur.
 - The Soul page's hub veil no longer drifts. The earlier 24-second infinite `veil-drift` animation was removed so the page is still while you only look at it.
 
-The Windows-first idle target (50–100 MB) and the active-task ceiling (600–700 MB) remain pending the procedure below.
+The Windows-first idle budget (100–200 MB) and the active-task ceiling (600–700 MB) still need a repeatable packaged run with the procedure below.
 
 ## Measurement procedure
 
@@ -109,7 +117,7 @@ For a repeatable idle reading:
 5. Separately measure open main UI, stats view, clipboard enabled/disabled, a sustained voice turn, lasso capture, and a search. Stop recording and close all sessions between runs.
 6. Record GPU memory separately where available. Do not add committed memory to working set or report a single process as the application total.
 
-Public performance claims should include the procedure, hardware/software, build type, number of runs, and aggregate process-tree definition. The 50–100 MB idle and 600–700 MB task budgets remain pending until this procedure yields stable results.
+Public performance claims should include the procedure, hardware/software, build type, number of runs, and aggregate process-tree definition. The 100–200 MB idle and 600–700 MB task budgets remain pending until this procedure yields stable results.
 
 ## Optimization principles
 

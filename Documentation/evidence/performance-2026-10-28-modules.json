@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-28",
+  "build": "production-source (npm run build, then Electron from the repository)",
+  "hardware": "AMD Ryzen 5 5600X, 12 logical CPUs, 31.9 GB RAM, Windows 11 Home 10.0.26300",
+  "method": "node scripts/measure-performance.mjs: isolated profile, start hidden, clipboard/context/weather off, startup settled 10 s, three snapshots 5 s apart of Win32_PerfFormattedData_PerfProc_Process for the full parent/child tree. The tree includes a cmd.exe and conhost.exe that Playwright's launcher adds on this machine (about 9 MB).",
+  "runs": [
+    {
+      "change": "before: optional modules and per-window screens, main window still created hidden",
+      "roam": true,
+      "privateWorkingSetMB": [207.5, 201.0, 183.8],
+      "processes": 9
+    },
+    {
+      "change": "before (repeat)",
+      "roam": true,
+      "privateWorkingSetMB": [213.8, 206.2, 206.2],
+      "processes": 9
+    },
+    {
+      "change": "after: main window created only when shown",
+      "roam": true,
+      "privateWorkingSetMB": [161.7, 161.4, 161.5],
+      "processes": 8,
+      "cpuPercentOfMachine": [0, 0, 0]
+    },
+    {
+      "change": "after (repeat)",
+      "roam": true,
+      "privateWorkingSetMB": [163.7, 163.8, 163.8],
+      "processes": 8,
+      "cpuPercentOfMachine": [0, 0, 0]
+    },
+    {
+      "change": "after, roaming off",
+      "roam": false,
+      "privateWorkingSetMB": [140.7, 140.7, 140.7],
+      "processes": 7,
+      "cpuPercentOfMachine": [0, 0, 0]
+    }
+  ],
+  "limits": "Short source-build runs, not a packaged build, task peak or soak test. Display scale and power mode were not recorded."
+}
