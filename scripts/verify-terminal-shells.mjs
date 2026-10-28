@@ -73,6 +73,27 @@ try {
   await box.fill("text-that-is-not-there");
   await box.press("Enter");
   await terminal.locator(".terminal-error").waitFor();
+  // Split view: two panes side by side; pressing the right one swaps them.
+  await box.press("Escape");
+  await terminal.getByRole("button", { name: /^Split/ }).click();
+  const shown = () => terminal.locator(".terminal-view:not([hidden])");
+  await wait(400);
+  assert.equal(await shown().count(), 2, "two panes");
+  assert.equal(await terminal.locator(".terminal-view.pane-a").count(), 1);
+  const before = await terminal
+    .locator("[data-session].selected")
+    .getAttribute("data-session");
+  await terminal
+    .locator(".terminal-view.pane-b")
+    .click({ position: { x: 40, y: 40 } });
+  await wait(300);
+  const after = await terminal
+    .locator("[data-session].selected")
+    .getAttribute("data-session");
+  assert.notEqual(after, before, "the right pane took input");
+  await terminal.getByRole("button", { name: "Show one tab" }).click();
+  await wait(300);
+  assert.equal(await shown().count(), 1, "back to one");
   for (const tab of await terminal.locator("[data-session]").all())
     await terminal.evaluate(
       (id) => window.yami.invoke("terminal.end", { session: id }),

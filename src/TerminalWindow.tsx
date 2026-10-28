@@ -56,14 +56,54 @@ export default function TerminalWindow() {
   };
   const backlog = useRef(new Map<string, any[]>()),
     mounted = useRef(true);
+  // Split view: the selected tab on the left, a partner tab on the right.
+  const partner = useRef("");
+  const [split, setSplit] = useState("");
+  function layout() {
+    const pair = partner.current;
+    for (const view of views.current.values()) {
+      view.element.hidden = view.id !== active.current && view.id !== pair;
+      view.element.classList.toggle(
+        "pane-a",
+        !!pair && view.id === active.current,
+      );
+      view.element.classList.toggle("pane-b", !!pair && view.id === pair);
+      if (!view.element.hidden) view.fit.fit();
+    }
+  }
   function select(id: string) {
+    // Choosing the right-hand pane swaps the two.
+    if (partner.current && id === partner.current)
+      partner.current = active.current;
     active.current = id;
     setSelected(id);
-    for (const view of views.current.values())
-      view.element.hidden = view.id !== id;
-    const view = views.current.get(id);
-    view?.fit.fit();
-    view?.terminal.focus();
+    setSplit(partner.current);
+    layout();
+    views.current.get(id)?.terminal.focus();
+  }
+  async function toggleSplit() {
+    if (partner.current) {
+      partner.current = "";
+      setSplit("");
+      layout();
+      return;
+    }
+    const other = [...views.current.keys()]
+      .reverse()
+      .find((k) => k !== active.current);
+    if (other) {
+      partner.current = other;
+      setSplit(other);
+      layout();
+    } else {
+      const left = active.current;
+      await create();
+      if (left && views.current.has(left) && left !== active.current) {
+        partner.current = left;
+        setSplit(left);
+        layout();
+      }
+    }
   }
   const report = (e: any) => setError(e.message || String(e));
   function output(event: any) {
@@ -106,6 +146,10 @@ export default function TerminalWindow() {
       }
       const element = document.createElement("div");
       element.className = "terminal-view";
+      // Pressing a pane makes it the one that takes input.
+      element.addEventListener("mousedown", () => {
+        if (active.current !== session.id) select(session.id);
+      });
       host.current.appendChild(element);
       const terminal = new Terminal({
         allowTransparency: true,
@@ -242,8 +286,7 @@ export default function TerminalWindow() {
       }
     });
     const observer = new ResizeObserver(() => {
-      if (host.current?.offsetWidth)
-        views.current.get(active.current)?.fit.fit();
+      if (host.current?.offsetWidth) layout();
     });
     if (host.current) observer.observe(host.current);
     return () => {
@@ -267,6 +310,9 @@ export default function TerminalWindow() {
       view.terminal.dispose();
       view.element.remove();
       views.current.delete(selected);
+      // Ending either pane leaves split view.
+      partner.current = "";
+      setSplit("");
       setList((old) => old.filter((v) => v.id !== selected));
       const next = [...views.current.keys()][0];
       if (next) select(next);
@@ -337,6 +383,12 @@ export default function TerminalWindow() {
           icon="plus"
           label="New terminal session"
           onClick={() => void create()}
+        />
+        <IconButton
+          icon="columns"
+          label={split ? "Show one tab" : "Split: two tabs side by side"}
+          active={!!split}
+          onClick={() => void toggleSplit()}
         />
         <IconButton
           icon="magnifying-glass"
