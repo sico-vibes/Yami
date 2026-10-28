@@ -62,9 +62,10 @@ Folders work on the wheel too: drag one, select it in File Explorer and use the 
 - **Terminal here**, which opens inside the folder.
 - **Folder size**, which counts the files and bytes. It stops after 200,000 entries or 15 seconds and then says "at least"; links and junctions are not followed.
 - **Zip**, which writes `<folder>.zip` beside it. A zip over 200 MB is refused, with a pointer to 7-Zip.
+- **Find duplicates** groups identical files by size and then SHA-256, bounded like Folder size, and copies the list to the clipboard with how much space repeats. Nothing is deleted.
 - **Add as project**, for one folder, adds it to the AI workspace's Projects.
 
-Batch rename, flatten, duplicate finding and folder icons from the plan are not built.
+Batch rename, flatten and folder icons from the plan are not built.
 
 ## Phase status
 

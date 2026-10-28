@@ -247,6 +247,12 @@ const FOLDER_ACTIONS: Petal[] = [
   { id: "action:size", label: "Folder size", group: "actions", window: false },
   { id: "action:zip", label: "Zip", group: "actions", window: false },
   {
+    id: "action:duplicates",
+    label: "Find duplicates",
+    group: "actions",
+    window: false,
+  },
+  {
     id: "action:project",
     label: "Add as project",
     group: "actions",

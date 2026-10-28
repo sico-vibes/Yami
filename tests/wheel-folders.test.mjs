@@ -18,6 +18,7 @@ test("folders get folder actions only, and Add as project needs one folder", () 
     "action:terminal",
     "action:size",
     "action:zip",
+    "action:duplicates",
     "action:project",
   ]);
   const two = petalsFor(["site/", "notes.txt"], "actions").map((p) => p.id);
@@ -50,4 +51,20 @@ test("folder size walks the tree, skips links and zips with its folder name", as
   assert.equal(size(1536), "2 KB");
   assert.equal(size(17), "17 bytes");
   assert.equal(size(5 * 1024 ** 3), "5.00 GB");
+});
+
+test("duplicates are found by content, not by name, and nothing is deleted", async () => {
+  const { findDuplicates } = await import("../electron/wheel/folder.ts");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "yami-dupes-"));
+  fs.mkdirSync(path.join(root, "a"));
+  fs.writeFileSync(path.join(root, "one.txt"), "same bytes");
+  fs.writeFileSync(path.join(root, "a", "copy.txt"), "same bytes");
+  fs.writeFileSync(path.join(root, "a", "other.txt"), "diff bytes");
+  fs.writeFileSync(path.join(root, "empty1"), "");
+  fs.writeFileSync(path.join(root, "empty2"), "");
+  const { groups, partial } = await findDuplicates(root);
+  assert.equal(partial, false);
+  assert.equal(groups.length, 1, "same size but different content is not a duplicate; empty files are skipped");
+  assert.deepEqual(groups[0].files.map((f) => path.basename(f)).sort(), ["copy.txt", "one.txt"]);
+  assert.equal(fs.readdirSync(root).length, 4, "nothing was removed");
 });

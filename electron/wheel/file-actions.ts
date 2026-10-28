@@ -10,7 +10,7 @@ import {
 } from "../../src/wheel/actions.ts";
 import type { WheelFile } from "../../src/wheel/types";
 import { runProcess } from "./spawn.ts";
-import { folderSize, size, zipEntries } from "./folder.ts";
+import { findDuplicates, folderSize, size, zipEntries } from "./folder.ts";
 
 export async function runFileAction(
   id: string,
@@ -31,6 +31,35 @@ export async function runFileAction(
     }
     notify(
       `${folders.length === 1 ? folders[0].name : `${folders.length} folders`}: ${partial ? "at least " : ""}${size(bytes)} in ${count.toLocaleString()} files.`,
+    );
+    return;
+  }
+  if (id === "action:duplicates") {
+    const folder = files.find((f) => f.folder);
+    if (!folder) throw new Error("Choose a folder.");
+    const { groups, partial } = await findDuplicates(folder.path);
+    if (!groups.length) {
+      notify(
+        `No duplicate files in ${folder.name}${partial ? " (checked part of it)" : ""}.`,
+      );
+      return;
+    }
+    const wasted = groups.reduce(
+      (n, g) => n + g.bytes * (g.files.length - 1),
+      0,
+    );
+    clipboard.writeText(
+      groups
+        .map(
+          (g) =>
+            `${size(g.bytes)} × ${g.files.length}\n` +
+            g.files.map((f) => "  " + f).join("\n"),
+        )
+        .join("\n\n")
+        .slice(0, 200000),
+    );
+    notify(
+      `${groups.length} sets of duplicates in ${folder.name}, ${size(wasted)} repeated. The list is on the clipboard; nothing was deleted.`,
     );
     return;
   }

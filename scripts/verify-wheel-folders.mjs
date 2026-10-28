@@ -53,8 +53,10 @@ try {
   await open();
   await call("wheel.choose", { petalId: "action:size" });
   await open();
+  await call("wheel.choose", { petalId: "action:duplicates" });
+  await open();
   await call("wheel.choose", { petalId: "action:project" });
-  for (let i = 0; i < 50 && toasts.length < 3; i++)
+  for (let i = 0; i < 50 && toasts.length < 4; i++)
     await new Promise((r) => setTimeout(r, 100));
   assert.ok(
     toasts.some((t) => /^Zipped to site\.zip/.test(t)),
@@ -62,6 +64,10 @@ try {
   );
   assert.ok(
     toasts.some((t) => /site: .* in 2 files/.test(t)),
+    toasts.join(" | "),
+  );
+  assert.ok(
+    toasts.some((t) => /No duplicate files in site/.test(t)),
     toasts.join(" | "),
   );
   assert.ok(
