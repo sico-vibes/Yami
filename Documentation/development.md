@@ -120,6 +120,9 @@ Workspace verification commands:
   Windhawk are installed on this PC (starting neither), then uses a fake install to check the
   RustDesk ID and server in Settings › Phone, a refused config string, and the Windhawk mod
   and curated links on the Tune page.
+- `node scripts/verify-mailcatcher.mjs`: isolated profile; downloads the Mailpit pack through
+  the pinned downloader (about 11 MB), checks it is installed and that Dev › Projects offers
+  Start. It does not start Mailpit.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

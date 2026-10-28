@@ -199,3 +199,6 @@ html[data-reduced="true"] .agent-launch {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.mail-catcher {
+  margin-top: var(--space-6);
+}

@@ -10,6 +10,7 @@ import {
 } from "../dev-types";
 import { Empty, Icon, IconButton } from "../ui";
 import { ProjectTasks } from "./ProjectTasks";
+import { MailCatcher } from "./MailCatcher";
 import type { WorkbenchState } from "../workbench-types";
 
 const editorNames: Record<Editor, string> = {
@@ -269,6 +270,7 @@ export function Projects({
             })}
         </div>
       )}
+      <MailCatcher report={report} />
     </>
   );
 }

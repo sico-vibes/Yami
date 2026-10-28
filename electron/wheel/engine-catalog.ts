@@ -5,7 +5,8 @@ export type EngineId =
   | "sevenExtra"
   | "exiftool"
   | "needle"
-  | "whistle";
+  | "whistle"
+  | "mailpit";
 export type EngineSpec = {
   id: EngineId;
   version: string;
@@ -33,7 +34,8 @@ export const engines: EngineSpec[] = [
     sha256: "60f467265b1e312373dbcd92200c2618a74850f98d3d078e94296bb3fa2047ba",
     format: "zip",
     exe: "ffmpeg.exe",
-    source: "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip.sha256",
+    source:
+      "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip.sha256",
   },
   {
     id: "magick",
@@ -68,7 +70,8 @@ export const engines: EngineSpec[] = [
   {
     id: "exiftool",
     version: "13.59",
-    license: "GPL-1.0-or-later OR Artistic-1.0-Perl. The Windows package also carries Strawberry Perl notices.",
+    license:
+      "GPL-1.0-or-later OR Artistic-1.0-Perl. The Windows package also carries Strawberry Perl notices.",
     url: "https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download",
     sha256: "44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec",
     format: "zip",
@@ -86,7 +89,8 @@ export const engines: EngineSpec[] = [
     sha256: "0d4bc1da8c51f5600f5c4f4bb4a92e0abe142fae7b69e695ccab93e6745c883d",
     format: "exe",
     exe: "needle.exe",
-    source: "https://huggingface.co/Cactus-Compute/needle3/tree/d6c7d6a2e9655505e0f8e23339356dd1705900eb/windows-x86_64",
+    source:
+      "https://huggingface.co/Cactus-Compute/needle3/tree/d6c7d6a2e9655505e0f8e23339356dd1705900eb/windows-x86_64",
   },
   {
     id: "whistle",
@@ -96,6 +100,18 @@ export const engines: EngineSpec[] = [
     sha256: "b6e02f048568ac5d01a2042556c658061e699acbc0aa2a1439f52f3d461dffeb",
     format: "file",
     exe: "whistle.cact",
-    source: "https://huggingface.co/Cactus-Compute/whistle/tree/741118687e1f008f06d1351a402a731274789790",
+    source:
+      "https://huggingface.co/Cactus-Compute/whistle/tree/741118687e1f008f06d1351a402a731274789790",
+  },
+  {
+    // Digest from GitHub's release asset metadata, checked 2026-10-28.
+    id: "mailpit",
+    version: "1.31.5",
+    license: "MIT (Mailpit by Ralph Slooten)",
+    url: "https://github.com/axllent/mailpit/releases/download/v1.31.5/mailpit-windows-amd64.zip",
+    sha256: "9637e21c02b33185fe69268ba05317152a5d8ac7877115e8a70e29b7e199e8dc",
+    format: "zip",
+    exe: "mailpit.exe",
+    source: "https://github.com/axllent/mailpit/releases/tag/v1.31.5",
   },
 ];

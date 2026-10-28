@@ -19,6 +19,7 @@ const sizes: Record<PackId, number> = {
   exiftool: 26_000_000,
   needle: 1_570_816,
   whistle: 16_919_407,
+  mailpit: 10_639_460,
 };
 const packs = new Map<PackId, PackStatus>();
 // "Show file extensions" starts as already set before Yami, to show the lock.
@@ -317,6 +318,16 @@ export function previewModules(
           },
         ],
       };
+    case "mailcatcher.status":
+    case "mailcatcher.stop":
+      return {
+        installed: true,
+        running: false,
+        smtp: "127.0.0.1:1025",
+        web: "http://127.0.0.1:8025",
+      };
+    case "mailcatcher.start":
+      throw new Error("Preview only — Mailpit was not started.");
     case "bridges.rustdesk.open":
     case "bridges.windhawk.open":
       throw new Error("Preview only — nothing was started.");

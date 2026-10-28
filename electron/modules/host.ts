@@ -38,6 +38,7 @@ import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
 import { createBridges } from "../bridges";
+import { MailCatcher } from "../workbench/mail-catcher";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
 import { darkAt, nextSwitch } from "../../src/theme-schedule";
@@ -160,6 +161,7 @@ export function createModuleHost(deps: Deps) {
   );
 
   let bridges: ReturnType<typeof createBridges> | undefined;
+  let mail: MailCatcher | undefined;
   const registry = new ModuleRegistry({
     settings: () => store.state.settings as unknown as Record<string, unknown>,
     save: () => {
@@ -483,13 +485,26 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|bridges)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|bridges|mailcatcher)\./.test(
           method,
         )
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
       if (method === "modules.list") return registry.list();
+      if (method.startsWith("mailcatcher.")) {
+        mail ||= new MailCatcher({
+          dataDir: path.dirname(store.file),
+          exe: async () =>
+            engines.list().find((e) => e.id === "mailpit")?.installed
+              ? engines.ensure("mailpit")
+              : "",
+        });
+        if (method === "mailcatcher.status") return mail.status();
+        if (method === "mailcatcher.start") return mail.start();
+        if (method === "mailcatcher.stop") return mail.stop();
+        throw new Error("Unknown request.");
+      }
       if (method.startsWith("bridges.")) {
         bridges ||= createBridges();
         if (method === "bridges.rustdesk") return bridges.rustdesk();
@@ -942,6 +957,7 @@ export function createModuleHost(deps: Deps) {
     },
     dispose() {
       clearTimeout(themeTimer);
+      mail?.stop();
       watchers?.dispose();
       packs.dispose();
       registry.dispose();

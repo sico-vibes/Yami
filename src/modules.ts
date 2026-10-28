@@ -27,7 +27,8 @@ export type PackId =
   | "sevenExtra"
   | "exiftool"
   | "needle"
-  | "whistle";
+  | "whistle"
+  | "mailpit";
 
 export type ModuleSpec = {
   id: ModuleId;
@@ -86,7 +87,7 @@ export const modules: ModuleSpec[] = [
     setting: "workbenchEnabled",
     cost: "low",
     permissions: ["files"],
-    packs: [],
+    packs: ["mailpit"],
     presets: ["developer", "everything"],
   },
   {
@@ -227,6 +228,7 @@ export const packLabels: Record<PackId, string> = {
   sevenExtra: "7-Zip extra (7z and rar)",
   exiftool: "ExifTool (metadata)",
   needle: "Needle engine (runs Whistle)",
+  mailpit: "Mailpit (local mail catcher)",
   whistle: "Whistle speech model",
 };
 
