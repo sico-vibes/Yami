@@ -129,10 +129,16 @@ export class Workbench {
       state: this.data.publicState(),
     });
     const active = activeAgents(this.data.state.sessions);
+    // The most recently changed session, so the island can react to a
+    // finish or an error once.
+    const latest = this.data.state.sessions.reduce<
+      (typeof this.data.state.sessions)[number] | undefined
+    >((a, b) => (!a || b.at > a.at ? b : a), undefined);
     this.ctx.broadcast({
       type: "agent-activity",
       session: active[0] || null,
       sessions: active.slice(0, 8),
+      latest: latest && { id: latest.id, phase: latest.phase, at: latest.at },
     });
     const request = this.data.state.requests.find(
       (r) => !this.announced.has(r.id),

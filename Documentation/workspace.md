@@ -87,6 +87,11 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   hovering holds it. Cycling stops when fewer than two agents are active, while the
   drawer is open, and while Yami's own activity is shown. A newly most-urgent agent
   shows at once.
+- **Yami reacts.** When the latest agent session finishes, Yami hops once (cheer);
+  on an error it tilts its head (worried); when an agent waits for you its ears go up
+  (alert). Each reaction lasts 1.6 seconds and plays once per change; the first update
+  after the island opens only sets the baseline. With Reduced motion on (in Yami or in
+  Windows) there is no reaction.
 - **Island drawer, AI tab.** Two columns. On the left, Agent activity lists the five
   latest sessions with their status words. On the right, Open Yami Terminal is the
   primary button, Open AI workspace is soft, and an Allowance card shows up to three

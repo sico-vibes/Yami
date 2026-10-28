@@ -79,6 +79,10 @@ export function stateEnergy(state: string) {
         thinking: 0.4,
         speaking: 0.85,
         connecting: 0.25,
+        // Short reactions to agents; the island ends them after 1.6 s.
+        cheer: 0.9,
+        alert: 0.5,
+        worried: 0.3,
       } as Record<string, number>
     )[state] ?? 0
   );
@@ -220,17 +224,25 @@ export function bodyPose(state: string, t: number, energy: number): Pose {
           ? Math.abs(blinkPhase - 0.9775) / 0.0225
           : 1;
   return {
-    bob: Math.sin(t * 1.7) * 2.4 * energy,
+    // Cheer hops: the body rises on every half beat.
+    bob:
+      state === "cheer"
+        ? -Math.abs(Math.sin(t * 7)) * 7
+        : Math.sin(t * 1.7) * 2.4 * energy,
     tilt:
       state === "thinking"
         ? Math.sin(t * 1.4) * 6
-        : Math.sin(t * 0.9) * 2 * energy,
+        : state === "worried"
+          ? -9 + Math.sin(t * 2.2) * 1.5
+          : Math.sin(t * 0.9) * 2 * energy,
     squash:
       state === "speaking"
         ? 1 + Math.sin(t * 22) * 0.025
-        : 1 + Math.sin(t * 1.7 + 1) * 0.015 * energy,
+        : state === "cheer"
+          ? 1 + Math.cos(t * 14) * 0.04
+          : 1 + Math.sin(t * 1.7 + 1) * 0.015 * energy,
     ear:
-      state === "listening"
+      state === "listening" || state === "alert"
         ? 10 + Math.sin(t * 3) * 3
         : Math.max(0, Math.sin(t * 0.7) - 0.92) * 140 * energy,
     blink,
@@ -238,7 +250,11 @@ export function bodyPose(state: string, t: number, energy: number): Pose {
     glow:
       state === "listening"
         ? 0.55 + Math.sin(t * 7.8) * 0.2
-        : 0.35 + energy * 0.15,
+        : state === "cheer"
+          ? 0.65
+          : state === "worried"
+            ? 0.22
+            : 0.35 + energy * 0.15,
   };
 }
 

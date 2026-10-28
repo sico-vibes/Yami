@@ -93,9 +93,27 @@ export function previewAgents() {
     demo("demo-wait", "claude", "waiting", "Wants to run a test (demo)"),
     demo("demo-work", "codex", "working", "Reviewing a change (demo)"),
   ];
+  const latest = (id: string, phase: string) => ({ id, phase, at: Date.now() });
   setTimeout(
-    () => emit({ type: "agent-activity", session: sessions[0], sessions }),
+    () =>
+      emit({
+        type: "agent-activity",
+        session: sessions[0],
+        sessions,
+        latest: latest("demo-work", "working"),
+      }),
     300,
+  );
+  // Then Codex finishes, so Yami's cheer can be seen.
+  setTimeout(
+    () =>
+      emit({
+        type: "agent-activity",
+        session: sessions[0],
+        sessions: sessions.slice(0, 1),
+        latest: latest("demo-work", "finished"),
+      }),
+    1500,
   );
 }
 export function resetPreview() {

@@ -9,6 +9,7 @@ import { skinFor } from "./yami/skins";
 import { TooltipLayer } from "./controls";
 import type { AgentSession } from "./workbench-types";
 import { agentClis } from "./dev-types";
+import { agentReaction, reactionMs } from "./agent-reaction";
 const agentName = (id: string) =>
   agentClis.find((c) => c.id === id)?.name || id;
 export function Island() {
@@ -19,6 +20,9 @@ export function Island() {
   const agent = agents.length ? agents[turn % agents.length] : null;
   const lead = agents[0] || null;
   const leadId = useRef<string | undefined>(undefined);
+  const [reaction, setReaction] = useState(""),
+    seen = useRef<string | undefined>(undefined),
+    reactionTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [open, setOpen] = useState(false),
     [tab, setTab] = useState<UtilityTab>("Controls"),
     [status, setStatus] = useState("idle"),
@@ -83,6 +87,17 @@ export function Island() {
       if (leadId.current !== next[0]?.id) setTurn(0);
       leadId.current = next[0]?.id;
       setAgents(next);
+      // A finish, error or question gets one short reaction from Yami.
+      const { reaction: react, key } = agentReaction(e.latest, seen.current);
+      seen.current = key;
+      const still =
+        prefs.current?.reducedMotion ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (react && !still) {
+        setReaction(react);
+        clearTimeout(reactionTimer.current);
+        reactionTimer.current = setTimeout(() => setReaction(""), reactionMs);
+      }
     } else if (e.type === "panel") {
       openRef.current = e.open;
       setOpen(e.open);
@@ -285,11 +300,13 @@ export function Island() {
             state={
               mode === "dictation"
                 ? "listening"
-                : status === "idle" &&
-                    lead &&
-                    ["thinking", "working"].includes(lead.phase)
-                  ? "thinking"
-                  : status
+                : status === "idle" && !mode && reaction
+                  ? reaction
+                  : status === "idle" &&
+                      lead &&
+                      ["thinking", "working"].includes(lead.phase)
+                    ? "thinking"
+                    : status
             }
           />
         </span>
