@@ -19,7 +19,15 @@ type Cache = {
 };
 type Saved = { sources: FeedSource[]; cache: Record<string, Cache> };
 
-const kinds = ["reddit", "hackernews", "github", "youtube", "url"];
+const kinds = [
+  "reddit",
+  "hackernews",
+  "github",
+  "youtube",
+  "bluesky",
+  "mastodon",
+  "url",
+];
 
 /**
  * Reads feeds when asked, never on a timer. Each request sends the saved

@@ -114,3 +114,27 @@ test("refresh sends ETags, keeps the cache on errors and merges newest first", a
   assert.equal(view.sources.length, 1);
   assert.equal(view.items.length, 1);
 });
+
+test("Bluesky and Mastodon accounts become their public RSS feeds", () => {
+  assert.deepEqual(feedAddress("bluesky", "@Bsky.App"), {
+    url: "https://bsky.app/profile/bsky.app/rss",
+    name: "@bsky.app",
+  });
+  assert.throws(() => feedAddress("bluesky", "not a handle"), /Bluesky handle/);
+  assert.throws(() => feedAddress("bluesky", "evil/../x.com"), /Bluesky handle/);
+  assert.deepEqual(feedAddress("mastodon", "@Gargron@Mastodon.Social"), {
+    url: "https://mastodon.social/@Gargron.rss",
+    name: "@Gargron@mastodon.social",
+  });
+  assert.throws(() => feedAddress("mastodon", "@user"), /Mastodon account/);
+  assert.throws(() => feedAddress("mastodon", "@u@host/evil"), /Mastodon account/);
+});
+
+test("untitled social posts use their text as the title", () => {
+  const post = `<rss version="2.0"><channel><item><link>https://bsky.app/profile/x/post/1</link>
+<description>Hello from Bluesky &amp; friends</description><pubDate>Tue, 27 Oct 2026 10:00:00 GMT</pubDate>
+<guid>at://x/1</guid></item></channel></rss>`;
+  const [item] = parseFeed(post, "b");
+  assert.equal(item.title, "Hello from Bluesky & friends");
+  assert.equal(item.summary, undefined, "not repeated as a summary");
+});

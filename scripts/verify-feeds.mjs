@@ -28,6 +28,8 @@ try {
   await call("feeds.add", { kind: "hackernews", value: "" });
   await call("feeds.add", { kind: "github", value: "electron/electron" });
   await call("feeds.add", { kind: "reddit", value: "r/rust" });
+  await call("feeds.add", { kind: "bluesky", value: "bsky.app" });
+  await call("feeds.add", { kind: "mastodon", value: "@Mastodon@mastodon.social" });
   await assert.rejects(
     call("feeds.add", { kind: "url", value: "http://insecure.example/feed" }),
     /https/,

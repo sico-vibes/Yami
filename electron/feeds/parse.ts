@@ -95,7 +95,11 @@ export function parseFeed(
     author?: string;
   }) => {
     const link = safeLink(raw.link);
-    const title = plain(raw.title, 300);
+    // Social posts (Bluesky, Mastodon) have no title; their text is the title.
+    const titled = !!plain(raw.title || "", 300);
+    const title = titled
+      ? plain(raw.title, 300)
+      : plain(raw.summary || "", 200);
     if (!link || !title) return;
     const at = Date.parse(raw.at || "");
     items.push({
@@ -104,7 +108,7 @@ export function parseFeed(
       title,
       link,
       at: Number.isFinite(at) ? at : 0,
-      ...(raw.summary && { summary: plain(raw.summary) }),
+      ...(titled && raw.summary && { summary: plain(raw.summary) }),
       ...(raw.author && { author: plain(raw.author, 80) }),
     });
   };
@@ -176,6 +180,26 @@ export function feedAddress(
     if (!/^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/.test(repo))
       throw new Error("Enter a repository like owner/repo.");
     return { url: `https://github.com/${repo}/releases.atom`, name: repo };
+  }
+  if (kind === "bluesky") {
+    const handle = v.replace(/^@/, "").toLowerCase();
+    if (!/^(?=.{3,253}$)[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(handle))
+      throw new Error("Enter a Bluesky handle like name.bsky.social.");
+    return {
+      url: `https://bsky.app/profile/${handle}/rss`,
+      name: "@" + handle,
+    };
+  }
+  if (kind === "mastodon") {
+    const match =
+      /^@?([A-Za-z0-9_]{1,30})@([a-z0-9-]+(?:\.[a-z0-9-]+)+)$/i.exec(v);
+    if (!match)
+      throw new Error("Enter a Mastodon account like @user@mastodon.social.");
+    const [, user, host] = match;
+    return {
+      url: `https://${host.toLowerCase()}/@${user}.rss`,
+      name: `@${user}@${host.toLowerCase()}`,
+    };
   }
   if (kind === "youtube") {
     if (!/^UC[A-Za-z0-9_-]{22}$/.test(v))

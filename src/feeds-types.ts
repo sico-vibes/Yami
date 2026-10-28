@@ -1,7 +1,14 @@
 // Feeds for the Desk inbox: public RSS, Atom and JSON Feed sources, read when
 // the inbox opens or you refresh. Nothing signs in and nothing is posted.
 
-export type FeedKind = "reddit" | "hackernews" | "github" | "youtube" | "url";
+export type FeedKind =
+  | "reddit"
+  | "hackernews"
+  | "github"
+  | "youtube"
+  | "bluesky"
+  | "mastodon"
+  | "url";
 
 export type FeedSource = {
   id: string;
@@ -64,6 +71,18 @@ export const feedKinds: {
     label: "YouTube channel",
     icon: "youtube-logo",
     placeholder: "Channel ID (UC…)",
+  },
+  {
+    kind: "bluesky",
+    label: "Bluesky profile",
+    icon: "butterfly",
+    placeholder: "name.bsky.social",
+  },
+  {
+    kind: "mastodon",
+    label: "Mastodon account",
+    icon: "mastodon-logo",
+    placeholder: "@user@mastodon.social",
   },
   {
     kind: "url",
