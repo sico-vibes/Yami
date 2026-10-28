@@ -6,6 +6,7 @@ import { Empty, Icon, IconButton, Modal } from "./ui";
 import { Launcher } from "./Launcher";
 import { shortTime } from "./controls";
 import { Today } from "./Today";
+import { AppVolumes } from "./AppVolumes";
 import { mediaControl, repeatLabel, type MediaAction } from "./media";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
@@ -237,6 +238,7 @@ function Controls({ report }: { report: (m: string) => void }) {
           />
         </div>
       )}
+      <AppVolumes report={report} />
       <div className="media-player">
         <small>
           <Icon name="speaker-high" size={11} /> Speakers

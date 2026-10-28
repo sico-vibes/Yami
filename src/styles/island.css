@@ -646,3 +646,40 @@
   color: var(--muted);
   font-size: 9px;
 }
+.app-volumes {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0;
+}
+.app-volumes > .text-button {
+  justify-self: start;
+  font-size: var(--fs-2xs);
+}
+.app-volume {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-2xs);
+}
+.app-volume span {
+  overflow: hidden;
+  color: var(--text-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-volume span.playing {
+  color: var(--text);
+}
+.app-volume input[type="range"] {
+  height: 4px;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  border-radius: 4px;
+  background: var(--grad-aurora) 0 0 / var(--value) 100% no-repeat, var(--track);
+}
+.app-volume .icon-button {
+  width: 26px;
+  height: 26px;
+}

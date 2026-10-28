@@ -38,12 +38,29 @@ function changed() {
   emit({ type: "state", state: structuredClone(state) });
 }
 function previewNames(tool: string) {
-  if (tool === "tool:merge" || tool === "tool:organize" || tool === "tool:pdf-split")
+  if (
+    tool === "tool:merge" ||
+    tool === "tool:organize" ||
+    tool === "tool:pdf-split"
+  )
     return ["notes.pdf", "extra.pdf"];
   if (tool === "tool:join") return ["one.mp4", "two.mp4"];
-  if (tool.startsWith("tool:video") || tool === "tool:speed" || tool === "tool:snapshots" || tool === "tool:split")
+  if (
+    tool.startsWith("tool:video") ||
+    tool === "tool:speed" ||
+    tool === "tool:snapshots" ||
+    tool === "tool:split"
+  )
     return ["clip.mp4"];
-  if (["tool:trim", "tool:normalize", "tool:channels", "tool:bleep", "tool:visualizer"].includes(tool))
+  if (
+    [
+      "tool:trim",
+      "tool:normalize",
+      "tool:channels",
+      "tool:bleep",
+      "tool:visualizer",
+    ].includes(tool)
+  )
     return ["voice.wav"];
   if (tool === "tool:collage") return ["grove.png", "second.png"];
   return ["grove.png"];
@@ -54,7 +71,8 @@ function toast(message: string) {
 }
 function wheelSession() {
   const sample =
-    PREVIEW_SAMPLES.find((item) => item.id === wheelSample) || PREVIEW_SAMPLES[0];
+    PREVIEW_SAMPLES.find((item) => item.id === wheelSample) ||
+    PREVIEW_SAMPLES[0];
   return {
     id: "preview-wheel",
     mode: wheelMode,
@@ -133,8 +151,14 @@ export function installPreviewBridge() {
     },
     async invoke(method, args = {}) {
       const a = args;
-      if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting|dev)\./.test(method)) return previewWorkbench(method, a, emit);
-      if (/^(modules|setup|packs|tune|feeds|agentlink|remote)\./.test(method)) return previewModules(method, a, state, emit, changed);
+      if (
+        /^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting|dev)\./.test(
+          method,
+        )
+      )
+        return previewWorkbench(method, a, emit);
+      if (/^(modules|setup|packs|tune|feeds|agentlink|remote)\./.test(method))
+        return previewModules(method, a, state, emit, changed);
       switch (method) {
         case "state":
           return structuredClone(state);
@@ -198,16 +222,43 @@ export function installPreviewBridge() {
           return { clientId: "", connected: false };
         case "spotify.connect":
           throw new Error("Preview only — Spotify was not contacted.");
+        case "audio.apps":
+        case "audio.app":
+          return [
+            {
+              pid: 101,
+              name: "Spotify (demo)",
+              volume: 70,
+              muted: false,
+              active: true,
+            },
+            {
+              pid: 102,
+              name: "Browser (demo)",
+              volume: 100,
+              muted: false,
+              active: false,
+            },
+          ];
         case "palette.projects":
-          return [{ id: "demo-yami", name: "yami-demo", path: "C:\\Demo\\yami-demo" }];
+          return [
+            { id: "demo-yami", name: "yami-demo", path: "C:\\Demo\\yami-demo" },
+          ];
         case "media.action":
           // Demo player only; no Windows media session is touched.
-          if (a.action === "toggle") previewMedia.playing = !previewMedia.playing;
-          if (a.action === "seek") previewMedia.position = Number(a.seconds) || 0;
-          if (a.action === "shuffle") previewMedia.shuffle = !previewMedia.shuffle;
+          if (a.action === "toggle")
+            previewMedia.playing = !previewMedia.playing;
+          if (a.action === "seek")
+            previewMedia.position = Number(a.seconds) || 0;
+          if (a.action === "shuffle")
+            previewMedia.shuffle = !previewMedia.shuffle;
           if (a.action === "repeat")
             previewMedia.repeat =
-              previewMedia.repeat === "None" ? "List" : previewMedia.repeat === "List" ? "Track" : "None";
+              previewMedia.repeat === "None"
+                ? "List"
+                : previewMedia.repeat === "List"
+                  ? "Track"
+                  : "None";
           return { ...previewMedia };
         case "control":
           toast("Preview only — Windows controls are unchanged.");
@@ -441,7 +492,9 @@ export function installPreviewBridge() {
           previewTool = String(a.tool || previewTool);
           return true;
         case "wheel.tool.apply":
-          toast(`Preview only — ${String(a.tool || "the tool")} was not saved.`);
+          toast(
+            `Preview only — ${String(a.tool || "the tool")} was not saved.`,
+          );
           return { preview: true, outputs: ["grove Background.png"] };
         case "wheel.preview":
           return "";

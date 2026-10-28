@@ -149,6 +149,8 @@ class Host {
             case "wallpaperGet": return Registry.GetValue(@"HKEY_CURRENT_USER\Control Panel\Desktop","WallPaper","");
             case "wallpaperSet": { string path=Path.GetFullPath(Str(a,"path")); if(!File.Exists(path)) throw new Exception("Wallpaper file does not exist."); if(!SystemParametersInfo(20,0,path,3)) throw new Exception("Windows could not apply this wallpaper."); return path; }
             case "controls": return Controls();
+            case "audioSessions": return AudioSessions.List();
+            case "audioSessionSet": return AudioSessions.Set(Num(a,"pid"), a.ContainsKey("volume") ? Num(a,"volume") : -1, a.ContainsKey("muted") ? (Flag(a,"muted") ? 1 : 0) : -1);
             case "volume": { var audio=Audio(); float value=Math.Max(0,Math.Min(100,Num(a,"value")))/100f; audio.SetMasterVolumeLevelScalar(value,Guid.Empty); return value*100; }
             case "mute": { Audio().SetMute(Flag(a,"value"),Guid.Empty); return true; }
             case "brightness": { using(var search=new ManagementObjectSearcher("root\\WMI","SELECT * FROM WmiMonitorBrightnessMethods")) foreach(ManagementObject item in search.Get()) item.InvokeMethod("WmiSetBrightness",new object[]{1,Math.Max(0,Math.Min(100,Num(a,"value")))}); return true; }

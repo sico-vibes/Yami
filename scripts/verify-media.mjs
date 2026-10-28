@@ -94,12 +94,36 @@ try {
   for (let i = 0; i < 20 && !/^seeked/.test(await tabTitle()); i++)
     await wait(150);
   assert.match(await tabTitle(), /^seeked [5-7]$/, "seek moved to 6 s");
+  // Per-app volume, on Yami's own audio session only; restored afterwards.
+  const ours = new Set(
+    await app.evaluate(({ app }) => app.getAppMetrics().map((m) => m.pid)),
+  );
+  const apps = await call("audio.apps");
+  const mine = apps.find((a) => ours.has(a.pid));
+  let appVolume = "no session";
+  if (mine) {
+    try {
+      let list = await call("audio.app", { pid: mine.pid, volume: 37 });
+      assert.equal(list.find((a) => a.pid === mine.pid).volume, 37);
+      list = await call("audio.app", { pid: mine.pid, muted: true });
+      assert.equal(list.find((a) => a.pid === mine.pid).muted, true);
+      appVolume = "set and read back";
+    } finally {
+      await call("audio.app", {
+        pid: mine.pid,
+        volume: mine.volume,
+        muted: mine.muted,
+      });
+    }
+  }
+  await assert.rejects(call("audio.app", { pid: -1 }), /Choose an app/);
   console.log(
     JSON.stringify({
       passed: true,
       canSeek: seek.canSeek,
       canShuffle: seek.canShuffle,
       canRepeat: seek.canRepeat,
+      appVolume,
     }),
   );
 } finally {

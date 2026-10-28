@@ -445,6 +445,21 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "audio.apps":
+        return native.call("audioSessions");
+      case "audio.app": {
+        const pid = Number(a.pid);
+        if (!Number.isInteger(pid) || pid <= 0)
+          throw new Error("Choose an app.");
+        const args: Record<string, unknown> = { pid };
+        if (a.volume !== undefined)
+          args.volume = Math.max(
+            0,
+            Math.min(100, Math.round(Number(a.volume) || 0)),
+          );
+        if (typeof a.muted === "boolean") args.muted = a.muted;
+        return native.call("audioSessionSet", args);
+      }
       case "control": {
         if (
           ![
