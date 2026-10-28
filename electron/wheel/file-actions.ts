@@ -11,12 +11,17 @@ import {
 import type { WheelFile } from "../../src/wheel/types";
 import { runProcess } from "./spawn.ts";
 import { findDuplicates, folderSize, size, zipEntries } from "./folder.ts";
+import { resetFolderIcon, setFolderIcon } from "./folder-icon.ts";
 
 export async function runFileAction(
   id: string,
   files: WheelFile[],
   notify: (message: string) => void,
-  extra: { addProject?: (folder: string) => Promise<unknown> } = {},
+  extra: {
+    addProject?: (folder: string) => Promise<unknown>;
+    /** Set by the desktop check, which cannot use the file dialog. */
+    iconFile?: string;
+  } = {},
 ) {
   if (id === "action:size") {
     const folders = files.filter((f) => f.folder);
@@ -31,6 +36,33 @@ export async function runFileAction(
     }
     notify(
       `${folders.length === 1 ? folders[0].name : `${folders.length} folders`}: ${partial ? "at least " : ""}${size(bytes)} in ${count.toLocaleString()} files.`,
+    );
+    return;
+  }
+  if (id === "action:icon" || id === "action:icon-reset") {
+    const folder = files[0];
+    if (!folder?.folder) throw new Error("Choose one folder.");
+    if (id === "action:icon-reset") {
+      notify(
+        (await resetFolderIcon(folder.path))
+          ? `${folder.name} has its usual icon again.`
+          : `${folder.name} has no custom icon.`,
+      );
+      return;
+    }
+    const icon =
+      extra.iconFile ||
+      (
+        await dialog.showOpenDialog({
+          title: `Choose an icon for ${folder.name}`,
+          properties: ["openFile"],
+          filters: [{ name: "Icons", extensions: ["ico", "exe", "dll"] }],
+        })
+      ).filePaths[0];
+    if (!icon) return;
+    await setFolderIcon(folder.path, icon);
+    notify(
+      `${folder.name} has a new icon. Explorer may take a moment to show it.`,
     );
     return;
   }

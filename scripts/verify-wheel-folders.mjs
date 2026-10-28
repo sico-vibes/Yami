@@ -14,7 +14,9 @@ const site = path.join(profile, "work", "site");
 fs.mkdirSync(path.join(site, "css"), { recursive: true });
 fs.writeFileSync(path.join(site, "index.html"), "<h1>demo</h1>");
 fs.writeFileSync(path.join(site, "css", "a.css"), "h1{}");
-const env = { ...process.env, YAMI_DATA_DIR: profile };
+const icon = path.join(profile, "work", "star.ico");
+fs.writeFileSync(icon, "icon");
+const env = { ...process.env, YAMI_DATA_DIR: profile, YAMI_TEST_ICON: icon };
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await _electron.launch({ args: [path.resolve(".")], env });
 const errors = [];
@@ -153,6 +155,22 @@ try {
     "trip-02.txt",
   ]);
   assert.equal(fs.readFileSync(path.join(shots, "trip-01.txt"), "utf8"), "a");
+  // Folder icon: set, then reset, on the temporary folder only.
+  await open();
+  await call("wheel.choose", { petalId: "action:icon" });
+  const ini = path.join(site, "desktop.ini");
+  for (let i = 0; i < 40 && !fs.existsSync(ini); i++)
+    await new Promise((r) => setTimeout(r, 100));
+  assert.match(fs.readFileSync(ini, "utf8"), /IconResource=.*star\.ico,0/);
+  const flags = () =>
+    execFileSync("attrib.exe", [site], { encoding: "utf8" }).slice(0, 12);
+  assert.match(flags(), /R/, "the folder is marked to read desktop.ini");
+  await open();
+  await call("wheel.choose", { petalId: "action:icon-reset" });
+  for (let i = 0; i < 40 && fs.existsSync(ini); i++)
+    await new Promise((r) => setTimeout(r, 100));
+  assert.ok(!fs.existsSync(ini), "icon reset");
+  assert.doesNotMatch(flags(), /R/);
   const projects = (await call("workbench.state")).projects;
   assert.equal(projects[0].path, site);
   assert.deepEqual(errors, []);

@@ -68,8 +68,9 @@ Folders work on the wheel too: drag one, select it in File Explorer and use the 
 - **Zip**, which writes `<folder>.zip` beside it. A zip over 200 MB is refused, with a pointer to 7-Zip.
 - **Find duplicates** groups identical files by size and then SHA-256, bounded like Folder size, and copies the list to the clipboard with how much space repeats. Nothing is deleted.
 - **Add as project**, for one folder, adds it to the AI workspace's Projects.
+- **Change icon**, for one folder, asks for an `.ico` (or an `.exe`/`.dll` icon) and writes the same `desktop.ini` Explorer's Customize tab writes: `IconResource`, hidden and system, with the folder's read-only flag so Explorer reads it. Yami marks the file as its own and never replaces a `desktop.ini` it did not write. The icon file stays where it is, so moving or deleting it brings back the usual icon. **Reset icon** removes Yami's `desktop.ini` and the flag. The desktop check sets and resets an icon on a temporary folder; how quickly Explorer repaints the icon was not measured.
 
-Flatten and folder icons from the plan are not built.
+Flatten from the plan is not built.
 
 ## Phase status
 

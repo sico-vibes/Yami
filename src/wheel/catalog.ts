@@ -259,7 +259,17 @@ const FOLDER_ACTIONS: Petal[] = [
     group: "actions",
     window: false,
   },
+  { id: "action:icon", label: "Change icon", group: "actions", window: false },
+  {
+    id: "action:icon-reset",
+    label: "Reset icon",
+    group: "actions",
+    window: false,
+  },
 ];
+
+/** Petals that act on exactly one folder. */
+const ONE_FOLDER = ["action:project", "action:icon", "action:icon-reset"];
 
 export const isFolderName = (name: string) => name.endsWith("/");
 /** The names petalsFor reads: folders carry a trailing "/". */
@@ -285,7 +295,9 @@ export function petalsFor(
   if (names.some(isFolderName))
     return mode === "actions"
       ? FOLDER_ACTIONS.filter(
-          (p) => p.id !== "action:project" || names.length === 1,
+          (p) =>
+            !ONE_FOLDER.includes(p.id) ||
+            (names.length === 1 && isFolderName(names[0])),
         )
       : [];
   const kinds = names.map(kindOf);

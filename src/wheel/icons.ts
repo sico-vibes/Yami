@@ -9,6 +9,8 @@ export const PETAL_ICON: Record<string, string> = {
   "action:zip": "file-zip",
   "action:duplicates": "copy-simple",
   "action:project": "folder-plus",
+  "action:icon": "paint-brush",
+  "action:icon-reset": "arrow-counter-clockwise",
   "tool:compress": "arrows-in",
   "tool:metadata": "info",
   "tool:background": "selection-background",

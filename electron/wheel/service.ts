@@ -7,7 +7,12 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { filesFromArgv } from "../../src/wheel/argv";
 import { petalsFor, wheelNames } from "../../src/wheel/catalog";
-import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
+import type {
+  WheelFile,
+  WheelMode,
+  WheelSession,
+  WheelSource,
+} from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
 import { runFileAction } from "./file-actions.ts";
 import { readImageText } from "./ocr.ts";
@@ -181,7 +186,14 @@ export function createWheel(deps: Deps) {
     try {
       const result = await exec(
         "powershell.exe",
-        ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", script],
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          script,
+        ],
         { windowsHide: true, timeout: 8000 },
       );
       const parsed = JSON.parse(result.stdout.trim() || "{}");
@@ -212,13 +224,24 @@ export function createWheel(deps: Deps) {
   };
 
   const api = {
-    onNative(event: { eventName?: string; action?: string; mode?: WheelMode; x?: number; y?: number }) {
+    onNative(event: {
+      eventName?: string;
+      action?: string;
+      mode?: WheelMode;
+      x?: number;
+      y?: number;
+    }) {
       if (event.eventName !== "file-wheel") return false;
       const x = Number(event.x) || 0;
       const y = Number(event.y) || 0;
       if (event.action === "open" || event.action === "swap") {
         const mode = event.mode || "convert";
-        if (event.action === "swap" && session && wheel && !wheel.isDestroyed()) {
+        if (
+          event.action === "swap" &&
+          session &&
+          wheel &&
+          !wheel.isDestroyed()
+        ) {
           session = { ...session, mode, x, y };
           publish();
           return true;
@@ -226,11 +249,21 @@ export function createWheel(deps: Deps) {
         showWheel("drag", x, y, mode, [], "Release on a petal.", true);
         void selection().then(async (paths) => {
           try {
-            if (!session || session.source !== "drag" || chosen || !paths.length) return;
+            if (
+              !session ||
+              session.source !== "drag" ||
+              chosen ||
+              !paths.length
+            )
+              return;
             session = { ...session, files: await describeWheelFiles(paths) };
             publish();
           } catch (error) {
-            deps.notify(error instanceof Error ? error.message : "Those files are blocked.");
+            deps.notify(
+              error instanceof Error
+                ? error.message
+                : "Those files are blocked.",
+            );
           }
         });
         return true;
@@ -257,7 +290,15 @@ export function createWheel(deps: Deps) {
             deps.notify(
               "Select files in File Explorer, then try the shortcut again. Desktop icons can use Send to or the drop shelf.",
             );
-          return openWithPaths(paths, "hotkey", x, y, "convert", "Choose a petal.", true);
+          return openWithPaths(
+            paths,
+            "hotkey",
+            x,
+            y,
+            "convert",
+            "Choose a petal.",
+            true,
+          );
         });
         return true;
       }
@@ -269,21 +310,44 @@ export function createWheel(deps: Deps) {
     },
     acceptArgv(argv: string[]) {
       if (!argv.includes("--file-wheel")) return false;
-      const files = filesFromArgv(argv, (value) => {
-        try {
-          return fs.existsSync(value) && (fs.statSync(value).isFile() || fs.statSync(value).isDirectory());
-        } catch {
-          return false;
-        }
-      }, process.execPath);
+      const files = filesFromArgv(
+        argv,
+        (value) => {
+          try {
+            return (
+              fs.existsSync(value) &&
+              (fs.statSync(value).isFile() || fs.statSync(value).isDirectory())
+            );
+          } catch {
+            return false;
+          }
+        },
+        process.execPath,
+      );
       const point = screen.getCursorScreenPoint();
-      void openWithPaths(files, "sendto", point.x, point.y, "convert", "Choose a petal.", false);
+      void openWithPaths(
+        files,
+        "sendto",
+        point.x,
+        point.y,
+        "convert",
+        "Choose a petal.",
+        false,
+      );
       return true;
     },
     /** Opens the wheel at a point for the files selected in Explorer. */
     openAt(x: number, y: number) {
       return selection().then((paths) =>
-        openWithPaths(paths, "hotkey", x, y, "convert", "Choose a petal.", false),
+        openWithPaths(
+          paths,
+          "hotkey",
+          x,
+          y,
+          "convert",
+          "Choose a petal.",
+          false,
+        ),
       );
     },
     openShelf() {
@@ -315,11 +379,16 @@ export function createWheel(deps: Deps) {
     dispose() {
       closeWheel();
       closeTool();
-      for (const w of [shelf, floatWindow]) if (w && !w.isDestroyed()) w.close();
+      for (const w of [shelf, floatWindow])
+        if (w && !w.isDestroyed()) w.close();
       shelf = floatWindow = undefined;
       floatFiles = [];
     },
-    async handle(method: string, args: any = {}, _sender?: Electron.WebContents) {
+    async handle(
+      method: string,
+      args: any = {},
+      _sender?: Electron.WebContents,
+    ) {
       switch (method) {
         case "wheel.session":
           return session;
@@ -340,9 +409,10 @@ export function createWheel(deps: Deps) {
         case "wheel.choose": {
           chosen = true;
           clearRelease();
-          const files = Array.isArray(args.paths) && args.paths.length
-            ? await describeWheelFiles(args.paths.map(String))
-            : session?.files || [];
+          const files =
+            Array.isArray(args.paths) && args.paths.length
+              ? await describeWheelFiles(args.paths.map(String))
+              : session?.files || [];
           if (!files.length) throw new Error("Drop a file on a petal.");
           const petal = petalsFor(
             wheelNames(files),
@@ -364,12 +434,15 @@ export function createWheel(deps: Deps) {
             }
             clipboard.writeText(text.slice(0, 100000));
             const lines = text.split(/\r?\n/).length;
-            deps.notify(`Copied ${lines} ${lines === 1 ? "line" : "lines"} of text.`);
+            deps.notify(
+              `Copied ${lines} ${lines === 1 ? "line" : "lines"} of text.`,
+            );
             return { action: petal.id };
           }
           if (petal.id.startsWith("action:")) {
             await runFileAction(petal.id, files, deps.notify, {
               addProject: deps.addProject,
+              iconFile: process.env.YAMI_TEST_ICON,
             });
             closeWheel();
             return { action: petal.id };
@@ -422,11 +495,21 @@ export function createWheel(deps: Deps) {
           const bytes = await fs.promises.readFile(file.path);
           if (bytes.length > 12 * 1024 * 1024)
             throw new Error("That image is too large to preview here.");
-          const mime = file.ext === "png" ? "image/png" : file.ext === "webp" ? "image/webp" : file.ext === "gif" ? "image/gif" : "image/jpeg";
+          const mime =
+            file.ext === "png"
+              ? "image/png"
+              : file.ext === "webp"
+                ? "image/webp"
+                : file.ext === "gif"
+                  ? "image/gif"
+                  : "image/jpeg";
           return `data:${mime};base64,${bytes.toString("base64")}`;
         }
         case "wheel.metadata":
-          return readMetadata(engines, (await describeWheelFiles([String(args.path || "")]))[0].path);
+          return readMetadata(
+            engines,
+            (await describeWheelFiles([String(args.path || "")]))[0].path,
+          );
         case "wheel.pdf.info": {
           const [file] = await describeWheelFiles([String(args.path || "")]);
           if (file.path.startsWith("preview://")) return { pages: 3 };
@@ -519,7 +602,9 @@ async function installSendTo() {
 
 export function engineRoot() {
   // Isolated test profiles keep their downloads with the rest of their data.
-  if (process.env.YAMI_DATA_DIR) return path.join(process.env.YAMI_DATA_DIR, "engines");
-  const base = process.env.LOCALAPPDATA || path.join(os.homedir(), ".local", "share");
+  if (process.env.YAMI_DATA_DIR)
+    return path.join(process.env.YAMI_DATA_DIR, "engines");
+  const base =
+    process.env.LOCALAPPDATA || path.join(os.homedir(), ".local", "share");
   return path.join(base, "Yami", "engines");
 }

@@ -20,9 +20,12 @@ test("folders get folder actions only, and Add as project needs one folder", () 
     "action:zip",
     "action:duplicates",
     "action:project",
+    "action:icon",
+    "action:icon-reset",
   ]);
   const two = petalsFor(["site/", "notes.txt"], "actions").map((p) => p.id);
   assert.ok(!two.includes("action:project"));
+  assert.ok(!two.includes("action:icon"));
   assert.ok(!two.includes("action:float"));
   assert.deepEqual(petalsFor(names, "convert"), []);
   assert.deepEqual(petalsFor(names, "tools"), []);
