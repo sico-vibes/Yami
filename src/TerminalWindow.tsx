@@ -48,6 +48,7 @@ export default function TerminalWindow() {
   const [finding, setFinding] = useState(false),
     [needle, setNeedle] = useState(""),
     [shells, setShells] = useState<string[]>([]),
+    [sshHosts, setSshHosts] = useState<string[]>([]),
     [shell, setShell] = useState("");
   // Read by create(), which outlives a render.
   const shellChoice = useRef("");
@@ -141,10 +142,16 @@ export default function TerminalWindow() {
     settings?: WorkbenchSettings,
     launch?: Launch,
   ) {
+    // "ssh:<host>" opens the default shell and runs ssh to that host.
+    const ssh =
+      !launch && shellChoice.current.startsWith("ssh:")
+        ? shellChoice.current.slice(4)
+        : "";
+    if (ssh) launch = { cwd: cwd || "", command: `ssh ${ssh}`, title: ssh };
     try {
       const session = await api("terminal.create", {
         cwd,
-        ...(shellChoice.current && { shell: shellChoice.current }),
+        ...(shellChoice.current && !ssh && { shell: shellChoice.current }),
       });
       if (!mounted.current || !host.current) {
         void api("terminal.end", { session: session.id });
@@ -304,6 +311,9 @@ export default function TerminalWindow() {
     void api("terminal.shells")
       .then(setShells)
       .catch(() => {});
+    void api("terminal.ssh")
+      .then(setSshHosts)
+      .catch(() => {});
     void api("workbench.state")
       .then((value) => {
         apply(value);
@@ -411,7 +421,7 @@ export default function TerminalWindow() {
             </button>
           ))}
         </div>
-        {shells.length > 1 && (
+        {(shells.length > 1 || sshHosts.length > 0) && (
           <Select
             label="Shell for new tabs"
             value={shell}
@@ -422,6 +432,11 @@ export default function TerminalWindow() {
                 value: name,
                 label: shellLabels[name] || name,
                 icon: "terminal",
+              })),
+              ...sshHosts.map((host) => ({
+                value: "ssh:" + host,
+                label: "SSH: " + host,
+                icon: "globe-simple",
               })),
             ]}
           />

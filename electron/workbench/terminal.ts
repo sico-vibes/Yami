@@ -10,6 +10,7 @@ import os from "node:os";
 import readline from "node:readline";
 import { randomUUID } from "node:crypto";
 import { integratedLaunch } from "./shell-integration";
+import { readSshHosts } from "./ssh-hosts";
 import { makeWindow } from "../windows";
 export function helperPath(name: string) {
   return path.join(
@@ -248,6 +249,9 @@ export class TerminalController {
     const owner = this.owner(sender);
     if (method === "terminal.shells")
       return shellNames.filter((n) => n !== "auto" && findShell(n));
+    // Hosts from ~/.ssh/config, offered when Windows' OpenSSH client is here.
+    if (method === "terminal.ssh")
+      return findExecutable("ssh.exe") ? readSshHosts() : [];
     if (method === "terminal.launches") {
       const queued = this.launches;
       this.launches = [];
