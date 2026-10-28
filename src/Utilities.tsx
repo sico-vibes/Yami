@@ -5,6 +5,7 @@ import { Empty, Icon, IconButton, Modal } from "./ui";
 import { Launcher } from "./Launcher";
 import { shortTime } from "./controls";
 import { Today } from "./Today";
+import { mediaControl, repeatLabel, type MediaAction } from "./media";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
   "Controls",
@@ -103,6 +104,10 @@ function Controls({ report }: { report: (m: string) => void }) {
     const id = setInterval(refresh, 6000);
     return () => clearInterval(id);
   }, []);
+  const play = (action: MediaAction, seconds?: number) =>
+    void mediaControl(action, seconds)
+      .then(setMedia)
+      .catch((e) => report(e.message));
   async function change(method: string, args: any) {
     setPending(method);
     try {
@@ -248,28 +253,74 @@ function Controls({ report }: { report: (m: string) => void }) {
           <IconButton
             icon="skip-back"
             label="Previous track"
-            onClick={() => void change("mediaKey", { action: "previous" })}
+            onClick={() => play("previous")}
           />
           <button
             className="play-button"
             aria-label={media?.playing ? "Pause" : "Play"}
-            onClick={() => void change("mediaKey", { action: "play_pause" })}
+            onClick={() => play("toggle")}
           >
             <Icon name={media?.playing ? "pause" : "play"} fill />
           </button>
           <IconButton
             icon="skip-forward"
             label="Next track"
-            onClick={() => void change("mediaKey", { action: "next" })}
+            onClick={() => play("next")}
           />
         </div>
         <div className="track-progress">
+          {media?.canShuffle && (
+            <button
+              className="media-mode"
+              aria-label="Shuffle"
+              aria-pressed={!!media.shuffle}
+              data-tip={media.shuffle ? "Shuffle is on" : "Shuffle is off"}
+              onClick={() => play("shuffle")}
+            >
+              <Icon name="shuffle" size={13} />
+            </button>
+          )}
           <span>{formatTime(media?.position || 0)}</span>
-          <progress
-            max={Math.max(1, media?.duration || 1)}
-            value={media?.position || 0}
-          />
+          {media?.canSeek ? (
+            <input
+              className="seek"
+              type="range"
+              aria-label="Position in track"
+              min="0"
+              max={Math.max(1, Math.floor(media.duration || 1))}
+              value={Math.floor(media.position || 0)}
+              style={
+                {
+                  "--value": `${((media.position || 0) / Math.max(1, media.duration || 1)) * 100}%`,
+                } as React.CSSProperties
+              }
+              onChange={(e) =>
+                setMedia({ ...media, position: Number(e.target.value) })
+              }
+              onPointerUp={(e) => play("seek", Number(e.currentTarget.value))}
+              onKeyUp={(e) => play("seek", Number(e.currentTarget.value))}
+            />
+          ) : (
+            <progress
+              max={Math.max(1, media?.duration || 1)}
+              value={media?.position || 0}
+            />
+          )}
           <span>{formatTime(media?.duration || 0)}</span>
+          {media?.canRepeat && (
+            <button
+              className="media-mode"
+              aria-label="Repeat"
+              aria-pressed={media.repeat === "List" || media.repeat === "Track"}
+              data-tip={repeatLabel[media.repeat] || "Repeat"}
+              onClick={() => play("repeat")}
+            >
+              <Icon
+                name={media.repeat === "Track" ? "repeat-once" : "repeat"}
+                size={13}
+              />
+            </button>
+          )}
         </div>
       </div>
     </>

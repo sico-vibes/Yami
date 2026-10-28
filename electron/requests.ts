@@ -1,3 +1,4 @@
+import { mediaAction } from "./platform";
 import {
   app,
   BrowserWindow,
@@ -457,6 +458,8 @@ export function createRequestHandler(ctx: RequestContext) {
       }
       case "media":
         return nativeScript("Media");
+      case "media.action":
+        return mediaAction(String(a.action), Number(a.seconds) || 0);
       case "effect.data":
         return ctx.effectData;
       case "power":

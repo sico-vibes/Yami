@@ -594,3 +594,46 @@
   height: 100%;
   pointer-events: none;
 }
+.track-progress input.seek {
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--grad-aurora) 0 0 / var(--value) 100% no-repeat,
+    var(--track);
+  box-shadow: none;
+  cursor: pointer;
+}
+.track-progress input.seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+.track-progress:hover input.seek::-webkit-slider-thumb,
+.track-progress input.seek:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+.media-mode {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  color: var(--muted);
+  transition:
+    color var(--dur-fast),
+    background var(--dur-fast);
+}
+.media-mode:hover {
+  color: var(--text);
+}
+.media-mode[aria-pressed="true"] {
+  color: var(--on-glow);
+  background: var(--grad-glow);
+}

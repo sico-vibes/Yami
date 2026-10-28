@@ -23,7 +23,7 @@ export function runPowerShell(
   );
 }
 
-async function executeNativeScript(name: string) {
+async function executeNativeScript(name: string, args: string[] = []) {
   const script = app.isPackaged
     ? path.join(process.resourcesPath, "native", name + ".ps1")
     : path.join(app.getAppPath(), "native", name + ".ps1");
@@ -36,6 +36,7 @@ async function executeNativeScript(name: string) {
       "Bypass",
       "-File",
       script,
+      ...args,
     ],
     { windowsHide: true, timeout: 15000 },
   );
@@ -43,6 +44,29 @@ async function executeNativeScript(name: string) {
 }
 
 const cache = new Map<string, { value: any; until: number }>();
+export const mediaActions = [
+  "toggle",
+  "next",
+  "previous",
+  "seek",
+  "shuffle",
+  "repeat",
+] as const;
+/** Acts on the playing app's media session, then refreshes the cache. */
+export async function mediaAction(action: string, seconds = 0) {
+  if (!mediaActions.includes(action as (typeof mediaActions)[number]))
+    throw new Error("Unknown media action.");
+  const at = Math.max(0, Math.min(86400, Number(seconds) || 0));
+  const value = await executeNativeScript("Media", [
+    "-Action",
+    action,
+    "-Seconds",
+    String(at),
+  ]);
+  if (value.error) throw new Error(value.error);
+  cache.set("Media", { value, until: Date.now() + 6000 });
+  return value;
+}
 const pending = new Map<string, Promise<any>>();
 export function nativeScript(name: string): Promise<any> {
   const cached = cache.get(name);

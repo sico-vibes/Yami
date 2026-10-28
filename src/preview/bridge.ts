@@ -7,6 +7,19 @@ import { previewWorkbench } from "./workbench";
 import { previewModules } from "./modules";
 import { islandSize, peekSize } from "../island-bounds";
 let state = createFixture();
+const previewMedia = {
+  active: true,
+  title: "Demo beats to relax to",
+  artist: "Preview Radio",
+  playing: true,
+  position: 42,
+  duration: 184,
+  shuffle: false,
+  repeat: "None",
+  canSeek: true,
+  canShuffle: true,
+  canRepeat: true,
+};
 let wheelSample = "image";
 let wheelMode: WheelMode = "convert";
 let previewTool = "tool:background";
@@ -162,14 +175,16 @@ export function installPreviewBridge() {
             bluetooth: false,
           };
         case "media":
-          return {
-            active: true,
-            title: "Demo beats to relax to",
-            artist: "Preview Radio",
-            playing: true,
-            position: 42,
-            duration: 184,
-          };
+          return { ...previewMedia };
+        case "media.action":
+          // Demo player only; no Windows media session is touched.
+          if (a.action === "toggle") previewMedia.playing = !previewMedia.playing;
+          if (a.action === "seek") previewMedia.position = Number(a.seconds) || 0;
+          if (a.action === "shuffle") previewMedia.shuffle = !previewMedia.shuffle;
+          if (a.action === "repeat")
+            previewMedia.repeat =
+              previewMedia.repeat === "None" ? "List" : previewMedia.repeat === "List" ? "Track" : "None";
+          return { ...previewMedia };
         case "control":
           toast("Preview only — Windows controls are unchanged.");
           return true;

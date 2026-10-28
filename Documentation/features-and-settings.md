@@ -59,6 +59,10 @@ Dragging a file and tapping a modifier can open a wheel of conversions, tools, o
 
 Dropping on a conversion petal saves a new file beside the original. Images, audio, and video need the matching engine. Documents, sheets, subtitles, and zip, tar, and gz archives convert inside Yami. Slides and page pictures need LibreOffice to already be installed. Compress, details, background, the image tools, the media tools, PDF merge, split, and organize open a small window. OCR is not connected. Copy path, move, the Windows clipboard copy, PowerShell, and the float shelf are on the actions wheel. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
 
+## Music and media
+
+The Controls card and the island's media peek act on the playing app's own Windows media session: play and pause, previous and next, and, when the app offers them, **seek** (drag the progress line), **shuffle** and **repeat** (off, playlist, track) as two small toggles in the time row. The Spotify desktop app, browsers and most players expose this session, so it needs no Spotify account or API key. When a session refuses play, pause or skip, Yami falls back to the media keys. Seek, shuffle and repeat appear only when the player reports them. The read path was checked on Windows on 2026-10-28; shuffle, repeat and seek actions were not exercised against a real player in Yami's checks. Spotify Web API control, lyrics and per-app volume from the plan are not built.
+
 ## Windows utilities
 
 | Utility | Available behavior | Limit |

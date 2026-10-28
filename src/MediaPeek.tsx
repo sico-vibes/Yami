@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { Icon, IconButton } from "./ui";
+import { mediaControl, type MediaAction } from "./media";
 
 const clock = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -33,9 +34,8 @@ export function MediaPeek({
     }, 1000);
     return () => clearInterval(id);
   }, [media.playing, media.duration]);
-  const key = (action: string) =>
-    void api("control", { method: "mediaKey", args: { action } })
-      .then(() => api("media"))
+  const key = (action: MediaAction) =>
+    void mediaControl(action)
       .then(onMedia)
       .catch(() => {});
   return (
@@ -65,7 +65,7 @@ export function MediaPeek({
         <button
           className="play-button"
           aria-label={media.playing ? "Pause" : "Play"}
-          onClick={() => key("play_pause")}
+          onClick={() => key("toggle")}
         >
           <Icon name={media.playing ? "pause" : "play"} fill size={16} />
         </button>
