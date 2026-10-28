@@ -207,6 +207,27 @@ export function previewModules(
     case "tune.undo":
       for (const id of a.ids || []) applied.delete(id);
       return tuneStates();
+    // A demo token; no server listens in preview.
+    case "agentlink.info":
+    case "agentlink.tools":
+    case "agentlink.rotate":
+      if (method === "agentlink.tools")
+        state.settings.agentLinkTools = [
+          ...state.settings.agentLinkTools.filter((t) => t !== a.name),
+          ...(a.allowed ? [a.name] : []),
+        ];
+      return {
+        enabled: state.settings.agentLinkEnabled,
+        url: "http://127.0.0.1:47821/mcp",
+        token: state.settings.agentLinkEnabled ? "preview-token-not-real" : "",
+        error: "",
+        tools: ["notify", "ask_user", "list_projects", "open_terminal"].map(
+          (name) => ({
+            name,
+            allowed: state.settings.agentLinkTools.includes(name),
+          }),
+        ),
+      };
     case "tune.startup":
       return [...previewStartup];
     case "tune.startup.set": {

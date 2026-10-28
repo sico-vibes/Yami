@@ -16,8 +16,13 @@ import { TuneController } from "../tune/tune";
 import { FeedsController } from "../feeds/feeds";
 import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
+import { agentLinkPort, startAgentLink } from "../agentlink/server";
+import { agentTools } from "../agentlink/tools";
+import { randomBytes } from "node:crypto";
 
 type Tune = { tweaks: TuneController; startup: StartupController };
+type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
+const agentToolNames = ["notify", "ask_user", "list_projects", "open_terminal"];
 import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
@@ -157,6 +162,42 @@ export function createModuleHost(deps: Deps) {
         },
         dispose: () => {},
       },
+      agentLink: {
+        load: (): AgentLink => {
+          let token = store.key("provider:agentlink");
+          if (!token) {
+            token = randomBytes(24).toString("hex");
+            store.setKeys({ "provider:agentlink": token });
+          }
+          const link: AgentLink = {
+            ...startAgentLink({
+              token: () => store.key("provider:agentlink"),
+              allowed: (name) => {
+                const list = store.state.settings.agentLinkTools;
+                return Array.isArray(list) && list.includes(name);
+              },
+              tools: agentTools({
+                notify: (message) =>
+                  deps.broadcast({ type: "caption-notice", message }),
+                ask: (title, detail) =>
+                  deps.confirm(
+                    "A coding agent asks: " + title,
+                    detail || "Answer in Yami; no answer counts as no.",
+                  ),
+                projects: () => speechCore().data.state.projects,
+                openTerminal: (project) => workbench().dev.launch({ project }),
+              }),
+            }),
+            error: "",
+          };
+          link.ready.catch((e: Error) => {
+            link.error = e.message;
+            deps.notify(e.message);
+          });
+          return link;
+        },
+        dispose: (link: AgentLink) => void link.close(),
+      },
       fileWheel: {
         load: () =>
           createWheel({
@@ -176,6 +217,9 @@ export function createModuleHost(deps: Deps) {
   const wheel = () => registry.get<Wheel>("fileWheel");
   // Background duties need the workspace running before any page opens.
   const wake = () => {
+    // The agent endpoint must listen before any agent calls it.
+    if (registry.enabled("agentLink") && !registry.loaded("agentLink"))
+      registry.get("agentLink");
     if (!registry.enabled("workbench") || registry.loaded("workbench")) return;
     const { settings, connections } = speechCore().data.state;
     if (workbenchDuties(settings, connections, store.state.settings.hotkeys))
@@ -195,7 +239,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds)\./.test(method)
+        /^(modules|setup|packs|tune|feeds|agentlink)\./.test(method)
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
@@ -218,6 +262,41 @@ export function createModuleHost(deps: Deps) {
           ),
         );
         return registry.list();
+      }
+      if (method.startsWith("agentlink.")) {
+        const settings = store.state.settings;
+        const current = () =>
+          Array.isArray(settings.agentLinkTools) ? settings.agentLinkTools : [];
+        if (method === "agentlink.tools") {
+          const name = String(a.name);
+          if (!agentToolNames.includes(name)) throw new Error("Unknown tool.");
+          if (typeof a.allowed !== "boolean")
+            throw new Error("Choose on or off.");
+          settings.agentLinkTools = [
+            ...current().filter((t) => t !== name),
+            ...(a.allowed ? [name] : []),
+          ];
+          deps.changed();
+        } else if (method === "agentlink.rotate") {
+          registry.get("agentLink");
+          store.setKeys({
+            "provider:agentlink": randomBytes(24).toString("hex"),
+          });
+        } else if (method !== "agentlink.info")
+          throw new Error("Unknown agent link request.");
+        const link = registry.enabled("agentLink")
+          ? registry.get<AgentLink>("agentLink")
+          : undefined;
+        return {
+          enabled: !!link,
+          url: `http://127.0.0.1:${agentLinkPort}/mcp`,
+          token: link ? store.key("provider:agentlink") : "",
+          error: link?.error || "",
+          tools: agentToolNames.map((name) => ({
+            name,
+            allowed: current().includes(name),
+          })),
+        };
       }
       if (method.startsWith("feeds.")) {
         const feeds = registry.get<FeedsController>("feeds");

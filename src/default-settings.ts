@@ -42,5 +42,7 @@ export const defaults: Settings = {
   tuneEnabled: false,
   feedsEnabled: false,
   lyricsEnabled: false,
+  agentLinkEnabled: false,
+  agentLinkTools: ["notify", "ask_user", "list_projects"],
   setupDone: false,
 };

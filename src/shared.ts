@@ -59,6 +59,9 @@ export type Settings = {
   tuneEnabled: boolean;
   feedsEnabled: boolean;
   lyricsEnabled: boolean;
+  agentLinkEnabled: boolean;
+  /** Yami tools coding agents may call through the agent link. */
+  agentLinkTools: string[];
   setupDone: boolean;
 };
 export type Task = {

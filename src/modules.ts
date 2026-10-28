@@ -10,6 +10,7 @@ export type ModuleId =
   | "whistle"
   | "tune"
   | "feeds"
+  | "agentLink"
   | "clipboard"
   | "weather"
   | "roam";
@@ -128,6 +129,18 @@ export const modules: ModuleSpec[] = [
       "Reddit, Hacker News, GitHub releases, YouTube channels and any RSS or Atom feed, in an Inbox on Desk. Read when you open it.",
     icon: "rss",
     setting: "feedsEnabled",
+    cost: "low",
+    permissions: ["network"],
+    packs: [],
+    presets: ["developer", "everything"],
+  },
+  {
+    id: "agentLink",
+    name: "Yami for your agents",
+    blurb:
+      "Coding agents like Claude Code and Codex can notify you, ask yes-or-no questions and see your projects through a local MCP endpoint.",
+    icon: "plugs-connected",
+    setting: "agentLinkEnabled",
     cost: "low",
     permissions: ["network"],
     packs: [],

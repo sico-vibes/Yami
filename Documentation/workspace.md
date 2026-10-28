@@ -49,6 +49,18 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   terminal or editor still has it open; Yami says which. The branch and its commits
   stay. Comparing agents' diffs and sending one prompt to several agents (Orca's
   "fan out") are not built yet.
+- **Agents calling Yami (MCP page).** Turn on **Yami for your agents** and Yami serves
+  an MCP endpoint at `http://127.0.0.1:47821/mcp` (streamable HTTP, JSON replies,
+  protocol 2025-06-18). It listens on this PC only, needs a bearer token kept with
+  your other credentials (DPAPI), refuses requests from web pages (a browser
+  `Origin` that is not this PC), and stops when the module is off. Tools, each with its
+  own switch: **notify** (shows in Yami's caption), **ask_user** (Yami's approval card;
+  no answer in two minutes is no), **list_projects**, and **open_terminal** (off by
+  default; opens a tab in a project and runs nothing). The page shows the address, a
+  copy button for the `Authorization` header and a ready `claude mcp add` command, and
+  **New token** locks out the old one. Registering it with each agent CLI is up to
+  you; Yami does not edit agents' MCP settings. Other agents take the same address and
+  header as a streamable HTTP server; that was **not verified per agent**.
 - **Usage.** Allowance alerts and background refresh are two toggles. Each provider
   that has been read gets a card with its account, source, status word, and each
   limit as a label, a meter, a percentage and a reset time, grouped by account.

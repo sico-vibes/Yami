@@ -115,6 +115,9 @@ Workspace verification commands:
   sandbox. It never restarts Explorer.
 - `node scripts/verify-feeds.mjs`: needs the internet. Reads Hacker News, the
   electron/electron releases feed and r/rust in an isolated profile, then opens the Inbox.
+- `node scripts/verify-agentlink.mjs`: isolated profile; turns on Yami for your
+  agents, then speaks MCP to the endpoint as an agent would: token refusal, notify,
+  ask_user through the visible approval card, tool switches and token rotation.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

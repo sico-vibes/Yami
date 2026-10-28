@@ -78,6 +78,7 @@ electron/        main process
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
   modules/         optional modules: registry.ts (pure, tested), host.ts (lazy build/dispose, modules.* IPC)
+  agentlink/       MCP endpoint for coding agents (loopback, token, per-tool switches)
   feeds/           Desk inbox: RSS/Atom/JSON Feed reader and on-request cache (feeds.json)
   tune/            Windows tune-up: reg.exe adapter and exact-undo snapshots (tune.json)
   workbench/       AI workspace: projects + agent launcher (dev.ts), sessions/hooks, quota, connections, terminal PTY, local model, MCP, context, speech/notes

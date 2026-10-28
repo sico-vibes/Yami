@@ -51,6 +51,7 @@ Every optional feature is a module, listed once in `src/modules.ts` with its nam
 - **File wheel** (`fileWheelEnabled`). The service and its windows exist only after the first drag, shortcut, Send to launch or tray click. Turning it off closes its windows; the native drag hook was already gated by the same setting.
 - **Windows tune-up** (`tuneEnabled`). `electron/tune/tune.ts` reads and writes per-user registry values through `electron/tune/registry.ts` (`reg.exe`, argument arrays only) and keeps earlier values in `tune.json` for exact undo.
 - **Feeds inbox** (`feedsEnabled`). `electron/feeds/feeds.ts` reads sources on request with conditional headers and keeps a capped cache in `feeds.json`; `electron/feeds/parse.ts` is a dependency-free RSS, Atom and JSON Feed reader.
+- **Yami for your agents** (`agentLinkEnabled`). Started at launch when on, since agents call it unprompted. `electron/agentlink/server.ts` is the loopback HTTP listener, `protocol.ts` the JSON-RPC core and `tools.ts` the four tools.
 - **Clipboard history, weather and roaming Yami** are settings-only modules: their existing code already checks the setting before doing any work.
 
 Dictation is core, not part of the AI workspace. Its rules and Windows speech engine use the workspace data file through a shared storage object, so dictation rules and offline dictation keep working when the AI workspace is asleep or off.

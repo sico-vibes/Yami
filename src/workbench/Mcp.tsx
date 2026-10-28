@@ -3,6 +3,7 @@ import type { WorkbenchState } from "../workbench-types";
 import { api } from "../api";
 import { Select } from "../controls";
 import { Icon } from "../ui";
+import { AgentLinkPanel } from "./AgentLinkPanel";
 export function Mcp({
   data,
   report,
@@ -29,72 +30,72 @@ export function Mcp({
         </div>
       </div>
       <section className="workbench-usage form-card">
-      <header className="entry-head">
-        <span className="entry-icon">
-          <Icon name="plug" />
-        </span>
-        <div className="entry-heading">
-          <strong>Server</strong>
-          <small>
-            {tools.length
-              ? `${tools.length} ${tools.length === 1 ? "tool" : "tools"} available`
-              : "Not connected"}
-          </small>
+        <header className="entry-head">
+          <span className="entry-icon">
+            <Icon name="plug" />
+          </span>
+          <div className="entry-heading">
+            <strong>Server</strong>
+            <small>
+              {tools.length
+                ? `${tools.length} ${tools.length === 1 ? "tool" : "tools"} available`
+                : "Not connected"}
+            </small>
+          </div>
+        </header>
+        <div className="workbench-form">
+          <label className="form-label">
+            Server address
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://your-server.example/mcp"
+            />
+          </label>
+          <label className="form-label">
+            {data.settings.mcpHasKey
+              ? "Replace server key"
+              : "Optional server key"}
+            <input
+              type="password"
+              autoComplete="off"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+            />
+          </label>
         </div>
-      </header>
-      <div className="workbench-form">
-        <label className="form-label">
-          Server address
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://your-server.example/mcp"
-          />
-        </label>
-        <label className="form-label">
-          {data.settings.mcpHasKey
-            ? "Replace server key"
-            : "Optional server key"}
-          <input
-            type="password"
-            autoComplete="off"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-          />
-        </label>
-      </div>
-      <div className="workbench-actions">
-        <button
-          className="soft-button"
-          disabled={busy || !url}
-          onClick={() => {
-            setBusy(true);
-            void api("workbench.settings", {
-              mcpUrl: url,
-              ...(key ? { mcpKey: key } : {}),
-            })
-              .then(() => api("mcp.connect"))
-              .then(setTools)
-              .catch((e) => report(e.message))
-              .finally(() => setBusy(false));
-          }}
-        >
-          <Icon name="plugs-connected" size={16} />
-          Connect and list tools
-        </button>
-        <button
-          className="text-button"
-          onClick={() =>
-            void api("mcp.disconnect").then(() => {
-              setTools([]);
-              setName("");
-            })
-          }
-        >
-          Disconnect
-        </button>
-      </div>
+        <div className="workbench-actions">
+          <button
+            className="soft-button"
+            disabled={busy || !url}
+            onClick={() => {
+              setBusy(true);
+              void api("workbench.settings", {
+                mcpUrl: url,
+                ...(key ? { mcpKey: key } : {}),
+              })
+                .then(() => api("mcp.connect"))
+                .then(setTools)
+                .catch((e) => report(e.message))
+                .finally(() => setBusy(false));
+            }}
+          >
+            <Icon name="plugs-connected" size={16} />
+            Connect and list tools
+          </button>
+          <button
+            className="text-button"
+            onClick={() =>
+              void api("mcp.disconnect").then(() => {
+                setTools([]);
+                setName("");
+              })
+            }
+          >
+            Disconnect
+          </button>
+        </div>
       </section>
       {!!tools.length && (
         <section className="workbench-usage form-card">
@@ -107,7 +108,11 @@ export function Mcp({
               onChange={setName}
               options={[
                 { value: "", label: "Choose a tool" },
-                ...tools.map((t) => ({ value: t.name, label: t.name, icon: "wrench" })),
+                ...tools.map((t) => ({
+                  value: t.name,
+                  label: t.name,
+                  icon: "wrench",
+                })),
               ]}
             />
           </label>
@@ -159,6 +164,8 @@ export function Mcp({
         </section>
       )}
       {result && <pre className="workbench-prose mcp-result">{result}</pre>}
+      <h3 className="group-title">Agents calling Yami</h3>
+      <AgentLinkPanel report={report} />
     </>
   );
 }
