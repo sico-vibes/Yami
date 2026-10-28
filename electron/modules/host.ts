@@ -32,9 +32,11 @@ import { agentTools } from "../agentlink/tools";
 import { startRemote, type RemoteAbility } from "../remote/server";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
+import { createLinked } from "../browser/linked";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
 import { darkAt, nextSwitch } from "../../src/theme-schedule";
+import { resolveInput, webOnly } from "../../src/browser-rules";
 import { activeAgents } from "../../src/agent-rank";
 import { agentClis } from "../../src/dev-types";
 import { mediaAction, nativeScript } from "../platform";
@@ -49,7 +51,11 @@ type Tune = {
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
 type Remote = ReturnType<typeof startRemote> & { error: string };
-type Browser = { browser: ReturnType<typeof createBrowser>; vault: Vault };
+type Browser = {
+  browser: ReturnType<typeof createBrowser>;
+  vault: Vault;
+  linked: ReturnType<typeof createLinked>;
+};
 const remoteAbilities: RemoteAbility[] = ["approvals", "media", "clipboard"];
 const agentName = (id: string) =>
   agentClis.find((c) => c.id === id)?.name || id;
@@ -218,8 +224,12 @@ export function createModuleHost(deps: Deps) {
             decrypt: (data) => safeStorage.decryptString(data),
             available: () => safeStorage.isEncryptionAvailable(),
           }),
+          linked: createLinked({ profileRoot: path.dirname(store.file) }),
         }),
-        dispose: (b: Browser) => b.browser.dispose(),
+        dispose: (b: Browser) => {
+          b.linked.close();
+          b.browser.dispose();
+        },
       },
       remote: {
         load: (): Remote => {
@@ -322,8 +332,11 @@ export function createModuleHost(deps: Deps) {
                   browser.show();
                   browser.open(url);
                 },
-                browserRead: () =>
-                  registry.get<Browser>("browser").browser.read(),
+                // A signed-in linked browser, when open, is what agents read.
+                browserRead: () => {
+                  const { browser, linked } = registry.get<Browser>("browser");
+                  return linked.running() ? linked.read() : browser.read();
+                },
               }),
             }),
             error: "",
@@ -486,7 +499,7 @@ export function createModuleHost(deps: Deps) {
         throw new Error("Unknown Spotify request.");
       }
       if (method.startsWith("browser.") || method.startsWith("vault.")) {
-        const { browser, vault } = registry.get<Browser>("browser");
+        const { browser, vault, linked } = registry.get<Browser>("browser");
         const local = process.env.LOCALAPPDATA || "";
         switch (method) {
           case "browser.show":
@@ -516,6 +529,26 @@ export function createModuleHost(deps: Deps) {
             return browser.close(String(a.id));
           case "browser.layout":
             return browser.layout(a);
+          case "browser.linked":
+            return {
+              browsers: linked.list().map(({ id, name }) => ({ id, name })),
+              open: linked.current()?.name || "",
+            };
+          case "browser.linked.open": {
+            const url = resolveInput(
+              String(a.url || "https://accounts.google.com/"),
+            );
+            if (!webOnly(url)) throw new Error("Open a web address.");
+            await linked.open(
+              String(a.id),
+              url,
+              !!process.env.YAMI_LINKED_HEADLESS,
+            );
+            return true;
+          }
+          case "browser.linked.close":
+            linked.close();
+            return true;
           case "vault.bookmarks":
             return vault.list();
           case "vault.sources":

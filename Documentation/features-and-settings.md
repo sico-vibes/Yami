@@ -167,7 +167,7 @@ The **Vault** imports bookmarks from Chrome, Edge, Brave, Vivaldi or Helium on t
 
 With **Yami for your agents** on, the `browser_open` and `browser_read` tools (both off by default) let an agent open an address and read the current tab's title, address and visible text, while a "Reading this page for an agent" bar shows.
 
-Checked on Windows on 2026-10-28 against a local test page: tabs, the page view's placement, background-tab sleep and wake, refusing `javascript:`, and an agent reading over MCP. The plan's remaining parts are **not built**: content blocking, reader mode, history and password import, autofill, Linked browser mode for Google sign-in, and agent clicking or typing.
+Checked on Windows on 2026-10-28 against a local test page: tabs, the page view's placement, background-tab sleep and wake, refusing `javascript:`, and an agent reading over MCP. **Linked browser mode.** Google, banks and some other sites refuse to sign in inside embedded browsers, and Yami does not disguise itself. So the new-tab page can open an installed Microsoft Edge, Google Chrome, Brave or Helium instead. It runs with its own Yami profile folder (never your usual profile) and a debugging port on `127.0.0.1:47824` only, so sign-ins work normally and `browser_read` reads that window while it is open. Closing it from Yami ends it. Checked on Windows with headless Edge reading a local test page. The plan's remaining parts are **not built**: content blocking, reader mode, history and password import, autofill, and agent clicking or typing.
 
 ## Yami Remote (phone)
 

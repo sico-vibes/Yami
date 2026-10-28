@@ -230,8 +230,15 @@ function NewTab({
     [sources, setSources] = useState<
       { id: string; name: string; found: boolean }[]
     >([]),
-    [query, setQuery] = useState("");
+    [query, setQuery] = useState(""),
+    [linked, setLinked] = useState<{
+      browsers: { id: string; name: string }[];
+      open: string;
+    } | null>(null);
   const load = () => {
+    void api("browser.linked")
+      .then(setLinked)
+      .catch(() => {});
     void api("vault.bookmarks").then(setBookmarks).catch(fail);
     void api("vault.sources")
       .then(setSources)
@@ -252,6 +259,45 @@ function NewTab({
         Type in the address bar above. Pages stay in this browser's own profile
         on your PC.
       </p>
+      {!!linked?.browsers.length && (
+        <section className="browser-linked">
+          <strong>Signing in to Google or your bank?</strong>
+          <p className="setting-note">
+            Some sites refuse built-in browsers. Open one of your installed
+            browsers with its own Yami profile instead. Your usual profile is
+            not touched, and Yami's agent tools read that window while it is
+            open.
+          </p>
+          <div className="browser-import">
+            {linked.browsers.map((b) => (
+              <button
+                key={b.id}
+                className="soft-button"
+                onClick={() =>
+                  void api("browser.linked.open", { id: b.id })
+                    .then(load)
+                    .catch(fail)
+                }
+              >
+                <Icon name="arrow-square-out" size={16} />
+                {linked.open === b.name
+                  ? `${b.name} is open`
+                  : `Open ${b.name}`}
+              </button>
+            ))}
+            {linked.open && (
+              <button
+                className="text-button"
+                onClick={() =>
+                  void api("browser.linked.close").then(load).catch(fail)
+                }
+              >
+                Close {linked.open}
+              </button>
+            )}
+          </div>
+        </section>
+      )}
       <div className="browser-import">
         {sources
           .filter((s) => s.found)

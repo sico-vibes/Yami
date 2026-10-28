@@ -22,6 +22,7 @@ const env = {
   ...process.env,
   YAMI_DATA_DIR: profile,
   YAMI_TAB_DISCARD_MS: "1500",
+  YAMI_LINKED_HEADLESS: "1",
 };
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await _electron.launch({ args: [path.resolve(".")], env });
@@ -97,7 +98,10 @@ try {
   // Stop the search before it reaches the internet, then check the page.
   await call("browser.go", { id: active, step: "stop" });
   await wait(300);
-  const after = await rpc("tools/call", { name: "browser_read", arguments: {} });
+  const after = await rpc("tools/call", {
+    name: "browser_read",
+    arguments: {},
+  });
   assert.notEqual(JSON.parse(after.result.content[0].text).title, "hacked");
   // A tab left in the background is discarded, then reloads on return.
   const second = await call("browser.open", {
@@ -118,6 +122,29 @@ try {
     false,
     "woken",
   );
+  // Linked browser mode: an installed Chromium browser, headless here, with
+  // its own profile inside this test profile. The agent tool reads it.
+  const linked = await call("browser.linked");
+  let linkedChecked = "";
+  if (linked.browsers.length) {
+    const pick = linked.browsers[0];
+    await call("browser.linked.open", {
+      id: pick.id,
+      url: "http://127.0.0.1:47896/two",
+    });
+    let viaLinked = "";
+    for (let i = 0; i < 30 && viaLinked !== "Second page"; i++) {
+      const r = await rpc("tools/call", {
+        name: "browser_read",
+        arguments: {},
+      });
+      viaLinked = JSON.parse(r.result.content[0].text || "{}").title || "";
+      if (viaLinked !== "Second page") await wait(300);
+    }
+    assert.equal(viaLinked, "Second page", "read through the linked browser");
+    await call("browser.linked.close");
+    linkedChecked = pick.name;
+  }
   await call("modules.set", { id: "browser", enabled: false });
   for (
     let i = 0;
@@ -130,7 +157,13 @@ try {
     "closed when off",
   );
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, views: views.length }));
+  console.log(
+    JSON.stringify({
+      passed: true,
+      views: views.length,
+      linked: linkedChecked,
+    }),
+  );
 } finally {
   await app.close();
   site.close();

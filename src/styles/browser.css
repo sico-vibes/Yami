@@ -216,3 +216,13 @@ html[data-window="browser"] body {
   color: var(--muted);
   font-size: var(--fs-2xs);
 }
+.browser-linked {
+  margin: var(--space-4) 0;
+  padding: var(--card-pad);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.browser-linked .setting-note {
+  margin: var(--space-1) 0 0;
+}
