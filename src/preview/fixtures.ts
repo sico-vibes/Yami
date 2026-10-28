@@ -9,6 +9,7 @@ export function createFixture(): State {
       clipboardEnabled: false,
       weatherEnabled: true,
       setupDone: true,
+      tuneEnabled: true,
     },
     todos: [
       { id: "todo-1", title: "Plan a quiet afternoon", done: false },

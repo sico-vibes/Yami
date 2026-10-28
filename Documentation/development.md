@@ -107,6 +107,10 @@ Workspace verification commands:
 - `node scripts/verify-projects.mjs`: isolated profile; adds this repository as a
   project, checks its git branch and the detected agent CLIs, refuses unknown and
   uninstalled agents, and opens a terminal tab there. It never starts an agent CLI.
+- `node scripts/verify-tune.mjs`: applies and undoes every Tune tweak with real
+  `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
+  `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the
+  sandbox. It never restarts Explorer.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

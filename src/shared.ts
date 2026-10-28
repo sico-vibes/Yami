@@ -5,7 +5,8 @@ export type Tab =
   | "desk"
   | "ai"
   | "settings"
-  | "setup";
+  | "setup"
+  | "tune";
 export type UtilityTab =
   | "Controls"
   | "Today"
@@ -55,6 +56,7 @@ export type Settings = {
   fileWheelSound: boolean;
   workbenchEnabled: boolean;
   whistleEnabled: boolean;
+  tuneEnabled: boolean;
   setupDone: boolean;
 };
 export type Task = {

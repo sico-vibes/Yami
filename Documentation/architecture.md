@@ -49,6 +49,7 @@ Every optional feature is a module, listed once in `src/modules.ts` with its nam
 
 - **AI workspace** (`workbenchEnabled`). It is built at startup only when it has work to do without its page open: the agent relay (`monitor`), background usage or connection refreshes, or a terminal shortcut with shortcuts on. Otherwise its first `workbench.*`, `terminal.*`, `agents.*` or similar request builds it. Turning it off disposes the controllers, closes terminals and unregisters its shortcut; it refuses while a meeting recording is open. Export and Delete all data still reach its data while it sleeps.
 - **File wheel** (`fileWheelEnabled`). The service and its windows exist only after the first drag, shortcut, Send to launch or tray click. Turning it off closes its windows; the native drag hook was already gated by the same setting.
+- **Windows tune-up** (`tuneEnabled`). `electron/tune/tune.ts` reads and writes per-user registry values through `electron/tune/registry.ts` (`reg.exe`, argument arrays only) and keeps earlier values in `tune.json` for exact undo.
 - **Clipboard history, weather and roaming Yami** are settings-only modules: their existing code already checks the setting before doing any work.
 
 Dictation is core, not part of the AI workspace. Its rules and Windows speech engine use the workspace data file through a shared storage object, so dictation rules and offline dictation keep working when the AI workspace is asleep or off.

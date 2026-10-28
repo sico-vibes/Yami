@@ -29,3 +29,10 @@ Record source behavior alongside meaningful end-to-end parity checks, including 
 Inspect the license of each reused file, dependency and asset; preserve required notices. An upstream code license does not automatically grant rights to its name, character, artwork, sounds or screenshots. Keep downloaded reference code and assets in ignored local research storage. Update the affected documentation, source provenance and project-local skill copies when shipping an adaptation.
 
 The [repository adaptation review](research/adaptation-review.md) applies these rules to Coucou, Terax AI and CodeNotch. The [workspace implementation guide](workspace.md) separates implemented scope, Windows checks and live-account/device gaps. The research review is a dated source record, not a claim of full upstream parity.
+
+## WinUtil → Tune (2026-10-28)
+
+- **Source:** [ChrisTitusTech/winutil](https://github.com/ChrisTitusTech/winutil), revision `2f0bdc8fca52`, MIT. Only the idea of a declared tweak list with apply and undo was used; no code, wording or tweak JSON was copied.
+- **Behaviour mapping:** WinUtil's tweaks set registry values, services and apps, and its undo writes fixed "original" values. Yami's Tune saves the exact earlier value of each registry value before it applies and restores that value, or removes it when it was not set.
+- **Platform differences:** Tune writes only `HKEY_CURRENT_USER` values, so it needs no administrator rights. WinUtil's machine-wide tweaks, services, app removal, Windows Update modes and restore points are **gaps**, not parity.
+- **Checks:** `tests/tune.test.mjs` covers exact undo, created-key removal and already-set tweaks. `scripts/verify-tune.mjs` applies and undoes all fourteen tweaks with real `reg.exe` in a sandbox key.

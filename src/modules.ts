@@ -5,7 +5,13 @@ import type { Settings } from "./shared";
 // downloads belong to a module as packs; their pins live in the main process.
 
 export type ModuleId =
-  "fileWheel" | "workbench" | "whistle" | "clipboard" | "weather" | "roam";
+  | "fileWheel"
+  | "workbench"
+  | "whistle"
+  | "tune"
+  | "clipboard"
+  | "weather"
+  | "roam";
 export type ModuleCost = "low" | "medium" | "high";
 export type ModulePermission =
   "network" | "microphone" | "screen" | "clipboard" | "admin" | "files";
@@ -101,6 +107,18 @@ export const modules: ModuleSpec[] = [
     permissions: ["files"],
     packs: ["ffmpeg", "magick", "sevenZip", "sevenExtra", "exiftool"],
     presets: ["essentials", "developer", "tinkerer", "everything"],
+  },
+  {
+    id: "tune",
+    name: "Windows tune-up",
+    blurb:
+      "Fourteen per-user tweaks for Explorer, the taskbar, privacy and games. Each one shows what it changes and undoes exactly.",
+    icon: "sliders-horizontal",
+    setting: "tuneEnabled",
+    cost: "low",
+    permissions: [],
+    packs: [],
+    presets: ["tinkerer", "everything"],
   },
   {
     id: "clipboard",

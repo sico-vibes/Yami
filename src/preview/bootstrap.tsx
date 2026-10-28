@@ -34,6 +34,7 @@ const screens = [
   "File wheel",
   "Background",
   "Setup",
+  "Tune",
 ];
 const overlays = ["Stray", "Caption"];
 function Preview() {
@@ -52,6 +53,7 @@ function Preview() {
     "AI",
     "Terminal",
     "Setup",
+    "Tune",
   ].includes(screen);
   useEffect(() => {
     history.replaceState(null, "", `?screen=${encodeURIComponent(screen)}`);
@@ -121,6 +123,7 @@ export function startPreview() {
           "Terminal",
           "Island",
           "Setup",
+          "Tune",
         ].includes(screen),
       island = utility || screen === "Island";
     document.documentElement.dataset.window = overlay

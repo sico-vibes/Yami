@@ -1,0 +1,29 @@
+/* Tune: Windows tune-up tweaks as grouped setting rows. */
+.page-tune {
+  padding: var(--space-2) var(--gutter) var(--space-6);
+}
+.tune-page {
+  max-width: var(--page-max);
+  margin: 0 auto;
+}
+.tune-restart {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, var(--selected), transparent 70%),
+    var(--surface-1);
+  border: 1px solid var(--selected-line);
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+}
+.tune-restart span {
+  flex: 1;
+}
+.tune-page .setting-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

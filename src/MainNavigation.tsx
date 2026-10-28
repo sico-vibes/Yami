@@ -8,18 +8,19 @@ const tabs: [Tab, string, string][] = [
   ["soul", "flame", "Soul"],
   ["desk", "armchair", "Desk"],
   ["ai", "robot", "AI"],
+  ["tune", "sliders-horizontal", "Tune"],
   ["settings", "gear", "Settings"],
 ];
 
 export function MainNavigation({
   tab,
   onNavigate,
-  workbench = true,
+  hidden = [],
 }: {
   tab: Tab;
   onNavigate: (tab: Tab) => void;
-  /** False hides AI while the AI workspace module is off. */
-  workbench?: boolean;
+  /** Tabs whose module is off, such as AI or Tune. */
+  hidden?: Tab[];
 }) {
   const dock = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
@@ -36,12 +37,12 @@ export function MainNavigation({
     const observer = new ResizeObserver(update);
     observer.observe(nav);
     return () => observer.disconnect();
-  }, [tab, workbench]);
+  }, [tab, hidden.join()]);
   return (
     <nav ref={dock} className="bottom-dock" aria-label="Main navigation">
       <span className="dock-selection" aria-hidden="true" />
       {tabs
-        .filter(([id]) => workbench || id !== "ai")
+        .filter(([id]) => !hidden.includes(id))
         .map(([id, icon, label]) => (
           <button
             key={id}

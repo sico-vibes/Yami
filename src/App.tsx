@@ -9,6 +9,7 @@ import { MainNavigation } from "./MainNavigation";
 import { skinFor } from "./yami/skins";
 import { TooltipLayer } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
+const TunePage = lazy(() => import("./tune/TunePage"));
 const Setup = lazy(() =>
   import("./setup/Setup").then((m) => ({ default: m.Setup })),
 );
@@ -79,10 +80,16 @@ export function App() {
       );
   }, [state?.settings.reducedMotion]);
   const firstRun = !!state && !state.settings.setupDone;
-  const workbenchOff = !!state && !state.settings.workbenchEnabled;
+  // Tabs of modules that are off are hidden; leave one if it was open.
+  const hidden: Tab[] = !state
+    ? []
+    : [
+        ...(state.settings.workbenchEnabled ? [] : (["ai"] as Tab[])),
+        ...(state.settings.tuneEnabled ? [] : (["tune"] as Tab[])),
+      ];
   useEffect(() => {
-    if (workbenchOff && tab === "ai") setTab("home");
-  }, [workbenchOff, tab]);
+    if (hidden.includes(tab)) setTab("home");
+  }, [hidden.join(), tab]);
   if (!state)
     return (
       <div className="boot">
@@ -133,6 +140,10 @@ export function App() {
               onDone={() => setTab("home")}
             />
           </Suspense>
+        ) : tab === "tune" ? (
+          <Suspense fallback={<p className="empty-state">Opening Tune…</p>}>
+            <TunePage report={report} />
+          </Suspense>
         ) : tab === "ai" ? (
           <Suspense
             fallback={<p className="empty-state">Opening workspace…</p>}
@@ -168,11 +179,7 @@ export function App() {
         )}
       </main>
       {!firstRun && (
-        <MainNavigation
-          tab={tab}
-          onNavigate={setTab}
-          workbench={state.settings.workbenchEnabled}
-        />
+        <MainNavigation tab={tab} onNavigate={setTab} hidden={hidden} />
       )}
       {toast && (
         <div className="toast" role="status">

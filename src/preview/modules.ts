@@ -8,6 +8,7 @@ import {
   type PackId,
   type PackStatus,
 } from "../modules";
+import { tweaks } from "../tune-types";
 
 const sizes: Record<PackId, number> = {
   ffmpeg: 101_000_000,
@@ -19,6 +20,14 @@ const sizes: Record<PackId, number> = {
   whistle: 16_919_407,
 };
 const packs = new Map<PackId, PackStatus>();
+// "Show file extensions" starts as already set before Yami, to show the lock.
+const applied = new Set<string>(["fileExtensions"]);
+const tuneStates = () =>
+  tweaks.map((t) => ({
+    id: t.id,
+    applied: applied.has(t.id),
+    undoable: applied.has(t.id) && t.id !== "fileExtensions",
+  }));
 const timers = new Map<PackId, ReturnType<typeof setInterval>>();
 
 function pack(id: PackId): PackStatus {
@@ -86,6 +95,21 @@ export function previewModules(
     case "packs.installFile":
       emit({ type: "toast", message: "Preview only — no file was read." });
       return pack(a.id);
+    // Tune changes nothing in preview; it only flips demo states.
+    case "tune.list":
+      return tuneStates();
+    case "tune.apply":
+      for (const id of a.ids || []) applied.add(id);
+      return tuneStates();
+    case "tune.undo":
+      for (const id of a.ids || []) applied.delete(id);
+      return tuneStates();
+    case "tune.restartExplorer":
+      emit({
+        type: "toast",
+        message: "Preview only — Explorer was not touched.",
+      });
+      return true;
   }
   throw new Error(`Desktop-only action: ${method}`);
   function install(id: PackId) {

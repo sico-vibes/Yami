@@ -131,6 +131,17 @@ The table lists source defaults; a user can change most values in Settings. Sett
 
 The source declares the voice and text defaults as `gemini-3.8-live` and `gemini-3.8-flash`, respectively. Provider model catalogs change; setup can choose a compatible model returned for the user’s API key. The saved model names are visible and changeable through settings/model discovery when supported.
 
+## Tune (Windows tune-up)
+
+Turn on **Windows tune-up** in Settings › Modules (or the Tinkerer preset) and a **Tune** tab joins the dock. It lists fourteen per-user tweaks in five groups:
+- **Explorer:** file extensions, hidden files, open to This PC, the classic right-click menu.
+- **Taskbar and Start:** icons on the left, End task in the taskbar menu, seconds on the clock, no web results in Start search, no suggested apps.
+- **Privacy:** no advertising ID, no tailored experiences, no tips.
+- **Gaming:** no background game recording.
+- **Comfort:** no Sticky Keys prompt.
+
+Every tweak writes only `HKEY_CURRENT_USER` values through `reg.exe`, so there is no administrator prompt. Before changing anything, Yami writes the exact earlier values to `tune.json` in its data folder. Turning a tweak off restores them, removes values that were not set, and deletes a key Yami created. A tweak that was already set before Yami shows **Already set** and stays locked, because there is nothing of Yami's to undo. Tweaks that Explorer reads at start offer **Restart Explorer**, which asks first and never runs on its own. The tweak list was adapted from the ideas in Chris Titus Tech's WinUtil (no code copied). Administrator tweaks, services, app removal, the DNS switcher and the startup manager from the plan are not built yet.
+
 ## Modules and first-run setup
 
 A new profile opens **Choose your Yami**. Presets (Essentials, Developer, Tinkerer, Everything) or Custom switch the five modules: AI workspace, File wheel, Clipboard history, Weather and Roaming Yami. Each card shows what the module does, how much background work it costs, the permissions it uses, and its optional downloads. A module that is off never loads. Profiles saved before setup existed skip it and keep their choices. **Settings › Modules** switches modules any time and shows whether each one is awake; the tray's **Choose features…** reopens setup. The AI workspace sleeps until its page, an agent hook, a background refresh or its terminal shortcut needs it. While it is off, the AI tab is hidden from the dock and the island drawer.

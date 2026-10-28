@@ -12,6 +12,9 @@ import { EngineStore } from "../wheel/engines.ts";
 import { modules } from "../../src/modules.ts";
 import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
+import { TuneController } from "../tune/tune";
+import { regExe } from "../tune/registry";
+import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
 type Deps = {
@@ -29,6 +32,33 @@ type Deps = {
     options: Electron.BrowserWindowConstructorOptions,
   ) => BrowserWindow;
 };
+
+/** Ends Explorer and starts it again if Windows did not. Asked for first. */
+function restartExplorer() {
+  return new Promise<boolean>((resolve) => {
+    execFile(
+      "taskkill.exe",
+      ["/f", "/im", "explorer.exe"],
+      { windowsHide: true, timeout: 8000 },
+      () =>
+        setTimeout(() => {
+          execFile(
+            "tasklist.exe",
+            ["/fi", "imagename eq explorer.exe", "/nh"],
+            { windowsHide: true, timeout: 8000 },
+            (_e, stdout) => {
+              if (!/explorer\.exe/i.test(String(stdout)))
+                spawn("explorer.exe", [], {
+                  detached: true,
+                  stdio: "ignore",
+                }).unref();
+              resolve(true);
+            },
+          );
+        }, 2000),
+    );
+  });
+}
 
 /**
  * Owns the optional modules: builds the AI workspace and the file wheel on
@@ -88,6 +118,14 @@ export function createModuleHost(deps: Deps) {
             ? "Finish or discard the recording before turning off the AI workspace."
             : undefined,
       },
+      tune: {
+        load: () =>
+          new TuneController(
+            path.join(path.dirname(store.file), "tune.json"),
+            regExe(process.env.YAMI_TUNE_ROOT),
+          ),
+        dispose: () => {},
+      },
       fileWheel: {
         load: () =>
           createWheel({
@@ -125,7 +163,8 @@ export function createModuleHost(deps: Deps) {
     },
     handles(method: string) {
       return (
-        Workbench.handles(method) || /^(modules|setup|packs)\./.test(method)
+        Workbench.handles(method) ||
+        /^(modules|setup|packs|tune)\./.test(method)
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
@@ -148,6 +187,14 @@ export function createModuleHost(deps: Deps) {
           ),
         );
         return registry.list();
+      }
+      if (method.startsWith("tune.")) {
+        const tune = registry.get<TuneController>("tune");
+        if (method === "tune.list") return tune.list();
+        if (method === "tune.apply") return tune.apply(a.ids);
+        if (method === "tune.undo") return tune.undo(a.ids);
+        if (method === "tune.restartExplorer") return restartExplorer();
+        throw new Error("Unknown tune-up request.");
       }
       if (method.startsWith("packs.")) {
         const [id] = validPacks([a.id]);
@@ -262,7 +309,7 @@ export function createModuleHost(deps: Deps) {
         if (live) return live.clearData();
         if (shared) shared.data.deleted = true;
         const dir = path.dirname(store.file);
-        for (const file of ["workbench.json", "agent-relay.json"])
+        for (const file of ["workbench.json", "agent-relay.json", "tune.json"])
           fs.rmSync(path.join(dir, file), { force: true });
       },
     },
