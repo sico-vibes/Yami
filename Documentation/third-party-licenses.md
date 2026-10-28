@@ -16,7 +16,7 @@ This initial inventory records direct packages from the application manifest. It
 | `@fontsource-variable/rubik` | Rubik font files | [Fontsource project](https://github.com/fontsource/font-files); OFL. |
 | `react`, `react-dom` | Renderer UI | [React repository](https://github.com/facebook/react); MIT. |
 | `motion` | UI animation | MIT; [Motion repository](https://github.com/motiondivision/motion). |
-| `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-search` | Interactive terminal renderer, fit and scrollback search addons | MIT notices in the generated versioned inventory. |
+| `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-search`, `@xterm/addon-web-links` | Interactive terminal renderer, fit, scrollback search and link addons | MIT notices in the generated versioned inventory. |
 | `node-pty`, `node-addon-api` | Windows PTY bridge/native addon | MIT notices, including winpty and Microsoft ConPTY; bundled binaries remain under their upstream terms. |
 | `@ghostery/adblocker` 2.20.1 and its `@ghostery/*`, `@remusao/*` dependencies, `tldts-experimental` | Yami Browser's full filter lists: parses EasyList and EasyPrivacy, matches requests and returns element-hiding CSS | MPL-2.0 (the `@ghostery` and `@remusao` packages; used unmodified, source at [ghostery/adblocker](https://github.com/ghostery/adblocker)) and MIT (`tldts`). Notices in the generated versioned inventory. The filter lists themselves are downloaded by the user, not shipped. |
 | `systeminformation` | Hardware and process metrics | MIT; [systeminformation repository](https://github.com/sebhildebrandt/systeminformation). |

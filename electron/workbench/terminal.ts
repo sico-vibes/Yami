@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, type WebContents } from "electron";
+import { app, BrowserWindow, dialog, shell, type WebContents } from "electron";
 import {
   spawn,
   execFileSync,
@@ -311,6 +311,17 @@ export class TerminalController {
         throw e;
       }
       return { id, cwd, shell: path.basename(shell) };
+    }
+    if (method === "terminal.reveal") {
+      // A path Ctrl+clicked in output: shown in Explorer if it is there.
+      const target = path.resolve(String(a.path || ""));
+      if (!/^([A-Za-z]:\\|\\\\)/.test(target) || !fs.existsSync(target))
+        throw new Error("That path is not on this PC.");
+      if (fs.statSync(target).isDirectory()) {
+        const error = await shell.openPath(target);
+        if (error) throw new Error(error);
+      } else shell.showItemInFolder(target);
+      return true;
     }
     const session = this.sessions.get(a.session);
     if (!session || session.owner !== owner)

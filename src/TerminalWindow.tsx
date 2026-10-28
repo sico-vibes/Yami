@@ -9,6 +9,7 @@ import { cssToken } from "./css-token";
 import { Select, TooltipLayer } from "./controls";
 import type { WorkbenchState, WorkbenchSettings } from "./workbench-types";
 import { trackShellMarks, type ShellMarks } from "./terminal-marks";
+import { attachLinks } from "./terminal-links";
 type View = {
   id: string;
   terminal: Terminal;
@@ -173,6 +174,7 @@ export default function TerminalWindow() {
       terminal.loadAddon(fit);
       terminal.loadAddon(search);
       terminal.open(element);
+      attachLinks(terminal, report);
       const marks = trackShellMarks(terminal, {
         cwd: (where) => {
           view.cwd = where;
@@ -564,7 +566,7 @@ export default function TerminalWindow() {
           {views.current.get(selected)?.marks.active
             ? "Ctrl+Up / Down: prompts · "
             : ""}
-          Ctrl+Shift+C / V · Closing this window hides it
+          Ctrl+click links · Ctrl+Shift+C / V · Closing this window hides it
         </span>
       </footer>
     </div>

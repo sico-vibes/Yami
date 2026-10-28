@@ -47,6 +47,16 @@ try {
     ),
     /Unsupported shell/,
   );
+  // Ctrl+clicked paths are shown in Explorer only when they exist; a real
+  // one is not opened here, so no Explorer window appears.
+  for (const bad of ["Z:\\no\\such\\file.txt", "relative\\path", "http://x"])
+    await assert.rejects(
+      terminal.evaluate(
+        (p) => window.yami.invoke("terminal.reveal", { path: p }),
+        bad,
+      ),
+      /not on this PC/,
+    );
   let checked = "default shell";
   if (shells.includes("bash")) {
     await terminal
