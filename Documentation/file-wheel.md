@@ -51,6 +51,10 @@ HEIC is still absent from the convert wheel. The first time a convert wheel open
 
 For one image, the tools wheel has **Copy text**. Windows' own OCR engine (`Windows.Media.Ocr`, through `native/Ocr.ps1`) reads the text in your Windows display languages, with no download or upload, and puts it on the clipboard with a note of how many lines it copied. If Windows has no OCR language, Yami says which setting adds one. Checked on Windows on 2026-10-28 with a drawn sample image.
 
+## Watch folders
+
+In Settings › File wheel › **Watch folders**, choose a conversion (PDF, PNG, JPG, WebP, MP3, MP4, GIF, HTML, text or Markdown) and a folder. Each file that arrives there afterwards is converted once, beside it, using the same engines and pins as the wheel. Files already in the folder are left alone, and partial downloads (`.tmp`, `.part`, `.crdownload`) are skipped. Yami waits until a file stops changing, and never converts its own output. It listens for file-system events (`fs.watch`) instead of scanning, only while the file wheel is on and a watch is switched on, for up to ten folders. Checked on Windows on 2026-10-28 with Markdown arriving in a folder and becoming HTML.
+
 ## Folders
 
 Folders work on the wheel too: drag one, select it in File Explorer and use the shortcut, use Send to, or drop it on the shelf. Converting and tools need files, so a selection with a folder offers the actions wheel:

@@ -88,6 +88,35 @@ try {
       saved,
     );
   }
+  // A watch folder converts a new Markdown file to HTML once, by itself.
+  const inbox = path.join(profile, "work", "inbox");
+  fs.mkdirSync(inbox, { recursive: true });
+  fs.writeFileSync(path.join(inbox, "old.md"), "# Already here\n");
+  const watches = await call("watch.add", { target: "to:html", folder: inbox });
+  assert.equal(watches.length, 1);
+  fs.writeFileSync(path.join(inbox, "notes.md"), "# Watched\n\nHello.\n");
+  let produced = [];
+  for (let i = 0; i < 60 && !produced.length; i++) {
+    await new Promise((r) => setTimeout(r, 200));
+    produced = fs.readdirSync(inbox).filter((f) => /^notes.*\.html$/.test(f));
+  }
+  assert.equal(produced.length, 1, fs.readdirSync(inbox).join(", "));
+  assert.match(
+    fs.readFileSync(path.join(inbox, produced[0]), "utf8"),
+    /Watched/,
+  );
+  await new Promise((r) => setTimeout(r, 2500));
+  assert.ok(
+    !fs.readdirSync(inbox).some((f) => /^old.*\.html$/.test(f)),
+    "files already there are left alone",
+  );
+  assert.equal(
+    fs.readdirSync(inbox).filter((f) => f.endsWith(".html")).length,
+    1,
+    "converted once",
+  );
+  await call("watch.remove", { id: watches[0].id });
+  assert.deepEqual(await call("watch.list"), []);
   const projects = (await call("workbench.state")).projects;
   assert.equal(projects[0].path, site);
   assert.deepEqual(errors, []);

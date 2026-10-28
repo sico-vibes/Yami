@@ -52,6 +52,7 @@ export const defaults: Settings = {
   themeScheduleEnabled: false,
   themeLightAt: "07:00",
   themeDarkAt: "19:00",
+  wheelWatch: [],
   remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

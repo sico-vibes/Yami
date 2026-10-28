@@ -240,6 +240,12 @@ export function installPreviewBridge() {
               active: false,
             },
           ];
+        case "watch.list":
+          return [];
+        case "watch.add":
+        case "watch.toggle":
+        case "watch.remove":
+          throw new Error("Preview only — no folder is watched.");
         case "palette.projects":
           return [
             { id: "demo-yami", name: "yami-demo", path: "C:\\Demo\\yami-demo" },

@@ -16,6 +16,9 @@ import { Workbench } from "../workbench";
 import { WorkbenchStorage } from "../workbench/storage";
 import { SpeechController } from "../workbench/speech";
 import { createWheel, engineRoot } from "../wheel/service";
+import { createWatchers, type WatchFolder } from "../wheel/watch";
+import { performWheel } from "../wheel/perform.ts";
+import { describeWheelFiles } from "../wheel/paths";
 import { EngineStore } from "../wheel/engines.ts";
 import { modules } from "../../src/modules.ts";
 import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
@@ -409,6 +412,35 @@ export function createModuleHost(deps: Deps) {
       deps.notify("The light and dark times need a form like 07:30.");
     }
   };
+  // Watch folders run only while the file wheel is on and some exist.
+  let watchers: ReturnType<typeof createWatchers> | undefined;
+  const watchList = (): WatchFolder[] =>
+    Array.isArray(store.state.settings.wheelWatch)
+      ? store.state.settings.wheelWatch
+      : [];
+  const syncWatch = () => {
+    const list = registry.enabled("fileWheel") ? watchList() : [];
+    if (!list.some((w) => w.enabled)) {
+      watchers?.dispose();
+      watchers = undefined;
+      return;
+    }
+    watchers ??= createWatchers({
+      notify: deps.notify,
+      convert: async (petalId, file) => {
+        const outputs = await performWheel({
+          petalId,
+          files: await describeWheelFiles([file]),
+          engines,
+          reveal: false,
+          notify: () => {},
+        });
+        deps.notify(`Converted ${path.basename(file)} in a watch folder.`);
+        return outputs;
+      },
+    });
+    watchers.sync(list);
+  };
   // Built on the first Spotify request; nothing runs while unused.
   let spotify: Spotify | undefined;
   const wheel = () => registry.get<Wheel>("fileWheel");
@@ -434,12 +466,13 @@ export function createModuleHost(deps: Deps) {
     start() {
       wake();
       syncTheme();
+      syncWatch();
       if (process.argv.includes("--file-wheel")) host.acceptArgv(process.argv);
     },
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch)\./.test(
           method,
         )
       );
@@ -476,6 +509,48 @@ export function createModuleHost(deps: Deps) {
           : [];
       if (method.startsWith("palette."))
         throw new Error("Unknown launcher request.");
+      if (method.startsWith("watch.")) {
+        const settings = store.state.settings;
+        if (method === "watch.add") {
+          const target = String(a.target || "");
+          if (!/^to:[a-z0-9]+$/.test(target))
+            throw new Error("Choose a conversion.");
+          if (watchList().length >= 10)
+            throw new Error("Up to ten watch folders.");
+          const folder = a.folder
+            ? String(a.folder)
+            : (
+                await dialog.showOpenDialog({
+                  title: "Choose a folder to watch",
+                  properties: ["openDirectory"],
+                })
+              ).filePaths[0];
+          if (!folder) return watchList();
+          if (!fs.existsSync(folder) || !fs.statSync(folder).isDirectory())
+            throw new Error("Choose a folder that exists.");
+          settings.wheelWatch = [
+            ...watchList(),
+            {
+              id: randomBytes(6).toString("hex"),
+              folder,
+              target,
+              enabled: true,
+            },
+          ];
+        } else if (method === "watch.remove")
+          settings.wheelWatch = watchList().filter((w) => w.id !== a.id);
+        else if (method === "watch.toggle")
+          settings.wheelWatch = watchList().map((w) =>
+            w.id === a.id ? { ...w, enabled: !!a.enabled } : w,
+          );
+        else if (method !== "watch.list")
+          throw new Error("Unknown watch request.");
+        if (method !== "watch.list") {
+          deps.changed();
+          syncWatch();
+        }
+        return watchList();
+      }
       if (method.startsWith("spotify.")) {
         const s = (spotify ??= new Spotify(
           () => store.state.settings.spotifyClientId,
@@ -719,6 +794,7 @@ export function createModuleHost(deps: Deps) {
       registry.sync();
       wake();
       syncTheme();
+      syncWatch();
       registry.peek<Workbench>("workbench")?.captureShortcuts(false);
     },
     captureShortcuts(active: boolean) {
@@ -838,6 +914,7 @@ export function createModuleHost(deps: Deps) {
     },
     dispose() {
       clearTimeout(themeTimer);
+      watchers?.dispose();
       packs.dispose();
       registry.dispose();
       shared?.data.dispose();

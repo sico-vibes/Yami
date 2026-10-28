@@ -6,6 +6,7 @@ import { EngineStatus } from "./wheel/Engines";
 import { ModulesSettings } from "./setup/ModulesSettings";
 import { RemotePanel } from "./RemotePanel";
 import { SpotifyPanel } from "./SpotifyPanel";
+import { WatchFolders } from "./wheel/WatchFolders";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 import { Select, StatusChip } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
@@ -684,6 +685,7 @@ export function Settings({
               shelf. Desktop icons are not always visible to the Explorer
               shortcut.
             </p>
+            {s.fileWheelEnabled && <WatchFolders report={report} />}
           </>
         )}
         {section === "Modules" && !all && <ModulesSettings report={report} />}

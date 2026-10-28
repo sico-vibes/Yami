@@ -74,6 +74,8 @@ export type Settings = {
   /** "HH:MM" local times for the Windows light and dark switch. */
   themeLightAt: string;
   themeDarkAt: string;
+  /** File wheel watch folders: new files there convert automatically. */
+  wheelWatch: { id: string; folder: string; target: string; enabled: boolean }[];
   /** What a paired phone may do: approvals, media, clipboard. */
   remoteAllow: string[];
   setupDone: boolean;
