@@ -107,7 +107,7 @@ export type WorkbenchSettings = {
   usageAlerts: boolean;
   usageBackground: boolean;
   recapRetention: number;
-  dictationEngine: "gemini" | "windows";
+  dictationEngine: "gemini" | "windows" | "whistle";
   lastDictation: string;
   cleanup: Record<string, "verbatim" | "natural" | "polished">;
   localUrl: string;

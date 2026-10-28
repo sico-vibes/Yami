@@ -42,8 +42,22 @@ export function createModuleHost(deps: Deps) {
   const speechCore = () =>
     (shared ??= (() => {
       const data = new WorkbenchStorage(store);
-      const speech = new SpeechController(data, deps.assistant, native, () =>
-        registry.peek<Workbench>("workbench")?.changed(),
+      const speech = new SpeechController(
+        data,
+        deps.assistant,
+        native,
+        () => registry.peek<Workbench>("workbench")?.changed(),
+        async () => {
+          if (!registry.enabled("whistle"))
+            throw new Error(
+              "Offline dictation is turned off. Turn it on in Settings › Modules.",
+            );
+          const [exe, model] = await Promise.all([
+            engines.ensure("needle"),
+            engines.ensure("whistle"),
+          ]);
+          return { exe, model };
+        },
       );
       return { data, speech };
     })());
@@ -174,7 +188,13 @@ export function createModuleHost(deps: Deps) {
     async offlineDictation(a: any) {
       const { speech } = speechCore();
       const text = await speech.transform(
-        await speech.transcribe(String(a.data), String(a.mimeType), "windows"),
+        await speech.transcribe(
+          String(a.data),
+          String(a.mimeType),
+          store.state.settings.dictationEngine === "whistle"
+            ? "whistle"
+            : "windows",
+        ),
         Number(a.target) || 0,
       );
       await native.call("insertText", { text, target: a.target || 0 });

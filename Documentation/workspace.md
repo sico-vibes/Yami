@@ -188,6 +188,9 @@ implemented. Use trusted servers; confirmed MCP tools may have side effects.
 
 ## Dictation, notes and selected context
 
+The Dictation page offers three engines: Gemini, Windows offline and Whistle offline. Picking Whistle turns on the Offline dictation module and downloads the Needle engine and Whistle model (about 18.5 MB, pinned SHA-256); a row shows progress, a Try again button after a failure, and a check mark when ready. Meeting recordings use the same engine on five-minute WAV segments. Whistle has not been run on Windows in this build's checks; the runner's output format is read as JSON (`text`) or plain text.
+
+
 Choose Gemini (default) or an installed Windows speech recognizer in Dictation.
 Windows transcription accepts 16 kHz mono PCM WAV, stays local and needs a
 recognizer installed in Windows. It uses System.Speech, not a bundled Whisper

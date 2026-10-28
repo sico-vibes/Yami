@@ -45,7 +45,7 @@ export type Settings = {
   ability: string;
   abilityButton: string;
   customPersonality: string;
-  dictationEngine: "gemini" | "windows";
+  dictationEngine: "gemini" | "windows" | "whistle";
   fileWheelEnabled: boolean;
   fileWheelConvert: string;
   fileWheelTools: string;
@@ -54,6 +54,7 @@ export type Settings = {
   fileWheelReveal: boolean;
   fileWheelSound: boolean;
   workbenchEnabled: boolean;
+  whistleEnabled: boolean;
   setupDone: boolean;
 };
 export type Task = {

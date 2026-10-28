@@ -108,7 +108,8 @@ export class AudioEngine {
           try {
             const blob = new Blob(chunks, { type: mimeType });
             if (blob.size < 500) return;
-            if (settings.dictationEngine === "windows") {
+            // Offline engines take 16 kHz PCM WAV; Gemini takes the recording as is.
+            if (settings.dictationEngine !== "gemini") {
               const decoder = new AudioContext({ sampleRate: 16000 });
               try {
                 const audio = await decoder.decodeAudioData(await blob.arrayBuffer());

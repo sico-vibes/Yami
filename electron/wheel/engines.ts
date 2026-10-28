@@ -120,7 +120,7 @@ export class EngineStore {
     await fs.promises.writeFile(payload, bytes);
     const filesDir = path.join(dir, "files");
     await fs.promises.mkdir(filesDir, { recursive: true });
-    if (spec.format === "exe") {
+    if (spec.format === "exe" || spec.format === "file") {
       await fs.promises.copyFile(payload, path.join(filesDir, spec.exe));
     } else if (spec.format === "zip") {
       for (const entry of unpackZip(bytes)) {

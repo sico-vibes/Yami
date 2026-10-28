@@ -5,12 +5,18 @@ import type { Settings } from "./shared";
 // downloads belong to a module as packs; their pins live in the main process.
 
 export type ModuleId =
-  "fileWheel" | "workbench" | "clipboard" | "weather" | "roam";
+  "fileWheel" | "workbench" | "whistle" | "clipboard" | "weather" | "roam";
 export type ModuleCost = "low" | "medium" | "high";
 export type ModulePermission =
   "network" | "microphone" | "screen" | "clipboard" | "admin" | "files";
 export type PackId =
-  "ffmpeg" | "magick" | "sevenZip" | "sevenExtra" | "exiftool";
+  | "ffmpeg"
+  | "magick"
+  | "sevenZip"
+  | "sevenExtra"
+  | "exiftool"
+  | "needle"
+  | "whistle";
 
 export type ModuleSpec = {
   id: ModuleId;
@@ -73,6 +79,18 @@ export const modules: ModuleSpec[] = [
     presets: ["developer", "everything"],
   },
   {
+    id: "whistle",
+    name: "Offline dictation",
+    blurb:
+      "Dictate without the internet using Cactus Whistle on this PC's processor. English, German, French, Spanish, Italian, Dutch and Polish.",
+    icon: "waveform",
+    setting: "whistleEnabled",
+    cost: "low",
+    permissions: ["microphone"],
+    packs: ["needle", "whistle"],
+    presets: ["essentials", "developer", "tinkerer", "everything"],
+  },
+  {
     id: "fileWheel",
     name: "File wheel",
     blurb:
@@ -125,6 +143,8 @@ export const packLabels: Record<PackId, string> = {
   sevenZip: "7-Zip (packing)",
   sevenExtra: "7-Zip extra (7z and rar)",
   exiftool: "ExifTool (metadata)",
+  needle: "Needle engine (runs Whistle)",
+  whistle: "Whistle speech model",
 };
 
 export function presetSelection(

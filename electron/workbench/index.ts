@@ -218,7 +218,7 @@ export class Workbench {
       Math.min(90, Number(next.recapRetention) || 0),
     );
     if (
-      !["gemini", "windows"].includes(next.dictationEngine) ||
+      !["gemini", "windows", "whistle"].includes(next.dictationEngine) ||
       !["auto", "pwsh", "powershell", "cmd"].includes(next.terminalShell) ||
       !["yami", "custom", "none"].includes(next.terminalBackground)
     )

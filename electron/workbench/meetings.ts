@@ -4,6 +4,7 @@ import os from "node:os";
 import { randomUUID } from "node:crypto";
 import type { SpeechController } from "./speech";
 import type { WebContents } from "electron";
+import type { WorkbenchSettings } from "../../src/workbench-types";
 export function wavHeader(bytes: number) {
   const h = Buffer.alloc(44);
   h.write("RIFF", 0);
@@ -25,7 +26,7 @@ type Recording = {
   dir: string;
   bytes: number;
   queue: Promise<void>;
-  engine: "gemini" | "windows";
+  engine: WorkbenchSettings["dictationEngine"];
   cancelled: boolean;
   finishing: boolean;
 };
@@ -39,7 +40,7 @@ export class Meetings {
   async start(
     sender: WebContents,
     consent: boolean,
-    engine: "gemini" | "windows",
+    engine: WorkbenchSettings["dictationEngine"],
   ) {
     if (!consent)
       throw new Error("Confirm that participants know you are recording.");

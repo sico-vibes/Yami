@@ -1,11 +1,19 @@
-export type EngineId = "ffmpeg" | "magick" | "sevenZip" | "sevenExtra" | "exiftool";
+export type EngineId =
+  | "ffmpeg"
+  | "magick"
+  | "sevenZip"
+  | "sevenExtra"
+  | "exiftool"
+  | "needle"
+  | "whistle";
 export type EngineSpec = {
   id: EngineId;
   version: string;
   license: string;
   url: string;
   sha256: string;
-  format: "zip" | "7z" | "exe";
+  /** "file" is a single data file kept under its `exe` name, like a model. */
+  format: "zip" | "7z" | "exe" | "file";
   exe: string;
   source: string;
 };
@@ -66,5 +74,28 @@ export const engines: EngineSpec[] = [
     format: "zip",
     exe: "exiftool.exe",
     source: "https://exiftool.org/checksums-13.59.txt",
+  },
+  // Whistle offline dictation. Both are pinned to a repository commit; the
+  // hashes are the Hugging Face LFS SHA-256s, checked against a download on
+  // 2026-10-28.
+  {
+    id: "needle",
+    version: "needle3-d6c7d6a",
+    license: "Apache-2.0 (Cactus Compute Needle engine)",
+    url: "https://huggingface.co/Cactus-Compute/needle3/resolve/d6c7d6a2e9655505e0f8e23339356dd1705900eb/windows-x86_64/needle.exe",
+    sha256: "0d4bc1da8c51f5600f5c4f4bb4a92e0abe142fae7b69e695ccab93e6745c883d",
+    format: "exe",
+    exe: "needle.exe",
+    source: "https://huggingface.co/Cactus-Compute/needle3/tree/d6c7d6a2e9655505e0f8e23339356dd1705900eb/windows-x86_64",
+  },
+  {
+    id: "whistle",
+    version: "whistle-7411186",
+    license: "Apache-2.0 (Cactus Compute Whistle model)",
+    url: "https://huggingface.co/Cactus-Compute/whistle/resolve/741118687e1f008f06d1351a402a731274789790/whistle.cact",
+    sha256: "b6e02f048568ac5d01a2042556c658061e699acbc0aa2a1439f52f3d461dffeb",
+    format: "file",
+    exe: "whistle.cact",
+    source: "https://huggingface.co/Cactus-Compute/whistle/tree/741118687e1f008f06d1351a402a731274789790",
   },
 ];

@@ -126,7 +126,8 @@ test("packs are validated against the catalogue", () => {
     "ffmpeg",
     "magick",
   ]);
-  assert.throws(() => validPacks(["whistle"]), /Unknown download/);
+  assert.throws(() => validPacks(["not-a-pack"]), /Unknown download/);
+  assert.deepEqual(validPacks(["needle", "whistle"]), ["needle", "whistle"]);
   assert.throws(() => validPacks("ffmpeg"), /list/);
 });
 

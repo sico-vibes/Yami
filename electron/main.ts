@@ -909,7 +909,7 @@ else {
         if (method === "chat") args = host.prepareChat(args);
         if (
           method === "dictation" &&
-          store.state.settings.dictationEngine === "windows"
+          store.state.settings.dictationEngine !== "gemini"
         )
           return host.offlineDictation(args);
         if (overlays?.handles(method)) return overlays.invoke(method, args);

@@ -52,7 +52,7 @@ const status = (list, id) => list.find((m) => m.id === id);
     await main.getByRole("heading", { name: "Choose your Yami" }).waitFor();
     assert.equal(await main.locator(".bottom-dock").count(), 0);
     const list = (await call(main, "modules.list")).value;
-    assert.equal(list.length, 5);
+    assert.equal(list.length, 6);
     assert.equal(status(list, "workbench").loaded, false, "workspace asleep");
     await main.getByRole("radio", { name: "Developer" }).click();
     await main.getByRole("button", { name: "Start with Yami" }).click();
@@ -126,9 +126,24 @@ const status = (list, id) => list.find((m) => m.id === id);
       /File wheel is turned off/,
     );
     assert.match(
-      (await call(main, "packs.install", { id: "whistle" })).error,
+      (await call(main, "packs.install", { id: "not-a-pack" })).error,
       /Unknown download/,
     );
+    // Whistle dictation refuses while its module is off; nothing is run.
+    await call(main, "settings", { dictationEngine: "whistle" });
+    const silence = Buffer.alloc(44 + 3200);
+    silence.write("RIFF", 0, "ascii");
+    silence.write("WAVE", 8, "ascii");
+    assert.match(
+      (
+        await call(main, "dictation", {
+          data: silence.toString("base64"),
+          mimeType: "audio/wav",
+        })
+      ).error,
+      /Offline dictation is turned off/,
+    );
+    await call(main, "settings", { dictationEngine: "gemini" });
     // Opt-in: downloads the pinned 7-Zip console (about 0.6 MB) into this
     // isolated profile, then removes it.
     if (process.argv.includes("--download")) {

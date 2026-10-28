@@ -62,7 +62,7 @@ export function Island() {
     if (!prefs.current) return;
     if (
       !keyReady.current &&
-      !(kind === "dictation" && prefs.current.dictationEngine === "windows")
+      !(kind === "dictation" && prefs.current.dictationEngine !== "gemini")
     ) {
       // The main process shows the missing-key notice in the caption pill.
       if (openRef.current) report("Connect your Gemini API key in Settings.");

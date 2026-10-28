@@ -16,7 +16,7 @@ This guide describes features currently represented in the source. Hardware-depe
 
 **Live voice.** Hold the voice shortcut or press the island ability button, speak, then release to finish. Voice connects through the Gemini Live API and streams audio. Yami uses explicit speech activity start/end boundaries; it does not send continuously when idle. A voice turn can make the same declared tool calls as text chat. A lasso selection with Gemini connected starts a one-shot voice question about the selected image.
 
-**Dictation.** Hold the dictation shortcut. Yami remembers the foreground window handle, captures speech, asks Gemini to transcribe and resolve spoken corrections, then inserts the final text into that original field using clipboard-preserving paste. Password fields are rejected by the native host. Dictation text is also retained in conversation history. The engine is chosen in AI > Dictation: Gemini (the default), or an installed Windows speech recognizer, which transcribes 16 kHz mono WAV audio locally and needs no key.
+**Dictation.** Hold the dictation shortcut. Yami remembers the foreground window handle, captures speech, asks Gemini to transcribe and resolve spoken corrections, then inserts the final text into that original field using clipboard-preserving paste. Password fields are rejected by the native host. Dictation text is also retained in conversation history. The engine is chosen in AI > Dictation: Gemini (the default); an installed Windows speech recognizer; or **Whistle offline**, Cactus Compute's 16.9 MB Whistle model run by its 1.6 MB Needle engine on this PC's processor (English, German, French, Spanish, Italian, Dutch and Polish). Both offline engines transcribe 16 kHz mono WAV locally and need no key. Choosing Whistle turns on the Offline dictation module and downloads its two pinned files; dictionary rules still apply afterwards. Whistle is **not verified on Windows yet**: its runner flags and output follow the published documentation, and keyword biasing and forcing a language are not passed because the runner documents no flag for them.
 
 **Circle to ask.** Hold the lasso shortcut, draw a loop around anything on screen, and complete the selection. Capture occurs locally. With Gemini connected, the selected image can be sent with a voice turn; without a key, the image appears in the console selection. Cancel with Escape.
 
@@ -104,7 +104,7 @@ The table lists source defaults; a user can change most values in Settings. Sett
 | Shortcuts | Voice | `Win+Alt` | Hold to speak; release to finish. |
 | Shortcuts | Dictation | `Ctrl+Win` | Hold to dictate. |
 | Shortcuts | Circle to ask | `Ctrl+Shift` | Hold and draw a screen selection. |
-| Dictation | Engine | Gemini (`gemini`) | `windows` uses an installed Windows speech recognizer; see AI > Dictation. |
+| Dictation | Engine | Gemini (`gemini`) | `windows` uses an installed Windows speech recognizer; `whistle` uses the Offline dictation module's Whistle model; see AI > Dictation. |
 | File wheel | Drag wheel | On | Tap a modifier during a file drag. Holding the key does not open the wheel. |
 | File wheel | Convert / Tools / Actions | Shift / Ctrl / Alt | Each wheel uses a different modifier. |
 | File wheel | Explorer shortcut | `Ctrl+Alt+Y` | Uses the files selected in the foreground File Explorer window. |

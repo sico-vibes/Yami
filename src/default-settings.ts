@@ -38,5 +38,6 @@ export const defaults: Settings = {
   fileWheelReveal: false,
   fileWheelSound: false,
   workbenchEnabled: true,
+  whistleEnabled: false,
   setupDone: false,
 };

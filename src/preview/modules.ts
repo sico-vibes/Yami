@@ -15,6 +15,8 @@ const sizes: Record<PackId, number> = {
   sevenZip: 600_000,
   sevenExtra: 1_600_000,
   exiftool: 26_000_000,
+  needle: 1_570_816,
+  whistle: 16_919_407,
 };
 const packs = new Map<PackId, PackStatus>();
 const timers = new Map<PackId, ReturnType<typeof setInterval>>();
