@@ -176,6 +176,8 @@ export function installPreviewBridge() {
           };
         case "media":
           return { ...previewMedia };
+        case "palette.projects":
+          return [{ id: "demo-yami", name: "yami-demo", path: "C:\\Demo\\yami-demo" }];
         case "media.action":
           // Demo player only; no Windows media session is touched.
           if (a.action === "toggle") previewMedia.playing = !previewMedia.playing;

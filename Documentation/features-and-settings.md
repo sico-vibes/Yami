@@ -59,6 +59,16 @@ Dragging a file and tapping a modifier can open a wheel of conversions, tools, o
 
 Dropping on a conversion petal saves a new file beside the original. Images, audio, and video need the matching engine. Documents, sheets, subtitles, and zip, tar, and gz archives convert inside Yami. Slides and page pictures need LibreOffice to already be installed. Compress, details, background, the image tools, the media tools, PDF merge, split, and organize open a small window. OCR is not connected. Copy path, move, the Windows clipboard copy, PowerShell, and the float shelf are on the actions wheel. Engines download on demand into local app data after a checksum check. See [File wheel](file-wheel.md) for which paths were executed, which are plans only, and what still has to be tried on Windows.
 
+## Launcher (Win+A)
+
+The Apps tab of the island drawer is also a small command palette. As you type, a **Yami** group appears above apps and files:
+- **Sums** such as `12*7+0.5` or `=(2+3)^2`, using + − × ÷ % ^ and brackets. Press Enter to copy the result. The calculator parses the text itself; nothing is evaluated as code.
+- **Pages:** Home, Bond, Soul, Desk, AI workspace, Tune, Settings and Choose features, matched by name or by words such as "modules", "tweaks" or "inbox".
+- **Module actions:** the file wheel's drop shelf and Yami Terminal.
+- **Projects** from the AI workspace, which open a terminal there. The list is read without loading the workspace.
+
+Results follow your modules, so Tune and AI appear only while they are on. **Enter** opens the first result (a Yami item, else the first app, else the first file). Units, quicklinks, agents and Windows Search results from the plan are not built.
+
 ## Music and media
 
 The Controls card and the island's media peek act on the playing app's own Windows media session: play and pause, previous and next, and, when the app offers them, **seek** (drag the progress line), **shuffle** and **repeat** (off, playlist, track) as two small toggles in the time row. The Spotify desktop app, browsers and most players expose this session, so it needs no Spotify account or API key. When a session refuses play, pause or skip, Yami falls back to the media keys. Seek, shuffle and repeat appear only when the player reports them. The read path was checked on Windows on 2026-10-28; shuffle, repeat and seek actions were not exercised against a real player in Yami's checks. **Lyrics** (off by default, Settings › Privacy) show the current line of a playing song in the island's media card, in the glow colour under the artist. Yami asks LRCLIB (lrclib.net), a free lyrics database with no key, once per track, sending only the artist, title and length; answers, including "no lyrics", are kept for the session. LRCLIB answered HTTP 503 during the 2026-10-28 check, so a live lookup is **not verified**; parsing and lookup are unit-tested. Spotify Web API control and per-app volume from the plan are not built.

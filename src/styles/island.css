@@ -641,3 +641,8 @@
   color: var(--glow);
   font-style: italic;
 }
+.launcher-row .launcher-enter {
+  margin-right: var(--space-3);
+  color: var(--muted);
+  font-size: 9px;
+}

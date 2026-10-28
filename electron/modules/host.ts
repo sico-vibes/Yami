@@ -239,7 +239,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink)\./.test(method)
+        /^(modules|setup|packs|tune|feeds|agentlink|palette)\./.test(method)
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
@@ -263,6 +263,17 @@ export function createModuleHost(deps: Deps) {
         );
         return registry.list();
       }
+      // The launcher lists projects without waking the AI workspace.
+      if (method === "palette.projects")
+        return registry.enabled("workbench")
+          ? speechCore().data.state.projects.map(({ id, name, path }) => ({
+              id,
+              name,
+              path,
+            }))
+          : [];
+      if (method.startsWith("palette."))
+        throw new Error("Unknown launcher request.");
       if (method.startsWith("agentlink.")) {
         const settings = store.state.settings;
         const current = () =>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { AppItem, State } from "./shared";
 import { api } from "./api";
 import { Empty, Icon, IconButton, Modal } from "./ui";
+import { paletteItems, type PaletteItem } from "./palette";
 export function Launcher({
   state,
   report,
@@ -14,11 +15,17 @@ export function Launcher({
     [files, setFiles] = useState<{ name: string; path: string }[]>([]),
     [newSnippet, setNewSnippet] = useState(false),
     [name, setName] = useState(""),
-    [text, setText] = useState("");
+    [text, setText] = useState(""),
+    [projects, setProjects] = useState<
+      { id: string; name: string; path: string }[]
+    >([]);
   useEffect(() => {
     api("apps")
       .then(setApps)
       .catch((e) => report(e.message));
+    api("palette.projects")
+      .then(setProjects)
+      .catch(() => {});
   }, []);
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -46,6 +53,28 @@ export function Launcher({
           filtered.filter((a) => !state.favorites.includes(a.path)),
         ],
       ] as const);
+  const commands = paletteItems(query, state.settings, projects);
+  const run = ({ run: action }: PaletteItem) => {
+    const done =
+      "copy" in action
+        ? navigator.clipboard
+            .writeText(action.copy)
+            .then(() => report("Copied " + action.copy))
+        : api(action.method, action.args);
+    void done.catch((e: Error) => report(e.message));
+  };
+  // Enter opens the first result: a command or sum, then an app, then a file.
+  const first = () => {
+    if (commands[0]) return run(commands[0]);
+    if (query && filtered[0])
+      return void api("apps.launch", { path: filtered[0].path }).catch((e) =>
+        report(e.message),
+      );
+    if (files[0])
+      void api("files.open", { path: files[0].path }).catch((e) =>
+        report(e.message),
+      );
+  };
   const snippets = state.snippets.filter((s) =>
     (s.name + " " + s.text).toLowerCase().includes(query.toLowerCase()),
   );
@@ -56,9 +85,10 @@ export function Launcher({
         <input
           autoFocus
           aria-label="Search apps"
-          placeholder="Search apps, files and snippets…"
+          placeholder="Search apps, files, Yami and sums…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && first()}
         />
         <kbd>Win+A</kbd>
       </label>
@@ -90,6 +120,21 @@ export function Launcher({
             onClick={() => setNewSnippet(true)}
           />
         </div>
+        {commands.length > 0 && (
+          <section>
+            <h4>Yami</h4>
+            {commands.map((c, i) => (
+              <div className="launcher-row" key={c.id}>
+                <button onClick={() => run(c)}>
+                  <Icon name={c.icon} size={22} />
+                  <b>{c.title}</b>
+                  <small>{c.hint}</small>
+                </button>
+                {i === 0 && <kbd className="launcher-enter">Enter</kbd>}
+              </div>
+            ))}
+          </section>
+        )}
         {groups.map(
           ([title, list]) =>
             list.length > 0 && (
@@ -143,12 +188,15 @@ export function Launcher({
             ))}
           </section>
         )}
-        {!filtered.length && !files.length && !snippets.length && (
-          <Empty
-            icon="magnifying-glass"
-            title={apps.length ? "No matches" : "Finding your applications…"}
-          />
-        )}
+        {!filtered.length &&
+          !files.length &&
+          !snippets.length &&
+          !commands.length && (
+            <Empty
+              icon="magnifying-glass"
+              title={apps.length ? "No matches" : "Finding your applications…"}
+            />
+          )}
       </div>
       {newSnippet && (
         <Modal title="Add a snippet" onClose={() => setNewSnippet(false)}>
