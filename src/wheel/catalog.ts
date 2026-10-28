@@ -260,6 +260,7 @@ const FOLDER_ACTIONS: Petal[] = [
     window: false,
   },
   { id: "action:icon", label: "Change icon", group: "actions", window: false },
+  { id: "tool:flatten", label: "Flatten", group: "actions", window: true },
   {
     id: "action:icon-reset",
     label: "Reset icon",
@@ -269,7 +270,12 @@ const FOLDER_ACTIONS: Petal[] = [
 ];
 
 /** Petals that act on exactly one folder. */
-const ONE_FOLDER = ["action:project", "action:icon", "action:icon-reset"];
+const ONE_FOLDER = [
+  "action:project",
+  "action:icon",
+  "action:icon-reset",
+  "tool:flatten",
+];
 
 export const isFolderName = (name: string) => name.endsWith("/");
 /** The names petalsFor reads: folders carry a trailing "/". */

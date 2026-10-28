@@ -70,7 +70,7 @@ Folders work on the wheel too: drag one, select it in File Explorer and use the 
 - **Add as project**, for one folder, adds it to the AI workspace's Projects.
 - **Change icon**, for one folder, asks for an `.ico` (or an `.exe`/`.dll` icon) and writes the same `desktop.ini` Explorer's Customize tab writes: `IconResource`, hidden and system, with the folder's read-only flag so Explorer reads it. Yami marks the file as its own and never replaces a `desktop.ini` it did not write. The icon file stays where it is, so moving or deleting it brings back the usual icon. **Reset icon** removes Yami's `desktop.ini` and the flag. The desktop check sets and resets an icon on a temporary folder; how quickly Explorer repaints the icon was not measured.
 
-Flatten from the plan is not built.
+- **Flatten**, for one folder, opens a small window listing every move first: each file in its subfolders moves up into the folder, a name that is already taken gets " (2)", " (3)"… so nothing is overwritten, and subfolders left empty are removed. Links and junctions are not followed, it stops at 20,000 files, and if a move fails the ones already made are put back. Checked on Windows on 2026-10-28 on a temporary folder through the tool window.
 
 ## Phase status
 

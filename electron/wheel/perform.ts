@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { renameFiles } from "./rename-files.ts";
+import { flattenFolder } from "./flatten.ts";
 import path from "node:path";
 import { shell } from "electron";
 import { extensionOf, kindOf } from "../../src/wheel/catalog";
@@ -133,6 +134,8 @@ async function performNow(input: {
       throw new Error("Those files are already in that format.");
     return finish(outputs);
   }
+  if (input.petalId === "tool:flatten")
+    return finish(await flattenFolder(input.files[0].path));
   if (input.petalId === "tool:rename")
     return finish(
       await renameFiles(

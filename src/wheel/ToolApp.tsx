@@ -23,6 +23,7 @@ import {
 import { OrganizeTool, PdfSplitTool } from "./PdfTools";
 import { QrTool } from "./QrTool";
 import { RenameTool } from "./RenameTool";
+import { FlattenTool } from "./FlattenTool";
 import { RedactTool } from "./RedactTool";
 import { CompressTool, MergeTool, MetadataTool, PendingTool } from "./SimpleTools";
 import type { WheelFile } from "./types";
@@ -53,6 +54,7 @@ const previewTools = [
   ["tool:pdf-split", "Split pages"],
   ["tool:organize", "Organize"],
   ["tool:rename", "Rename"],
+  ["tool:flatten", "Flatten"],
 ];
 
 export function ToolApp() {
@@ -96,6 +98,8 @@ function bodyFor(tool: string, files: WheelFile[]) {
   switch (tool) {
     case "tool:rename":
       return <RenameTool files={files} />;
+    case "tool:flatten":
+      return <FlattenTool files={files} />;
     case "tool:background":
       return <BackgroundTool files={files} />;
     case "tool:compress":

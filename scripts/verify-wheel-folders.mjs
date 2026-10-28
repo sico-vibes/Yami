@@ -155,6 +155,36 @@ try {
     "trip-02.txt",
   ]);
   assert.equal(fs.readFileSync(path.join(shots, "trip-01.txt"), "utf8"), "a");
+  // Flatten through its tool window: subfolder files move up, clashes get
+  // " (2)", emptied folders go.
+  const nest = path.join(profile, "work", "nest");
+  fs.mkdirSync(path.join(nest, "a", "b"), { recursive: true });
+  fs.writeFileSync(path.join(nest, "top.txt"), "top");
+  fs.writeFileSync(path.join(nest, "a", "top.txt"), "inner");
+  fs.writeFileSync(path.join(nest, "a", "b", "deep.txt"), "deep");
+  await call("wheel.shelf.drop", { paths: [nest] });
+  await call("wheel.swap", { mode: "actions" });
+  assert.deepEqual(await call("wheel.choose", { petalId: "tool:flatten" }), {
+    tool: "tool:flatten",
+  });
+  let flattenWindow;
+  for (let i = 0; i < 100; i++) {
+    flattenWindow = app
+      .windows()
+      .find((p) => p.url().includes("window=tool") && !p.isClosed());
+    if (flattenWindow) break;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  await flattenWindow.getByText(/2 files from 2 subfolders/).waitFor();
+  await flattenWindow.getByRole("button", { name: "Flatten 2 files" }).click();
+  for (let i = 0; i < 40 && fs.existsSync(path.join(nest, "a")); i++)
+    await new Promise((r) => setTimeout(r, 100));
+  assert.deepEqual(fs.readdirSync(nest).sort(), [
+    "deep.txt",
+    "top (2).txt",
+    "top.txt",
+  ]);
+  assert.equal(fs.readFileSync(path.join(nest, "top.txt"), "utf8"), "top");
   // Folder icon: set, then reset, on the temporary folder only.
   await open();
   await call("wheel.choose", { petalId: "action:icon" });

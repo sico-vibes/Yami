@@ -15,6 +15,7 @@ import type {
 } from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
 import { runFileAction } from "./file-actions.ts";
+import { flattenPlan } from "./flatten.ts";
 import { readImageText } from "./ocr.ts";
 import { cachedHeic } from "./heic-probe.ts";
 import { pageCount } from "./pdf-pages.ts";
@@ -467,6 +468,19 @@ export function createWheel(deps: Deps) {
         }
         case "wheel.tool.get":
           return toolSession;
+        case "wheel.flatten.plan": {
+          const folder = toolSession?.files[0];
+          if (!folder?.folder) throw new Error("Choose one folder.");
+          const { moves, folders } = flattenPlan(folder.path);
+          return {
+            folders,
+            moves: moves.slice(0, 200).map((m) => ({
+              from: path.relative(folder.path, m.from),
+              to: path.basename(m.to),
+            })),
+            count: moves.length,
+          };
+        }
         case "wheel.float.get":
           return { files: floatFiles };
         case "wheel.float.close":

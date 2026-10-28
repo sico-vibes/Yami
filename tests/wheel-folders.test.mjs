@@ -21,6 +21,7 @@ test("folders get folder actions only, and Add as project needs one folder", () 
     "action:duplicates",
     "action:project",
     "action:icon",
+    "tool:flatten",
     "action:icon-reset",
   ]);
   const two = petalsFor(["site/", "notes.txt"], "actions").map((p) => p.id);
