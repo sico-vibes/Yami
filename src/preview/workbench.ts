@@ -374,6 +374,21 @@ function previewDev(method: string, a: any, changed: () => void): any {
     });
     return { branch: "yami/" + slug, path: previewTasks.at(-1)!.path };
   }
+  if (method === "dev.fanout") {
+    const slug = String(a.name || "task")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-");
+    return (a.agents as string[]).map((agent) => {
+      const branch = `yami/${slug}-${agent}`;
+      previewTasks.push({
+        path: `C:\\Demo\\yami-demo.worktrees\\${slug}-${agent}`,
+        branch,
+        head: "1a2b3c4d5e6f",
+        main: false,
+      });
+      return { agent, branch, path: previewTasks.at(-1)!.path };
+    });
+  }
   if (method === "dev.task.remove") {
     previewTasks = previewTasks.filter((t) => t.path !== a.path);
     return previewDev("dev.worktrees", a, changed);

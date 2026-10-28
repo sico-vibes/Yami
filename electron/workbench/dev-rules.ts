@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { ProjectInfo } from "../../src/dev-types.ts";
+import type { AgentCli, ProjectInfo } from "../../src/dev-types.ts";
 
 // Pure rules for the Dev hub, kept apart from Electron so they are testable.
 
@@ -141,4 +141,41 @@ export function worktreePlan(project: string, name: string) {
     folder,
     args: ["-C", root, "worktree", "add", "-b", branch, folder],
   };
+}
+
+/** The task file each fan-out worktree gets; kept out of git by info/exclude. */
+export const TASK_FILE = ".yami-task.md";
+const instruction = `Read ${TASK_FILE} in this folder and do the task it describes.`;
+
+/** The typed command: the instruction holds no quotes or shell characters. */
+export function promptCommand(cli: AgentCli) {
+  if (cli.prompt === "argument") return `${cli.command} "${instruction}"`;
+  if (cli.prompt === "--prompt")
+    return `${cli.command} --prompt "${instruction}"`;
+  throw new Error(`${cli.name} cannot start with a prompt from Yami.`);
+}
+
+/**
+ * Fan out: the same task for several agents, each in its own worktree on a
+ * `yami/<name>-<agent>` branch, so their results can be compared.
+ */
+export function fanOutPlan(project: string, name: string, clis: AgentCli[]) {
+  if (clis.length < 2 || clis.length > 4)
+    throw new Error("Choose two to four agents.");
+  if (new Set(clis.map((c) => c.id)).size !== clis.length)
+    throw new Error("Choose each agent once.");
+  // Short enough that the agent's id always fits in the 40-character slug.
+  const base = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 28)
+    .replace(/-+$/, "");
+  if (!base) throw new Error("Name the task with letters or numbers.");
+  return clis.map((cli) => ({
+    cli,
+    command: promptCommand(cli),
+    ...worktreePlan(project, `${base}-${cli.id}`),
+  }));
 }

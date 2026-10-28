@@ -128,6 +128,24 @@ html[data-reduced="true"] .agent-launch {
   flex: 1;
   min-width: 0;
 }
+.fanout-form {
+  display: grid;
+  gap: var(--space-3);
+}
+.fanout-form label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fs-sm);
+}
+.fanout-form textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+.fanout-agents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
 .task-row {
   display: flex;
   align-items: center;

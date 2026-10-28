@@ -47,8 +47,21 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   a terminal button and **Remove**, which asks first and runs `git worktree remove`.
   Git refuses when the folder has uncommitted changes, and Windows refuses while a
   terminal or editor still has it open; Yami says which. The branch and its commits
-  stay. Comparing agents' diffs and sending one prompt to several agents (Orca's
-  "fan out") are not built yet.
+  stay.
+- **Fan out** (Orca's idea) sends one task to two to four agents at once. Write the
+  task, pick the agents and Yami makes a worktree for each on a
+  `yami/<task>-<agent>` branch, writes the task to `.yami-task.md` there, adds
+  `/.yami-task.md` once to the repository's shared `.git/info/exclude` so it is never
+  committed, and opens a terminal tab per agent with a fixed first prompt: `Read
+  .yami-task.md in this folder and do the task it describes.` Your text is never typed
+  into a shell, so no quoting can turn it into a command. Only agents whose interactive
+  start takes a prompt are offered, as checked in each CLI's own `--help` on
+  2026-10-28: Claude Code, Codex and Gemini CLI (an argument) and OpenCode
+  (`--prompt`). Crush has no prompt option for its interactive mode, and the CLIs not
+  installed here were not checked, so they are left out. If one worktree fails, the
+  ones already started keep running and the message says how many. Remove the tasks
+  from the same list once you have picked a result. Comparing the agents' diffs side by
+  side is not built yet.
 - **Agents calling Yami (MCP page).** Turn on **Yami for your agents** and Yami serves
   an MCP endpoint at `http://127.0.0.1:47821/mcp` (streamable HTTP, JSON replies,
   protocol 2025-06-18). It listens on this PC only, needs a bearer token kept with

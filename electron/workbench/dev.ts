@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
+import path from "node:path";
 import { promisify } from "node:util";
 import {
   agentClis,
@@ -22,6 +23,8 @@ import {
   projectName,
   sameFolder,
   worktreePlan,
+  fanOutPlan,
+  TASK_FILE,
 } from "./dev-rules.ts";
 
 const exec = promisify(execFile);
@@ -232,6 +235,87 @@ export class DevController {
     }
     this.launch({ cwd: plan.folder, agent: a.agent || undefined });
     return { branch: plan.branch, path: plan.folder };
+  }
+
+  /**
+   * Fan out: one task for several agents, each in its own worktree with the
+   * task written to a file there, so no prompt text is typed into a shell.
+   */
+  async fanOut(a: {
+    id: string;
+    name: unknown;
+    prompt: unknown;
+    agents: unknown;
+  }) {
+    const project = this.project(a.id);
+    const prompt = String(a.prompt ?? "").trim();
+    if (!prompt) throw new Error("Describe the task for the agents.");
+    if (prompt.length > 20000)
+      throw new Error("Keep the task under 20,000 characters.");
+    const installed = new Set(this.agents().map((d) => d.id));
+    const clis = (Array.isArray(a.agents) ? a.agents : []).map((id) => {
+      const cli = this.cli(id);
+      if (!installed.has(cli.id))
+        throw new Error(`${cli.name} is not installed on this PC.`);
+      return cli;
+    });
+    const plans = fanOutPlan(project.path, String(a.name ?? ""), clis);
+    for (const p of plans)
+      if (fs.existsSync(p.folder))
+        throw new Error(`A task folder already exists: ${p.folder}`);
+    const started: { agent: string; branch: string; path: string }[] = [];
+    for (const p of plans) {
+      try {
+        await exec("git", p.args, { windowsHide: true, timeout: 30000 });
+        await fs.promises.writeFile(
+          path.join(p.folder, TASK_FILE),
+          `# Task\n\n${prompt}\n`,
+          "utf8",
+        );
+        await this.excludeTaskFile(p.folder);
+      } catch (error) {
+        const text = String(
+          (error as { stderr?: string }).stderr || (error as Error).message,
+        );
+        throw new Error(
+          (started.length
+            ? `Started ${started.length} of ${plans.length}; `
+            : "") +
+            (/not a git repository/i.test(text)
+              ? "this project is not a git repository."
+              : /already exists/i.test(text)
+                ? `the branch ${p.branch} already exists.`
+                : text.trim().split(/\r?\n/).pop() ||
+                  "git could not add the worktree."),
+        );
+      }
+      this.terminal.launch({
+        cwd: p.folder,
+        command: p.command,
+        title: `${p.cli.name} · ${p.branch.slice(5)}`,
+      });
+      started.push({ agent: p.cli.id, branch: p.branch, path: p.folder });
+    }
+    return started;
+  }
+
+  /** Adds the task file to the repository's shared info/exclude once. */
+  private async excludeTaskFile(folder: string) {
+    const { stdout } = await exec(
+      "git",
+      ["-C", folder, "rev-parse", "--path-format=absolute", "--git-common-dir"],
+      { windowsHide: true, timeout: 5000 },
+    );
+    const file = path.join(stdout.trim(), "info", "exclude");
+    const line = "/" + TASK_FILE;
+    const text = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+    if (text.split(/\r?\n/).includes(line)) return;
+    await fs.promises.mkdir(path.dirname(file), { recursive: true });
+    await fs.promises.appendFile(
+      file,
+      (text && !text.endsWith("\n") ? "\n" : "") +
+        `# Yami fan-out task files\n${line}\n`,
+    );
   }
 
   /** Removes a task worktree; git refuses when it has uncommitted changes. */

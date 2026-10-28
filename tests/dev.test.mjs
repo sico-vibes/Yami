@@ -8,6 +8,8 @@ import {
   parseGitStatus,
   projectName,
   sameFolder,
+  fanOutPlan,
+  promptCommand,
 } from "../electron/workbench/dev-rules.ts";
 import { agentClis } from "../src/dev-types.ts";
 
@@ -131,4 +133,47 @@ test("worktrees list with the main checkout first and plans stay beside it", asy
     () => worktreePlan("D:\\Code\\yami", "!!!"),
     /letters or numbers/,
   );
+});
+
+test("fan out plans one worktree per agent and types no task text", () => {
+  const pick = (...ids) => ids.map((id) => agentClis.find((c) => c.id === id));
+  const plans = fanOutPlan(
+    path.join("C:", "code", "site"),
+    "Fix the login!",
+    pick("claude", "opencode"),
+  );
+  assert.deepEqual(
+    plans.map((p) => [p.branch, path.basename(p.folder), p.command]),
+    [
+      [
+        "yami/fix-the-login-claude",
+        "fix-the-login-claude",
+        'claude "Read .yami-task.md in this folder and do the task it describes."',
+      ],
+      [
+        "yami/fix-the-login-opencode",
+        "fix-the-login-opencode",
+        'opencode --prompt "Read .yami-task.md in this folder and do the task it describes."',
+      ],
+    ],
+  );
+  assert.equal(path.basename(path.dirname(plans[0].folder)), "site.worktrees");
+  // A long name is cut so the agent's id always survives.
+  const long = fanOutPlan("C:/p", "x".repeat(80), pick("codex", "gemini"));
+  assert.ok(long.every((p, i) => p.branch.endsWith(["-codex", "-gemini"][i])));
+  assert.throws(() => fanOutPlan("C:/p", "a", pick("claude")), /two to four/);
+  assert.throws(
+    () => fanOutPlan("C:/p", "a", pick("claude", "claude")),
+    /once/,
+  );
+  assert.throws(
+    () => fanOutPlan("C:/p", "!!", pick("claude", "codex")),
+    /letters or numbers/,
+  );
+  assert.throws(
+    () => promptCommand(agentClis.find((c) => c.id === "crush")),
+    /cannot start/,
+  );
+  for (const c of agentClis.filter((c) => c.prompt))
+    assert.doesNotMatch(promptCommand(c), /['$`;&|<>%]/, c.id);
 });

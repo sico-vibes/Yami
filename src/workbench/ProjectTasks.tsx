@@ -23,7 +23,8 @@ export function ProjectTasks({
     [name, setName] = useState(""),
     [agent, setAgent] = useState(project.agent || ""),
     [busy, setBusy] = useState(false),
-    [removing, setRemoving] = useState<Worktree | null>(null);
+    [removing, setRemoving] = useState<Worktree | null>(null),
+    [fanning, setFanning] = useState(false);
   const fail = (e: Error) => report(e.message);
   const load = () =>
     void api("dev.worktrees", { id: project.id }).then(setTrees).catch(fail);
@@ -83,6 +84,19 @@ export function ProjectTasks({
               <Icon name="git-branch" size={16} />
               {busy ? "Adding…" : "New task"}
             </button>
+            <button
+              className="soft-button"
+              disabled={agents.filter((a) => a.prompt).length < 2}
+              data-tip={
+                agents.filter((a) => a.prompt).length < 2
+                  ? "Fan out needs two installed agents that take a prompt"
+                  : undefined
+              }
+              onClick={() => setFanning(true)}
+            >
+              <Icon name="tree-structure" size={16} />
+              Fan out
+            </button>
           </div>
           {trees && !tasks.length && (
             <p className="setting-note">
@@ -113,6 +127,21 @@ export function ProjectTasks({
           ))}
         </>
       )}
+      {fanning && (
+        <FanOut
+          project={project}
+          agents={agents.filter((a) => a.prompt)}
+          name={name}
+          onClose={() => setFanning(false)}
+          onStarted={(count) => {
+            setFanning(false);
+            setName("");
+            load();
+            report(`Started ${count} agents, each in its own worktree.`);
+          }}
+          report={report}
+        />
+      )}
       {removing && (
         <Modal title="Remove this task?" onClose={() => setRemoving(null)}>
           <p>
@@ -140,5 +169,114 @@ export function ProjectTasks({
         </Modal>
       )}
     </div>
+  );
+}
+
+/**
+ * One task for several agents at once. Each gets a worktree on its own
+ * branch and the task in a .yami-task.md file there, which its first prompt
+ * points to, so the results can be compared side by side.
+ */
+function FanOut({
+  project,
+  agents,
+  name: initialName,
+  onClose,
+  onStarted,
+  report,
+}: {
+  project: { id: string; name: string };
+  agents: AgentCli[];
+  name: string;
+  onClose: () => void;
+  onStarted: (count: number) => void;
+  report: (text: string) => void;
+}) {
+  const [name, setName] = useState(initialName),
+    [prompt, setPrompt] = useState(""),
+    [picked, setPicked] = useState<string[]>(
+      agents.slice(0, 2).map((a) => a.id),
+    ),
+    [busy, setBusy] = useState(false);
+  const toggle = (id: string) =>
+    setPicked((now) =>
+      now.includes(id)
+        ? now.filter((p) => p !== id)
+        : now.length < 4
+          ? [...now, id]
+          : now,
+    );
+  const ready = name.trim() && prompt.trim() && picked.length >= 2 && !busy;
+  return (
+    <Modal title={`Fan out in ${project.name}`} onClose={onClose}>
+      <div className="fanout-form">
+        <label>
+          <span>Task name</span>
+          <input
+            autoFocus
+            value={name}
+            placeholder="e.g. fix login"
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
+        <label>
+          <span>The task</span>
+          <textarea
+            rows={5}
+            value={prompt}
+            placeholder="What should each agent do?"
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+        </label>
+        <div
+          role="group"
+          aria-label="Agents for the task"
+          className="fanout-agents"
+        >
+          {agents.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              className={
+                "file-chip" + (picked.includes(a.id) ? " selected" : "")
+              }
+              aria-pressed={picked.includes(a.id)}
+              onClick={() => toggle(a.id)}
+            >
+              <Icon name="robot" size={14} />
+              {a.name}
+            </button>
+          ))}
+        </div>
+        <p className="setting-note">
+          Two to four agents. Each starts in its own folder on a{" "}
+          <code>yami/&lt;task&gt;-&lt;agent&gt;</code> branch; your checkout is
+          not touched. Remove the tasks here when you have picked a result.
+        </p>
+      </div>
+      <div className="dialog-actions">
+        <button className="soft-button" onClick={onClose}>
+          Cancel
+        </button>
+        <button
+          className="primary-button"
+          disabled={!ready}
+          onClick={() => {
+            setBusy(true);
+            void api("dev.fanout", {
+              id: project.id,
+              name,
+              prompt,
+              agents: picked,
+            })
+              .then((started: unknown[]) => onStarted(started.length))
+              .catch((e: Error) => report(e.message))
+              .finally(() => setBusy(false));
+          }}
+        >
+          {busy ? "Starting…" : `Start ${picked.length} agents`}
+        </button>
+      </div>
+    </Modal>
   );
 }

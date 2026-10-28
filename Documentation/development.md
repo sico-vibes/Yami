@@ -109,6 +109,11 @@ Workspace verification commands:
   uninstalled agents, and opens a terminal tab there. It never starts an agent CLI.
   In a throwaway repository it also adds a task worktree, checks that removing it is
   refused while it has changes, and removes it once clean, keeping the branch.
+- `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
+  `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
+  repository, and checks the two branches, the task files, that git ignores them, the
+  command each stand-in received, the refusals (one agent, an uninstalled one, a
+  repeat), and removing both worktrees.
 - `node scripts/verify-tune.mjs`: applies and undoes every Tune tweak with real
   `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the

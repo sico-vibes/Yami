@@ -23,6 +23,11 @@ export type AgentCli = {
   /** Two letters for the tile; brand marks are not bundled. */
   mark: string;
   site: string;
+  /**
+   * How an interactive session takes a first prompt, checked against each
+   * CLI's own --help. Without it the agent cannot join a fan-out.
+   */
+  prompt?: "argument" | "--prompt";
 };
 
 export const agentClis: AgentCli[] = [
@@ -32,6 +37,7 @@ export const agentClis: AgentCli[] = [
     command: "claude",
     mark: "Cl",
     site: "https://www.anthropic.com/claude-code",
+    prompt: "argument",
   },
   {
     id: "codex",
@@ -39,6 +45,7 @@ export const agentClis: AgentCli[] = [
     command: "codex",
     mark: "Cx",
     site: "https://github.com/openai/codex",
+    prompt: "argument",
   },
   {
     id: "opencode",
@@ -46,6 +53,7 @@ export const agentClis: AgentCli[] = [
     command: "opencode",
     mark: "Oc",
     site: "https://opencode.ai",
+    prompt: "--prompt",
   },
   {
     id: "cursor",
@@ -60,6 +68,7 @@ export const agentClis: AgentCli[] = [
     command: "gemini",
     mark: "Ge",
     site: "https://github.com/google-gemini/gemini-cli",
+    prompt: "argument",
   },
   {
     id: "copilot",
