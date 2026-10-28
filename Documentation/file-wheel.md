@@ -40,7 +40,7 @@ Subtitles convert between SRT, VTT, and plain text. Markdown conversion covers h
 
 XLS and ODS are refused. The message tells you to save as XLSX or CSV. Slide files, and any conversion to PNG or JPG that is not a normal image, ask for `soffice` on the PC. Yami does not download LibreOffice. If it is missing, the job stops with that reason. That path was not run.
 
-OCR is not connected. There is no Tesseract download and no Windows OCR call in this build.
+Copy text uses Windows' own OCR (see Copy text from an image); there is no Tesseract download.
 
 Copy path writes the paths to the clipboard. Copy asks PowerShell to put the files on the Windows clipboard. Move asks for a folder and renames the file, copying across drives when a rename is refused. Terminal opens PowerShell in the file's folder. Those three were not run. Float opens a small always-on-top list and stays until it is closed.
 
@@ -79,7 +79,7 @@ Flatten from the plan is not built.
 | 0 | Drag hook, wheel window, drop target, shortcut, Send to, drop shelf | Code is in the repo. The gesture rules are unit-tested. The live Windows drag is not. |
 | 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
 | 2 | Remaining image, video, audio, and PDF tools, plus QR | Image adjust, markup, crop, redact, and collage save a canvas PNG. PDF split and organize were executed in tests. QR reading was executed on a generated code. ffmpeg command plans for mute, trim, crop, speed, join, snapshots, split, redact, normalize, channels, bleep, and the visualizer are unit-tested and were not run. |
-| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Subtitles, a small Markdown/HTML/text path, DOCX, EPUB, CSV/TSV/XLSX, archive repack, plain-text PDF, and PDF text extraction were executed in tests. Slides and page pictures call LibreOffice if it is already installed. That program was not run, and it is not downloaded. OCR is not connected. XLS and ODS are refused with a message. |
+| 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Subtitles, a small Markdown/HTML/text path, DOCX, EPUB, CSV/TSV/XLSX, archive repack, plain-text PDF, and PDF text extraction were executed in tests. Slides and page pictures call LibreOffice if it is already installed. That program was not run, and it is not downloaded. OCR uses Windows' own engine. XLS and ODS are refused with a message. |
 | 4 | HEIC encode, float shelf, file actions | HEIC stays off the wheel until ffmpeg, already installed, reports both an HEVC encoder and an HEIC muxer. That probe was not run here. Float opens a small always-on-top list. Copy path is real. Copy, move, and the terminal are implemented for Windows and were not run. |
 
 ## Windows drag, unverified
