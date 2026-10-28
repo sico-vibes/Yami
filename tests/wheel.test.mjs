@@ -30,7 +30,8 @@ test("tools change when several files are selected", () => {
   assert.ok(ids(["grove.png", "orchard.jpg"], "tools").includes("tool:collage"));
   assert.ok(ids(["notes.pdf", "extra.pdf"], "tools").includes("tool:merge"));
   assert.equal(ids(["notes.pdf"], "tools").includes("tool:merge"), false);
-  assert.deepEqual(ids(["grove.png", "notes.pdf"], "tools"), ["tool:compress", "tool:metadata"]);
+  assert.deepEqual(ids(["grove.png", "notes.pdf"], "tools"), ["tool:compress", "tool:metadata", "tool:rename"]);
+  assert.equal(ids(["notes.pdf"], "tools").includes("tool:rename"), false, "rename needs several files");
   assert.equal(ids(["grove.png", "notes.pdf"], "convert").length, 0);
   assert.match(emptyHint("convert", ["grove.png", "notes.pdf"]), /different kinds/);
   assert.ok(ids(["bundle.rar"], "tools").includes("tool:extract"));
