@@ -37,6 +37,7 @@ import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
+import { createBridges } from "../bridges";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
 import { darkAt, nextSwitch } from "../../src/theme-schedule";
@@ -158,6 +159,7 @@ export function createModuleHost(deps: Deps) {
     deps.broadcast({ type: "modules", modules: registry.list() }),
   );
 
+  let bridges: ReturnType<typeof createBridges> | undefined;
   const registry = new ModuleRegistry({
     settings: () => store.state.settings as unknown as Record<string, unknown>,
     save: () => {
@@ -481,13 +483,22 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|bridges)\./.test(
           method,
         )
       );
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
       if (method === "modules.list") return registry.list();
+      if (method.startsWith("bridges.")) {
+        bridges ||= createBridges();
+        if (method === "bridges.rustdesk") return bridges.rustdesk();
+        if (method === "bridges.rustdesk.open")
+          return bridges.openRustdesk(a.config);
+        if (method === "bridges.windhawk") return bridges.windhawk();
+        if (method === "bridges.windhawk.open") return bridges.openWindhawk();
+        throw new Error("Unknown request.");
+      }
       if (method === "modules.set") {
         const list = await registry.set(a.id, a.enabled);
         wake();

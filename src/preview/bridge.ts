@@ -157,7 +157,11 @@ export function installPreviewBridge() {
         )
       )
         return previewWorkbench(method, a, emit);
-      if (/^(modules|setup|packs|tune|feeds|agentlink|remote)\./.test(method))
+      if (
+        /^(modules|setup|packs|tune|feeds|agentlink|remote|bridges)\./.test(
+          method,
+        )
+      )
         return previewModules(method, a, state, emit, changed);
       switch (method) {
         case "state":

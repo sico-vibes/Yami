@@ -5,6 +5,7 @@ import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
 import { ModulesSettings } from "./setup/ModulesSettings";
 import { RemotePanel } from "./RemotePanel";
+import { RustDeskCard } from "./RustDeskCard";
 import { SpotifyPanel } from "./SpotifyPanel";
 import { WatchFolders } from "./wheel/WatchFolders";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
@@ -689,7 +690,12 @@ export function Settings({
           </>
         )}
         {section === "Modules" && !all && <ModulesSettings report={report} />}
-        {section === "Phone" && !all && <RemotePanel report={report} />}
+        {section === "Phone" && !all && (
+          <>
+            <RemotePanel report={report} />
+            <RustDeskCard report={report} />
+          </>
+        )}
         {section === "Music" && !all && <SpotifyPanel report={report} />}
       </section>
       {keyModal && (

@@ -287,6 +287,39 @@ export function previewModules(
           allowed: state.settings.remoteAllow.includes(name),
         })),
       };
+    case "bridges.rustdesk":
+      return {
+        installed: true,
+        id: "123 456 789",
+        idServer: "hbbs.home.lan",
+        relayServer: "",
+        hasKey: true,
+      };
+    case "bridges.windhawk":
+      return {
+        installed: true,
+        mods: [
+          {
+            id: "taskbar-clock-customization",
+            name: "Taskbar Clock Customization",
+            version: "1.5",
+            disabled: false,
+          },
+        ],
+        curated: [
+          {
+            id: "windows-11-taskbar-styler",
+            name: "Windows 11 Taskbar Styler",
+          },
+          {
+            id: "taskbar-clock-customization",
+            name: "Taskbar Clock Customization",
+          },
+        ],
+      };
+    case "bridges.rustdesk.open":
+    case "bridges.windhawk.open":
+      throw new Error("Preview only — nothing was started.");
     case "tune.dns":
       return [
         {
