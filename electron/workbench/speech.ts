@@ -8,7 +8,7 @@ import type { WorkbenchStorage } from "./storage";
 import type { Assistant } from "../assistant";
 import type { Native } from "../native";
 import { helperPath } from "./terminal";
-import { parseWhistle, whistleArgs } from "./whistle";
+import { parseWhistle, whistleArgs, whistleKeywords } from "./whistle";
 const exec = promisify(execFile);
 export function applyDictationRules(text: string, rules: DictationRule[]) {
   const snippet = rules.find(
@@ -105,12 +105,21 @@ export class SpeechController {
           if (!this.whistle)
             throw new Error("Whistle is not available in this build.");
           const { exe, model } = await this.whistle();
-          const { stdout } = await exec(exe, whistleArgs(model, file), {
-            windowsHide: true,
-            timeout: 180000,
-            maxBuffer: 2 * 1024 * 1024,
-            signal: controller.signal,
-          });
+          const words = whistleKeywords(this.data.state.rules);
+          const keywords = words.length
+            ? path.join(dir, "keywords.txt")
+            : undefined;
+          if (keywords) await fs.writeFile(keywords, words.join("\n"), "utf8");
+          const { stdout } = await exec(
+            exe,
+            whistleArgs(model, file, keywords),
+            {
+              windowsHide: true,
+              timeout: 180000,
+              maxBuffer: 2 * 1024 * 1024,
+              signal: controller.signal,
+            },
+          );
           const text = parseWhistle(stdout);
           if (!text) throw new Error("No speech was recognized.");
           return text;

@@ -4,18 +4,37 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { parseWhistle, whistleArgs } from "../electron/workbench/whistle.ts";
+import {
+  parseWhistle,
+  whistleArgs,
+  whistleKeywords,
+} from "../electron/workbench/whistle.ts";
 import { EngineStore } from "../electron/wheel/engines.ts";
 import { engines } from "../electron/wheel/engine-catalog.ts";
 import { modules } from "../src/modules.ts";
 
-test("Whistle runs with the documented runner flags only", () => {
+test("Whistle runs English only, with Your words as keywords", () => {
   assert.deepEqual(whistleArgs("C:\\m\\whistle.cact", "C:\\t\\a.wav"), [
     "--model",
     "C:\\m\\whistle.cact",
     "--audio",
     "C:\\t\\a.wav",
+    "--audio-language",
+    "en",
   ]);
+  assert.deepEqual(
+    whistleArgs("m.cact", "a.wav", "C:\\t\\keywords.txt").slice(-2),
+    ["--audio-keywords", "C:\\t\\keywords.txt"],
+  );
+  assert.deepEqual(
+    whistleKeywords([
+      { kind: "word", replacement: "Yami" },
+      { kind: "word", replacement: "  Basem  Hesham " },
+      { kind: "word", replacement: "Yami" },
+      { kind: "snippet", replacement: "Long reply text" },
+    ]),
+    ["Yami", "Basem Hesham"],
+  );
 });
 
 test("the transcript is read from JSON or plain output", () => {

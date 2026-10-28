@@ -819,7 +819,9 @@ export function createModuleHost(deps: Deps) {
           const choice = await dialog.showOpenDialog({
             title: "Choose the downloaded file",
             properties: ["openFile"],
-            filters: [{ name: "Download", extensions: ["zip", "7z", "exe"] }],
+            filters: [
+              { name: "Download", extensions: ["zip", "7z", "exe", "cact"] },
+            ],
           });
           if (!choice.filePaths[0]) return registry.list();
           await packs.installFile(id, choice.filePaths[0]);

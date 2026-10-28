@@ -61,7 +61,13 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   installed here were not checked, so they are left out. If one worktree fails, the
   ones already started keep running and the message says how many. Remove the tasks
   from the same list once you have picked a result. Comparing the agents' diffs side by
-  side is not built yet.
+  side is not built yet. On 2026-10-28 a one-file task was fanned out to the real Claude Code and
+  Codex in a throwaway repository: both started in their own worktrees with the fixed first prompt,
+  read `.yami-task.md`, and wrote `HELLO.txt` containing *hello*. Each agent first asks whether
+  to trust the new worktree folder (Claude Code's default answer is *No, exit*), so expect one
+  trust prompt per task. Codex also printed "Hook failed" after each step in that run; the Yami
+  and Orca Codex hooks in this PC's `~/.codex/hooks.json` both exit 0 when run by hand with the
+  same events, so the failing hook was not identified.
 - **Agents calling Yami (MCP page).** Turn on **Yami for your agents** and Yami serves
   an MCP endpoint at `http://127.0.0.1:47821/mcp` (streamable HTTP, JSON replies,
   protocol 2025-06-18). It listens on this PC only, needs a bearer token kept with
@@ -230,7 +236,7 @@ implemented. Use trusted servers; confirmed MCP tools may have side effects.
 
 ## Dictation, notes and selected context
 
-The Dictation page offers three engines: Gemini, Windows offline and Whistle offline. Picking Whistle turns on the Offline dictation module and downloads the Needle engine and Whistle model (about 18.5 MB, pinned SHA-256); a row shows progress, a Try again button after a failure, and a check mark when ready. Meeting recordings use the same engine on five-minute WAV segments. Whistle has not been run on Windows in this build's checks; the runner's output format is read as JSON (`text`) or plain text.
+The Dictation page offers three engines: Gemini, Windows offline and Whistle offline. Picking Whistle turns on the Offline dictation module and downloads the Needle engine and Whistle model (about 18.5 MB, pinned SHA-256); a row shows progress, a Try again button after a failure, and a check mark when ready. Meeting recordings use the same engine on five-minute WAV segments. Yami runs it with English forced (`--audio-language en`) and the words from **Your words** as `--audio-keywords`, flags taken from the pinned runner's own `--help`. On Windows on 2026-10-28, `scripts/verify-whistle.mjs` downloaded both files through Yami, synthesized a sentence with Windows' own voice (no microphone), and dictated it into Yami's own chat box: "Please open the terminal and show me the weather for tmrw." (a Your words entry turned *tomorrow* into *tmrw*), about 1 second for the whole dictation. The runner alone answered a 5-second clip in 384 ms (118 ms to the first token) and peaked at about 42 MB working set (38 MB private) before exiting. The runner prints JSON with `text`; plain text is accepted too. Live streaming (`--audio-stream`) exists in the runner and is not used yet.
 
 
 Choose Gemini (default) or an installed Windows speech recognizer in Dictation.
