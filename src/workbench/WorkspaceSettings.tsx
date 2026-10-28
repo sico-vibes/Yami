@@ -90,6 +90,8 @@ export function WorkspaceSettings({
               { value: "pwsh", label: "PowerShell 7" },
               { value: "powershell", label: "Windows PowerShell" },
               { value: "cmd", label: "Command Prompt" },
+              { value: "bash", label: "Git Bash", hint: "Git for Windows" },
+              { value: "wsl", label: "WSL", hint: "Your default Linux distribution" },
             ]}
           />
         </div>

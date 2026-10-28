@@ -69,6 +69,7 @@
     "@m-lab/ndt7": "^0.1.5",
     "@phosphor-icons/web": "^2.1.2",
     "@xterm/addon-fit": "^0.11.0",
+    "@xterm/addon-search": "0.16.0",
     "@xterm/xterm": "^6.0.0",
     "jsqr": "^1.4.0",
     "motion": "^14.3.0",

@@ -34,6 +34,24 @@ export function findExecutable(name: string): string | undefined {
   ];
   return candidates.find((p) => fs.existsSync(p) && fs.statSync(p).isFile());
 }
+export const shellNames = ["auto", "pwsh", "powershell", "cmd", "bash", "wsl"];
+
+/** Git Bash is looked for where Git for Windows installs, never WSL's bash.exe. */
+export function findShell(name: string): string | undefined {
+  if (name === "auto")
+    return (
+      findExecutable("pwsh.exe") ||
+      findExecutable("powershell.exe") ||
+      findExecutable("cmd.exe")
+    );
+  if (name === "bash")
+    return [
+      path.join(process.env.ProgramFiles || "C:\\Program Files", "Git", "bin", "bash.exe"),
+      path.join(process.env.LOCALAPPDATA || "", "Programs", "Git", "bin", "bash.exe"),
+    ].find((p) => fs.existsSync(p));
+  return findExecutable(`${name}.exe`);
+}
+
 export class TerminalController {
   window?: BrowserWindow;
   child?: ChildProcessWithoutNullStreams;
@@ -215,6 +233,8 @@ export class TerminalController {
       return true;
     }
     const owner = this.owner(sender);
+    if (method === "terminal.shells")
+      return shellNames.filter((n) => n !== "auto" && findShell(n));
     if (method === "terminal.launches") {
       const queued = this.launches;
       this.launches = [];
@@ -249,15 +269,8 @@ export class TerminalController {
           "Close a terminal before opening another (maximum eight).",
         );
       const shellName = String(a.shell || this.settings().terminalShell);
-      if (!["auto", "pwsh", "powershell", "cmd"].includes(shellName))
-        throw new Error("Unsupported shell.");
-      const shell =
-        (shellName === "auto"
-          ? findExecutable("pwsh.exe")
-          : findExecutable(`${shellName}.exe`)) ||
-        (shellName === "auto"
-          ? findExecutable("powershell.exe") || findExecutable("cmd.exe")
-          : undefined);
+      if (!shellNames.includes(shellName)) throw new Error("Unsupported shell.");
+      const shell = findShell(shellName);
       if (!shell) throw new Error("This shell is not installed.");
       const cwd = a.cwd ? path.resolve(String(a.cwd)) : os.homedir();
       if (!fs.statSync(cwd).isDirectory())

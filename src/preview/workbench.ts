@@ -157,6 +157,8 @@ export function previewWorkbench(
     return false;
   }
   if (method === "terminal.folder") return "";
+  if (method === "terminal.shells")
+    return ["pwsh", "powershell", "cmd", "bash"];
   if (method === "context.pick" || method === "context.windows") return [];
   if (method === "context.use") {
     emit({

@@ -20,7 +20,7 @@ import {
 } from "../../src/workbench-types";
 import { WorkbenchStorage } from "./storage";
 import { AgentHub } from "./agents";
-import { TerminalController } from "./terminal";
+import { shellNames, TerminalController } from "./terminal";
 import { UsageController } from "./usage";
 import { Connections } from "./connections";
 import { LocalModel } from "./local-model";
@@ -225,7 +225,7 @@ export class Workbench {
     );
     if (
       !["gemini", "windows", "whistle"].includes(next.dictationEngine) ||
-      !["auto", "pwsh", "powershell", "cmd"].includes(next.terminalShell) ||
+      !shellNames.includes(next.terminalShell) ||
       !["yami", "custom", "none"].includes(next.terminalBackground)
     )
       throw new Error("Unsupported workspace setting.");

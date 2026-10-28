@@ -26,7 +26,12 @@ lines.on("line", (line) => {
       delete env.YAMI_PTY_MODULE;
       const child = pty.spawn(
         request.shell,
-        /cmd\.exe$/i.test(request.shell) ? [] : ["-NoLogo"],
+        // PowerShell hides its banner; Git Bash starts as a login shell.
+        /(pwsh|powershell)\.exe$/i.test(request.shell)
+          ? ["-NoLogo"]
+          : /bash\.exe$/i.test(request.shell)
+            ? ["--login", "-i"]
+            : [],
         {
           name: "xterm-256color",
           cols: request.cols,

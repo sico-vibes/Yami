@@ -1,22 +1,32 @@
 import { useEffect, useRef, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
+import { SearchAddon } from "@xterm/addon-search";
 import "@xterm/xterm/css/xterm.css";
 import { api } from "./api";
 import { Icon, IconButton, Modal } from "./ui";
 import { cssToken } from "./css-token";
-import { TooltipLayer } from "./controls";
+import { Select, TooltipLayer } from "./controls";
 import type { WorkbenchState, WorkbenchSettings } from "./workbench-types";
 type View = {
   id: string;
   terminal: Terminal;
   fit: FitAddon;
+  search: SearchAddon;
   element: HTMLDivElement;
   shell: string;
   cwd: string;
   exited?: boolean;
   orphaned?: boolean;
 };
+const shellLabels: Record<string, string> = {
+  pwsh: "PowerShell 7",
+  powershell: "Windows PowerShell",
+  cmd: "Command Prompt",
+  bash: "Git Bash",
+  wsl: "WSL",
+};
+
 export default function TerminalWindow() {
   const host = useRef<HTMLDivElement>(null),
     views = useRef(new Map<string, View>()),
@@ -29,6 +39,21 @@ export default function TerminalWindow() {
     [ending, setEnding] = useState(false),
     [data, setData] = useState<WorkbenchState | null>(null),
     [background, setBackground] = useState("");
+  const [finding, setFinding] = useState(false),
+    [needle, setNeedle] = useState(""),
+    [shells, setShells] = useState<string[]>([]),
+    [shell, setShell] = useState("");
+  // Read by create(), which outlives a render.
+  const shellChoice = useRef("");
+  shellChoice.current = shell;
+  const find = (back = false) => {
+    const view = views.current.get(active.current);
+    if (!view || !needle) return;
+    const found = back
+      ? view.search.findPrevious(needle)
+      : view.search.findNext(needle);
+    if (!found) setError(`"${needle}" is not in this tab's scrollback.`);
+  };
   const backlog = useRef(new Map<string, any[]>()),
     mounted = useRef(true);
   function select(id: string) {
@@ -71,7 +96,10 @@ export default function TerminalWindow() {
     launch?: Launch,
   ) {
     try {
-      const session = await api("terminal.create", { cwd });
+      const session = await api("terminal.create", {
+        cwd,
+        ...(shellChoice.current && { shell: shellChoice.current }),
+      });
       if (!mounted.current || !host.current) {
         void api("terminal.end", { session: session.id });
         return;
@@ -89,9 +117,11 @@ export default function TerminalWindow() {
         theme: terminalTheme(),
       });
       const fit = new FitAddon();
+      const search = new SearchAddon();
       terminal.loadAddon(fit);
+      terminal.loadAddon(search);
       terminal.open(element);
-      const view = { ...session, terminal, fit, element };
+      const view = { ...session, terminal, fit, search, element };
       views.current.set(session.id, view);
       terminal.onData(
         (text) =>
@@ -129,6 +159,15 @@ export default function TerminalWindow() {
             .readText()
             .then((text) => terminal.paste(text))
             .catch(report);
+          return false;
+        }
+        if (
+          e.type === "keydown" &&
+          e.ctrlKey &&
+          e.shiftKey &&
+          e.key.toLowerCase() === "f"
+        ) {
+          setFinding(true);
           return false;
         }
         return true;
@@ -171,6 +210,9 @@ export default function TerminalWindow() {
       for (const item of queued) await create(item.cwd, settings, item);
       if (!queued.length && fallback) await create(undefined, settings);
     };
+    void api("terminal.shells")
+      .then(setShells)
+      .catch(() => {});
     void api("workbench.state")
       .then((value) => {
         apply(value);
@@ -276,10 +318,31 @@ export default function TerminalWindow() {
             </button>
           ))}
         </div>
+        {shells.length > 1 && (
+          <Select
+            label="Shell for new tabs"
+            value={shell}
+            onChange={setShell}
+            options={[
+              { value: "", label: "Default shell", icon: "terminal-window" },
+              ...shells.map((name) => ({
+                value: name,
+                label: shellLabels[name] || name,
+                icon: "terminal",
+              })),
+            ]}
+          />
+        )}
         <IconButton
           icon="plus"
           label="New terminal session"
           onClick={() => void create()}
+        />
+        <IconButton
+          icon="magnifying-glass"
+          label="Search this tab (Ctrl+Shift+F)"
+          active={finding}
+          onClick={() => setFinding(!finding)}
         />
         <IconButton
           icon="folder-open"
@@ -312,6 +375,48 @@ export default function TerminalWindow() {
           End session
         </button>
       </nav>
+      {finding && (
+        <form
+          className="terminal-find"
+          onSubmit={(e) => {
+            e.preventDefault();
+            find();
+          }}
+        >
+          <input
+            autoFocus
+            aria-label="Find in this tab"
+            placeholder="Find in this tab's scrollback"
+            value={needle}
+            onChange={(e) => setNeedle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setFinding(false);
+                views.current.get(active.current)?.terminal.focus();
+              }
+              if (e.key === "Enter" && e.shiftKey) {
+                e.preventDefault();
+                find(true);
+              }
+            }}
+          />
+          <IconButton
+            icon="caret-up"
+            label="Previous match"
+            onClick={() => find(true)}
+          />
+          <IconButton
+            icon="caret-down"
+            label="Next match"
+            onClick={() => find()}
+          />
+          <IconButton
+            icon="x"
+            label="Close search"
+            onClick={() => setFinding(false)}
+          />
+        </form>
+      )}
       {error && (
         <div className="terminal-error" role="status">
           {error}
