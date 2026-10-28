@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { State, Tab, YamiEvent } from "./shared";
 import { api, asset } from "./api";
 import { Empty, Icon, IconButton, Modal, Spirit, useYami } from "./ui";
@@ -141,13 +142,11 @@ export function App() {
             />
           </Suspense>
         ) : tab === "tune" ? (
-          <Suspense fallback={<p className="empty-state">Opening Tune…</p>}>
+          <Suspense fallback={<AsciiSkeleton label="Opening Tune…" />}>
             <TunePage report={report} />
           </Suspense>
         ) : tab === "ai" ? (
-          <Suspense
-            fallback={<p className="empty-state">Opening workspace…</p>}
-          >
+          <Suspense fallback={<AsciiSkeleton label="Opening workspace…" />}>
             <WorkbenchPage report={report} />
           </Suspense>
         ) : tab === "settings" ? (

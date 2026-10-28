@@ -629,3 +629,12 @@ kbd {
   opacity: 0.6;
 }
 /* Pose and tail motion are driven by src/yami/motion.ts only while active. */
+/* Lazy-screen loading line; see AsciiSkeleton.tsx. */
+.ascii-skeleton {
+  margin: var(--space-7) auto;
+  color: var(--muted);
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.06em;
+  text-align: center;
+}

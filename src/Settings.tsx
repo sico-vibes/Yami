@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
@@ -201,7 +202,9 @@ export function Settings({
       </aside>
       <section className="settings-content">
         {section === "Workspace" && (
-          <Suspense fallback={<p>Opening workspace settings…</p>}>
+          <Suspense
+            fallback={<AsciiSkeleton label="Opening workspace settings…" />}
+          >
             <WorkbenchPage embedded initial="Workspace" report={report} />
           </Suspense>
         )}

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { State } from "./shared";
 import { Plans } from "./Plans";
 
@@ -36,7 +37,7 @@ export function Desk({
         ))}
       </div>
       {view === "inbox" ? (
-        <Suspense fallback={<p className="empty-state">Opening Inbox…</p>}>
+        <Suspense fallback={<AsciiSkeleton label="Opening Inbox…" />}>
           <Inbox report={report} />
         </Suspense>
       ) : (

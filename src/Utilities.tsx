@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { AppItem, State, UtilityTab } from "./shared";
 import { api, asset, bytes, time } from "./api";
 import { Empty, Icon, IconButton, Modal } from "./ui";
@@ -65,7 +66,7 @@ export function Utilities({
       </nav>
       <div className={"utility-content utility-" + tab.toLowerCase()}>
         {tab === "AI" ? (
-          <Suspense fallback={<p>Opening AI…</p>}>
+          <Suspense fallback={<AsciiSkeleton label="Opening AI…" />}>
             <WorkbenchPage compact report={report} />
           </Suspense>
         ) : tab === "Controls" ? (
