@@ -12,6 +12,8 @@ export type RegistryIo = {
   write(value: RegValue): Promise<void>;
   deleteValue(key: string, name: string): Promise<void>;
   deleteKey(key: string): Promise<void>;
+  /** Every value of a key, by name; empty when the key is missing. */
+  list(key: string): Promise<Record<string, Stored>>;
 };
 
 /** One value from `reg query` output; DWORDs come back as decimal. */
@@ -27,6 +29,34 @@ export function parseRegQuery(stdout: string, name: string): Stored | null {
     };
   }
   return null;
+}
+
+/** Every value in `reg query` output for one key, by name. */
+export function parseRegValues(stdout: string) {
+  const out: Record<string, Stored> = {};
+  for (const line of stdout.split(/\r?\n/)) {
+    const match = /^ {4}(.+?) {4}(REG_[A-Z_]+)(?: {4}(.*))?$/.exec(line);
+    if (!match) continue;
+    const [, name, type, raw = ""] = match;
+    out[name] = {
+      type,
+      data: type === "REG_DWORD" ? String(parseInt(raw, 16)) : raw,
+    };
+  }
+  return out;
+}
+
+/** Machine-wide values, read-only; used to list all-users startup apps. */
+export async function readMachineKey(key: string) {
+  try {
+    const { stdout } = await exec("reg.exe", ["query", "HKLM\\" + key], {
+      windowsHide: true,
+      timeout: 10000,
+    });
+    return parseRegValues(stdout);
+  } catch {
+    return {};
+  }
 }
 
 export function sameValue(stored: Stored | null, value: RegValue) {
@@ -76,6 +106,14 @@ export function regExe(root = ""): RegistryIo {
       try {
         await run(["delete", full(key), ...named(name), "/f"]);
       } catch {}
+    },
+    async list(key) {
+      try {
+        const { stdout } = await run(["query", full(key)]);
+        return parseRegValues(stdout);
+      } catch {
+        return {};
+      }
     },
     async deleteKey(key) {
       try {

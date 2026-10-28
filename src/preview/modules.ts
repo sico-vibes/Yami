@@ -30,6 +30,32 @@ const tuneStates = () =>
     undoable: applied.has(t.id) && t.id !== "fileExtensions",
   }));
 const timers = new Map<PackId, ReturnType<typeof setInterval>>();
+const previewStartup = [
+  {
+    id: "user:Demo Chat",
+    name: "Demo Chat",
+    command: '"C:\\Demo\\chat.exe" --minimized',
+    source: "user" as const,
+    enabled: true,
+    editable: true,
+  },
+  {
+    id: "folder:Demo Notes.lnk",
+    name: "Demo Notes",
+    command: "Demo Notes.lnk",
+    source: "folder" as const,
+    enabled: false,
+    editable: true,
+  },
+  {
+    id: "machine:Demo Driver",
+    name: "Demo Driver Helper",
+    command: "C:\\Demo\\driver.exe",
+    source: "machine" as const,
+    enabled: true,
+    editable: false,
+  },
+];
 const feedSources: FeedSource[] = [
   {
     id: "demo-rust",
@@ -181,6 +207,13 @@ export function previewModules(
     case "tune.undo":
       for (const id of a.ids || []) applied.delete(id);
       return tuneStates();
+    case "tune.startup":
+      return [...previewStartup];
+    case "tune.startup.set": {
+      const app = previewStartup.find((s) => s.id === a.id);
+      if (app?.editable) app.enabled = !!a.enabled;
+      return [...previewStartup];
+    }
     case "tune.restartExplorer":
       emit({
         type: "toast",

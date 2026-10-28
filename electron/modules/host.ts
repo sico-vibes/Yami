@@ -14,7 +14,10 @@ import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
 import { TuneController } from "../tune/tune";
 import { FeedsController } from "../feeds/feeds";
-import { regExe } from "../tune/registry";
+import { readMachineKey, regExe } from "../tune/registry";
+import { StartupController } from "../tune/startup";
+
+type Tune = { tweaks: TuneController; startup: StartupController };
 import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
@@ -127,11 +130,31 @@ export function createModuleHost(deps: Deps) {
         dispose: () => {},
       },
       tune: {
-        load: () =>
-          new TuneController(
-            path.join(path.dirname(store.file), "tune.json"),
-            regExe(process.env.YAMI_TUNE_ROOT),
-          ),
+        load: (): Tune => {
+          // The sandbox root of the desktop check also hides machine entries
+          // and uses its own Startup folder.
+          const sandbox = process.env.YAMI_TUNE_ROOT;
+          const io = regExe(sandbox);
+          return {
+            tweaks: new TuneController(
+              path.join(path.dirname(store.file), "tune.json"),
+              io,
+            ),
+            startup: new StartupController(
+              io,
+              process.env.YAMI_TUNE_STARTUP_DIR ||
+                path.join(
+                  process.env.APPDATA || "",
+                  "Microsoft",
+                  "Windows",
+                  "Start Menu",
+                  "Programs",
+                  "Startup",
+                ),
+              sandbox ? undefined : readMachineKey,
+            ),
+          };
+        },
         dispose: () => {},
       },
       fileWheel: {
@@ -206,10 +229,12 @@ export function createModuleHost(deps: Deps) {
         throw new Error("Unknown feeds request.");
       }
       if (method.startsWith("tune.")) {
-        const tune = registry.get<TuneController>("tune");
+        const { tweaks: tune, startup } = registry.get<Tune>("tune");
         if (method === "tune.list") return tune.list();
         if (method === "tune.apply") return tune.apply(a.ids);
         if (method === "tune.undo") return tune.undo(a.ids);
+        if (method === "tune.startup") return startup.list();
+        if (method === "tune.startup.set") return startup.set(a.id, a.enabled);
         if (method === "tune.restartExplorer") return restartExplorer();
         throw new Error("Unknown tune-up request.");
       }

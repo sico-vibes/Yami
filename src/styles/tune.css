@@ -27,3 +27,11 @@
   align-items: center;
   gap: var(--space-3);
 }
+.startup-app {
+  min-width: 0;
+}
+.startup-app p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

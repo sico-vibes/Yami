@@ -4,6 +4,7 @@
 // The sandbox key is deleted at the end. Explorer is never restarted.
 import { _electron } from "playwright";
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { skipSetup } from "./test-profile.mjs";
@@ -24,7 +25,31 @@ const reg = (...args) => {
 const realKey =
   "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced";
 const realBefore = reg("query", realKey);
-const env = { ...process.env, YAMI_DATA_DIR: profile, YAMI_TUNE_ROOT: sandbox };
+const realRun = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+const realRunBefore = reg("query", realRun);
+// A sandbox startup entry and Startup folder for the startup manager.
+const runKey =
+  "HKCU\\" + sandbox + "\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+reg(
+  "add",
+  runKey,
+  "/v",
+  "Yami verify app",
+  "/t",
+  "REG_SZ",
+  "/d",
+  "C:\\verify.exe",
+  "/f",
+);
+const startupDir = path.join(profile, "Startup");
+fs.mkdirSync(startupDir, { recursive: true });
+fs.writeFileSync(path.join(startupDir, "Verify notes.lnk"), "");
+const env = {
+  ...process.env,
+  YAMI_DATA_DIR: profile,
+  YAMI_TUNE_ROOT: sandbox,
+  YAMI_TUNE_STARTUP_DIR: startupDir,
+};
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await _electron.launch({ args: [path.resolve(".")], env });
 const errors = [];
@@ -90,7 +115,41 @@ try {
   // The page renders the rows from the live states.
   await main.getByRole("button", { name: "Tune", exact: true }).click();
   await main.getByText("Classic right-click menu").waitFor();
+  // Startup apps: switching off writes StartupApproved; the entry stays.
+  let apps = await call("tune.startup");
+  assert.deepEqual(apps.map((a) => [a.id, a.enabled]).sort(), [
+    ["folder:Verify notes.lnk", true],
+    ["user:Yami verify app", true],
+  ]);
+  apps = await call("tune.startup.set", {
+    id: "user:Yami verify app",
+    enabled: false,
+  });
+  assert.equal(apps.find((a) => a.source === "user").enabled, false);
+  const approvedKey =
+    "HKCU\\" +
+    sandbox +
+    "\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved";
+  assert.match(
+    reg("query", approvedKey + "\\Run", "/v", "Yami verify app") || "",
+    /REG_BINARY\s+03000000/,
+  );
+  apps = await call("tune.startup.set", {
+    id: "folder:Verify notes.lnk",
+    enabled: false,
+  });
+  apps = await call("tune.startup.set", {
+    id: "user:Yami verify app",
+    enabled: true,
+  });
+  assert.deepEqual(apps.map((a) => [a.id, a.enabled]).sort(), [
+    ["folder:Verify notes.lnk", false],
+    ["user:Yami verify app", true],
+  ]);
+  assert.match(reg("query", runKey) || "", /C:\\verify\.exe/, "entry kept");
+  await main.getByText("Startup apps").waitFor();
   assert.equal(reg("query", realKey), realBefore, "real settings untouched");
+  assert.equal(reg("query", realRun), realRunBefore, "real startup untouched");
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, tweaks: ids.length, sandbox }));
 } finally {

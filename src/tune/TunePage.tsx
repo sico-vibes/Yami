@@ -1,8 +1,19 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { StatusChip } from "../controls";
-import { tuneCategories, tweaks, type TweakState } from "../tune-types";
+import {
+  tuneCategories,
+  tweaks,
+  type StartupApp,
+  type TweakState,
+} from "../tune-types";
 import { Icon, Modal, Toggle } from "../ui";
+
+const sourceLabel: Record<StartupApp["source"], string> = {
+  user: "Your account",
+  folder: "Startup folder",
+  machine: "All users",
+};
 
 /** Windows tune-up: per-user tweaks with exact undo. */
 export default function TunePage({
@@ -13,10 +24,14 @@ export default function TunePage({
   const [states, setStates] = useState<TweakState[] | null>(null),
     [busy, setBusy] = useState(""),
     [restart, setRestart] = useState(false),
-    [asking, setAsking] = useState(false);
+    [asking, setAsking] = useState(false),
+    [startup, setStartup] = useState<StartupApp[] | null>(null);
   useEffect(() => {
     void api("tune.list")
       .then(setStates)
+      .catch((e) => report(e.message));
+    void api("tune.startup")
+      .then(setStartup)
       .catch((e) => report(e.message));
   }, []);
   const state = (id: string) => states?.find((s) => s.id === id);
@@ -88,6 +103,51 @@ export default function TunePage({
           </div>
         </section>
       ))}
+      <section>
+        <h3 className="group-title">Startup apps</h3>
+        <p className="setting-note">
+          Switching an app off works like Task Manager: the entry stays, it just
+          does not start with Windows. All-users apps need administrator rights,
+          so they are shown but not changed.
+        </p>
+        <div className="setting-group">
+          {startup === null ? (
+            <div className="setting-row">
+              <p>Reading startup apps…</p>
+            </div>
+          ) : !startup.length ? (
+            <div className="setting-row">
+              <p>No apps start with Windows for your account.</p>
+            </div>
+          ) : (
+            startup.map((app) => (
+              <div className="setting-row" key={app.id}>
+                <div className="startup-app">
+                  <strong>{app.name}</strong>
+                  <p data-tip={app.command}>
+                    {sourceLabel[app.source]} · {app.command}
+                  </p>
+                </div>
+                <div className="setting-control">
+                  {!app.editable && <StatusChip status="Needs admin" />}
+                  <Toggle
+                    label={`Start ${app.name} with Windows`}
+                    value={app.enabled}
+                    disabled={!app.editable || busy === app.id}
+                    onChange={(enabled) => {
+                      setBusy(app.id);
+                      void api("tune.startup.set", { id: app.id, enabled })
+                        .then(setStartup)
+                        .catch((e) => report(e.message))
+                        .finally(() => setBusy(""));
+                    }}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </section>
       {asking && (
         <Modal title="Restart File Explorer?" onClose={() => setAsking(false)}>
           <p>

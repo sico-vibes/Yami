@@ -10,7 +10,7 @@ export type RegValue = {
   key: string;
   /** Empty for the key's default value. */
   name: string;
-  type: "REG_DWORD" | "REG_SZ";
+  type: "REG_DWORD" | "REG_SZ" | "REG_BINARY";
   data: string;
 };
 
@@ -24,6 +24,17 @@ export type Tweak = {
   ownsKey?: string;
   /** Explorer reads it at start, so it shows after Explorer restarts. */
   restartExplorer?: boolean;
+};
+
+/** An app that starts with Windows. Only your own entries can be switched. */
+export type StartupApp = {
+  id: string;
+  name: string;
+  /** The command line, or the shortcut's file name for the Startup folder. */
+  command: string;
+  source: "user" | "folder" | "machine";
+  enabled: boolean;
+  editable: boolean;
 };
 
 export type TweakState = {
