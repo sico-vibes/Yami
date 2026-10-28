@@ -68,6 +68,10 @@ export type Settings = {
   spotifyClientId: string;
   /** Hide recognisable credentials before chat text reaches Gemini. */
   maskSecrets: boolean;
+  themeScheduleEnabled: boolean;
+  /** "HH:MM" local times for the Windows light and dark switch. */
+  themeLightAt: string;
+  themeDarkAt: string;
   /** What a paired phone may do: approvals, media, clipboard. */
   remoteAllow: string[];
   setupDone: boolean;

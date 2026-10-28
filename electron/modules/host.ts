@@ -34,6 +34,7 @@ import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
+import { darkAt, nextSwitch } from "../../src/theme-schedule";
 import { activeAgents } from "../../src/agent-rank";
 import { agentClis } from "../../src/dev-types";
 import { mediaAction, nativeScript } from "../platform";
@@ -356,6 +357,34 @@ export function createModuleHost(deps: Deps) {
     },
   });
   const workbench = () => registry.get<Workbench>("workbench");
+  // Light and dark on a schedule: one timeout to the next switch. The theme
+  // is applied when the schedule changes and at each switch, so a manual
+  // change in between is left alone until the next switch.
+  let themeTimer: NodeJS.Timeout | undefined,
+    themeKey = "";
+  const syncTheme = (fired = false) => {
+    clearTimeout(themeTimer);
+    const s = store.state.settings;
+    const key = `${s.themeScheduleEnabled}|${s.themeLightAt}|${s.themeDarkAt}`;
+    const changed = key !== themeKey;
+    themeKey = key;
+    if (!s.themeScheduleEnabled) return;
+    try {
+      if (changed || fired)
+        void native
+          .call("theme", {
+            dark: darkAt(new Date(), s.themeLightAt, s.themeDarkAt),
+          })
+          .catch(() => {});
+      const next = nextSwitch(new Date(), s.themeLightAt, s.themeDarkAt);
+      themeTimer = setTimeout(
+        () => syncTheme(true),
+        Math.min(2 ** 31 - 1, next.at.getTime() - Date.now() + 1000),
+      );
+    } catch {
+      deps.notify("The light and dark times need a form like 07:30.");
+    }
+  };
   // Built on the first Spotify request; nothing runs while unused.
   let spotify: Spotify | undefined;
   const wheel = () => registry.get<Wheel>("fileWheel");
@@ -380,6 +409,7 @@ export function createModuleHost(deps: Deps) {
     registry,
     start() {
       wake();
+      syncTheme();
       if (process.argv.includes("--file-wheel")) host.acceptArgv(process.argv);
     },
     handles(method: string) {
@@ -638,6 +668,7 @@ export function createModuleHost(deps: Deps) {
     afterSettings() {
       registry.sync();
       wake();
+      syncTheme();
       registry.peek<Workbench>("workbench")?.captureShortcuts(false);
     },
     captureShortcuts(active: boolean) {
@@ -756,6 +787,7 @@ export function createModuleHost(deps: Deps) {
       return registry.peek<Workbench>("workbench")?.confirmQuit() ?? true;
     },
     dispose() {
+      clearTimeout(themeTimer);
       packs.dispose();
       registry.dispose();
       shared?.data.dispose();

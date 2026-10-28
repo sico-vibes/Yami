@@ -145,6 +145,10 @@ The table lists source defaults; a user can change most values in Settings. Sett
 
 The source declares the voice and text defaults as `gemini-3.8-live` and `gemini-3.8-flash`, respectively. Provider model catalogs change; setup can choose a compatible model returned for the user’s API key. The saved model names are visible and changeable through settings/model discovery when supported.
 
+## Light and dark on a schedule
+
+Settings › System › **Light and dark on a schedule** switches Windows (apps and the system) to dark mode from an evening time and back to light from a morning time (default 19:00 and 07:00). A night schedule, with dark during the day, also works. Yami keeps one timer to the next switch. It applies the theme when you turn the schedule on or change the times, and at each switch, so a manual change in between stays until the next switch. It uses the same registry setting and broadcast as the Controls card's dark mode toggle. The rules are unit-tested; switching the real theme was **not exercised** in Yami's checks. Wallpaper rotation, accent sync and the rest of the Theme Hub from the plan are not built.
+
 ## Feeds inbox
 
 Turn on **Feeds inbox** in Settings › Modules (or the Developer preset) and Desk gains a **Plans | Inbox** switch. Add a subreddit (`r/rust`), Hacker News, a GitHub repository's releases (`owner/repo`), a YouTube channel ID, a Bluesky profile (`name.bsky.social`, read from its public `/rss`), a Mastodon account (`@user@instance`, read from `/@user.rss`) or any HTTPS RSS, Atom or JSON Feed address. Untitled social posts use their text as the title. Items from every source are listed newest first; a chip per source filters the list, shows its last error on hover, and removes it. Opening an item opens your browser.

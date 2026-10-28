@@ -48,6 +48,9 @@ export const defaults: Settings = {
   browserEnabled: false,
   spotifyClientId: "",
   maskSecrets: true,
+  themeScheduleEnabled: false,
+  themeLightAt: "07:00",
+  themeDarkAt: "19:00",
   remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

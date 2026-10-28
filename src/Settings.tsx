@@ -348,6 +348,36 @@ export function Settings({
                 "Keep the main Yami window above your other apps.",
                 toggle("alwaysOnTop", "Keep window on top"),
               )}
+              {row(
+                "Light and dark on a schedule",
+                "Windows switches to dark mode in the evening and back to light in the morning. One timer waits for the next switch.",
+                toggle("themeScheduleEnabled", "Light and dark on a schedule"),
+              )}
+              {s.themeScheduleEnabled &&
+                row(
+                  "Switch times",
+                  "Light from the first time, dark from the second.",
+                  <span className="theme-times">
+                    <input
+                      type="time"
+                      aria-label="Light from"
+                      value={s.themeLightAt}
+                      onChange={(e) =>
+                        e.target.value &&
+                        void patch({ themeLightAt: e.target.value })
+                      }
+                    />
+                    <input
+                      type="time"
+                      aria-label="Dark from"
+                      value={s.themeDarkAt}
+                      onChange={(e) =>
+                        e.target.value &&
+                        void patch({ themeDarkAt: e.target.value })
+                      }
+                    />
+                  </span>,
+                )}
             </div>
             <h3 className="group-title">Audio</h3>
             <div className="setting-group">
