@@ -2,6 +2,7 @@ import { app } from "electron";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
+import os from "node:os";
 const exec = promisify(execFile);
 export function runPowerShell(
   script: string,
@@ -41,6 +42,29 @@ async function executeNativeScript(name: string, args: string[] = []) {
     { windowsHide: true, timeout: 15000 },
   );
   return JSON.parse(r.stdout.trim() || "{}");
+}
+
+/**
+ * File names from Windows Search under the user's folder, for the launcher.
+ * Quotes, wildcards and brackets are dropped before the query reaches it.
+ */
+export async function windowsSearch(query: string) {
+  const words = query
+    .replace(/['"*%[\]]/g, " ")
+    .trim()
+    .slice(0, 80);
+  if (words.length < 3) return [];
+  const found = await executeNativeScript("Search", [
+    "-Query",
+    words,
+    "-Scope",
+    os.homedir(),
+  ]).catch(() => []);
+  return (Array.isArray(found) ? found : [])
+    .filter(
+      (f: any) => typeof f?.path === "string" && typeof f?.name === "string",
+    )
+    .slice(0, 20) as { name: string; path: string }[];
 }
 
 const cache = new Map<string, { value: any; until: number }>();

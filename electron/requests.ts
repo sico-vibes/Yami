@@ -1,5 +1,5 @@
 import { findLyrics } from "./lyrics";
-import { mediaAction } from "./platform";
+import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
   BrowserWindow,
@@ -17,6 +17,9 @@ import type { Store } from "./store";
 import type { Native } from "./native";
 import type { Assistant } from "./assistant";
 import { safeWebUrl } from "./policy";
+
+/** Files Windows Search offered, which the launcher may open. */
+const searchHits = new Set<string>();
 
 export type RequestContext = {
   workbench?: { exportData: () => any; clearData: () => void };
@@ -282,14 +285,25 @@ export function createRequestHandler(ctx: RequestContext) {
         return ctx.apps;
       case "launcher.files": {
         const query = String(a.query || "").toLowerCase();
-        return query.length < 2
-          ? []
-          : ctx.launcherFiles
-              .filter((f) => f.name.toLowerCase().includes(query))
-              .slice(0, 30);
+        if (query.length < 2) return [];
+        const local = ctx.launcherFiles
+          .filter((f) => f.name.toLowerCase().includes(query))
+          .slice(0, 30);
+        if (local.length >= 10) return local;
+        // Few hits in Yami's own index: ask Windows Search too.
+        const known = new Set(local.map((f) => f.path.toLowerCase()));
+        const more = (await windowsSearch(query)).filter(
+          (f) => !known.has(f.path.toLowerCase()),
+        );
+        for (const f of more) searchHits.add(f.path);
+        return [...local, ...more].slice(0, 30);
       }
       case "files.open": {
-        const file = ctx.launcherFiles.find((f) => f.path === a.path);
+        const file =
+          ctx.launcherFiles.find((f) => f.path === a.path) ||
+          (searchHits.has(String(a.path)) && fs.existsSync(String(a.path))
+            ? { path: String(a.path) }
+            : undefined);
         if (!file) throw new Error("File not found in your launcher index.");
         const error = await shell.openPath(file.path);
         if (error) throw new Error(error);
