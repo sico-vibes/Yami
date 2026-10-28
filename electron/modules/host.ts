@@ -4,6 +4,7 @@ import {
   clipboard,
   dialog,
   safeStorage,
+  shell,
   screen,
   BrowserWindow,
   type WebContents,
@@ -31,6 +32,7 @@ import { agentTools } from "../agentlink/tools";
 import { startRemote, type RemoteAbility } from "../remote/server";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
+import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { activeAgents } from "../../src/agent-rank";
 import { agentClis } from "../../src/dev-types";
 import { mediaAction, nativeScript } from "../platform";
@@ -353,6 +355,8 @@ export function createModuleHost(deps: Deps) {
     },
   });
   const workbench = () => registry.get<Workbench>("workbench");
+  // Built on the first Spotify request; nothing runs while unused.
+  let spotify: Spotify | undefined;
   const wheel = () => registry.get<Wheel>("fileWheel");
   // Background duties need the workspace running before any page opens.
   const wake = () => {
@@ -380,7 +384,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
-        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault)\./.test(
+        /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify)\./.test(
           method,
         )
       );
@@ -417,6 +421,39 @@ export function createModuleHost(deps: Deps) {
           : [];
       if (method.startsWith("palette."))
         throw new Error("Unknown launcher request.");
+      if (method.startsWith("spotify.")) {
+        const s = (spotify ??= new Spotify(
+          () => store.state.settings.spotifyClientId,
+          {
+            get: () => store.key("provider:spotify"),
+            set: (value) => store.setKeys({ "provider:spotify": value }),
+          },
+        ));
+        const status = () => ({
+          clientId: store.state.settings.spotifyClientId,
+          connected: s.connected(),
+        });
+        if (method === "spotify.status") return status();
+        if (method === "spotify.connect") {
+          const clientId = String(a.clientId || "").trim();
+          const { verifier, challenge, state } = pkce();
+          const url = authorizeUrl(clientId, challenge, state);
+          store.state.settings.spotifyClientId = clientId;
+          deps.changed();
+          const code = waitForCode(state);
+          await shell.openExternal(url);
+          await s.exchange(await code, verifier);
+          return status();
+        }
+        if (method === "spotify.disconnect") {
+          s.disconnect();
+          return status();
+        }
+        if (method === "spotify.now") return s.now();
+        if (method === "spotify.devices") return s.devices();
+        if (method === "spotify.act") return s.act(String(a.action), a.value);
+        throw new Error("Unknown Spotify request.");
+      }
       if (method.startsWith("browser.") || method.startsWith("vault.")) {
         const { browser, vault } = registry.get<Browser>("browser");
         const local = process.env.LOCALAPPDATA || "";

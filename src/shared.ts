@@ -64,6 +64,8 @@ export type Settings = {
   agentLinkTools: string[];
   remoteEnabled: boolean;
   browserEnabled: boolean;
+  /** The user's own Spotify app (public client ID; PKCE, no secret). */
+  spotifyClientId: string;
   /** What a paired phone may do: approvals, media, clipboard. */
   remoteAllow: string[];
   setupDone: boolean;

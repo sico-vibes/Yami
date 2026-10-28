@@ -46,6 +46,7 @@ export const defaults: Settings = {
   agentLinkTools: ["notify", "ask_user", "list_projects"],
   remoteEnabled: false,
   browserEnabled: false,
+  spotifyClientId: "",
   remoteAllow: ["approvals", "media"],
   setupDone: false,
 };

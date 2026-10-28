@@ -194,6 +194,10 @@ export function installPreviewBridge() {
           };
         case "media":
           return { ...previewMedia };
+        case "spotify.status":
+          return { clientId: "", connected: false };
+        case "spotify.connect":
+          throw new Error("Preview only — Spotify was not contacted.");
         case "palette.projects":
           return [{ id: "demo-yami", name: "yami-demo", path: "C:\\Demo\\yami-demo" }];
         case "media.action":

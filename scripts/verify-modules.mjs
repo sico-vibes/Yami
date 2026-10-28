@@ -129,6 +129,12 @@ const status = (list, id) => list.find((m) => m.id === id);
       (await call(main, "packs.install", { id: "not-a-pack" })).error,
       /Unknown download/,
     );
+    // Spotify stays disconnected, and a bad client ID never opens a browser.
+    assert.equal((await call(main, "spotify.status")).value.connected, false);
+    assert.match(
+      (await call(main, "spotify.connect", { clientId: "not-an-id" })).error,
+      /Client ID/,
+    );
     // Whistle dictation refuses while its module is off; nothing is run.
     await call(main, "settings", { dictationEngine: "whistle" });
     const silence = Buffer.alloc(44 + 3200);

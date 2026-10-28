@@ -4,6 +4,7 @@ import { api, todayUsage } from "./api";
 import { EngineStatus } from "./wheel/Engines";
 import { ModulesSettings } from "./setup/ModulesSettings";
 import { RemotePanel } from "./RemotePanel";
+import { SpotifyPanel } from "./SpotifyPanel";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 import { Select, StatusChip } from "./controls";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
@@ -19,6 +20,7 @@ const groups = [
   ["circles-four", "File wheel"],
   ["puzzle-piece", "Modules"],
   ["device-mobile", "Phone"],
+  ["music-notes", "Music"],
 ];
 export function Settings({
   state,
@@ -166,6 +168,7 @@ export function Settings({
     "File wheel": "Drag a file, tap a modifier, and drop it on a petal.",
     Modules: "Wake the features you use. The rest stay asleep.",
     Phone: "Approve agents and control music from your phone.",
+    Music: "Spotify devices and volume, if you connect it.",
   };
   const all = !!search;
   return (
@@ -647,6 +650,7 @@ export function Settings({
         )}
         {section === "Modules" && !all && <ModulesSettings report={report} />}
         {section === "Phone" && !all && <RemotePanel report={report} />}
+        {section === "Music" && !all && <SpotifyPanel report={report} />}
       </section>
       {keyModal && (
         <Modal
