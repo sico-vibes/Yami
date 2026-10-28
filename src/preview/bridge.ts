@@ -80,7 +80,7 @@ export function installPreviewBridge() {
     },
     async invoke(method, args = {}) {
       const a = args;
-      if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting)\./.test(method)) return previewWorkbench(method, a, emit);
+      if (/^(workbench|terminal|agents|connections|usage|local|context|speech|notes|mcp|meeting|dev)\./.test(method)) return previewWorkbench(method, a, emit);
       if (/^(modules|setup|packs)\./.test(method)) return previewModules(method, a, state, emit, changed);
       switch (method) {
         case "state":

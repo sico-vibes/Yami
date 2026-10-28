@@ -21,7 +21,9 @@ export default function TerminalWindow() {
   const host = useRef<HTMLDivElement>(null),
     views = useRef(new Map<string, View>()),
     active = useRef("");
-  const [list, setList] = useState<{ id: string; shell: string }[]>([]),
+  const [list, setList] = useState<
+      { id: string; shell: string; title?: string }[]
+    >([]),
     [selected, setSelected] = useState(""),
     [error, setError] = useState(""),
     [ending, setEnding] = useState(false),
@@ -62,7 +64,12 @@ export default function TerminalWindow() {
       view.terminal.writeln(`\r\n[Process exited: ${event.code}]`);
     } else if (event.error) setError(event.error);
   }
-  async function create(cwd?: string, settings?: WorkbenchSettings) {
+  type Launch = { cwd: string; command?: string; title: string };
+  async function create(
+    cwd?: string,
+    settings?: WorkbenchSettings,
+    launch?: Launch,
+  ) {
     try {
       const session = await api("terminal.create", { cwd });
       if (!mounted.current || !host.current) {
@@ -128,8 +135,17 @@ export default function TerminalWindow() {
       });
       for (const e of backlog.current.get(session.id) || []) output(e);
       backlog.current.delete(session.id);
-      setList((old) => [...old, { id: session.id, shell: session.shell }]);
+      setList((old) => [
+        ...old,
+        { id: session.id, shell: session.shell, title: launch?.title },
+      ]);
       select(session.id);
+      // The command is one of Yami's agent CLIs, typed as if by the user.
+      if (launch?.command)
+        void api("terminal.write", {
+          session: session.id,
+          text: launch.command + "\r",
+        }).catch(report);
     } catch (e) {
       report(e);
     }
@@ -149,14 +165,21 @@ export default function TerminalWindow() {
         void api("workbench.backgroundData").then(setBackground).catch(report);
       }
     };
+    // Tabs other pages asked for (a project or an agent), else one shell.
+    const drain = async (settings?: WorkbenchSettings, fallback = false) => {
+      const queued: Launch[] = await api("terminal.launches");
+      for (const item of queued) await create(item.cwd, settings, item);
+      if (!queued.length && fallback) await create(undefined, settings);
+    };
     void api("workbench.state")
       .then((value) => {
         apply(value);
-        void create(undefined, value.settings);
+        return drain(value.settings, true);
       })
       .catch(report);
     const off = window.yami.on((e) => {
       if (e.type === "terminal-output") output(e);
+      if (e.type === "terminal-launch") void drain().catch(report);
       if (e.type === "workbench-state") apply(e.state);
       if (
         e.type === "state" &&
@@ -249,7 +272,7 @@ export default function TerminalWindow() {
               className={selected === v.id ? "selected" : ""}
               onClick={() => select(v.id)}
             >
-              {v.shell} {i + 1}
+              {v.title || `${v.shell} ${i + 1}`}
             </button>
           ))}
         </div>

@@ -1,0 +1,112 @@
+/* Dev hub: project cards and coding-agent tiles. Agent marks are two-letter
+   tiles in Yami's own type, not brand logos. */
+.agent-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.agent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 34px;
+  padding: 0 var(--space-3) 0 4px;
+  border-radius: var(--r-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  color: var(--text-soft);
+  font-size: var(--fs-xs);
+}
+.agent-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-pill);
+  background: var(--ink-panel);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.project-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.project-suggestions .setting-note {
+  margin: 0 var(--space-2) 0 0;
+}
+.project-card .entry-heading small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: 50px;
+}
+.project-meta .value-pill {
+  height: 26px;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-2xs);
+}
+.project-meta .setting-note {
+  margin: 0;
+}
+.project-agents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-left: 50px;
+}
+.agent-launch {
+  padding: 3px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  transition:
+    border-color var(--dur-fast),
+    background var(--dur-fast),
+    scale var(--dur-fast) var(--ease-fluid);
+}
+.agent-launch .agent-mark {
+  width: 34px;
+  height: 34px;
+  font-size: var(--fs-xs);
+}
+.agent-launch:hover .agent-mark,
+.agent-launch:focus-visible .agent-mark {
+  border-color: var(--selected-line);
+  background: var(--selected);
+}
+.agent-launch:active {
+  scale: 0.94;
+}
+.agent-launch.favourite .agent-mark {
+  color: var(--on-glow);
+  background: var(--grad-glow);
+  border-color: transparent;
+  box-shadow: var(--lit-shadow);
+}
+.project-card .entry-foot {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.project-card .entry-foot .entry-action {
+  margin-left: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-launch {
+    transition: none;
+  }
+}
+html[data-reduced="true"] .agent-launch {
+  transition: none;
+}

@@ -152,6 +152,7 @@ usage and alerts are off; the terminal shortcut is empty; the terminal backgroun
 follows Yami at 6px blur and 22% opacity; scrollback is 3,000 lines; recap retention
 is seven days. Dictation stays on Gemini unless a Windows recognizer is selected.
 Its screens use the same cards, status words and meters as the rest of the app.
+**Projects** keeps your project folders with their git state and starts any installed coding-agent CLI (Claude Code, Codex, OpenCode, Cursor CLI, Gemini CLI, Copilot CLI, Pi, Qwen Code, Amp, Aider, Crush or Goose) in a Yami Terminal tab there with one press.
 Account, device and installed-agent verification limits are listed in the
 [AI workspace and terminal guide](workspace.md).
 

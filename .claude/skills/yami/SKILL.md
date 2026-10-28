@@ -78,7 +78,7 @@ electron/        main process
   store.ts         data.json + DPAPI-encrypted keys  windows.ts  makeWindow factory
   native.ts / platform.ts   native host and PowerShell helpers
   modules/         optional modules: registry.ts (pure, tested), host.ts (lazy build/dispose, modules.* IPC)
-  workbench/       AI workspace: sessions/hooks, quota, connections, terminal PTY, local model, MCP, context, speech/notes
+  workbench/       AI workspace: projects + agent launcher (dev.ts), sessions/hooks, quota, connections, terminal PTY, local model, MCP, context, speech/notes
   wheel/           file wheel: service window, engine downloads, command plans, PDF/archive/document conversion
   native-path.ts   resolves the content-hashed native host from host-manifest.json
 src/             renderer (main.tsx imports only the `?window=` screen)

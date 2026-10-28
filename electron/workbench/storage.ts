@@ -18,6 +18,7 @@ export class WorkbenchStorage {
     } catch {}
     this.state = {
       connections: [],
+      projects: [],
       readings: [],
       rules: [],
       notes: [],

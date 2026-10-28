@@ -1,7 +1,23 @@
 import { workbenchDefaults, type WorkbenchState } from "../workbench-types";
+import { agentClis } from "../dev-types";
 let nextId = 0;
 const demo: WorkbenchState = {
   settings: { ...workbenchDefaults },
+  projects: [
+    {
+      id: "demo-yami",
+      path: "C:\\Demo\\yami-demo",
+      name: "yami-demo",
+      added: Date.now() - 86400000,
+      agent: "claude",
+    },
+    {
+      id: "demo-site",
+      path: "C:\\Demo\\portfolio-site",
+      name: "portfolio-site",
+      added: Date.now() - 3 * 86400000,
+    },
+  ],
   connections: [],
   readings: [],
   requests: [],
@@ -80,6 +96,7 @@ export function previewWorkbench(
   const changed = () =>
     emit({ type: "workbench-state", state: structuredClone(demo) });
   if (method === "workbench.state") return structuredClone(demo);
+  if (method.startsWith("dev.")) return previewDev(method, a, changed);
   if (method === "workbench.settings") {
     if (a.localKey || a.mcpKey || a.usageKey)
       throw new Error(
@@ -275,4 +292,55 @@ export function previewWorkbench(
       "Recording is unavailable in preview. No microphone, system audio or provider is accessed.",
     );
   throw new Error("Desktop-only workspace action: " + method);
+}
+
+// Dev hub stand-ins: synthetic folders and git counts; nothing is read or run.
+function previewDev(method: string, a: any, changed: () => void): any {
+  if (method === "dev.agents")
+    return ["claude", "codex", "opencode", "gemini"].map((id) => ({
+      id,
+      path: "Preview (not detected)",
+    }));
+  if (method === "dev.editors") return ["vscode"];
+  if (method === "dev.suggestions") return ["C:\\Demo\\api-server"];
+  if (method === "dev.projects")
+    return demo.projects.map((p, i) => ({
+      ...p,
+      exists: true,
+      git: i ? undefined : { branch: "main", changes: 3, ahead: 1, behind: 0 },
+      activity: i
+        ? undefined
+        : { agent: "codex", phase: "working", at: Date.now() - 120000 },
+    }));
+  if (method === "dev.projects.add") {
+    const path = String(a.path || "C:\\Demo\\new-project");
+    const project = {
+      id: "demo-" + ++nextId,
+      path,
+      name: path.split(/[\\/]/).pop() || path,
+      added: Date.now(),
+    };
+    demo.projects = [...demo.projects, project];
+    changed();
+    return project;
+  }
+  if (method === "dev.projects.update") {
+    demo.projects = demo.projects.map((p) =>
+      p.id === a.id ? { ...p, ...(a.agent && { agent: a.agent }) } : p,
+    );
+    changed();
+    return true;
+  }
+  if (method === "dev.projects.remove") {
+    demo.projects = demo.projects.filter((p) => p.id !== a.id);
+    changed();
+    return true;
+  }
+  if (method === "dev.launch") {
+    const cli = agentClis.find((c) => c.id === a.agent);
+    throw new Error(
+      `Preview only: ${cli ? cli.name + " would start" : "a terminal would open"} in that folder.`,
+    );
+  }
+  throw new Error("Desktop-only Dev action: " + method);
 }

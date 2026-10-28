@@ -9,11 +9,13 @@ import { Recap } from "./Recap";
 import { ContextView } from "./Context";
 import { WorkspaceSettings } from "./WorkspaceSettings";
 import { Mcp } from "./Mcp";
+import { Projects } from "./Projects";
 import { Icon } from "../ui";
 import { Meter, relativeTime, StatusChip } from "../controls";
 import { api } from "../api";
 const pages = [
   ["Sessions", "robot"],
+  ["Projects", "folders"],
   ["Usage", "chart-bar"],
   ["Connections", "plugs-connected"],
   ["Context", "paperclip"],
@@ -38,7 +40,9 @@ export default function WorkbenchPage({
     [page, setPage] = useState(initial);
   if (!data) return <div className="empty-state">Opening your workspace…</div>;
   const content =
-    page === "Usage" ? (
+    page === "Projects" ? (
+      <Projects data={data} report={report} />
+    ) : page === "Usage" ? (
       <Usage data={data} report={report} />
     ) : page === "Connections" ? (
       <Connections data={data} report={report} />

@@ -1,3 +1,4 @@
+import type { Project } from "./dev-types";
 export type AgentPhase =
   | "idle"
   | "thinking"
@@ -120,6 +121,7 @@ export type WorkbenchSettings = {
 };
 export type WorkbenchState = {
   settings: WorkbenchSettings;
+  projects: Project[];
   connections: ConnectionConfig[];
   readings: ConnectionReading[];
   sessions: AgentSession[];

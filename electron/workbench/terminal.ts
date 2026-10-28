@@ -53,6 +53,8 @@ export class TerminalController {
     string,
     { owner: number; cwd: string; shell: string; pid?: number }
   >();
+  // Tabs another page asked for; the terminal page drains them when ready.
+  private launches: { cwd: string; command?: string; title: string }[] = [];
   constructor(
     private settings: () => { terminalShell: string },
     private selection: (text: string) => void,
@@ -82,6 +84,14 @@ export class TerminalController {
       this.window = undefined;
       this.disposeHost();
     });
+  }
+  /** Opens a tab in `cwd` and types `command`, which comes from Yami's list. */
+  launch(item: { cwd: string; command?: string; title: string }) {
+    this.launches = [...this.launches, item].slice(-4);
+    this.open();
+    const page = this.window?.webContents;
+    if (page && !page.isLoading())
+      page.send("yami:event", { type: "terminal-launch" });
   }
   private disposing = false;
   private startHost() {
@@ -205,6 +215,11 @@ export class TerminalController {
       return true;
     }
     const owner = this.owner(sender);
+    if (method === "terminal.launches") {
+      const queued = this.launches;
+      this.launches = [];
+      return queued;
+    }
     if (method === "terminal.hide") {
       this.window?.hide();
       return true;

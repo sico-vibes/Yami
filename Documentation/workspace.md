@@ -20,6 +20,25 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   word and the latest detail. Changed files sit behind a disclosure as file chips.
   Each chip shows its full path on hover and opens the bounded diff. Dismiss removes
   the card. Pending permission requests appear in a dialog over the page.
+- **Projects.** Folders you add, each as a card: name, path, branch, how many paths
+  changed, commits ahead and behind, and the latest agent session reported there.
+  Yami runs `git status --porcelain=v2 --branch` (five-second limit, four folders at a
+  time) when the page opens, when you press refresh, or when the list changes. It
+  never runs git on a timer or on agent events. Above the cards, the coding-agent CLIs
+  found on this PC are listed. Yami looks on PATH and in npm, WinGet, Scoop, Bun and
+  Cargo folders, preferring a real `.exe` over npm's `.cmd` and `.ps1` shims, when the
+  page first opens or on refresh. Each card has a tile per installed agent: pressing
+  one opens a Yami Terminal tab in the folder and types that agent's command (for
+  example `claude` or `cursor-agent`), then remembers it as the card's **Start**
+  button. Commands come only from Yami's list of twelve CLIs (Claude Code, Codex,
+  OpenCode, Cursor CLI, Gemini CLI, Copilot CLI, Pi, Qwen Code, Amp, Aider, Crush and
+  Goose); the page never sends a command line. **Terminal here**, **Explorer** and,
+  when VS Code or Cursor has registered its link scheme, an editor button open the
+  folder. "Folders your agents worked in" suggests folders that agent sessions
+  reported, so you can add them with one press. Forgetting a project never touches
+  its files. The tiles show two-letter marks, not brand logos. The command names were
+  checked against installs on one PC (Claude Code, Codex, OpenCode, Gemini CLI and
+  Crush); the others follow each project's documentation and are **not verified** here.
 - **Usage.** Allowance alerts and background refresh are two toggles. Each provider
   that has been read gets a card with its account, source, status word, and each
   limit as a label, a meter, a percentage and a reset time, grouped by account.

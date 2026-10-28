@@ -104,6 +104,9 @@ Workspace verification commands:
   `--download` also fetches the pinned 7-Zip console (about 0.6 MB) into the
   isolated profile and removes it. Other desktop checks start past setup through
   `scripts/test-profile.mjs`.
+- `node scripts/verify-projects.mjs`: isolated profile; adds this repository as a
+  project, checks its git branch and the detected agent CLIs, refuses unknown and
+  uninstalled agents, and opens a terminal tab there. It never starts an agent CLI.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native
   approval relay, persistent PTY, resize, interruption and descendant cleanup.
 - `npx electron-builder --win --dir` followed by

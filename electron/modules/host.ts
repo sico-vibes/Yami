@@ -218,10 +218,24 @@ export function createModuleHost(deps: Deps) {
       exportData() {
         const live = registry.peek<Workbench>("workbench");
         if (live) return live.exportData();
-        const { settings, notes, rules, history, connections, usage } = (
-          shared?.data || new WorkbenchStorage(store)
-        ).state;
-        return { settings, notes, rules, history, connections, usage };
+        const {
+          settings,
+          notes,
+          rules,
+          history,
+          connections,
+          usage,
+          projects,
+        } = (shared?.data || new WorkbenchStorage(store)).state;
+        return {
+          settings,
+          notes,
+          rules,
+          history,
+          connections,
+          usage,
+          projects,
+        };
       },
       clearData() {
         const live = registry.peek<Workbench>("workbench");
