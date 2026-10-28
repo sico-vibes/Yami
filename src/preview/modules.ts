@@ -193,6 +193,37 @@ export function previewModules(
     case "feeds.list":
     case "feeds.refresh":
       return feedView();
+    case "feeds.mail":
+    case "feeds.mail.refresh":
+      return [
+        {
+          id: "demo-mail",
+          provider: "gmail",
+          host: "imap.gmail.com",
+          user: "demo@example.com",
+          added: 0,
+          checkedAt: Date.now(),
+          glance: {
+            unread: 3,
+            total: 128,
+            latest: [
+              {
+                from: "Demo Shop",
+                subject: "Your order shipped (demo)",
+                at: Date.now() - 900_000,
+              },
+              {
+                from: "Ada",
+                subject: "Notes from today (demo)",
+                at: Date.now() - 7_200_000,
+              },
+            ],
+          },
+        },
+      ];
+    case "feeds.mail.add":
+    case "feeds.mail.remove":
+      throw new Error("Preview only — no mail account was touched.");
     case "feeds.add":
       throw new Error("Preview only — no feed was added or read.");
     case "feeds.remove":

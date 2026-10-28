@@ -14,6 +14,7 @@ import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
 import { TuneController } from "../tune/tune";
 import { FeedsController } from "../feeds/feeds";
+import { MailAccounts } from "../feeds/mail-accounts";
 import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
 import { agentLinkPort, startAgentLink } from "../agentlink/server";
@@ -21,6 +22,7 @@ import { agentTools } from "../agentlink/tools";
 import { randomBytes } from "node:crypto";
 
 type Tune = { tweaks: TuneController; startup: StartupController };
+type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
 const agentToolNames = ["notify", "ask_user", "list_projects", "open_terminal"];
 import { execFile, spawn } from "node:child_process";
@@ -128,10 +130,19 @@ export function createModuleHost(deps: Deps) {
             : undefined,
       },
       feeds: {
-        load: () =>
-          new FeedsController(
+        load: (): Feeds => ({
+          feeds: new FeedsController(
             path.join(path.dirname(store.file), "feeds.json"),
           ),
+          mail: new MailAccounts(
+            path.join(path.dirname(store.file), "mail.json"),
+            {
+              get: (id) => store.key(`connection:mail-${id}`),
+              set: (id, value) =>
+                store.setKeys({ [`connection:mail-${id}`]: value }),
+            },
+          ),
+        }),
         dispose: () => {},
       },
       tune: {
@@ -315,7 +326,11 @@ export function createModuleHost(deps: Deps) {
         };
       }
       if (method.startsWith("feeds.")) {
-        const feeds = registry.get<FeedsController>("feeds");
+        const { feeds, mail } = registry.get<Feeds>("feeds");
+        if (method === "feeds.mail") return mail.list();
+        if (method === "feeds.mail.refresh") return mail.refresh();
+        if (method === "feeds.mail.add") return mail.add(a);
+        if (method === "feeds.mail.remove") return mail.remove(String(a.id));
         if (method === "feeds.list") return feeds.view();
         if (method === "feeds.refresh")
           return feeds.refresh(a.id ? String(a.id) : undefined);
@@ -445,7 +460,7 @@ export function createModuleHost(deps: Deps) {
         const live = registry.peek<Workbench>("workbench");
         const dir = path.dirname(store.file);
         // Tune and feeds keep their own files whether or not they are loaded.
-        for (const file of ["tune.json", "feeds.json"])
+        for (const file of ["tune.json", "feeds.json", "mail.json"])
           fs.rmSync(path.join(dir, file), { force: true });
         if (live) return live.clearData();
         if (shared) shared.data.deleted = true;

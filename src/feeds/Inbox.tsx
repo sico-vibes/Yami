@@ -3,6 +3,7 @@ import { api } from "../api";
 import { relativeTime, Select, StatusChip } from "../controls";
 import { feedKinds, type FeedKind, type FeedsView } from "../feeds-types";
 import { Empty, Icon, IconButton } from "../ui";
+import { MailGlance } from "./MailGlance";
 
 /** Freshly read sources are not read again for this long when Desk opens. */
 const freshFor = 10 * 60_000;
@@ -57,7 +58,7 @@ export default function Inbox({
         <div>
           <h1>Inbox</h1>
           <p className="page-description">
-            Your feeds, read when you look. Nothing signs in.
+            Feeds and mail, read when you look. Nothing is posted or sent.
           </p>
         </div>
         <IconButton
@@ -67,6 +68,8 @@ export default function Inbox({
           onClick={() => void refresh()}
         />
       </div>
+      <MailGlance report={report} />
+      <h3 className="group-title">Feeds</h3>
       <div className="inbox-add">
         <Select
           label="Feed type"

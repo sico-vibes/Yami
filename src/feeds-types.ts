@@ -35,6 +35,22 @@ export type FeedStatus = {
   error?: string;
 };
 
+/** A mail account for the glance; its app password never leaves the main process. */
+export type MailAccount = {
+  id: string;
+  provider: string;
+  host: string;
+  user: string;
+  added: number;
+  glance?: {
+    unread: number;
+    total: number;
+    latest: { from: string; subject: string; at: number }[];
+  };
+  error?: string;
+  checkedAt?: number;
+};
+
 export type FeedsView = {
   sources: FeedSource[];
   /** Newest first, across sources, at most 200. */
