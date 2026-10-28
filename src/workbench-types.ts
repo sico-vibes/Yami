@@ -104,6 +104,8 @@ export type WorkbenchSettings = {
   terminalBlur: number;
   terminalOpacity: number;
   terminalScrollback: number;
+  /** Prompt marks and folder reports from shells Yami opens. */
+  terminalMarks: boolean;
   usageAlerts: boolean;
   usageBackground: boolean;
   recapRetention: number;
@@ -146,6 +148,7 @@ export const workbenchDefaults: WorkbenchSettings = {
   terminalBlur: 6,
   terminalOpacity: 0.22,
   terminalScrollback: 3000,
+  terminalMarks: true,
   usageAlerts: false,
   usageBackground: false,
   recapRetention: 7,

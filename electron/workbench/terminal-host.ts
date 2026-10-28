@@ -21,17 +21,13 @@ lines.on("line", (line) => {
     if (method === "open") {
       if (sessions.size >= 8 || sessions.has(session))
         throw new Error("Terminal session limit reached.");
-      const env = { ...process.env };
+      // Arguments and extra variables come from shell-integration.ts.
+      const env = { ...process.env, ...(request.env || {}) };
       delete env.ELECTRON_RUN_AS_NODE;
       delete env.YAMI_PTY_MODULE;
       const child = pty.spawn(
         request.shell,
-        // PowerShell hides its banner; Git Bash starts as a login shell.
-        /(pwsh|powershell)\.exe$/i.test(request.shell)
-          ? ["-NoLogo"]
-          : /bash\.exe$/i.test(request.shell)
-            ? ["--login", "-i"]
-            : [],
+        Array.isArray(request.args) ? request.args.map(String) : [],
         {
           name: "xterm-256color",
           cols: request.cols,

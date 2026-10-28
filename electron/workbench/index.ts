@@ -87,6 +87,7 @@ export class Workbench {
         ctx.native.call(own ? "processJob.create" : "processJob.close", {
           pid,
         }),
+      notify,
     );
     this.usage = new UsageController(this.data, changed, notify);
     this.connections = new Connections(this.data, changed, notify);

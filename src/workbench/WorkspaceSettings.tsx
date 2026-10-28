@@ -177,6 +177,22 @@ export function WorkspaceSettings({
             }
           />
         </div>
+        <div className="setting-row">
+          <div>
+            <strong>Shell integration</strong>
+            <p>
+              Shells Yami opens report their folder and mark each prompt, so
+              you can jump between commands, see exit codes and copy the last
+              command's output. Your own prompt is kept. Applies to new
+              sessions.
+            </p>
+          </div>
+          <Toggle
+            label="Terminal shell integration"
+            value={s.terminalMarks}
+            onChange={(terminalMarks) => patch({ terminalMarks })}
+          />
+        </div>
       </div>
       <h3 className="group-title">Agent activity</h3>
       <div className="setting-group">

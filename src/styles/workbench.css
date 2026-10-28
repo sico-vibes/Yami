@@ -318,6 +318,16 @@
   font-size: var(--fs-2xs);
   background: color-mix(in srgb, var(--ink-0) 33%, transparent);
 }
+.terminal-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--mint);
+}
+.terminal-exit.failed {
+  color: var(--danger);
+}
 .terminal-error {
   padding: 8px 16px;
   display: flex;

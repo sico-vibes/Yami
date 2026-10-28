@@ -9,6 +9,7 @@ import path from "node:path";
 import os from "node:os";
 import readline from "node:readline";
 import { randomUUID } from "node:crypto";
+import { integratedLaunch } from "./shell-integration";
 import { makeWindow } from "../windows";
 export function helperPath(name: string) {
   return path.join(
@@ -46,8 +47,19 @@ export function findShell(name: string): string | undefined {
     );
   if (name === "bash")
     return [
-      path.join(process.env.ProgramFiles || "C:\\Program Files", "Git", "bin", "bash.exe"),
-      path.join(process.env.LOCALAPPDATA || "", "Programs", "Git", "bin", "bash.exe"),
+      path.join(
+        process.env.ProgramFiles || "C:\\Program Files",
+        "Git",
+        "bin",
+        "bash.exe",
+      ),
+      path.join(
+        process.env.LOCALAPPDATA || "",
+        "Programs",
+        "Git",
+        "bin",
+        "bash.exe",
+      ),
     ].find((p) => fs.existsSync(p));
   return findExecutable(`${name}.exe`);
 }
@@ -74,9 +86,10 @@ export class TerminalController {
   // Tabs another page asked for; the terminal page drains them when ready.
   private launches: { cwd: string; command?: string; title: string }[] = [];
   constructor(
-    private settings: () => { terminalShell: string },
+    private settings: () => { terminalShell: string; terminalMarks?: boolean },
     private selection: (text: string) => void,
     private processJob: (pid: number, own: boolean) => Promise<any>,
+    private notice: (text: string) => void = () => {},
   ) {}
   open() {
     if (this.window && !this.window.isDestroyed()) {
@@ -269,7 +282,8 @@ export class TerminalController {
           "Close a terminal before opening another (maximum eight).",
         );
       const shellName = String(a.shell || this.settings().terminalShell);
-      if (!shellNames.includes(shellName)) throw new Error("Unsupported shell.");
+      if (!shellNames.includes(shellName))
+        throw new Error("Unsupported shell.");
       const shell = findShell(shellName);
       if (!shell) throw new Error("This shell is not installed.");
       const cwd = a.cwd ? path.resolve(String(a.cwd)) : os.homedir();
@@ -284,6 +298,7 @@ export class TerminalController {
           cwd,
           cols: 100,
           rows: 30,
+          ...integratedLaunch(shell, this.settings().terminalMarks !== false),
         });
         if (opened?.pid) {
           await this.processJob(opened.pid, true);
@@ -300,6 +315,19 @@ export class TerminalController {
     const session = this.sessions.get(a.session);
     if (!session || session.owner !== owner)
       throw new Error("Terminal session is closed.");
+    if (method === "terminal.finished") {
+      // A long command ended; say so only when nobody is looking.
+      if (this.window?.isVisible() && this.window.isFocused()) return false;
+      const title = String(a.title || "Terminal").slice(0, 60);
+      const code = Number(a.exit);
+      const seconds = Math.round(Math.max(0, Number(a.ms) || 0) / 1000);
+      this.notice(
+        Number.isInteger(code) && code !== 0
+          ? `${title}: the command failed (exit ${code}) after ${seconds} s.`
+          : `${title}: the command finished after ${seconds} s.`,
+      );
+      return true;
+    }
     if (method === "terminal.ack") {
       this.credit.set(
         a.session,

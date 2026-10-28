@@ -2,6 +2,8 @@
 // tab (when Git for Windows is installed), runs a harmless echo, then finds
 // the output with Ctrl+Shift+F. Uses an isolated profile.
 import { _electron } from "playwright";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { skipSetup } from "./test-profile.mjs";
@@ -10,6 +12,9 @@ const profile = path.resolve(".artifacts/shells-verify-" + Date.now());
 skipSetup(profile);
 const env = { ...process.env, YAMI_DATA_DIR: profile };
 delete env.ELECTRON_RUN_AS_NODE;
+let marks = {};
+// The shells sit in this folder, so it is removed after they end.
+const folder = fs.mkdtempSync(path.join(os.tmpdir(), "yami-marks-"));
 const app = await _electron.launch({ args: [path.resolve(".")], env });
 const errors = [];
 app.on("window", (p) => p.on("pageerror", (e) => errors.push(e.message)));
@@ -94,13 +99,119 @@ try {
   await terminal.getByRole("button", { name: "Show one tab" }).click();
   await wait(300);
   assert.equal(await shown().count(), 1, "back to one");
+  // Shell integration: each shell reports its folder; PowerShell and Git
+  // Bash also report how the last command exited.
+  const saved = await app.evaluate(({ clipboard }) => clipboard.readText());
+  marks = {};
+  const labels = {
+    powershell: "Windows PowerShell",
+    pwsh: "PowerShell 7",
+    cmd: "Command Prompt",
+    bash: "Git Bash",
+  };
+  try {
+    for (const name of ["powershell", "pwsh", "cmd", "bash"]) {
+      if (!shells.includes(name)) continue;
+      const tabs = await terminal.locator("[data-session]").count();
+      await terminal
+        .getByRole("combobox", { name: "Shell for new tabs" })
+        .click();
+      await terminal.getByRole("option", { name: labels[name] }).click();
+      await terminal
+        .getByRole("button", { name: "New terminal session" })
+        .click();
+      await terminal
+        .locator("[data-session]")
+        .nth(tabs)
+        .waitFor({ timeout: 20000 });
+      await wait(name === "pwsh" ? 4000 : 2500);
+      const where = name === "bash" ? folder.replace(/\\/g, "/") : folder;
+      await terminal.keyboard.type(`cd "${where}"`);
+      await terminal.keyboard.press("Enter");
+      await wait(1200);
+      await terminal.keyboard.type(
+        name === "bash"
+          ? "(exit 4)"
+          : name === "cmd"
+            ? "echo marks"
+            : "cmd /c exit 4",
+      );
+      await terminal.keyboard.press("Enter");
+      await wait(1500);
+      const footer = await terminal.locator(".terminal-footer").innerText();
+      const exit = await terminal
+        .locator(".terminal-exit")
+        .innerText()
+        .catch(() => "");
+      marks[name] = {
+        cwd: footer.toLowerCase().includes(folder.toLowerCase()),
+        exit,
+      };
+      assert.ok(marks[name].cwd, `${name} reported its folder: ${footer}`);
+      if (name !== "cmd") {
+        assert.match(exit, /Exit 4/, `${name} reported the exit code`);
+        await terminal
+          .getByRole("button", { name: "Copy the last command and its output" })
+          .click();
+        await wait(300);
+        const copied = await app.evaluate(({ clipboard }) =>
+          clipboard.readText(),
+        );
+        const problem = await terminal
+          .locator(".terminal-error")
+          .innerText()
+          .catch(() => "");
+        assert.match(
+          copied,
+          /exit 4/,
+          `${name} copied the last block: ${problem}`,
+        );
+      }
+    }
+  } finally {
+    await app.evaluate(
+      ({ clipboard }, text) => clipboard.writeText(text),
+      saved,
+    );
+  }
+  // A long command that ends while the window is hidden gets a notice.
+  const notices = [];
+  await main.exposeFunction("__notice", (m) => notices.push(m));
+  await main.evaluate(() =>
+    window.yami.on(
+      (e) => e.type === "caption-notice" && window.__notice(e.message),
+    ),
+  );
+  const session = await terminal
+    .locator("[data-session]")
+    .first()
+    .getAttribute("data-session");
+  await terminal.evaluate(() => window.yami.invoke("terminal.hide"));
+  await wait(300);
+  assert.equal(
+    await terminal.evaluate(
+      (id) =>
+        window.yami.invoke("terminal.finished", {
+          session: id,
+          title: "Build",
+          exit: 2,
+          ms: 42000,
+        }),
+      session,
+    ),
+    true,
+  );
+  for (let i = 0; i < 20 && !notices.length; i++) await wait(100);
+  assert.deepEqual(notices, ["Build: the command failed (exit 2) after 42 s."]);
+  await main.evaluate(() => window.yami.invoke("terminal.open"));
   for (const tab of await terminal.locator("[data-session]").all())
     await terminal.evaluate(
       (id) => window.yami.invoke("terminal.end", { session: id }),
       await tab.getAttribute("data-session"),
     );
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, shells, checked }));
+  console.log(JSON.stringify({ passed: true, shells, checked, marks }));
 } finally {
   await app.close();
+  fs.rmSync(folder, { recursive: true, force: true, maxRetries: 5 });
 }

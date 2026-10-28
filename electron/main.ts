@@ -757,7 +757,15 @@ else {
         }
       });
       electronSession.defaultSession.setPermissionRequestHandler(
-        (_wc, permission, callback) => callback(permission === "media"),
+        (wc, permission, callback) =>
+          callback(
+            permission === "media" ||
+              // Copy and paste buttons in Yami's own windows, which never
+              // navigate away from Yami's pages.
+              ((permission === "clipboard-sanitized-write" ||
+                permission === "clipboard-read") &&
+                [...windows].some((w) => w.webContents === wc)),
+          ),
       );
       // The main window is created only when shown. First run shows
       // "Choose your Yami" even when starting hidden.

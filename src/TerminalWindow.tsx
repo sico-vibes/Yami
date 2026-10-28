@@ -8,6 +8,7 @@ import { Icon, IconButton, Modal } from "./ui";
 import { cssToken } from "./css-token";
 import { Select, TooltipLayer } from "./controls";
 import type { WorkbenchState, WorkbenchSettings } from "./workbench-types";
+import { trackShellMarks, type ShellMarks } from "./terminal-marks";
 type View = {
   id: string;
   terminal: Terminal;
@@ -16,6 +17,8 @@ type View = {
   element: HTMLDivElement;
   shell: string;
   cwd: string;
+  title?: string;
+  marks: ShellMarks;
   exited?: boolean;
   orphaned?: boolean;
 };
@@ -38,7 +41,9 @@ export default function TerminalWindow() {
     [error, setError] = useState(""),
     [ending, setEnding] = useState(false),
     [data, setData] = useState<WorkbenchState | null>(null),
-    [background, setBackground] = useState("");
+    [background, setBackground] = useState(""),
+    // Bumped when a tab's folder or last command changes.
+    [, setMarked] = useState(0);
   const [finding, setFinding] = useState(false),
     [needle, setNeedle] = useState(""),
     [shells, setShells] = useState<string[]>([]),
@@ -159,13 +164,41 @@ export default function TerminalWindow() {
         fontFamily: '"Cascadia Mono", Consolas, monospace',
         fontSize: 14,
         theme: terminalTheme(),
+        // Decorations colour finished commands in the overview ruler.
+        allowProposedApi: true,
+        overviewRuler: { width: 6 },
       });
       const fit = new FitAddon();
       const search = new SearchAddon();
       terminal.loadAddon(fit);
       terminal.loadAddon(search);
       terminal.open(element);
-      const view = { ...session, terminal, fit, search, element };
+      const marks = trackShellMarks(terminal, {
+        cwd: (where) => {
+          view.cwd = where;
+          setMarked((n) => n + 1);
+        },
+        finished: (block) => {
+          setMarked((n) => n + 1);
+          if ((block.ms || 0) >= 10000)
+            void api("terminal.finished", {
+              session: session.id,
+              title: view.title || session.shell,
+              exit: block.exit,
+              ms: block.ms,
+            }).catch(() => {});
+        },
+        color: (failed) => cssToken(failed ? "--danger" : "--mint"),
+      });
+      const view: View = {
+        ...session,
+        title: launch?.title,
+        terminal,
+        fit,
+        search,
+        element,
+        marks,
+      };
       views.current.set(session.id, view);
       terminal.onData(
         (text) =>
@@ -212,6 +245,18 @@ export default function TerminalWindow() {
           e.key.toLowerCase() === "f"
         ) {
           setFinding(true);
+          return false;
+        }
+        // Ctrl+Up and Ctrl+Down move between prompts once the shell marks them.
+        if (
+          e.type === "keydown" &&
+          e.ctrlKey &&
+          !e.shiftKey &&
+          !e.altKey &&
+          (e.key === "ArrowUp" || e.key === "ArrowDown") &&
+          marks.active
+        ) {
+          marks.jump(e.key === "ArrowUp" ? -1 : 1);
           return false;
         }
         return true;
@@ -397,6 +442,18 @@ export default function TerminalWindow() {
           onClick={() => setFinding(!finding)}
         />
         <IconButton
+          icon="clipboard-text"
+          label="Copy the last command and its output"
+          onClick={() => {
+            const text = views.current.get(active.current)?.marks.lastBlock();
+            if (!text)
+              setError(
+                "No finished command yet. Shells Yami opens mark each command once a prompt appears.",
+              );
+            else void navigator.clipboard.writeText(text).catch(report);
+          }}
+        />
+        <IconButton
           icon="folder-open"
           label="Open shell in a folder"
           onClick={() =>
@@ -502,17 +559,43 @@ export default function TerminalWindow() {
       )}
       <footer className="terminal-footer">
         {views.current.get(selected)?.cwd || "Open a shell to begin"}
-        <span>Ctrl+Shift+C / V · Closing this window hides it</span>
+        <LastCommand marks={views.current.get(selected)?.marks} />
+        <span>
+          {views.current.get(selected)?.marks.active
+            ? "Ctrl+Up / Down: prompts · "
+            : ""}
+          Ctrl+Shift+C / V · Closing this window hides it
+        </span>
       </footer>
     </div>
+  );
+}
+
+/** How the selected tab's last command ended, when the shell reports it. */
+function LastCommand({ marks }: { marks?: ShellMarks }) {
+  const last = marks?.last();
+  if (!last || last.exit === undefined) return null;
+  const seconds = (last.ms || 0) / 1000;
+  const took =
+    seconds < 10 ? `${seconds.toFixed(1)} s` : `${Math.round(seconds)} s`;
+  return (
+    <span
+      className={"terminal-exit" + (last.exit ? " failed" : "")}
+      role="status"
+    >
+      <Icon name={last.exit ? "x-circle" : "check-circle"} size={14} />
+      {last.exit ? `Exit ${last.exit}` : "Done"} · {took}
+    </span>
   );
 }
 
 // xterm needs literal colours, so the Nightglow terminal tokens are read here.
 function terminalTheme() {
   const t = (name: string) => cssToken("--term-" + name);
+  const clear = "rgba(0, 0, 0, 0)";
   return {
-    background: "rgba(0, 0, 0, 0)",
+    background: clear,
+    overviewRulerBorder: clear,
     foreground: t("fg"),
     cursor: t("cursor"),
     cursorAccent: cssToken("--ink-1"),
