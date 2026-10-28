@@ -88,6 +88,7 @@ export class Workbench {
           pid,
         }),
       notify,
+      path.join(path.dirname(this.data.file), "terminal-layout.json"),
     );
     this.usage = new UsageController(this.data, changed, notify);
     this.connections = new Connections(this.data, changed, notify);

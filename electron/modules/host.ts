@@ -958,8 +958,10 @@ export function createModuleHost(deps: Deps) {
           "feeds.json",
           "mail.json",
           "vault.bin",
+          "terminal-layout.json",
+          "mail-catcher",
         ])
-          fs.rmSync(path.join(dir, file), { force: true });
+          fs.rmSync(path.join(dir, file), { force: true, recursive: true });
         if (live) return live.clearData();
         if (shared) shared.data.deleted = true;
         for (const file of ["workbench.json", "agent-relay.json"])

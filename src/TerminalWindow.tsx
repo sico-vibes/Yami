@@ -19,6 +19,10 @@ type View = {
   shell: string;
   cwd: string;
   title?: string;
+  /** The shell asked for ("" for the default), kept for layout restore. */
+  shellId: string;
+  /** Opened to run a command (an agent or ssh), which is not restored. */
+  ran?: boolean;
   marks: ShellMarks;
   exited?: boolean;
   orphaned?: boolean;
@@ -44,7 +48,10 @@ export default function TerminalWindow() {
     [data, setData] = useState<WorkbenchState | null>(null),
     [background, setBackground] = useState(""),
     // Bumped when a tab's folder or last command changes.
-    [, setMarked] = useState(0);
+    [marked, setMarked] = useState(0);
+  // Saving waits until the last layout has been reopened, so an empty window
+  // never overwrites it.
+  const restored = useRef(false);
   const [finding, setFinding] = useState(false),
     [needle, setNeedle] = useState(""),
     [shells, setShells] = useState<string[]>([]),
@@ -136,7 +143,13 @@ export default function TerminalWindow() {
       view.terminal.writeln(`\r\n[Process exited: ${event.code}]`);
     } else if (event.error) setError(event.error);
   }
-  type Launch = { cwd: string; command?: string; title: string };
+  type Launch = {
+    cwd: string;
+    command?: string;
+    title: string;
+    /** A shell from the saved layout, instead of the menu's choice. */
+    shell?: string;
+  };
   async function create(
     cwd?: string,
     settings?: WorkbenchSettings,
@@ -148,10 +161,15 @@ export default function TerminalWindow() {
         ? shellChoice.current.slice(4)
         : "";
     if (ssh) launch = { cwd: cwd || "", command: `ssh ${ssh}`, title: ssh };
+    const shellId =
+      launch?.shell ??
+      (ssh || shellChoice.current.startsWith("ssh:")
+        ? ""
+        : shellChoice.current);
     try {
       const session = await api("terminal.create", {
         cwd,
-        ...(shellChoice.current && !ssh && { shell: shellChoice.current }),
+        ...(shellId && { shell: shellId }),
       });
       if (!mounted.current || !host.current) {
         void api("terminal.end", { session: session.id });
@@ -202,6 +220,8 @@ export default function TerminalWindow() {
       const view: View = {
         ...session,
         title: launch?.title,
+        shellId,
+        ran: !!launch?.command,
         terminal,
         fit,
         search,
@@ -306,7 +326,18 @@ export default function TerminalWindow() {
     const drain = async (settings?: WorkbenchSettings, fallback = false) => {
       const queued: Launch[] = await api("terminal.launches");
       for (const item of queued) await create(item.cwd, settings, item);
-      if (!queued.length && fallback) await create(undefined, settings);
+      if (!queued.length && fallback) {
+        const layout: { shell: string; cwd: string; title: string }[] =
+          await api("terminal.layout").catch(() => []);
+        for (const tab of layout)
+          await create(tab.cwd || undefined, settings, {
+            cwd: tab.cwd,
+            title: tab.title,
+            shell: tab.shell,
+          });
+        if (!layout.length) await create(undefined, settings);
+      }
+      restored.current = true;
     };
     void api("terminal.shells")
       .then(setShells)
@@ -354,6 +385,22 @@ export default function TerminalWindow() {
       views.current.clear();
     };
   }, []);
+  // Tabs and their folders are saved a moment after they change.
+  useEffect(() => {
+    if (!restored.current) return;
+    const timer = setTimeout(() => {
+      const tabs = list
+        .map((item) => views.current.get(item.id))
+        .filter((v): v is View => !!v && !v.exited)
+        .map((v) => ({
+          shell: v.shellId,
+          cwd: v.cwd,
+          title: v.ran ? "" : v.title || "",
+        }));
+      void api("terminal.layout.save", { tabs }).catch(() => {});
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [list, marked]);
   async function end(confirmed = false) {
     const view = views.current.get(selected);
     if (!view) return;

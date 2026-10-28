@@ -36,6 +36,13 @@ export function findExecutable(name: string): string | undefined {
   ];
   return candidates.find((p) => fs.existsSync(p) && fs.statSync(p).isFile());
 }
+const isFolder = (p: string) => {
+  try {
+    return fs.statSync(p).isDirectory();
+  } catch {
+    return false;
+  }
+};
 export const shellNames = ["auto", "pwsh", "powershell", "cmd", "bash", "wsl"];
 
 /** Git Bash is looked for where Git for Windows installs, never WSL's bash.exe. */
@@ -87,10 +94,16 @@ export class TerminalController {
   // Tabs another page asked for; the terminal page drains them when ready.
   private launches: { cwd: string; command?: string; title: string }[] = [];
   constructor(
-    private settings: () => { terminalShell: string; terminalMarks?: boolean },
+    private settings: () => {
+      terminalShell: string;
+      terminalMarks?: boolean;
+      terminalRestore?: boolean;
+    },
     private selection: (text: string) => void,
     private processJob: (pid: number, own: boolean) => Promise<any>,
     private notice: (text: string) => void = () => {},
+    /** Where the tab layout is kept between sessions. */
+    private layoutFile = "",
   ) {}
   open() {
     if (this.window && !this.window.isDestroyed()) {
@@ -250,6 +263,36 @@ export class TerminalController {
     if (method === "terminal.shells")
       return shellNames.filter((n) => n !== "auto" && findShell(n));
     // Hosts from ~/.ssh/config, offered when Windows' OpenSSH client is here.
+    // The tabs to reopen: shells and folders only, never the processes.
+    if (method === "terminal.layout") {
+      if (!this.layoutFile || this.settings().terminalRestore === false)
+        return [];
+      try {
+        const saved = JSON.parse(fs.readFileSync(this.layoutFile, "utf8"));
+        return (Array.isArray(saved) ? saved : [])
+          .slice(0, 8)
+          .map((tab: any) => ({
+            shell: shellNames.includes(tab.shell) ? tab.shell : "",
+            cwd: typeof tab.cwd === "string" && isFolder(tab.cwd) ? tab.cwd : "",
+            title: String(tab.title || "").slice(0, 60),
+          }));
+      } catch {
+        return [];
+      }
+    }
+    if (method === "terminal.layout.save") {
+      if (!this.layoutFile) return false;
+      const tabs = (Array.isArray(a.tabs) ? a.tabs : []).slice(0, 8).map(
+        (tab: any) => ({
+          shell: shellNames.includes(tab.shell) ? tab.shell : "",
+          cwd: String(tab.cwd || "").slice(0, 1024),
+          title: String(tab.title || "").slice(0, 60),
+        }),
+      );
+      fs.mkdirSync(path.dirname(this.layoutFile), { recursive: true });
+      fs.writeFileSync(this.layoutFile, JSON.stringify(tabs));
+      return true;
+    }
     if (method === "terminal.ssh")
       return findExecutable("ssh.exe") ? readSshHosts() : [];
     if (method === "terminal.launches") {

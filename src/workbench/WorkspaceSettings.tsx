@@ -193,6 +193,21 @@ export function WorkspaceSettings({
             onChange={(terminalMarks) => patch({ terminalMarks })}
           />
         </div>
+        <div className="setting-row">
+          <div>
+            <strong>Reopen last tabs</strong>
+            <p>
+              When the terminal opens, bring back its tabs with their shells
+              and folders. Programs that were running, such as agents, are not
+              started again.
+            </p>
+          </div>
+          <Toggle
+            label="Reopen last terminal tabs"
+            value={s.terminalRestore}
+            onChange={(terminalRestore) => patch({ terminalRestore })}
+          />
+        </div>
       </div>
       <h3 className="group-title">Agent activity</h3>
       <div className="setting-group">

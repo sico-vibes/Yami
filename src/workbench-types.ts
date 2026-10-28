@@ -106,6 +106,8 @@ export type WorkbenchSettings = {
   terminalScrollback: number;
   /** Prompt marks and folder reports from shells Yami opens. */
   terminalMarks: boolean;
+  /** Reopen the last tabs (shells and folders) when the terminal opens. */
+  terminalRestore: boolean;
   usageAlerts: boolean;
   usageBackground: boolean;
   recapRetention: number;
@@ -149,6 +151,7 @@ export const workbenchDefaults: WorkbenchSettings = {
   terminalOpacity: 0.22,
   terminalScrollback: 3000,
   terminalMarks: true,
+  terminalRestore: true,
   usageAlerts: false,
   usageBackground: false,
   recapRetention: 7,

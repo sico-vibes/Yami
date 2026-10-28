@@ -133,6 +133,8 @@ Workspace verification commands:
   both and checks the new-tab page lists them.
 - `node scripts/verify-ssh-menu.mjs`: isolated profile with a fixture `~/.ssh/config`; picks its
   host from the terminal's shell menu and checks the tab runs `ssh` without reaching a server.
+- `node scripts/verify-terminal-layout.mjs`: isolated profile; opens two tabs, moves one into a
+  temporary folder, restarts Yami and checks both tabs come back with that folder.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the
