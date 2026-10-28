@@ -65,9 +65,13 @@ action. Lists are cards, choices are Yami menus, and an empty page says what to 
   Codex in a throwaway repository: both started in their own worktrees with the fixed first prompt,
   read `.yami-task.md`, and wrote `HELLO.txt` containing *hello*. Each agent first asks whether
   to trust the new worktree folder (Claude Code's default answer is *No, exit*), so expect one
-  trust prompt per task. Codex also printed "Hook failed" after each step in that run; the Yami
-  and Orca Codex hooks in this PC's `~/.codex/hooks.json` both exit 0 when run by hand with the
-  same events, so the failing hook was not identified.
+  trust prompt per task. Codex also printed "Hook failed" after each step in that run. The cause was Yami's own Codex
+  hook: Codex 0.163 on Windows runs hook commands with PowerShell, and Yami wrote them as
+  `"path" codex Event "config"`, which PowerShell reads as a string ("Unexpected token
+  'codex'"). Yami now writes Codex hooks as `& 'path' codex Event 'config'`, like its Gemini and
+  Copilot hooks, which ran in both PowerShell 7 and Windows PowerShell; pressing Install for
+  Codex again in Connections updates an older install. Codex then asks you to review the changed
+  hooks once before it runs them.
 - **Agents calling Yami (MCP page).** Turn on **Yami for your agents** and Yami serves
   an MCP endpoint at `http://127.0.0.1:47821/mcp` (streamable HTTP, JSON replies,
   protocol 2025-06-18). It listens on this PC only, needs a bearer token kept with

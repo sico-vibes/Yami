@@ -137,13 +137,16 @@ export function hookPlan(
   }
   if (install)
     for (const event of spec.events) {
+      // Codex on Windows runs hook commands with PowerShell, where a line
+      // that starts with a quoted path is a string, not a call ("Unexpected
+      // token"), so it gets the same call-operator form as Gemini and
+      // Copilot. Checked with Codex 0.163 on 2026-10-28.
+      const pwsh = spec.powershell || agent === "codex";
       const quote = (v: string) =>
-        spec.powershell
+        pwsh
           ? "'" + v.replaceAll("'", "''") + "'"
-          : agent === "codex"
-            ? '"' + v.replaceAll("\\", "/") + '"'
-            : "'" + v.replaceAll("\\", "/").replaceAll("'", "'\\''") + "'";
-      const command = `${spec.powershell ? "& " : ""}${quote(helperPath("Yami.Hook.exe"))} ${agent} ${event} ${quote(relayConfig)}`;
+          : "'" + v.replaceAll("\\", "/").replaceAll("'", "'\\''") + "'";
+      const command = `${pwsh ? "& " : ""}${quote(helperPath("Yami.Hook.exe"))} ${agent} ${event} ${quote(relayConfig)}`;
       const timeout =
         /Permission/.test(event) || event === "permissionRequest"
           ? 120

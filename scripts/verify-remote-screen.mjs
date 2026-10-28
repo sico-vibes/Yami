@@ -86,6 +86,20 @@ try {
       ],
       { encoding: "utf8" },
     ).trim();
+  // Ask Windows to put Yami's window in front, as Yami does for dictation.
+  execFileSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      path.resolve("scripts/bring-to-front.ps1"),
+      "-Handle",
+      spot.hwnd,
+    ],
+    { encoding: "utf8" },
+  );
   await wait(500);
   let inputChecked = "skipped: Yami's window was not in front";
   const safe = () => foreground() === spot.hwnd;
@@ -101,16 +115,69 @@ try {
       x > 0 && x < 1 && y > 0 && y < 1,
       "the box is on the primary screen",
     );
+    // The first input raises Yami's "controlling" notice; let both notices
+    // clear so neither toast covers the chat box when it is tapped.
+    assert.equal(
+      (await api("/api/input", { kind: "key", key: "escape" })).status,
+      200,
+    );
+    for (let i = 0; i < 100 && (await main.locator(".toast").count()); i++)
+      await wait(100);
+    assert.ok(safe(), "still in front before the tap");
     await box.evaluate((el) => el.blur());
+    await main.evaluate(() => {
+      window.__presses = [];
+      for (const type of ["pointerdown", "mousedown", "click", "focusin"])
+        document.addEventListener(
+          type,
+          (e) =>
+            window.__presses.push(
+              type +
+                ":" +
+                (e.target.getAttribute?.("aria-label") ||
+                  e.target.tagName +
+                    "." +
+                    e.target.className +
+                    "@" +
+                    e.clientX +
+                    "," +
+                    e.clientY),
+            ),
+          true,
+        );
+    });
     assert.equal(
       (await api("/api/input", { kind: "click", x, y })).status,
       200,
     );
     await wait(300);
+    const landed = await app.evaluate(({ screen }) => ({
+      cursor: screen.getCursorScreenPoint(),
+      scale: screen.getPrimaryDisplay().scaleFactor,
+    }));
     assert.equal(
       await box.evaluate((el) => document.activeElement === el),
       true,
-      "the tap focused the chat box",
+      "the tap focused the chat box: " +
+        JSON.stringify({
+          landed,
+          x,
+          y,
+          presses: await main.evaluate(() => window.__presses),
+          rect,
+          at: await main.evaluate(
+            ([x, y]) => {
+              const e = document.elementFromPoint(x, y);
+              return e && e.tagName + "." + e.className;
+            },
+            [rect.x + rect.width / 2, rect.y + rect.height / 2],
+          ),
+          dpr: await main.evaluate(() => [
+            devicePixelRatio,
+            innerWidth,
+            innerHeight,
+          ]),
+        }),
     );
     assert.ok(safe(), "still in front before typing");
     assert.equal(
