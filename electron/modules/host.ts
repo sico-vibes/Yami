@@ -208,6 +208,11 @@ export function createModuleHost(deps: Deps) {
             getSettings: () => store.state.settings,
             getWallpapers: () => store.state.wallpapers,
             engines,
+            addProject: async (folder) => {
+              if (!registry.enabled("workbench"))
+                throw new Error("Turn on the AI workspace to keep projects.");
+              return workbench().dev.add(folder);
+            },
           }),
         dispose: (w: Wheel) => w.dispose(),
       },

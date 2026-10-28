@@ -15,8 +15,7 @@ const blockedName = /(\.env|\.pem|\.key)$/i;
 
 /** User-chosen wheel files may live on any drive. Credential locations stay blocked. */
 export function assertWheelPath(raw: string) {
-  if (typeof raw !== "string" || !raw.trim())
-    throw new Error("Choose a file.");
+  if (typeof raw !== "string" || !raw.trim()) throw new Error("Choose a file.");
   if (raw.startsWith("preview://")) return raw;
   const value = path.resolve(raw);
   const base = path.basename(value);
@@ -32,7 +31,9 @@ export function assertWheelPath(raw: string) {
   return value;
 }
 
-export async function describeWheelFiles(inputs: string[]): Promise<WheelFile[]> {
+export async function describeWheelFiles(
+  inputs: string[],
+): Promise<WheelFile[]> {
   const files: WheelFile[] = [];
   for (const input of inputs) {
     const resolved = assertWheelPath(input);
@@ -42,7 +43,17 @@ export async function describeWheelFiles(inputs: string[]): Promise<WheelFile[]>
       continue;
     }
     const stat = await fs.promises.stat(resolved);
-    if (!stat.isFile()) throw new Error("Choose a file, not a folder.");
+    if (stat.isDirectory()) {
+      files.push({
+        path: resolved,
+        name: path.basename(resolved),
+        size: 0,
+        ext: "",
+        folder: true,
+      });
+      continue;
+    }
+    if (!stat.isFile()) throw new Error("Choose a file or a folder.");
     files.push({
       path: resolved,
       name: path.basename(resolved),

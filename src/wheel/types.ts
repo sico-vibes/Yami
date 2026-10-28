@@ -5,6 +5,8 @@ export type WheelFile = {
   name: string;
   size: number;
   ext: string;
+  /** A folder; only actions fit it. */
+  folder?: boolean;
 };
 export type Petal = {
   id: string;

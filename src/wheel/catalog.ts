@@ -47,9 +47,28 @@ const AUDIO = new Set([
   "wma",
 ]);
 const VIDEO = new Set(["mp4", "mov", "mkv", "webm", "avi", "wmv"]);
-const DOC = new Set(["docx", "md", "markdown", "rtf", "txt", "html", "htm", "epub"]);
+const DOC = new Set([
+  "docx",
+  "md",
+  "markdown",
+  "rtf",
+  "txt",
+  "html",
+  "htm",
+  "epub",
+]);
 const SHEET = new Set(["xlsx", "xls", "ods", "csv", "tsv"]);
-const ARCHIVE = new Set(["zip", "tar", "gz", "tgz", "rar", "7z", "tar.gz", "tar.bz2", "tar.xz"]);
+const ARCHIVE = new Set([
+  "zip",
+  "tar",
+  "gz",
+  "tgz",
+  "rar",
+  "7z",
+  "tar.gz",
+  "tar.bz2",
+  "tar.xz",
+]);
 const SUB = new Set(["srt", "vtt"]);
 const SLIDES = new Set(["ppt", "pptx"]);
 
@@ -139,12 +158,16 @@ function convertTargets(kind: FileKind, caps: WheelCaps): string[] {
 }
 
 function toolPetals(kind: FileKind, count: number): Petal[] {
-  const one = (
-    id: string,
-    label: string,
-    window = true,
-  ): Petal => ({ id, label, group: "tools", window });
-  const common = [one("tool:compress", "Compress"), one("tool:metadata", "Details")];
+  const one = (id: string, label: string, window = true): Petal => ({
+    id,
+    label,
+    group: "tools",
+    window,
+  });
+  const common = [
+    one("tool:compress", "Compress"),
+    one("tool:metadata", "Details"),
+  ];
   if (count > 1 && (kind === "image" || kind === "gif"))
     return [
       ...common,
@@ -209,11 +232,38 @@ const ACTIONS: Petal[] = [
   { id: "action:float", label: "Float", group: "actions", window: false },
 ];
 
+/** For a selection with a folder; folder names end in "/" in petalsFor. */
+const FOLDER_ACTIONS: Petal[] = [
+  { id: "action:copy", label: "Copy", group: "actions", window: false },
+  { id: "action:move", label: "Move", group: "actions", window: false },
+  { id: "action:path", label: "Copy path", group: "actions", window: false },
+  {
+    id: "action:terminal",
+    label: "Terminal here",
+    group: "actions",
+    window: false,
+  },
+  { id: "action:size", label: "Folder size", group: "actions", window: false },
+  { id: "action:zip", label: "Zip", group: "actions", window: false },
+  {
+    id: "action:project",
+    label: "Add as project",
+    group: "actions",
+    window: false,
+  },
+];
+
+export const isFolderName = (name: string) => name.endsWith("/");
+/** The names petalsFor reads: folders carry a trailing "/". */
+export const wheelNames = (files: { name: string; folder?: boolean }[]) =>
+  files.map((f) => (f.folder ? f.name + "/" : f.name));
+
 function canonicalExt(ext: string) {
   if (ext === "jpeg") return "jpg";
   if (ext === "tif") return "tiff";
   if (ext === "aif") return "aiff";
-  if (ext === "htm" || ext === "markdown") return ext === "markdown" ? "md" : "html";
+  if (ext === "htm" || ext === "markdown")
+    return ext === "markdown" ? "md" : "html";
   if (ext === "tgz") return "gz";
   return ext;
 }
@@ -224,6 +274,12 @@ export function petalsFor(
   caps: WheelCaps = {},
 ): Petal[] {
   if (!names.length) return mode === "actions" ? ACTIONS : [];
+  if (names.some(isFolderName))
+    return mode === "actions"
+      ? FOLDER_ACTIONS.filter(
+          (p) => p.id !== "action:project" || names.length === 1,
+        )
+      : [];
   const kinds = names.map(kindOf);
   const same = kinds.every((kind) => kind === kinds[0]);
   if (mode === "actions") return ACTIONS;
@@ -249,24 +305,27 @@ export function emptyHint(mode: WheelMode, names: string[]) {
     return mode === "actions"
       ? "Choose a file action."
       : "Drop a file, or select files in Explorer.";
+  if (names.some(isFolderName) && mode !== "actions")
+    return "Folders take actions. Tap the actions key, or flip the wheel.";
   if (mode === "convert" && new Set(names.map(kindOf)).size > 1)
     return "These files are different kinds, so there is no shared conversion.";
   return "Nothing on this wheel fits the selection.";
 }
 
-export const PREVIEW_SAMPLES: { id: string; label: string; names: string[] }[] = [
-  { id: "image", label: "Image", names: ["grove.png"] },
-  { id: "images", label: "Images", names: ["grove.png", "orchard.jpg"] },
-  { id: "audio", label: "Audio", names: ["evening.wav"] },
-  { id: "video", label: "Video", names: ["walk.mp4"] },
-  { id: "videos", label: "Videos", names: ["walk.mp4", "gate.mov"] },
-  { id: "gif", label: "GIF", names: ["loop.gif"] },
-  { id: "pdf", label: "PDF", names: ["notes.pdf"] },
-  { id: "pdfs", label: "PDFs", names: ["notes.pdf", "extra.pdf"] },
-  { id: "archive", label: "Archive", names: ["bundle.zip"] },
-  { id: "document", label: "Document", names: ["letter.docx"] },
-  { id: "sheet", label: "Sheet", names: ["budget.xlsx"] },
-  { id: "subtitle", label: "Subtitles", names: ["dialog.srt"] },
-  { id: "slides", label: "Slides", names: ["talk.pptx"] },
-  { id: "mixed", label: "Mixed", names: ["grove.png", "notes.pdf"] },
-];
+export const PREVIEW_SAMPLES: { id: string; label: string; names: string[] }[] =
+  [
+    { id: "image", label: "Image", names: ["grove.png"] },
+    { id: "images", label: "Images", names: ["grove.png", "orchard.jpg"] },
+    { id: "audio", label: "Audio", names: ["evening.wav"] },
+    { id: "video", label: "Video", names: ["walk.mp4"] },
+    { id: "videos", label: "Videos", names: ["walk.mp4", "gate.mov"] },
+    { id: "gif", label: "GIF", names: ["loop.gif"] },
+    { id: "pdf", label: "PDF", names: ["notes.pdf"] },
+    { id: "pdfs", label: "PDFs", names: ["notes.pdf", "extra.pdf"] },
+    { id: "archive", label: "Archive", names: ["bundle.zip"] },
+    { id: "document", label: "Document", names: ["letter.docx"] },
+    { id: "sheet", label: "Sheet", names: ["budget.xlsx"] },
+    { id: "subtitle", label: "Subtitles", names: ["dialog.srt"] },
+    { id: "slides", label: "Slides", names: ["talk.pptx"] },
+    { id: "mixed", label: "Mixed", names: ["grove.png", "notes.pdf"] },
+  ];

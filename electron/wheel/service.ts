@@ -6,7 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { filesFromArgv } from "../../src/wheel/argv";
-import { petalsFor } from "../../src/wheel/catalog";
+import { petalsFor, wheelNames } from "../../src/wheel/catalog";
 import type { WheelFile, WheelMode, WheelSession, WheelSource } from "../../src/wheel/types";
 import { EngineStore } from "./engines.ts";
 import { runFileAction } from "./file-actions.ts";
@@ -34,6 +34,8 @@ type Deps = {
   getWallpapers?: () => string[];
   /** Shared with Settings › Modules so one download serves both. */
   engines?: EngineStore;
+  /** Adds a folder to Projects; absent while the AI workspace is off. */
+  addProject?: (folder: string) => Promise<unknown>;
 };
 
 export function createWheel(deps: Deps) {
@@ -268,7 +270,7 @@ export function createWheel(deps: Deps) {
       if (!argv.includes("--file-wheel")) return false;
       const files = filesFromArgv(argv, (value) => {
         try {
-          return fs.existsSync(value) && fs.statSync(value).isFile();
+          return fs.existsSync(value) && (fs.statSync(value).isFile() || fs.statSync(value).isDirectory());
         } catch {
           return false;
         }
@@ -342,7 +344,7 @@ export function createWheel(deps: Deps) {
             : session?.files || [];
           if (!files.length) throw new Error("Drop a file on a petal.");
           const petal = petalsFor(
-            files.map((file) => file.name),
+            wheelNames(files),
             session?.mode || "convert",
             { heicEncode: await cachedHeic(engines) },
           ).find((item) => item.id === args.petalId);
@@ -353,7 +355,9 @@ export function createWheel(deps: Deps) {
             return { tool: "float" };
           }
           if (petal.id.startsWith("action:")) {
-            await runFileAction(petal.id, files, deps.notify);
+            await runFileAction(petal.id, files, deps.notify, {
+              addProject: deps.addProject,
+            });
             closeWheel();
             return { action: petal.id };
           }

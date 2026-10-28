@@ -46,6 +46,18 @@ Copy path writes the paths to the clipboard. Copy asks PowerShell to put the fil
 
 HEIC is still absent from the convert wheel. The first time a convert wheel opens, if ffmpeg is already installed, Yami reads `ffmpeg -encoders` and `ffmpeg -muxers`. The HEIC petal appears only when both an HEVC encoder and an HEIC or HEIF muxer are listed. This build does not claim the pinned Gyan or ImageMagick packages can write HEIC. The probe was not run here.
 
+
+## Folders
+
+Folders work on the wheel too: drag one, select it in File Explorer and use the shortcut, use Send to, or drop it on the shelf. Converting and tools need files, so a selection with a folder offers the actions wheel:
+- **Copy**, **Move** (across drives it copies everything first and removes the original only after the copy succeeded) and **Copy path**.
+- **Terminal here**, which opens inside the folder.
+- **Folder size**, which counts the files and bytes. It stops after 200,000 entries or 15 seconds and then says "at least"; links and junctions are not followed.
+- **Zip**, which writes `<folder>.zip` beside it. A zip over 200 MB is refused, with a pointer to 7-Zip.
+- **Add as project**, for one folder, adds it to the AI workspace's Projects.
+
+Batch rename, flatten, duplicate finding and folder icons from the plan are not built.
+
 ## Phase status
 
 | Phase | Scope | This build |

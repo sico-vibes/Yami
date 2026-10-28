@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { Select } from "../controls";
-import { emptyHint, petalsFor, PREVIEW_SAMPLES } from "./catalog";
+import { emptyHint, petalsFor, PREVIEW_SAMPLES, wheelNames } from "./catalog";
 import type { WheelFile, WheelMode, WheelSession } from "./types";
 import { WheelView } from "./WheelView";
 
@@ -43,7 +43,7 @@ export function WheelApp() {
       }
     });
   }, []);
-  const names = session?.files.map((file) => file.name) ?? [];
+  const names = session ? wheelNames(session.files) : [];
   const petals = useMemo(
     () => (session ? petalsFor(names, session.mode, caps) : []),
     [session, names.join("|"), caps.heicEncode],
