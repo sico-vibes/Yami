@@ -66,6 +66,8 @@ const agentToolNames = [
   "open_terminal",
   "browser_open",
   "browser_read",
+  "browser_click",
+  "browser_type",
 ];
 import { execFile, spawn } from "node:child_process";
 
@@ -335,6 +337,12 @@ export function createModuleHost(deps: Deps) {
                   browser.show();
                   browser.open(url);
                 },
+                browserAct: (kind, target, value) =>
+                  registry
+                    .get<Browser>("browser")
+                    .browser.act(kind, target, value, (title, detail) =>
+                      deps.confirm(title, detail),
+                    ),
                 // A signed-in linked browser, when open, is what agents read.
                 browserRead: () => {
                   const { browser, linked } = registry.get<Browser>("browser");

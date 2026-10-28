@@ -7,6 +7,12 @@ import {
 import { randomUUID } from "node:crypto";
 import { newTab, resolveInput, webOnly } from "../../src/browser-rules.ts";
 import { isBlockedHost } from "../../src/blocklist.ts";
+import {
+  pageScript,
+  riskyAction,
+  type Found,
+  type Target,
+} from "../../src/browser-agent.ts";
 
 export type BrowserTab = {
   id: string;
@@ -281,6 +287,52 @@ export function createBrowser(deps: {
         url: wc.getURL(),
         text: text.slice(0, 200000),
       };
+    },
+    /**
+     * For agents: click or type on the active page. Risky actions (submit,
+     * pay, post, delete) wait for `ask`; password fields are refused.
+     */
+    async act(
+      kind: "click" | "type",
+      target: Target,
+      text: string,
+      ask: (title: string, detail: string) => Promise<boolean>,
+    ) {
+      const wc = tab(active)?.view?.webContents;
+      if (!wc) throw new Error("Open a page in the Yami Browser first.");
+      if (!target.selector && !target.text)
+        throw new Error("Say what to click or type into.");
+      const run = (act: "find" | "click" | "type") =>
+        wc.executeJavaScriptInIsolatedWorld(999, [
+          { code: pageScript(target, kind, act, text) },
+        ]) as Promise<Found>;
+      driving =
+        kind === "click"
+          ? "An agent is clicking on this page"
+          : "An agent is typing on this page";
+      publish();
+      try {
+        const found = await run("find");
+        if (!found?.found) throw new Error("Nothing on the page matches that.");
+        if (found.password)
+          throw new Error("Agents cannot type into password fields.");
+        if (riskyAction(found)) {
+          const ok = await ask(
+            `Let an agent ${kind === "click" ? "press" : "type into"} “${found.label || found.tag}”?`,
+            `On ${wc.getURL()}${kind === "type" ? `\nText: ${text.slice(0, 300)}` : ""}`,
+          );
+          if (!ok) throw new Error("The user said no.");
+        }
+        const done = await run(kind);
+        return {
+          done: !!done?.found,
+          label: done?.label || "",
+          url: wc.getURL(),
+        };
+      } finally {
+        driving = "";
+        publish();
+      }
     },
     /** For agents: the active page's title, address and visible text. */
     async read(max = 20000) {

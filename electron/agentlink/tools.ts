@@ -11,6 +11,11 @@ export function agentTools(deps: {
   openTerminal: (project: string) => void;
   browserOpen?: (url: string) => void;
   browserRead?: () => Promise<{ title: string; url: string; text: string }>;
+  browserAct?: (
+    kind: "click" | "type",
+    target: { selector?: string; text?: string },
+    text: string,
+  ) => Promise<object>;
 }): AgentTool[] {
   const text = (value: unknown, max: number, what: string) => {
     const s = String(value ?? "").trim();
@@ -115,6 +120,77 @@ export function agentTools(deps: {
         if (!deps.browserRead)
           throw new Error("The Yami Browser is turned off.");
         return JSON.stringify(await deps.browserRead());
+      },
+    },
+    {
+      name: "browser_click",
+      description:
+        "Click a link or button on the Yami Browser's current page, found by its visible text or a CSS selector. Buttons that submit, pay, post or delete ask the user first.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          selector: {
+            type: "string",
+            description: "A CSS selector, if you know one.",
+          },
+          text: {
+            type: "string",
+            description: "Or the visible text or label of the element.",
+          },
+        },
+      },
+      run: async (a) => {
+        if (!deps.browserAct)
+          throw new Error("The Yami Browser is turned off.");
+        return JSON.stringify(
+          await deps.browserAct(
+            "click",
+            {
+              selector: a.selector ? String(a.selector) : undefined,
+              text: a.text ? String(a.text) : undefined,
+            },
+            "",
+          ),
+        );
+      },
+    },
+    {
+      name: "browser_type",
+      description:
+        "Type text into a field on the Yami Browser's current page, found by its label, placeholder or a CSS selector. It never submits; password fields are refused.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          ...{
+            selector: {
+              type: "string",
+              description: "A CSS selector, if you know one.",
+            },
+            text: {
+              type: "string",
+              description: "Or the visible text or label of the element.",
+            },
+          },
+          value: {
+            type: "string",
+            description: "The text to type, up to 5,000 characters.",
+          },
+        },
+        required: ["value"],
+      },
+      run: async (a) => {
+        if (!deps.browserAct)
+          throw new Error("The Yami Browser is turned off.");
+        return JSON.stringify(
+          await deps.browserAct(
+            "type",
+            {
+              selector: a.selector ? String(a.selector) : undefined,
+              text: a.text ? String(a.text) : undefined,
+            },
+            text(a.value, 5000, "text to type"),
+          ),
+        );
       },
     },
   ];

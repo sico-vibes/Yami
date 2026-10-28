@@ -12,10 +12,12 @@ const site = http.createServer((req, res) => {
   res.end(
     req.url === "/two"
       ? "<title>Second page</title><p>two</p>"
-      : req.url === "/tracker"
-        ? // A request to a listed tracker host; blocking cancels it locally.
-          "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
-        : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
+      : req.url === "/form"
+        ? "<title>form</title><form onsubmit='document.title=\"submitted\";return false'><input placeholder='Search' oninput='document.title=\"typed \"+this.value'><input type='password' placeholder='Password'><button>Submit</button></form><a href='#' onclick='document.title=\"more\";return false'>More info</a>"
+        : req.url === "/tracker"
+          ? // A request to a listed tracker host; blocking cancels it locally.
+            "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
+          : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
   );
 });
 await new Promise((r) => site.listen(47896, "127.0.0.1", r));
@@ -132,6 +134,39 @@ try {
     false,
     "woken",
   );
+  // Agents type and click; a submit asks first, passwords are refused.
+  await call("agentlink.tools", { name: "browser_click", allowed: true });
+  await call("agentlink.tools", { name: "browser_type", allowed: true });
+  const formTab = await call("browser.open", {
+    input: "http://127.0.0.1:47896/form",
+  });
+  const titleOf = async () =>
+    (await call("browser.state")).tabs.find((t) => t.id === formTab)?.title ||
+    "";
+  for (let i = 0; i < 30 && (await titleOf()) !== "form"; i++) await wait(200);
+  const tool = async (name, args) => {
+    const r = await rpc("tools/call", { name, arguments: args });
+    return { error: r.result.isError, text: r.result.content[0].text };
+  };
+  const typed = await tool("browser_type", { text: "Search", value: "hello" });
+  assert.equal(typed.error, false, typed.text);
+  assert.equal(await titleOf(), "typed hello");
+  assert.match(
+    (await tool("browser_type", { text: "Password", value: "x" })).text,
+    /password fields/,
+  );
+  assert.equal(
+    (await tool("browser_click", { text: "More info" })).error,
+    false,
+  );
+  assert.equal(await titleOf(), "more");
+  const asking = tool("browser_click", { text: "Submit" });
+  const card = main.getByRole("dialog");
+  await card.getByText(/Let an agent press “Submit”/).waitFor();
+  await card.getByRole("button", { name: "Cancel" }).click();
+  assert.match((await asking).text, /said no/);
+  assert.notEqual(await titleOf(), "submitted", "nothing was submitted");
+  await call("browser.close", { id: formTab });
   // Known trackers are cancelled before they leave the PC.
   const trackerTab = await call("browser.open", {
     input: "http://127.0.0.1:47896/tracker",

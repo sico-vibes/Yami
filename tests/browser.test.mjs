@@ -153,3 +153,14 @@ test("tracker hosts and their subdomains are blocked, look-alikes are not", asyn
   assert.equal(isBlockedHost("doubleclick.net.example.com"), false);
   assert.equal(isBlockedHost("github.com"), false);
 });
+
+test("agent clicks that submit, pay, post or delete need approval", async () => {
+  const { riskyAction, pageScript } = await import("../src/browser-agent.ts");
+  assert.equal(riskyAction({ found: true, label: "More info" }), false);
+  assert.equal(riskyAction({ found: true, label: "Place order" }), true);
+  assert.equal(riskyAction({ found: true, label: "Delete repository" }), true);
+  assert.equal(riskyAction({ found: true, label: "Next", submits: true }), true);
+  // The page code is a single expression that parses.
+  assert.doesNotThrow(() => new Function("return " + pageScript({ text: "Go" }, "click", "find")));
+  assert.doesNotThrow(() => new Function("return " + pageScript({ selector: "#q" }, "type", "type", 'a"b')));
+});
