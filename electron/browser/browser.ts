@@ -45,6 +45,7 @@ export function createBrowser(deps: {
   let bounds = { x: 0, y: 0, width: 0, height: 0 };
   let driving = "";
   let blocked = 0;
+  const history: { url: string; title: string; at: number }[] = [];
 
   const publish = () =>
     win?.webContents.send("yami:event", {
@@ -89,6 +90,14 @@ export function createBrowser(deps: {
     t.loading = wc.isLoading();
     t.canBack = wc.navigationHistory.canGoBack();
     t.canForward = wc.navigationHistory.canGoForward();
+    // A finished page joins the recent list (newest first, no repeats).
+    if (!t.loading && webOnly(t.url) && t.title && history[0]?.url !== t.url) {
+      history.unshift({ url: t.url, title: t.title, at: Date.now() });
+      for (let i = history.length - 1; i > 0; i--)
+        if (history.findIndex((h) => h.url === history[i].url) < i)
+          history.splice(i, 1);
+      history.length = Math.min(history.length, 200);
+    }
     publish();
   };
   const wake = (t: (typeof tabs)[number]) => {
@@ -250,6 +259,27 @@ export function createBrowser(deps: {
         active,
         driving,
         blocked,
+      };
+    },
+    history: () => history.slice(0, 30),
+    clearHistory() {
+      history.length = 0;
+      return true;
+    },
+    /** The current page's main article as plain paragraphs, for reading. */
+    async reader() {
+      const wc = tab(active)?.view?.webContents;
+      if (!wc) throw new Error("Open a page first.");
+      const text = String(
+        await wc.executeJavaScript(
+          "(() => { const root = document.querySelector('article') || document.querySelector('main') || document.body; return root ? root.innerText : ''; })()",
+          false,
+        ),
+      );
+      return {
+        title: wc.getTitle(),
+        url: wc.getURL(),
+        text: text.slice(0, 200000),
       };
     },
     /** For agents: the active page's title, address and visible text. */

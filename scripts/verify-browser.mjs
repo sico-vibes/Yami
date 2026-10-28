@@ -92,6 +92,13 @@ try {
   const page = JSON.parse(read.result.content[0].text);
   assert.equal(page.title, "Yami test page");
   assert.match(page.text, /Hello from the local test page/);
+  // The reader shows the page's text; the page joins the recent list.
+  const reader = await call("browser.reader");
+  assert.match(reader.text, /Hello from the local test page/);
+  assert.ok(
+    (await call("browser.history")).some((h) => h.title === "Yami test page"),
+    "recent pages",
+  );
   // A javascript: address never runs; it becomes a search.
   const active = state.active;
   await call("browser.navigate", {

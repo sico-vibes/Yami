@@ -28,6 +28,11 @@ export default function BrowserApp() {
   const [tabs, setTabs] = useState<Tab[]>([]),
     [blocked, setBlocked] = useState(0),
     [blocking, setBlocking] = useState(true),
+    [reading, setReading] = useState<{
+      title: string;
+      url: string;
+      text: string;
+    } | null>(null),
     [active, setActive] = useState(""),
     [driving, setDriving] = useState(""),
     [address, setAddress] = useState(""),
@@ -62,20 +67,21 @@ export default function BrowserApp() {
   useLayoutEffect(() => {
     const box = page.current;
     if (!box) return;
+    // While the reader is open the page view steps aside (zero size).
     const send = () => {
       const r = box.getBoundingClientRect();
       void api("browser.layout", {
         x: r.left,
         y: r.top,
-        width: r.width,
-        height: r.height,
+        width: reading ? 0 : r.width,
+        height: reading ? 0 : r.height,
       });
     };
     send();
     const observer = new ResizeObserver(send);
     observer.observe(box);
     return () => observer.disconnect();
-  }, []);
+  }, [reading]);
   const go = (step: string) =>
     current && void api("browser.go", { id: current.id, step }).catch(fail);
   return (
@@ -184,6 +190,17 @@ export default function BrowserApp() {
               onChange={(e) => setAddress(e.target.value)}
             />
           </form>
+          <IconButton
+            icon="book-open-text"
+            label={reading ? "Close the reader" : "Read this page"}
+            active={!!reading}
+            disabled={!current || current.url === newTab}
+            onClick={() =>
+              reading
+                ? setReading(null)
+                : void api("browser.reader").then(setReading).catch(fail)
+            }
+          />
           <button
             className={"browser-shield" + (blocking ? " on" : "")}
             aria-pressed={blocking}
@@ -230,6 +247,20 @@ export default function BrowserApp() {
           </p>
         )}
         <div className="browser-page" ref={page}>
+          {reading && (
+            <article className="browser-reader">
+              <small>{host(reading.url)}</small>
+              <h1>{reading.title}</h1>
+              {reading.text
+                .split(/\n{2,}|\n(?=[A-Z0-9“"])/)
+                .map((p) => p.trim())
+                .filter(Boolean)
+                .slice(0, 400)
+                .map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+            </article>
+          )}
           {current?.url === newTab && (
             <NewTab
               open={(url) =>
@@ -259,6 +290,9 @@ function NewTab({
       { id: string; name: string; found: boolean }[]
     >([]),
     [query, setQuery] = useState(""),
+    [recent, setRecent] = useState<
+      { url: string; title: string; at: number }[]
+    >([]),
     [linked, setLinked] = useState<{
       browsers: { id: string; name: string }[];
       open: string;
@@ -266,6 +300,9 @@ function NewTab({
   const load = () => {
     void api("browser.linked")
       .then(setLinked)
+      .catch(() => {});
+    void api("browser.history")
+      .then(setRecent)
       .catch(() => {});
     void api("vault.bookmarks").then(setBookmarks).catch(fail);
     void api("vault.sources")
@@ -344,6 +381,36 @@ function NewTab({
             </button>
           ))}
       </div>
+      {recent.length > 0 && (
+        <section className="browser-recent">
+          <div className="mail-head">
+            <h3 className="group-title">Recent</h3>
+            <button
+              className="text-button"
+              onClick={() =>
+                void api("browser.history.clear")
+                  .then(() => setRecent([]))
+                  .catch(fail)
+              }
+            >
+              Clear
+            </button>
+          </div>
+          <div className="browser-bookmarks">
+            {recent.slice(0, 8).map((r) => (
+              <button
+                key={r.url}
+                className="browser-bookmark"
+                data-tip={r.url}
+                onClick={() => open(r.url)}
+              >
+                <b>{r.title}</b>
+                <small>{host(r.url)}</small>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
       {bookmarks && bookmarks.length > 0 ? (
         <>
           <input

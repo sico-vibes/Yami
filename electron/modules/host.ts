@@ -532,6 +532,12 @@ export function createModuleHost(deps: Deps) {
             return browser.close(String(a.id));
           case "browser.layout":
             return browser.layout(a);
+          case "browser.history":
+            return browser.history();
+          case "browser.history.clear":
+            return browser.clearHistory();
+          case "browser.reader":
+            return browser.reader();
           case "browser.linked":
             return {
               browsers: linked.list().map(({ id, name }) => ({ id, name })),
