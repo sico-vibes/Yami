@@ -295,6 +295,7 @@ export function previewModules(
           description: "Demo adapter",
           servers: ["192.168.1.1"],
           profile: "custom",
+          encrypted: false,
         },
         {
           index: 12,
@@ -302,6 +303,7 @@ export function previewModules(
           description: "Demo adapter",
           servers: ["9.9.9.9", "149.112.112.112"],
           profile: "quad9",
+          encrypted: true,
         },
       ];
     case "tune.dns.set":

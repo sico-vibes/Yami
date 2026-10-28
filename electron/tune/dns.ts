@@ -16,7 +16,12 @@ export function profileOf(servers: string[]) {
 export const psQuote = (value: string) => "'" + value.replace(/'/g, "''") + "'";
 
 /** The elevated command: only a number and a profile id reach it. */
-export function elevatedArgs(script: string, index: number, profile: string) {
+export function elevatedArgs(
+  script: string,
+  index: number,
+  profile: string,
+  encrypt: "on" | "off" = "off",
+) {
   const inner = [
     "-NoProfile",
     "-ExecutionPolicy",
@@ -29,6 +34,8 @@ export function elevatedArgs(script: string, index: number, profile: string) {
     String(index),
     "-Profile",
     profile,
+    "-Encrypt",
+    encrypt,
   ];
   return [
     "-NoProfile",
@@ -71,11 +78,16 @@ export class DnsController {
         description: String(a.description || ""),
         servers,
         profile: profileOf(servers),
+        encrypted: a.encrypted === true,
       };
     });
   }
 
-  async set(index: unknown, profile: unknown) {
+  /**
+   * Encryption uses Windows 11's own DNS over HTTPS with no fallback to
+   * plain lookups, so it is offered only for profiles with a DoH address.
+   */
+  async set(index: unknown, profile: unknown, encrypt: unknown = false) {
     const n = Number(index);
     if (!Number.isInteger(n) || n <= 0)
       throw new Error("Choose a network adapter.");
@@ -87,8 +99,9 @@ export class DnsController {
       !dnsProfiles.some((p) => p.id === id && p.servers.length)
     )
       throw new Error("Choose a DNS profile.");
+    const mode = encrypt === true && id !== "automatic" ? "on" : "off";
     try {
-      await exec("powershell.exe", elevatedArgs(this.script, n, id), {
+      await exec("powershell.exe", elevatedArgs(this.script, n, id, mode), {
         windowsHide: true,
         timeout: 120000,
       });

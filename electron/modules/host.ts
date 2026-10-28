@@ -758,7 +758,7 @@ export function createModuleHost(deps: Deps) {
       if (method.startsWith("tune.")) {
         const { tweaks: tune, startup, dns } = registry.get<Tune>("tune");
         if (method === "tune.dns") return dns.list();
-        if (method === "tune.dns.set") return dns.set(a.index, a.profile);
+        if (method === "tune.dns.set") return dns.set(a.index, a.profile, a.encrypted);
         if (method === "tune.list") return tune.list();
         if (method === "tune.apply") return tune.apply(a.ids);
         if (method === "tune.undo") return tune.undo(a.ids);

@@ -26,4 +26,8 @@ test("the elevated command quotes the script path and passes only a number and a
   assert.ok(command.includes(`'"D:\\Basem''s Coding\\Dns.ps1"'`), command);
   assert.ok(command.includes("'-Index','7','-Profile','quad9'"), command);
   assert.match(command, /exit \$p\.ExitCode$/);
+  assert.ok(command.includes("'-Encrypt','off'"), command);
+  assert.ok(
+    elevatedArgs("x.ps1", 7, "quad9", "on")[3].includes("'-Encrypt','on'"),
+  );
 });

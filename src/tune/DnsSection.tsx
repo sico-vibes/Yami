@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Select } from "../controls";
 import { dnsProfiles, type DnsAdapter } from "../tune-types";
-import { Modal } from "../ui";
+import { Modal, Toggle } from "../ui";
 
 /** DNS per adapter: a fixed list of public resolvers, or back to automatic. */
 export function DnsSection({ report }: { report: (m: string) => void }) {
@@ -10,6 +10,7 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
     [pending, setPending] = useState<{
       adapter: DnsAdapter;
       profile: string;
+      encrypted: boolean;
     } | null>(null),
     [busy, setBusy] = useState(false);
   const fail = (e: Error) => report(e.message);
@@ -19,13 +20,18 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
   const profile = (id: string) => dnsProfiles.find((p) => p.id === id);
   const apply = () => {
     if (!pending) return;
-    const { adapter, profile: id } = pending;
+    const { adapter, profile: id, encrypted } = pending;
     setPending(null);
     setBusy(true);
-    void api("tune.dns.set", { index: adapter.index, profile: id })
-      .then((next) => {
+    void api("tune.dns.set", { index: adapter.index, profile: id, encrypted })
+      .then((next: DnsAdapter[]) => {
         setAdapters(next);
-        report(`${adapter.name} now uses ${profile(id)?.name || id} DNS.`);
+        const now = next.find((a) => a.index === adapter.index);
+        report(
+          `${adapter.name} now uses ${profile(id)?.name || id} DNS${
+            now?.encrypted ? ", encrypted" : ""
+          }.`,
+        );
       })
       .catch(fail)
       .finally(() => setBusy(false));
@@ -48,7 +54,7 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
             <p>No connected network adapter was found.</p>
           </div>
         ) : (
-          adapters.map((a) => (
+          adapters.flatMap((a) => [
             <div className="setting-row" key={a.index}>
               <div>
                 <strong>{a.name}</strong>
@@ -62,7 +68,12 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
                 label={`DNS for ${a.name}`}
                 value={a.profile === "custom" ? "automatic" : a.profile}
                 onChange={(id) =>
-                  id !== a.profile && setPending({ adapter: a, profile: id })
+                  id !== a.profile &&
+                  setPending({
+                    adapter: a,
+                    profile: id,
+                    encrypted: a.encrypted && id !== "automatic",
+                  })
                 }
                 options={dnsProfiles.map((p) => ({
                   value: p.id,
@@ -70,19 +81,55 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
                   icon: p.id === "automatic" ? "network" : "shield-check",
                 }))}
               />
-            </div>
-          ))
+            </div>,
+            profile(a.profile) && a.profile !== "automatic" && (
+              <div className="setting-row" key={`${a.index}-doh`}>
+                <div>
+                  <strong>Encrypt {a.name} lookups</strong>
+                  <p>
+                    {a.encrypted
+                      ? "DNS over HTTPS only: your network cannot read or change the lookups."
+                      : "Uses Windows 11's DNS over HTTPS so your network cannot read or change the lookups."}
+                  </p>
+                </div>
+                <Toggle
+                  label={`Encrypt DNS for ${a.name}`}
+                  value={a.encrypted}
+                  disabled={busy}
+                  onChange={(on) =>
+                    setPending({
+                      adapter: a,
+                      profile: a.profile,
+                      encrypted: on,
+                    })
+                  }
+                />
+              </div>
+            ),
+          ])
         )}
       </div>
       {busy && <p className="setting-note">Waiting for Windows…</p>}
       {pending && (
-        <Modal title="Change DNS?" onClose={() => setPending(null)}>
+        <Modal
+          title={
+            pending.profile === pending.adapter.profile
+              ? pending.encrypted
+                ? "Encrypt DNS?"
+                : "Stop encrypting DNS?"
+              : "Change DNS?"
+          }
+          onClose={() => setPending(null)}
+        >
           <p>
             {pending.adapter.name} will use{" "}
             <b>{profile(pending.profile)?.name}</b>
             {profile(pending.profile)?.servers.length
               ? ` (${profile(pending.profile)!.servers.join(", ")}). ${profile(pending.profile)!.detail}.`
               : ", the DNS your router hands out."}{" "}
+            {pending.encrypted
+              ? "Lookups go over HTTPS only, with no fallback to plain DNS; if the resolver is unreachable, websites stop loading until you switch back. "
+              : ""}
             Windows asks for administrator approval next. You can switch back
             here any time.
           </p>
@@ -91,7 +138,11 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
               Cancel
             </button>
             <button className="primary-button" onClick={apply}>
-              Change DNS
+              {pending.profile === pending.adapter.profile
+                ? pending.encrypted
+                  ? "Encrypt"
+                  : "Stop encrypting"
+                : "Change DNS"}
             </button>
           </div>
         </Modal>

@@ -78,6 +78,8 @@ export type DnsAdapter = {
   servers: string[];
   /** A profile id, or "custom" for servers Yami does not know. */
   profile: string;
+  /** Every server is looked up over DNS over HTTPS only. */
+  encrypted: boolean;
 };
 
 /** An app that starts with Windows. Only your own entries can be switched. */

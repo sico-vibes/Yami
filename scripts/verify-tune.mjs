@@ -118,7 +118,10 @@ try {
   // DNS is read only here; changing it would touch the real network.
   const adapters = await call("tune.dns");
   assert.ok(Array.isArray(adapters));
-  for (const a of adapters) assert.ok(Number.isInteger(a.index) && a.name);
+  for (const a of adapters) {
+    assert.ok(Number.isInteger(a.index) && a.name);
+    assert.equal(typeof a.encrypted, "boolean", "DoH state is read");
+  }
   await assert.rejects(
     call("tune.dns.set", { index: 99999, profile: "quad9" }),
     /not connected/,
