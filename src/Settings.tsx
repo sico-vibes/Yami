@@ -364,6 +364,27 @@ export function Settings({
                 "Your pinned and open apps along the bottom of the screen. Right-click an app to keep it there.",
                 toggle("dockEnabled", "Dock"),
               )}
+              {s.deskWidget &&
+                row(
+                  "Desk widget style",
+                  "The full card, a large clock, or a clock face.",
+                  <Select
+                    label="Desk widget style"
+                    value={s.deskWidgetStyle || "card"}
+                    onChange={(deskWidgetStyle) =>
+                      void patch({ deskWidgetStyle })
+                    }
+                    options={[
+                      { value: "card", label: "Card", icon: "cards" },
+                      { value: "clock", label: "Large clock", icon: "clock" },
+                      {
+                        value: "analog",
+                        label: "Clock face",
+                        icon: "clock-clockwise",
+                      },
+                    ]}
+                  />,
+                )}
               {s.dockEnabled &&
                 row(
                   "Hide the Windows taskbar",

@@ -9,6 +9,7 @@ export const defaults: Settings = {
   roam: true,
   deskWidget: false,
   deskWidgetAt: "",
+  deskWidgetStyle: "card",
   wallpaperRotate: "off",
   wallpaperRotatedAt: 0,
   livingFlame: false,

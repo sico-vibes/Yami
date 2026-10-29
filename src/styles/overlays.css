@@ -666,3 +666,57 @@ html[data-reduced="true"] .dock-item {
   transform: none;
   transition: none;
 }
+/* Desk widget clock styles. */
+.desk-widget.desk-clock,
+.desk-widget.desk-analog {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-6);
+  text-align: center;
+}
+.desk-big-clock {
+  font-size: 52px;
+  font-weight: 250;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--text);
+}
+.desk-widget.desk-clock small,
+.desk-widget.desk-analog small {
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+}
+.desk-face {
+  width: 150px;
+  height: 150px;
+}
+.desk-face .face {
+  fill: color-mix(in srgb, var(--ink-0) 70%, transparent);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+.desk-face .tick {
+  stroke: var(--muted);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.desk-face .tick.major {
+  stroke: var(--text-soft);
+  stroke-width: 2;
+}
+.desk-face .hour,
+.desk-face .minute {
+  stroke-linecap: round;
+}
+.desk-face .hour {
+  stroke: var(--text);
+  stroke-width: 3.4;
+}
+.desk-face .minute {
+  stroke: var(--glow);
+  stroke-width: 2.2;
+}
+.desk-face .pin {
+  fill: var(--glow);
+}

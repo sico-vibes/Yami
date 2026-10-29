@@ -28,6 +28,8 @@ export type Settings = {
   /** The desk widget card; its spot is "x,y", empty for the default. */
   deskWidget: boolean;
   deskWidgetAt: string;
+  /** card: time, weather, media, agents; clock: a large clock; analog: a clock face. */
+  deskWidgetStyle: string;
   /** "off", "hourly" or "daily": moving through the wallpaper library. */
   wallpaperRotate: string;
   wallpaperRotatedAt: number;

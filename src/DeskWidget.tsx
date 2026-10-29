@@ -97,6 +97,31 @@ export function DeskWidget() {
     void mediaControl(action)
       .then(setMedia)
       .catch(() => {});
+  const style = state?.settings.deskWidgetStyle || "card";
+  if (style === "clock" || style === "analog")
+    return (
+      <main
+        ref={card}
+        className={`desk-widget desk-${style}`}
+        aria-label="Yami desk clock"
+      >
+        {style === "analog" ? (
+          <ClockFace at={now} />
+        ) : (
+          <time className="desk-big-clock" dateTime={now.toISOString()}>
+            {now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+          </time>
+        )}
+        <small>
+          {now.toLocaleDateString([], {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+          })}
+          {weather ? ` · ${Math.round(weather.temperature)}°` : ""}
+        </small>
+      </main>
+    );
   return (
     <main ref={card} className="desk-widget" aria-label="Yami desk widget">
       <header>
@@ -154,5 +179,44 @@ export function DeskWidget() {
         <p className="desk-quiet">All quiet.</p>
       )}
     </main>
+  );
+}
+
+/** A clock face with hour and minute hands; it moves once a minute. */
+function ClockFace({ at }: { at: Date }) {
+  const minutes = at.getMinutes(),
+    hours = (at.getHours() % 12) + minutes / 60;
+  const hand = (deg: number, length: number, className: string) => (
+    <line
+      className={className}
+      x1="50"
+      y1="50"
+      x2={50 + length * Math.sin((deg * Math.PI) / 180)}
+      y2={50 - length * Math.cos((deg * Math.PI) / 180)}
+    />
+  );
+  return (
+    <svg
+      className="desk-face"
+      viewBox="0 0 100 100"
+      role="img"
+      aria-label={at.toLocaleTimeString()}
+    >
+      <circle className="face" cx="50" cy="50" r="46" />
+      {Array.from({ length: 12 }, (_, i) => (
+        <line
+          key={i}
+          className={i % 3 ? "tick" : "tick major"}
+          x1="50"
+          y1="8"
+          x2="50"
+          y2={i % 3 ? 12 : 15}
+          transform={`rotate(${i * 30} 50 50)`}
+        />
+      ))}
+      {hand(hours * 30, 24, "hour")}
+      {hand(minutes * 6, 34, "minute")}
+      <circle className="pin" cx="50" cy="50" r="2.6" />
+    </svg>
   );
 }
