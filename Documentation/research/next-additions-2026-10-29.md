@@ -39,7 +39,7 @@ Each one is fetched only when a card opens or the palette is asked, and cached.
 | API | Use in Yami | Terms found | Notes |
 | --- | --- | --- | --- |
 | **Frankfurter** (`api.frankfurter.dev`) | **Built 2026-10-29:** `100 usd to eur` in the launcher (v2 `rate` endpoint) | No key; ECB daily rates, updated about 16:00 CET; v1 frozen, v2 recommended ([frankfurter.dev](https://frankfurter.dev/v1)) | Not real-time; say "rates from <date>" |
-| **Nager.Date** (`date.nager.at/api/v3`) | Public holidays in Today's week strip and Plans, and the "next long weekend" | No key; 100+ countries; no documented rate limit (**verify** terms) | One request per year and country, cached |
+| **Nager.Date** (`date.nager.at/api/v3`) | **Built 2026-10-29:** public holidays in Today's week strip and agenda. Still open: Plans and the "next long weekend" | No key; 100+ countries; no documented rate limit (**verify** terms) | One request per year and country, cached |
 | **Open-Meteo Air Quality** (`air-quality-api.open-meteo.com`) | UV index, air quality and pollen in the weather card | No key for non-commercial use, fair use, data under CC BY 4.0 (attribution needed) | Yami's forecast stays on MET Norway; pollen covers mostly Europe |
 | **Radio Browser** (`api.radio-browser.info`) | An internet radio tab in Music: search stations, play in Yami, favourites | No key; community-maintained station list; server software AGPL-3.0, used as a service, not bundled (**verify** terms) | Streams are played by Yami's own audio element |
 | **iTunes Search** (`itunes.apple.com/search`) | Find podcasts by name, then follow their RSS feed in the Inbox | No key; about 20 requests per minute per IP | Episodes come from the public RSS feed, which Feeds already reads |

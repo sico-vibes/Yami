@@ -195,3 +195,13 @@
   overflow: auto;
   margin-bottom: 8px;
 }
+/* A public holiday is a mint dot; beside a plan dot, the two sit apart. */
+.week-strip i.holiday {
+  background: var(--mint);
+}
+.week-strip i:has(+ i.holiday) {
+  transform: translateX(-4px);
+}
+.week-strip i + i.holiday {
+  transform: translateX(4px);
+}

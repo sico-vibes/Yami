@@ -2,6 +2,7 @@ import { findLyrics } from "./lyrics";
 import { KeepAwake } from "./keep-awake";
 import { createScreenTools } from "./screen-tools";
 import { Rates } from "./currency";
+import { Holidays } from "./holidays";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -105,6 +106,9 @@ export function createRequestHandler(ctx: RequestContext) {
     broadcast,
   });
   const rates = new Rates();
+  const holidays = new Holidays(path.dirname(store.file), () =>
+    app.getLocaleCountryCode(),
+  );
   const awake = new KeepAwake(powerSaveBlocker, (state) =>
     broadcast({ type: "keep-awake", state }),
   );
@@ -474,6 +478,10 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "holidays":
+        if (!store.state.settings.holidaysEnabled)
+          throw new Error("Public holidays are off.");
+        return holidays.year(a.year);
       case "currency.convert":
         return rates.convert(a);
       case "color.pick":

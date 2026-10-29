@@ -311,6 +311,15 @@ export function installPreviewBridge() {
         case "control":
           toast("Preview only — Windows controls are unchanged.");
           return true;
+        case "holidays": {
+          const d = new Date();
+          d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7));
+          const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          return {
+            country: "XX",
+            holidays: [{ date, name: "Demo Day", localName: "Demo Day" }],
+          };
+        }
         case "weather":
           return state.settings.weatherEnabled
             ? { place: "Kyoto", temperature: 21, condition: "partlycloudy_day" }

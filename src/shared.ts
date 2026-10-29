@@ -44,6 +44,8 @@ export type Settings = {
   contextEnabled: boolean;
   memoryEnabled: boolean;
   weatherEnabled: boolean;
+  /** Public holidays in Today, from Nager.Date for Windows' region. */
+  holidaysEnabled: boolean;
   terminalEnabled: boolean;
   desktopEnabled: boolean;
   voice: string;

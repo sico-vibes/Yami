@@ -25,6 +25,7 @@ export const defaults: Settings = {
   contextEnabled: true,
   memoryEnabled: true,
   weatherEnabled: false,
+  holidaysEnabled: false,
   terminalEnabled: false,
   desktopEnabled: false,
   voice: "Charon",

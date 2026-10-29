@@ -29,7 +29,9 @@ export function Today({
     [weather, setWeather] = useState<any>(),
     [picked, setPicked] = useState(() => new Date()),
     [minutes, setMinutes] = useState(5),
-    [timer, setTimer] = useState({ endsAt: 0, duration: 0 });
+    [timer, setTimer] = useState({ endsAt: 0, duration: 0 }),
+    // Public holidays by yyyy-mm-dd, for the years this week touches.
+    [holidays, setHolidays] = useState<Record<string, string>>({});
   // The panel is only mounted while it is open, so this tick stops with it.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -59,6 +61,24 @@ export function Today({
       (_, i) => new Date(start.getTime() + i * DAY),
     );
   }, [now.toDateString()]);
+  useEffect(() => {
+    if (!state.settings.holidaysEnabled) return setHolidays({});
+    const years = [...new Set(week.map((d) => d.getFullYear()))];
+    void Promise.all(years.map((year) => api("holidays", { year })))
+      .then((lists) => {
+        const out: Record<string, string> = {};
+        for (const l of lists) for (const h of l.holidays) out[h.date] = h.name;
+        setHolidays(out);
+      })
+      .catch((e) => report(e.message));
+  }, [
+    state.settings.holidaysEnabled,
+    week[0].getFullYear(),
+    week[6].getFullYear(),
+  ]);
+  const dayKey = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const holiday = holidays[dayKey(picked)];
   const dayStart = new Date(picked);
   dayStart.setHours(0, 0, 0, 0);
   const agenda = state.tasks.filter((t) => t.enabled && occursOn(t, dayStart));
@@ -141,10 +161,22 @@ export function Today({
                 <small>{d.toLocaleDateString([], { weekday: "narrow" })}</small>
                 <b>{d.getDate()}</b>
                 {state.tasks.some((t) => t.enabled && occursOn(t, d)) && <i />}
+                {holidays[dayKey(d)] && (
+                  <i className="holiday" aria-label={holidays[dayKey(d)]} />
+                )}
               </button>
             ))}
           </div>
           <div className="week-agenda">
+            {holiday && (
+              <div className="agenda-row">
+                <Icon name="confetti" />
+                <div>
+                  <b>{holiday}</b>
+                  <small>Public holiday</small>
+                </div>
+              </div>
+            )}
             {agenda.slice(0, 3).map((t) => (
               <div className="agenda-row" key={t.id}>
                 <Icon name={t.repeat === "none" ? "calendar" : "repeat"} />
@@ -154,7 +186,21 @@ export function Today({
                 </div>
               </div>
             ))}
-            {!agenda.length && <p className="muted">Nothing planned.</p>}
+            {!agenda.length && !holiday && (
+              <p className="muted">Nothing planned.</p>
+            )}
+            {!state.settings.holidaysEnabled && (
+              <button
+                className="text-button"
+                onClick={() =>
+                  void api("settings", { holidaysEnabled: true }).catch((e) =>
+                    report(e.message),
+                  )
+                }
+              >
+                Show public holidays
+              </button>
+            )}
           </div>
         </section>
         <section className="focus-timer">
