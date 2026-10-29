@@ -15,6 +15,7 @@ import { AppsSection } from "./AppsSection";
 import { CleanupSection } from "./CleanupSection";
 import { SpaceSection } from "./SpaceSection";
 import { CursorSection } from "./CursorSection";
+import { EnvSection } from "./EnvSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -126,6 +127,7 @@ export default function TunePage({
       />
       <AdminSection report={report} />
       <CleanupSection report={report} />
+      <EnvSection report={report} />
       <SpaceSection report={report} />
       <AppsSection report={report} />
       <section>

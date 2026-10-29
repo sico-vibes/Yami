@@ -87,3 +87,38 @@
   white-space: nowrap;
   color: var(--text);
 }
+.env-folders {
+  display: grid;
+  gap: 2px;
+  margin: var(--space-2) 0;
+  padding: 0;
+  list-style: none;
+}
+.env-folders li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  font: 400 var(--fs-xs) "Cascadia Mono", Consolas, monospace;
+  color: var(--text-soft);
+}
+.env-folders span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.env-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  flex: 1;
+}
+.env-add input {
+  flex: 1;
+  min-width: 140px;
+}
+.env-path .startup-app {
+  flex: 1;
+}

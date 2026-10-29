@@ -154,6 +154,8 @@ class Host {
             case "snap": return WindowPin.Snap(Convert.ToInt64(a["handle"]),Str(a,"layout"));
             case "topmost": return WindowPin.Toggle(Convert.ToInt64(a["handle"]));
             case "topmostState": return WindowPin.IsPinned(Convert.ToInt64(a["handle"]));
+            // Newly started apps read the user environment again.
+            case "envChanged": { IntPtr r; SendMessageTimeout(new IntPtr(0xffff),0x1a,IntPtr.Zero,"Environment",2,2000,out r); return true; }
             case "cursorsReload": return SystemParametersInfo(0x57,0,null,3);
             case "listeningPorts": return NetPorts.Listening(Num(a,"root"));
             case "audioOutputs": return AudioDevices.List();

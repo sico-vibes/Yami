@@ -407,6 +407,18 @@ export function previewModules(
           user: true,
         },
       ];
+    case "tune.env":
+    case "tune.env.set":
+    case "tune.env.remove":
+    case "tune.env.restore":
+      return {
+        variables: [
+          { name: "Path", value: "C:\\Demo\\bin;C:\\Tools", expand: true },
+          { name: "EDITOR", value: "code", expand: false },
+          { name: "DEMO_API_KEY", value: "not-a-real-key", expand: false },
+        ],
+        changed: method === "tune.env" ? [] : ["Path"],
+      };
     case "tune.cursors":
     case "tune.cursors.set":
     case "tune.cursors.restore":

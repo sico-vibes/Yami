@@ -12,6 +12,7 @@ import { CleanupController, nativeStats } from "./cleanup";
 import { NetworkShield } from "./shield";
 import { SpaceController } from "./space";
 import { CursorController } from "./cursors";
+import { EnvController } from "./env";
 import { shell } from "electron";
 
 export { shieldWanted } from "./shield";
@@ -26,6 +27,7 @@ export type Tune = {
   cleanup: CleanupController;
   space: SpaceController;
   cursors: CursorController;
+  env: EnvController;
   shield: NetworkShield;
 };
 
@@ -33,6 +35,8 @@ export function loadTune(
   dataDir: string,
   /** Asks Windows to read the pointer values again (native host). */
   reloadCursors: () => Promise<unknown> = async () => {},
+  /** Tells Windows the user environment changed (native host). */
+  announceEnv: () => Promise<unknown> = async () => {},
 ): Tune {
   // The sandbox root of the desktop check also hides machine entries and
   // uses its own Startup folder.
@@ -67,6 +71,11 @@ export function loadTune(
       path.join(dataDir, "tune-cursors.json"),
       sandbox ? async () => {} : reloadCursors,
     ),
+    env: new EnvController(
+      io,
+      path.join(dataDir, "tune-env.json"),
+      sandbox ? async () => {} : announceEnv,
+    ),
     // YAMI_SHIELD_PORT moves it off port 53 for the desktop check.
     shield: new NetworkShield({
       dir: dataDir,
@@ -82,6 +91,10 @@ export function loadTune(
 /** Answers `tune.*` requests from the page. */
 export function tuneRequest(t: Tune, method: string, a: any = {}) {
   if (method.startsWith("tune.shield")) return t.shield.request(method, a);
+  if (method === "tune.env") return t.env.list();
+  if (method === "tune.env.set") return t.env.set(a);
+  if (method === "tune.env.remove") return t.env.remove(a.name);
+  if (method === "tune.env.restore") return t.env.restore();
   if (method === "tune.cursors") return t.cursors.status();
   if (method === "tune.cursors.set") return t.cursors.apply(a);
   if (method === "tune.cursors.restore") return t.cursors.restore();

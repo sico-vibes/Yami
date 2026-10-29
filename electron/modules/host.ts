@@ -166,8 +166,10 @@ export function createModuleHost(deps: Deps) {
       },
       tune: {
         load: () =>
-          loadTune(path.dirname(store.file), () =>
-            native.call("cursorsReload"),
+          loadTune(
+            path.dirname(store.file),
+            () => native.call("cursorsReload"),
+            () => native.call("envChanged"),
           ),
         dispose: (t: Tune) => {
           t.shield.stop();
