@@ -114,6 +114,7 @@ export class DnsController {
     );
     let failure = "",
       timedOut = false;
+    const started = Date.now();
     try {
       await exec(
         "powershell.exe",
@@ -121,6 +122,10 @@ export class DnsController {
         { windowsHide: true, timeout: 120000 },
       );
     } catch (error) {
+      // Node does not always mark a timed-out run as killed on Windows.
+      timedOut =
+        !!(error as { killed?: boolean }).killed ||
+        Date.now() - started >= 119_000;
       failure = String(
         (error as { stderr?: string }).stderr || (error as Error).message,
       );
@@ -141,9 +146,24 @@ export class DnsController {
             ? `: ${reply.error}`
             : timedOut
               ? ": the administrator prompt was not answered in two minutes."
-              : "."
+              : `. ${lastLine(failure)}`
         }`,
       );
     return this.list();
   }
+}
+
+/** The last meaningful line of PowerShell's error, kept short. */
+function lastLine(text: string) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(
+      (l) => l && !/^(At line|\+|~|CategoryInfo|FullyQualifiedErrorId)/.test(l),
+    );
+  return (
+    lines.find((l) => /error|denied|cancel|not/i.test(l)) ||
+    lines[0] ||
+    ""
+  ).slice(0, 240);
 }
