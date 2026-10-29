@@ -13,6 +13,7 @@ import {
   safeStorage,
   session as electronSession,
 } from "electron";
+import { handleRadio, radioScheme } from "./radio";
 import { noteForeground } from "./screen-tools";
 import { spawn } from "node:child_process";
 import { runPowerShell, nativeScript } from "./platform";
@@ -49,6 +50,7 @@ protocol.registerSchemesAsPrivileged([
     scheme: "yami-asset",
     privileges: { standard: true, secure: true, supportFetchAPI: true },
   },
+  radioScheme,
 ]);
 if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
@@ -756,6 +758,7 @@ else {
           return new Response("Not found", { status: 404 });
         }
       });
+      handleRadio();
       electronSession.defaultSession.setPermissionRequestHandler(
         (wc, permission, callback) =>
           callback(

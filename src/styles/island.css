@@ -773,3 +773,69 @@
 .color-swatch:focus-visible {
   box-shadow: 0 0 0 2px var(--glow);
 }
+/* Drawer › Radio. */
+.radio-panel {
+  display: grid;
+  gap: var(--space-2);
+}
+.radio-heading {
+  margin: var(--space-2) var(--space-1) 0;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--text-soft);
+}
+.radio-station,
+.radio-now {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.radio-station.on,
+.radio-now {
+  background: var(--selected);
+  border-color: var(--selected-line);
+}
+.radio-station > div,
+.radio-now > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.radio-station b,
+.radio-now b {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.radio-station small,
+.radio-now small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.radio-play {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+}
+.radio-play:hover,
+.radio-play:focus-visible {
+  background: var(--selected);
+}
+.radio-now input[type="range"] {
+  width: 90px;
+}

@@ -10,6 +10,7 @@ import { AppVolumes } from "./AppVolumes";
 import { AudioOutput } from "./AudioOutput";
 import { KeepAwake } from "./KeepAwake";
 import { ScreenTools } from "./ScreenTools";
+import { RadioPanel } from "./RadioPanel";
 import { mediaControl, repeatLabel, type MediaAction } from "./media";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
@@ -20,6 +21,7 @@ export const utilityTabs: UtilityTab[] = [
   "Apps",
   "Wallpaper",
   "Power",
+  "Radio",
   "AI",
 ];
 export function Utilities({
@@ -85,6 +87,8 @@ export function Utilities({
           <Clipboard state={state} report={report} />
         ) : tab === "Power" ? (
           <Power report={report} />
+        ) : tab === "Radio" ? (
+          <RadioPanel report={report} />
         ) : (
           <Today state={state} report={report} />
         )}

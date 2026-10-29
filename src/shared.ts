@@ -15,6 +15,7 @@ export type UtilityTab =
   | "Apps"
   | "Wallpaper"
   | "Power"
+  | "Radio"
   | "AI";
 export type Settings = {
   name: string;

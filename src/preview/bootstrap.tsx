@@ -28,6 +28,7 @@ const screens = [
   "Apps",
   "Wallpaper",
   "Power",
+  "Radio",
   "Stray",
   "Caption",
   "Desk widget",

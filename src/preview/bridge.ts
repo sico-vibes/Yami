@@ -235,6 +235,29 @@ export function installPreviewBridge() {
         case "color.pick":
         case "window.pin":
           throw new Error("Preview only — the screen was not touched.");
+        case "radio.search":
+          return [
+            {
+              id: "11111111-1111-1111-1111-111111111111",
+              name: "Demo Jazz",
+              country: "Demoland",
+              tags: "jazz, smooth",
+              codec: "MP3",
+              bitrate: 128,
+            },
+            {
+              id: "22222222-2222-2222-2222-222222222222",
+              name: "Sample News",
+              country: "Exampleland",
+              tags: "news",
+              codec: "AAC",
+              bitrate: 64,
+            },
+          ];
+        case "radio.favourites":
+          return [];
+        case "radio.favourite":
+          throw new Error("Preview only — nothing was saved.");
         case "awake":
         case "awake.stop":
           return { on: false, screen: false, until: 0 };

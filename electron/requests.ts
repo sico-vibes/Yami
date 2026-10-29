@@ -3,6 +3,7 @@ import { KeepAwake } from "./keep-awake";
 import { createScreenTools } from "./screen-tools";
 import { Rates } from "./currency";
 import { Holidays } from "./holidays";
+import { Radio } from "./radio";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -106,6 +107,7 @@ export function createRequestHandler(ctx: RequestContext) {
     broadcast,
   });
   const rates = new Rates();
+  const radio = new Radio(path.dirname(store.file));
   const holidays = new Holidays(path.dirname(store.file), () =>
     app.getLocaleCountryCode(),
   );
@@ -478,6 +480,12 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "radio.search":
+        return radio.search(a.term);
+      case "radio.favourites":
+        return radio.favourites().map(({ url: _url, ...s }) => s);
+      case "radio.favourite":
+        return radio.favourite(a.station, a.on === true);
       case "holidays":
         if (!store.state.settings.holidaysEnabled)
           throw new Error("Public holidays are off.");
