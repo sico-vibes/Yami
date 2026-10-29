@@ -29,8 +29,12 @@ import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
 import { DnsController } from "../tune/dns";
 import { helperPath } from "../workbench/terminal";
-import { agentLinkPort, startAgentLink } from "../agentlink/server";
-import { agentTools } from "../agentlink/tools";
+import { agentLinkPort } from "../agentlink/server";
+import {
+  agentToolNames,
+  loadAgentLink,
+  type AgentLink,
+} from "../agentlink/load";
 import { type RemoteAbility } from "../remote/server";
 import { loadRemote, remoteAbilities, type Remote } from "../remote/load";
 import { createBrowser } from "../browser/browser";
@@ -52,24 +56,12 @@ type Tune = {
   dns: DnsController;
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
-type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
 type Browser = {
   browser: ReturnType<typeof createBrowser>;
   vault: Vault;
   linked: ReturnType<typeof createLinked>;
   filters: FilterLists;
 };
-const agentToolNames = [
-  "notify",
-  "ask_user",
-  "list_projects",
-  "open_terminal",
-  "browser_open",
-  "browser_read",
-  "browser_click",
-  "browser_type",
-  "browser_select",
-];
 import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
@@ -257,55 +249,16 @@ export function createModuleHost(deps: Deps) {
         dispose: (link: Remote) => void link.close(),
       },
       agentLink: {
-        load: (): AgentLink => {
-          let token = store.key("provider:agentlink");
-          if (!token) {
-            token = randomBytes(24).toString("hex");
-            store.setKeys({ "provider:agentlink": token });
-          }
-          const link: AgentLink = {
-            ...startAgentLink({
-              token: () => store.key("provider:agentlink"),
-              allowed: (name) => {
-                const list = store.state.settings.agentLinkTools;
-                return Array.isArray(list) && list.includes(name);
-              },
-              tools: agentTools({
-                notify: (message) =>
-                  deps.broadcast({ type: "caption-notice", message }),
-                ask: (title, detail) =>
-                  deps.confirm(
-                    "A coding agent asks: " + title,
-                    detail || "Answer in Yami; no answer counts as no.",
-                  ),
-                projects: () => speechCore().data.state.projects,
-                openTerminal: (project) => workbench().dev.launch({ project }),
-                browserOpen: (url) => {
-                  const { browser } = registry.get<Browser>("browser");
-                  browser.show();
-                  browser.open(url);
-                },
-                browserAct: (kind, target, value) =>
-                  registry
-                    .get<Browser>("browser")
-                    .browser.act(kind, target, value, (title, detail) =>
-                      deps.confirm(title, detail),
-                    ),
-                // A signed-in linked browser, when open, is what agents read.
-                browserRead: () => {
-                  const { browser, linked } = registry.get<Browser>("browser");
-                  return linked.running() ? linked.read() : browser.read();
-                },
-              }),
-            }),
-            error: "",
-          };
-          link.ready.catch((e: Error) => {
-            link.error = e.message;
-            deps.notify(e.message);
-          });
-          return link;
-        },
+        load: (): AgentLink =>
+          loadAgentLink({
+            store,
+            notify: deps.notify,
+            broadcast: deps.broadcast,
+            confirm: deps.confirm,
+            projects: () => speechCore().data.state.projects,
+            openTerminal: (project) => workbench().dev.launch({ project }),
+            browser: () => registry.get<Browser>("browser"),
+          }),
         dispose: (link: AgentLink) => void link.close(),
       },
       fileWheel: {

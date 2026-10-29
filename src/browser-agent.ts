@@ -81,3 +81,22 @@ export function pageScript(
   return info;
 })()`;
 }
+
+/**
+ * Page code that finds a file field (by selector, or its label or name) and
+ * tags it with `token` so Chromium can be told which field to fill.
+ */
+export function uploadScript(target: Target, token: string) {
+  return `(() => {
+  const want = ${JSON.stringify(target)};
+  const fields = [...document.querySelectorAll('input[type="file"]')];
+  const labelOf = (el) => ((el.id && document.querySelector('label[for="' + CSS.escape(el.id) + '"]')?.innerText) || el.closest("label")?.innerText || el.getAttribute("aria-label") || el.name || "").trim().slice(0, 120);
+  let el = null;
+  if (want.selector) { try { el = document.querySelector(want.selector); } catch { return { found: false }; } }
+  else if (want.text) { const n = want.text.trim().toLowerCase(); el = fields.find((f) => labelOf(f).toLowerCase().includes(n)) || null; }
+  else if (fields.length === 1) el = fields[0];
+  if (!el || el.tagName !== "INPUT" || el.type !== "file") return { found: false, count: fields.length };
+  el.setAttribute("data-yami-upload", ${JSON.stringify(token)});
+  return { found: true, label: labelOf(el), tag: "input" };
+})()`;
+}

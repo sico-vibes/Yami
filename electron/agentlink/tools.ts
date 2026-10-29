@@ -11,6 +11,10 @@ export function agentTools(deps: {
   openTerminal: (project: string) => void;
   browserOpen?: (url: string) => void;
   browserRead?: () => Promise<{ title: string; url: string; text: string }>;
+  browserUpload?: (
+    target: { selector?: string; text?: string },
+    file: string,
+  ) => Promise<object>;
   browserAct?: (
     kind: "click" | "type" | "select",
     target: { selector?: string; text?: string },
@@ -226,6 +230,39 @@ export function agentTools(deps: {
               text: a.text ? String(a.text) : undefined,
             },
             text(a.option, 300, "option"),
+          ),
+        );
+      },
+    },
+    {
+      name: "browser_upload",
+      description:
+        "Attach one file from this PC to a file field on the Yami Browser's current page, found by the field's label or a CSS selector (or the only one). The user is always asked first, with the file and the site named.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          selector: {
+            type: "string",
+            description: "A CSS selector for the file field, if you know one.",
+          },
+          text: { type: "string", description: "Or the field's label." },
+          path: {
+            type: "string",
+            description: "The full path of the file on this PC.",
+          },
+        },
+        required: ["path"],
+      },
+      run: async (a) => {
+        if (!deps.browserUpload)
+          throw new Error("The Yami Browser is turned off.");
+        return JSON.stringify(
+          await deps.browserUpload(
+            {
+              selector: a.selector ? String(a.selector) : undefined,
+              text: a.text ? String(a.text) : undefined,
+            },
+            text(a.path, 1024, "path"),
           ),
         );
       },

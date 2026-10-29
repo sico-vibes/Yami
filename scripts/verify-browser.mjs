@@ -14,10 +14,12 @@ const site = http.createServer((req, res) => {
       ? "<title>Second page</title><p>two</p>"
       : req.url === "/form"
         ? "<title>form</title><form onsubmit='document.title=\"submitted\";return false'><input placeholder='Search' oninput='document.title=\"typed \"+this.value'><input type='password' placeholder='Password'><label for='size'>Size</label><select id='size' onchange='document.title=\"size \"+this.value'><option value='s'>Small</option><option value='m'>Medium</option></select><button>Submit</button></form><a href='#' onclick='document.title=\"more\";return false'>More info</a>"
-        : req.url === "/tracker"
-          ? // A request to a listed tracker host; blocking cancels it locally.
-            "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
-          : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
+        : req.url === "/upload"
+          ? "<title>upload</title><label for='doc'>Document</label><input id='doc' type='file' onchange='document.title=\"file \"+this.files[0].name'>"
+          : req.url === "/tracker"
+            ? // A request to a listed tracker host; blocking cancels it locally.
+              "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
+            : "<title>Yami test page</title><h1>Hello from the local test page</h1><p>Agents can read this.</p>",
   );
 });
 await new Promise((r) => site.listen(47896, "127.0.0.1", r));
@@ -182,6 +184,36 @@ try {
   assert.match((await asking).text, /said no/);
   assert.notEqual(await titleOf(), "submitted", "nothing was submitted");
   await call("browser.close", { id: formTab });
+  // Uploads always ask: once declined, once allowed.
+  await call("agentlink.tools", { name: "browser_upload", allowed: true });
+  const doc = path.join(profile, "report.txt");
+  (await import("node:fs")).writeFileSync(doc, "quarterly numbers");
+  const uploadTab = await call("browser.open", {
+    input: "http://127.0.0.1:47896/upload",
+  });
+  const uploadTitle = async () =>
+    (await call("browser.state")).tabs.find((t) => t.id === uploadTab)?.title ||
+    "";
+  for (let i = 0; i < 30 && (await uploadTitle()) !== "upload"; i++)
+    await wait(200);
+  const declined = tool("browser_upload", { text: "Document", path: doc });
+  await card.getByText(/Let an agent upload “report\.txt”/).waitFor();
+  await card.getByRole("button", { name: "Cancel" }).click();
+  assert.match((await declined).text, /said no/);
+  assert.equal(await uploadTitle(), "upload", "nothing was attached");
+  const allowed = tool("browser_upload", { text: "Document", path: doc });
+  await card.getByText(/Let an agent upload “report\.txt”/).waitFor();
+  await card.getByRole("button", { name: "Confirm" }).click();
+  const uploaded = await allowed;
+  assert.equal(uploaded.error, false, uploaded.text);
+  for (let i = 0; i < 20 && (await uploadTitle()) !== "file report.txt"; i++)
+    await wait(150);
+  assert.equal(await uploadTitle(), "file report.txt");
+  assert.match(
+    (await tool("browser_upload", { path: "Z:\\nope.txt" })).text,
+    /not on this PC/,
+  );
+  await call("browser.close", { id: uploadTab });
   // Known trackers are cancelled before they leave the PC.
   const trackerTab = await call("browser.open", {
     input: "http://127.0.0.1:47896/tracker",

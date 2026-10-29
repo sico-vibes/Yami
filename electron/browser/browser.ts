@@ -5,6 +5,8 @@ import {
   type Session,
 } from "electron";
 import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { newTab, resolveInput, webOnly } from "../../src/browser-rules.ts";
 import { isBlockedHost } from "../../src/blocklist.ts";
 import {
@@ -15,6 +17,7 @@ import {
 import {
   pageScript,
   riskyAction,
+  uploadScript,
   type Found,
   type Target,
 } from "../../src/browser-agent.ts";
@@ -392,6 +395,78 @@ export function createBrowser(deps: {
           text: text.slice(0, max),
         };
       } finally {
+        driving = "";
+        publish();
+      }
+    },
+    /**
+     * For agents: attach one local file to a file field on the active page.
+     * It always asks the user first, naming the file and the site.
+     */
+    async upload(
+      target: Target,
+      file: string,
+      ask: (title: string, detail: string) => Promise<boolean>,
+    ) {
+      const wc = tab(active)?.view?.webContents;
+      if (!wc) throw new Error("Open a page in the Yami Browser first.");
+      const full = path.resolve(file);
+      let size = 0;
+      try {
+        const stat = fs.statSync(full);
+        if (!stat.isFile()) throw new Error();
+        size = stat.size;
+      } catch {
+        throw new Error("That file is not on this PC.");
+      }
+      if (size > 100 * 1024 * 1024)
+        throw new Error("Files over 100 MB are not uploaded by agents.");
+      const token = randomUUID();
+      const found = (await wc.executeJavaScriptInIsolatedWorld(999, [
+        { code: uploadScript(target, token) },
+      ])) as Found & { count?: number };
+      if (!found?.found)
+        throw new Error(
+          found?.count
+            ? "Say which file field: this page has more than one."
+            : "This page has no file field.",
+        );
+      driving = "An agent wants to upload a file";
+      publish();
+      try {
+        const ok = await ask(
+          `Let an agent upload “${path.basename(full)}”?`,
+          `To ${new URL(wc.getURL()).host}${found.label ? ` (${found.label})` : ""}\nFile: ${full}\nSize: ${Math.ceil(size / 1024)} KB`,
+        );
+        if (!ok) throw new Error("The user said no.");
+        const cdp = wc.debugger;
+        const attached = cdp.isAttached();
+        if (!attached) cdp.attach("1.3");
+        try {
+          const { root } = await cdp.sendCommand("DOM.getDocument", {
+            depth: 0,
+          });
+          const { nodeId } = await cdp.sendCommand("DOM.querySelector", {
+            nodeId: root.nodeId,
+            selector: `[data-yami-upload="${token}"]`,
+          });
+          if (!nodeId) throw new Error("The file field went away.");
+          await cdp.sendCommand("DOM.setFileInputFiles", {
+            nodeId,
+            files: [full],
+          });
+        } finally {
+          if (!attached) cdp.detach();
+        }
+        return { done: true, file: path.basename(full), url: wc.getURL() };
+      } finally {
+        void wc
+          .executeJavaScriptInIsolatedWorld(999, [
+            {
+              code: `document.querySelector('[data-yami-upload="${token}"]')?.removeAttribute("data-yami-upload")`,
+            },
+          ])
+          .catch(() => {});
         driving = "";
         publish();
       }
