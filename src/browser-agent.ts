@@ -10,6 +10,10 @@ export type Found = {
   label?: string;
   submits?: boolean;
   password?: boolean;
+  /** For a menu: its options' visible text, so an agent can pick again. */
+  options?: string[];
+  /** The option that matched, for select. */
+  chosen?: string;
 };
 
 const riskyWords =
@@ -23,8 +27,8 @@ export function riskyAction(found: Found) {
 /** Page code that finds the target and optionally acts; returns a Found. */
 export function pageScript(
   target: Target,
-  kind: "click" | "type",
-  act: "find" | "click" | "type",
+  kind: "click" | "type" | "select",
+  act: "find" | "click" | "type" | "select",
   text = "",
 ) {
   return `(() => {
@@ -32,8 +36,10 @@ export function pageScript(
   const clickable = "a, button, input[type=submit], input[type=button], [role=button], [role=link], summary, label";
   const typable = "input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=submit]):not([type=button]), textarea, [contenteditable=true]";
   // What to look among follows the kind of action, on the find step too.
-  const pool = ${JSON.stringify(kind)} === "type" ? typable : clickable;
-  const labelOf = (el) => (el.getAttribute("aria-label") || el.innerText || el.value || el.placeholder || el.name || el.title || "").trim().replace(/\\s+/g, " ").slice(0, 120);
+  const kind = ${JSON.stringify(kind)};
+  const pool = kind === "type" ? typable : kind === "select" ? "select" : clickable;
+  const labelFor = (el) => el.id ? document.querySelector('label[for="' + CSS.escape(el.id) + '"]')?.innerText : el.closest("label")?.innerText;
+  const labelOf = (el) => (el.getAttribute("aria-label") || (el.tagName === "SELECT" ? labelFor(el) || el.name : "") || el.innerText || el.value || el.placeholder || el.name || el.title || "").trim().replace(/\\s+/g, " ").slice(0, 120);
   const visible = (el) => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
   let el = null;
   if (want.selector) { try { el = document.querySelector(want.selector); } catch { return { found: false }; } }
@@ -46,6 +52,21 @@ export function pageScript(
   const form = el.closest("form");
   const submits = (el.tagName === "BUTTON" && (el.type || "submit") === "submit" && !!form) || (el.tagName === "INPUT" && el.type === "submit");
   const info = { found: true, tag: el.tagName.toLowerCase(), label: labelOf(el), submits, password: el.type === "password" };
+  if (kind === "select") {
+    if (el.tagName !== "SELECT") return { found: false };
+    const opts = [...el.options];
+    info.options = opts.map((o) => o.text.trim()).slice(0, 100);
+    const want2 = ${JSON.stringify(text)}.trim().toLowerCase();
+    const pick = opts.find((o) => o.text.trim().toLowerCase() === want2 || o.value.toLowerCase() === want2) || opts.find((o) => o.text.trim().toLowerCase().includes(want2));
+    if (!pick || pick.disabled) return { ...info, chosen: "" };
+    info.chosen = pick.text.trim();
+    if (${JSON.stringify(act)} === "select") {
+      el.value = pick.value;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    return info;
+  }
   if (${JSON.stringify(act)} === "click") el.click();
   if (${JSON.stringify(act)} === "type" && !info.password) {
     el.focus();

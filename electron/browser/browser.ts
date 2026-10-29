@@ -318,7 +318,7 @@ export function createBrowser(deps: {
      * pay, post, delete) wait for `ask`; password fields are refused.
      */
     async act(
-      kind: "click" | "type",
+      kind: "click" | "type" | "select",
       target: Target,
       text: string,
       ask: (title: string, detail: string) => Promise<boolean>,
@@ -327,31 +327,43 @@ export function createBrowser(deps: {
       if (!wc) throw new Error("Open a page in the Yami Browser first.");
       if (!target.selector && !target.text)
         throw new Error("Say what to click or type into.");
-      const run = (act: "find" | "click" | "type") =>
+      const run = (act: "find" | "click" | "type" | "select") =>
         wc.executeJavaScriptInIsolatedWorld(999, [
           { code: pageScript(target, kind, act, text) },
         ]) as Promise<Found>;
       driving =
         kind === "click"
           ? "An agent is clicking on this page"
-          : "An agent is typing on this page";
+          : kind === "select"
+            ? "An agent is choosing from a menu on this page"
+            : "An agent is typing on this page";
       publish();
       try {
         const found = await run("find");
         if (!found?.found) throw new Error("Nothing on the page matches that.");
         if (found.password)
           throw new Error("Agents cannot type into password fields.");
+        if (kind === "select" && !found.chosen)
+          return {
+            done: false,
+            label: found.label || "",
+            options: found.options || [],
+            url: wc.getURL(),
+          };
         if (riskyAction(found)) {
           const ok = await ask(
-            `Let an agent ${kind === "click" ? "press" : "type into"} “${found.label || found.tag}”?`,
+            kind === "select"
+              ? `Let an agent choose “${found.chosen}” in “${found.label || "a menu"}”?`
+              : `Let an agent ${kind === "click" ? "press" : "type into"} “${found.label || found.tag}”?`,
             `On ${wc.getURL()}${kind === "type" ? `\nText: ${text.slice(0, 300)}` : ""}`,
           );
           if (!ok) throw new Error("The user said no.");
         }
         const done = await run(kind);
         return {
-          done: !!done?.found,
+          done: !!done?.found && (kind !== "select" || !!done.chosen),
           label: done?.label || "",
+          ...(kind === "select" && { chosen: done?.chosen || "" }),
           url: wc.getURL(),
         };
       } finally {

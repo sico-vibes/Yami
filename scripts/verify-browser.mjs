@@ -13,7 +13,7 @@ const site = http.createServer((req, res) => {
     req.url === "/two"
       ? "<title>Second page</title><p>two</p>"
       : req.url === "/form"
-        ? "<title>form</title><form onsubmit='document.title=\"submitted\";return false'><input placeholder='Search' oninput='document.title=\"typed \"+this.value'><input type='password' placeholder='Password'><button>Submit</button></form><a href='#' onclick='document.title=\"more\";return false'>More info</a>"
+        ? "<title>form</title><form onsubmit='document.title=\"submitted\";return false'><input placeholder='Search' oninput='document.title=\"typed \"+this.value'><input type='password' placeholder='Password'><label for='size'>Size</label><select id='size' onchange='document.title=\"size \"+this.value'><option value='s'>Small</option><option value='m'>Medium</option></select><button>Submit</button></form><a href='#' onclick='document.title=\"more\";return false'>More info</a>"
         : req.url === "/tracker"
           ? // A request to a listed tracker host; blocking cancels it locally.
             "<title>tracker test</title><script>fetch('https://www.google-analytics.com/collect?v=1').then(() => document.title = 'tracker reached', () => document.title = 'tracker blocked')</script>"
@@ -160,6 +160,21 @@ try {
     false,
   );
   assert.equal(await titleOf(), "more");
+  // Menus: an option by its text; an unknown one returns the choices.
+  await call("agentlink.tools", { name: "browser_select", allowed: true });
+  const picked = await tool("browser_select", {
+    text: "Size",
+    option: "Medium",
+  });
+  assert.equal(picked.error, false, picked.text);
+  assert.equal(JSON.parse(picked.text).chosen, "Medium");
+  assert.equal(await titleOf(), "size m");
+  assert.deepEqual(
+    JSON.parse(
+      (await tool("browser_select", { text: "Size", option: "Huge" })).text,
+    ).options,
+    ["Small", "Medium"],
+  );
   const asking = tool("browser_click", { text: "Submit" });
   const card = main.getByRole("dialog");
   await card.getByText(/Let an agent press “Submit”/).waitFor();

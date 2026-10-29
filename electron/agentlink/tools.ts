@@ -12,7 +12,7 @@ export function agentTools(deps: {
   browserOpen?: (url: string) => void;
   browserRead?: () => Promise<{ title: string; url: string; text: string }>;
   browserAct?: (
-    kind: "click" | "type",
+    kind: "click" | "type" | "select",
     target: { selector?: string; text?: string },
     text: string,
   ) => Promise<object>;
@@ -189,6 +189,43 @@ export function agentTools(deps: {
               text: a.text ? String(a.text) : undefined,
             },
             text(a.value, 5000, "text to type"),
+          ),
+        );
+      },
+    },
+    {
+      name: "browser_select",
+      description:
+        "Choose an option in a drop-down menu on the Yami Browser's current page, found by the menu's label or a CSS selector, and the option by its visible text or value. If no option matches, the menu's options are returned.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          selector: {
+            type: "string",
+            description: "A CSS selector for the menu, if you know one.",
+          },
+          text: {
+            type: "string",
+            description: "Or the menu's label.",
+          },
+          option: {
+            type: "string",
+            description: "The option's visible text or value.",
+          },
+        },
+        required: ["option"],
+      },
+      run: async (a) => {
+        if (!deps.browserAct)
+          throw new Error("The Yami Browser is turned off.");
+        return JSON.stringify(
+          await deps.browserAct(
+            "select",
+            {
+              selector: a.selector ? String(a.selector) : undefined,
+              text: a.text ? String(a.text) : undefined,
+            },
+            text(a.option, 300, "option"),
           ),
         );
       },

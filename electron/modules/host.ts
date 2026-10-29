@@ -68,6 +68,7 @@ const agentToolNames = [
   "browser_read",
   "browser_click",
   "browser_type",
+  "browser_select",
 ];
 import { execFile, spawn } from "node:child_process";
 
