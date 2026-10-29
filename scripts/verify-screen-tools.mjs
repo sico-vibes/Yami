@@ -134,6 +134,15 @@ try {
     "moved to the left edge: " + JSON.stringify(rect),
   );
   await assert.rejects(call("window.snap", { layout: "diagonal" }), /layout/);
+  // Workspaces: saving only reads windows. The test window is in it with
+  // its program; restoring is not run, because it would move your windows.
+  // The saved list lives in the isolated profile and is removed here.
+  const saved = await call("workspaces.save", { name: "verify" });
+  const test = saved[0].windows.find((w) => w.title === "Yami pin test");
+  assert.ok(test, "the test window was saved");
+  assert.match(test.exe, /powershell\.exe$/i);
+  assert.ok(test.width > 200 && test.height > 100, JSON.stringify(test));
+  assert.deepEqual(await call("workspaces.remove", { id: saved[0].id }), []);
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, copied, pinned: r.title }));
 } finally {

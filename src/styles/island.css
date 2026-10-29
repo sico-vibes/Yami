@@ -839,3 +839,32 @@
 .radio-now input[type="range"] {
   width: 90px;
 }
+/* Controls card: saved workspaces. */
+.workspace-list {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.workspace-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}
+.workspace-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.workspace-row > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.workspace-row small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}

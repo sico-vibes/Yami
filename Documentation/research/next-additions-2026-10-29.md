@@ -28,7 +28,7 @@ The current PowerToys README names 31 utilities. These are the ones Yami does no
 | **Image resizer** | Already covered by the file wheel's resize petal | n/a | n/a |
 | **Peek** (quick look) | Space on a selected Explorer file opens Yami's viewer (images, PDF, text, media) | Explorer selection is already read for the wheel; viewers exist in the tool window | None |
 | **PowerRename** | Batch rename with find/replace, regex and preview | The wheel already has batch rename; add regex and preview | None |
-| **Workspaces** | Save the open apps and their window positions, then restore them with one click | Window list and `MoveWindow` exist; launching apps exists | None |
+| **Workspaces** | **Built 2026-10-29:** save the open apps and their window positions, then restore them with one click | Window list and `MoveWindow` exist; launching apps exists | None |
 
 **Recommended first three:** Keep awake, Color picker and Always on top. They are small, they are used daily, and they reuse code Yami already has. **Keep awake, Color picker and Always on top are built** (Controls card, 2026-10-29).
 

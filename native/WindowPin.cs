@@ -83,6 +83,61 @@ static class WindowPin
         return new { layout = layout, x = r[0], y = r[1], width = r[2], height = r[3] };
     }
 
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc proc, IntPtr l);
+    delegate bool EnumProc(IntPtr h, IntPtr l);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr h, out Rect r);
+    [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr h, uint cmd);
+    [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr h, int attribute, out int value, int size);
+    [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint access, bool inherit, uint pid);
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern bool QueryFullProcessImageNameW(IntPtr p, uint flags, StringBuilder name, ref uint size);
+    [DllImport("kernel32.dll")] static extern bool CloseHandle(IntPtr h);
+
+    static string ExePath(uint pid)
+    {
+        IntPtr p = OpenProcess(0x1000, false, pid); // PROCESS_QUERY_LIMITED_INFORMATION
+        if (p == IntPtr.Zero) return "";
+        try { var b = new StringBuilder(1024); uint n = (uint)b.Capacity; return QueryFullProcessImageNameW(p, 0, b, ref n) ? b.ToString() : ""; }
+        finally { CloseHandle(p); }
+    }
+
+    /**
+     * The app windows a person would call open: visible, titled, top-level,
+     * not cloaked (other virtual desktops, hidden UWP frames), with the
+     * program that owns each and where it sits.
+     */
+    public static object Windows(uint skipPid)
+    {
+        var list = new System.Collections.Generic.List<object>();
+        EnumWindows(delegate (IntPtr h, IntPtr l)
+        {
+            if (!IsWindowVisible(h) || GetWindow(h, 4) != IntPtr.Zero) return true; // GW_OWNER
+            int cloaked; if (DwmGetWindowAttribute(h, 14, out cloaked, 4) == 0 && cloaked != 0) return true;
+            var title = new StringBuilder(256); GetWindowTextW(h, title, title.Capacity);
+            if (title.Length == 0) return true;
+            uint pid; GetWindowThreadProcessId(h, out pid);
+            if (pid == skipPid) return true;
+            string exe = ExePath(pid);
+            if (exe.Length == 0) return true;
+            Rect r; GetWindowRect(h, out r);
+            list.Add(new { handle = h.ToInt64(), exe = exe, title = title.ToString(), maximized = IsZoomed(h), x = r.Left, y = r.Top, width = r.Right - r.Left, height = r.Bottom - r.Top });
+            return true;
+        }, IntPtr.Zero);
+        return list;
+    }
+
+    /** Puts a window back where it was saved. */
+    public static bool Place(long handle, int x, int y, int width, int height, bool maximized)
+    {
+        var h = new IntPtr(handle);
+        if (!IsWindow(h)) return false;
+        if (IsZoomed(h) || IsIconic(h)) ShowWindow(h, 9);
+        SetWindowPos(h, IntPtr.Zero, x, y, Math.Max(120, width), Math.Max(80, height), 0x0004 | 0x0010);
+        if (maximized) ShowWindow(h, 3);
+        return true;
+    }
+
     public static bool IsPinned(long handle)
     {
         var h = new IntPtr(handle);

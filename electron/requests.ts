@@ -4,6 +4,7 @@ import { createScreenTools } from "./screen-tools";
 import { Rates } from "./currency";
 import { Holidays } from "./holidays";
 import { Radio } from "./radio";
+import { Workspaces } from "./workspaces";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -108,6 +109,10 @@ export function createRequestHandler(ctx: RequestContext) {
   });
   const rates = new Rates();
   const radio = new Radio(path.dirname(store.file));
+  const workspaces = new Workspaces(
+    path.join(path.dirname(store.file), "workspaces.json"),
+    native,
+  );
   const holidays = new Holidays(path.dirname(store.file), () =>
     app.getLocaleCountryCode(),
   );
@@ -480,6 +485,14 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "workspaces":
+        return workspaces.list();
+      case "workspaces.save":
+        return workspaces.save(a.name);
+      case "workspaces.restore":
+        return workspaces.restore(a.id);
+      case "workspaces.remove":
+        return workspaces.remove(a.id);
       case "radio.search":
         return radio.search(a.term);
       case "radio.favourites":

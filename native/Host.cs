@@ -151,6 +151,8 @@ class Host {
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
             // SPI_SETCURSORS: Windows reads the pointer values in Control Panel\Cursors again.
+            case "appWindows": return WindowPin.Windows((uint)Num(a,"skip"));
+            case "placeWindow": return WindowPin.Place(Convert.ToInt64(a["handle"]),Num(a,"x"),Num(a,"y"),Num(a,"width"),Num(a,"height"),Flag(a,"maximized"));
             case "snap": return WindowPin.Snap(Convert.ToInt64(a["handle"]),Str(a,"layout"));
             case "topmost": return WindowPin.Toggle(Convert.ToInt64(a["handle"]));
             case "topmostState": return WindowPin.IsPinned(Convert.ToInt64(a["handle"]));

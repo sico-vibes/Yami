@@ -258,6 +258,19 @@ export function installPreviewBridge() {
           return [];
         case "radio.favourite":
           throw new Error("Preview only — nothing was saved.");
+        case "workspaces":
+          return [
+            {
+              id: "demo",
+              name: "Writing",
+              at: Date.now() - 3600_000,
+              windows: [1, 2, 3],
+            },
+          ];
+        case "workspaces.save":
+        case "workspaces.restore":
+        case "workspaces.remove":
+          throw new Error("Preview only — no windows were touched.");
         case "awake":
         case "awake.stop":
           return { on: false, screen: false, until: 0 };
