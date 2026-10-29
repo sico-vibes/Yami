@@ -68,9 +68,11 @@ export default function TunePage({
         </div>
       </div>
       <p className="setting-note">
-        These change your own Windows settings only, with no administrator
-        prompt. Before a change, Yami saves the earlier values, so turning a
-        tweak off puts back what was there.
+        The tweaks below change your own Windows settings only, with no
+        administrator prompt. Before a change, Yami saves the earlier values,
+        so turning a tweak off puts back what was there. Sections further down
+        that change the whole PC (DNS, the hosts file, Administrator) say so and
+        ask Windows first.
       </p>
       {restart && (
         <div className="tune-restart" role="status">

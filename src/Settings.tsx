@@ -1,4 +1,11 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { State, Settings as Preferences } from "./shared";
 import { api, todayUsage } from "./api";
@@ -41,6 +48,11 @@ export function Settings({
     [models, setModels] = useState<any[]>([]),
     [usage, setUsage] = useState<any>(null),
     [diagnostics, setDiagnostics] = useState<any>(null);
+  const content = useRef<HTMLElement>(null);
+  // One column holds every section: a new section starts at its top.
+  useEffect(() => {
+    content.current?.scrollTo({ top: 0 });
+  }, [section]);
   const s = state.settings;
   const patch = (patch: Partial<Preferences>) =>
     api("settings", patch).catch((e) => report(e.message));
@@ -201,7 +213,7 @@ export function Settings({
           ))}
         </nav>
       </aside>
-      <section className="settings-content">
+      <section className="settings-content" ref={content}>
         {section === "Workspace" && (
           <Suspense
             fallback={<AsciiSkeleton label="Opening workspace settings…" />}

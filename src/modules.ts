@@ -117,7 +117,7 @@ export const modules: ModuleSpec[] = [
     id: "tune",
     name: "Windows tune-up",
     blurb:
-      "Fourteen per-user tweaks for Explorer, the taskbar, privacy and games. Each one shows what it changes and undoes exactly.",
+      "Tweaks for Explorer, the taskbar, privacy and games, plus startup apps, DNS and the network shield, cleanup, disk space, installed apps, the hosts file, environment variables and the mouse pointer. Every change shows what it does and can be put back.",
     icon: "sliders-horizontal",
     setting: "tuneEnabled",
     cost: "low",

@@ -18,6 +18,7 @@
     "docs": "node scripts/build-docs.mjs",
     "check:lines": "node scripts/check-lines.mjs",
     "check:ui": "node scripts/check-ui.mjs",
+    "audit:ui": "node scripts/audit-ui.mjs",
     "check": "npm run check:lines && npm run check:ui && npm run typecheck && npm run build:native && npm test",
     "notices": "node scripts/collect-notices.mjs"
   },

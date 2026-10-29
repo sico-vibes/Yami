@@ -640,3 +640,10 @@ kbd {
   letter-spacing: 0.06em;
   text-align: center;
 }
+
+/* Every control is at least 24 px tall to click (WCAG 2.2 target size). */
+button,
+[role="switch"],
+[role="tab"] {
+  min-height: 24px;
+}

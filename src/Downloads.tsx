@@ -58,7 +58,7 @@ export function Downloads({ report }: { report: (m: string) => void }) {
       <div className="page-head">
         <div>
           <h1>Downloads</h1>
-          <p>
+          <p className="page-description">
             {active.length
               ? `${active.length} downloading · ${bytesText(total)}/s`
               : "Paste a link, or download in the Yami Browser."}
