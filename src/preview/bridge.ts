@@ -226,6 +226,17 @@ export function installPreviewBridge() {
           return { clientId: "", connected: false };
         case "spotify.connect":
           throw new Error("Preview only — Spotify was not contacted.");
+        case "awake":
+        case "awake.stop":
+          return { on: false, screen: false, until: 0 };
+        case "awake.set":
+          return {
+            on: true,
+            screen: !!a?.screen,
+            until: Number(a?.minutes)
+              ? Date.now() + Number(a.minutes) * 60_000
+              : 0,
+          };
         case "audio.outputs":
         case "audio.output": {
           const pick = method === "audio.output" ? String(a?.id) : "";

@@ -78,6 +78,7 @@ The Controls card and the island's media peek act on the playing app's own Windo
 | Utility | Available behavior | Limit |
 | --- | --- | --- |
 | Controls | Master volume, supported brightness, Windows dark/light theme, Wi-Fi, Bluetooth, Night Light, and links to selected Windows Settings pages. | Brightness requires WMI monitor support. Radio and Night Light toggles rely on exposed Windows UI Automation controls. |
+| Keep awake | In the Controls card: keep the PC awake, optionally with the screen on, until switched off or for 30 minutes, 1, 2 or 4 hours. The island and every window show the same state. | Uses Electron's power-save blocker (`SetThreadExecutionState`); quitting Yami ends it. A timed keep-awake holds one timer while on. Checked on 2026-10-29 by `scripts/verify-keep-awake.mjs`, which asks Electron whether the request is held. Adapted from the idea of PowerToys Awake; no code copied. |
 | Media | Read the current Windows media session and send play/pause/next/previous media key events. | Depends on active media-session support in Windows and the player. |
 | Stats | CPU, memory, GPU, disks, network rates, uptime, process count, and top processes; values are queried locally. | GPU details can be absent. Stats are sampled rather than performance guarantees. |
 | Internet speed | Optional M-Lab ndt7 download/upload measurement. | Transfers real data and publishes results including IP address; requires a per-run consent prompt. |

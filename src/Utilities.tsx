@@ -8,6 +8,7 @@ import { Select, shortTime } from "./controls";
 import { Today } from "./Today";
 import { AppVolumes } from "./AppVolumes";
 import { AudioOutput } from "./AudioOutput";
+import { KeepAwake } from "./KeepAwake";
 import { mediaControl, repeatLabel, type MediaAction } from "./media";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 export const utilityTabs: UtilityTab[] = [
@@ -241,6 +242,7 @@ function Controls({ report }: { report: (m: string) => void }) {
       )}
       <AudioOutput report={report} />
       <AppVolumes report={report} />
+      <KeepAwake report={report} />
       <div className="media-player">
         <small>
           <Icon name="speaker-high" size={11} /> Speakers

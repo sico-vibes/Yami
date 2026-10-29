@@ -1,4 +1,5 @@
 import { findLyrics } from "./lyrics";
+import { KeepAwake } from "./keep-awake";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -6,6 +7,7 @@ import {
   dialog,
   shell,
   nativeImage,
+  powerSaveBlocker,
   safeStorage,
 } from "electron";
 import fs from "node:fs";
@@ -93,6 +95,10 @@ export function createRequestHandler(ctx: RequestContext) {
     beginLasso,
     approvals,
   } = ctx;
+  // Every window sees the same keep-awake state, including the island.
+  const awake = new KeepAwake(powerSaveBlocker, (state) =>
+    broadcast({ type: "keep-awake", state }),
+  );
   return async function invoke(
     method: string,
     a: any = {},
@@ -459,6 +465,12 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "awake":
+        return awake.status();
+      case "awake.set":
+        return awake.set(a);
+      case "awake.stop":
+        return awake.stop();
       case "audio.outputs":
         return native.call("audioOutputs");
       case "audio.output": {

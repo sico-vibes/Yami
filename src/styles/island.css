@@ -689,3 +689,42 @@
 .audio-output .select {
   width: 100%;
 }
+/* Controls card: keep awake, a switch over a length menu. */
+.keep-awake {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.keep-awake-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.keep-awake-row > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.keep-awake-row small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.keep-awake-row .select {
+  flex: 1;
+  min-width: 0;
+}
+.keep-awake-screen {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.keep-awake-row strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+}

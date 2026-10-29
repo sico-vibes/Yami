@@ -13,6 +13,8 @@ This page separates implemented behavior from future ideas. Features described a
 
 The owner-approved direction and phase order are in the [expansion plan (2026-10-27)](research/expansion-plan-2026-10-27.md). It covers optional modules with first-run choices and downloadable packs, the Nightglow revamp, the Dev and AI hub, Whistle dictation, Windows Tune and Style, file-wheel parity, media, feeds and mail, remote servers, and the Yami Browser. None of it is on `main` or released. Most of it is built on the local `yami-expansion` branch. [Features and settings](features-and-settings.md) says what each part does and how it was checked; it also names what is not built and what was not exercised live (for example, signed-in mail and social accounts, a real phone on Yami Remote, and pointing a real adapter at the network shield).
 
+The [next additions note (2026-10-29)](research/next-additions-2026-10-29.md) proposes what to add after the expansion: PowerToys-style utilities built natively (keep awake, color picker, always on top, window layouts, quick accent, hosts and environment editors), free keyless data (Frankfurter, Nager.Date, Open-Meteo air quality, Radio Browser, iTunes podcast search, OSV.dev), and companion ideas (daily brief, focus sessions, clipboard actions).
+
 The ranked list of feature ideas, with their references, code review, costs, and guardrails, is in the [feature recommendations note (2026-10-18)](research/feature-recommendations-2026-10-18.md). Its Tier 1 items (Theme Hub, cursor manager, a launcher on the Windows Search index, keep-awake, an island OSD, a window switcher with snap zones, and scheduled theme and wallpaper changes) are the proposed starting point. None of them is implemented yet.
 
 
