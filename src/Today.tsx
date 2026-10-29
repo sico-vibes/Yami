@@ -3,6 +3,8 @@ import type { State, Task } from "./shared";
 import { api, time } from "./api";
 import { Icon, IconButton } from "./ui";
 import { weatherLook } from "./weather-look";
+import { FocusOptions, useFocusChoice } from "./FocusOptions";
+import { startFocus, endFocus } from "./focus";
 
 const PRESETS = [1, 5, 10, 15, 30];
 const DAY = 86_400_000;
@@ -44,7 +46,8 @@ export function Today({
     [minutes, setMinutes] = useState(5),
     [timer, setTimer] = useState({ endsAt: 0, duration: 0 }),
     // Public holidays by yyyy-mm-dd, for the years this week touches.
-    [holidays, setHolidays] = useState<Record<string, string>>({});
+    [holidays, setHolidays] = useState<Record<string, string>>({}),
+    focus = useFocusChoice();
   // The panel is only mounted while it is open, so this tick stops with it.
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000);
@@ -257,13 +260,19 @@ export function Today({
                 </button>
               ))}
             </div>
+            <FocusOptions focus={focus} running={!!timer.endsAt} />
             <div className="focus-actions">
               <button
                 className="gold-button"
                 onClick={() =>
-                  void api(timer.endsAt ? "timer.stop" : "timer.start", {
-                    minutes,
-                  })
+                  void (
+                    timer.endsAt
+                      ? api("timer.stop").then((t) => {
+                          void endFocus();
+                          return t;
+                        })
+                      : startFocus(minutes, focus.choice).then((r) => r.timer)
+                  )
                     .then(setTimer)
                     .catch((e) => report(e.message))
                 }

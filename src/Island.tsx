@@ -10,6 +10,7 @@ import { TooltipLayer } from "./controls";
 import type { AgentSession } from "./workbench-types";
 import { agentClis } from "./dev-types";
 import { agentReaction, reactionMs } from "./agent-reaction";
+import { watchFocus } from "./focus";
 const agentName = (id: string) =>
   agentClis.find((c) => c.id === id)?.name || id;
 export function Island() {
@@ -140,6 +141,8 @@ export function Island() {
     }
   };
   const { state } = useYami(event);
+  // A focus session ends with its timer, even with the drawer closed.
+  useEffect(() => watchFocus(), []);
   useEffect(() => {
     if (state) {
       prefs.current = state.settings;
