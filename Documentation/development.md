@@ -141,6 +141,9 @@ Workspace verification commands:
 - `node scripts/verify-passwords.mjs`: isolated profile and a local sign-in page; imports a
   fixture CSV, deletes it on request, fills the page from the toolbar key, and checks a fill cannot
   be asked for from outside the browser window.
+- `node scripts/verify-whistle-live.mjs`: isolated profile; Chromium's fake microphone plays a
+  synthesized sentence, dictation starts in the island, and the caption must show its words
+  while recording; the recording is then cancelled so nothing is typed.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

@@ -59,12 +59,48 @@ export class SpeechController {
     );
     return JSON.parse(stdout.trim());
   }
+  private partialRun?: AbortController;
+  /**
+   * The words so far, while dictating with Whistle: a quick run on the audio
+   * up to now, for the caption. It never holds up the final transcription,
+   * which cancels a partial run still going.
+   */
+  async partial(data: string) {
+    if (this.busy || this.partialRun || !this.whistle) return "";
+    const bytes = Buffer.from(data, "base64");
+    if (
+      bytes.length < 1000 ||
+      bytes.length > 2 * 1024 * 1024 ||
+      bytes.toString("ascii", 0, 4) !== "RIFF"
+    )
+      return "";
+    const controller = (this.partialRun = new AbortController());
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "yami-partial-"));
+    try {
+      const file = path.join(dir, "so-far.wav");
+      await fs.writeFile(file, bytes, { mode: 0o600 });
+      const { exe, model } = await this.whistle();
+      const { stdout } = await exec(exe, whistleArgs(model, file), {
+        windowsHide: true,
+        timeout: 8000,
+        maxBuffer: 512 * 1024,
+        signal: controller.signal,
+      });
+      return parseWhistle(stdout);
+    } catch {
+      return "";
+    } finally {
+      this.partialRun = undefined;
+      await fs.rm(dir, { recursive: true, force: true }).catch(() => {});
+    }
+  }
   async transcribe(
     data: string,
     mime: string,
     engine = this.data.state.settings.dictationEngine,
     jobId = "",
   ) {
+    this.partialRun?.abort();
     if (this.busy)
       throw new Error("Wait for the current transcription to finish.");
     if (data.length > 45 * 1024 * 1024 || data.length < 50)

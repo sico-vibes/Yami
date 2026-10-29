@@ -7,6 +7,27 @@ const base64 = (buffer: ArrayBuffer) => {
   for (let i = 0; i < b.length; i++) text += String.fromCharCode(b[i]);
   return btoa(text);
 };
+/**
+ * A recording as 16 kHz mono PCM WAV, the form offline engines take;
+ * `lastSeconds` keeps only the end of it.
+ */
+async function toWav(blob: Blob, lastSeconds = 0) {
+  const decoder = new AudioContext({ sampleRate: 16000 });
+  try {
+    const audio = await decoder.decodeAudioData(await blob.arrayBuffer());
+    const channel = audio.getChannelData(0);
+    const from = lastSeconds
+      ? Math.max(0, channel.length - lastSeconds * 16000)
+      : 0;
+    const pcm = new Int16Array(channel.length - from);
+    for (let i = 0; i < pcm.length; i++)
+      pcm[i] = Math.max(-1, Math.min(1, channel[from + i])) * 32767;
+    return pcmWav([new Uint8Array(pcm.buffer)]);
+  } finally {
+    await decoder.close();
+  }
+}
+
 export class AudioEngine {
   stream?: MediaStream;
   context?: AudioContext;
@@ -101,8 +122,21 @@ export class AudioEngine {
           ? "audio/webm;codecs=opus"
           : "audio/webm";
         this.recorder = new MediaRecorder(stream, { mimeType });
+        // With Whistle, the audio so far is transcribed every two seconds so
+        // the caption shows words while you speak; the final text still
+        // comes from the whole recording when you stop.
+        const live = settings.dictationEngine === "whistle";
+        let looking = false;
         this.recorder.ondataavailable = (e) => {
           if (e.data.size) chunks.push(e.data);
+          if (!live || looking || this.recorder?.state !== "recording") return;
+          looking = true;
+          void toWav(new Blob(chunks, { type: mimeType }), 30)
+            .then((wav) => api("dictation.partial", { data: encodeBytes(wav) }))
+            .catch(() => {})
+            .finally(() => {
+              looking = false;
+            });
         };
         this.recorder.onstop = async () => {
           try {
@@ -110,13 +144,11 @@ export class AudioEngine {
             if (blob.size < 500) return;
             // Offline engines take 16 kHz PCM WAV; Gemini takes the recording as is.
             if (settings.dictationEngine !== "gemini") {
-              const decoder = new AudioContext({ sampleRate: 16000 });
-              try {
-                const audio = await decoder.decodeAudioData(await blob.arrayBuffer());
-                const pcm = new Int16Array(audio.length), channel = audio.getChannelData(0);
-                for (let i = 0; i < pcm.length; i++) pcm[i] = Math.max(-1, Math.min(1, channel[i])) * 32767;
-                await api("dictation", { data: encodeBytes(pcmWav([new Uint8Array(pcm.buffer)])), mimeType: "audio/wav", target });
-              } finally { await decoder.close(); }
+              await api("dictation", {
+                data: encodeBytes(await toWav(blob)),
+                mimeType: "audio/wav",
+                target,
+              });
               return;
             }
             await api("dictation", {
@@ -128,7 +160,10 @@ export class AudioEngine {
             this.error((e as Error).message);
           }
         };
-        this.recorder.start();
+        // Whistle gets a chunk every two seconds for the live caption.
+        this.recorder.start(
+          settings.dictationEngine === "whistle" ? 2000 : undefined,
+        );
       }
     } catch (e) {
       const cancelled = token !== this.token;

@@ -68,6 +68,25 @@ try {
     w.focus();
     return Number(w.getNativeWindowHandle().readBigUInt64LE(0));
   });
+  // The live caption step: the words so far, broadcast, never typed.
+  const captions = [];
+  await main.exposeFunction("__caption", (t) => captions.push(t));
+  await main.evaluate(() =>
+    window.yami.on(
+      (e) =>
+        e.type === "transcript" &&
+        e.role === "user" &&
+        window.__caption(e.text),
+    ),
+  );
+  const startedPartial = Date.now();
+  const partial = await call("dictation.partial", {
+    data: fs.readFileSync(wav).toString("base64"),
+  });
+  const partialMs = Date.now() - startedPartial;
+  assert.match(partial, /weather/i);
+  for (let i = 0; i < 20 && !captions.length; i++) await wait(100);
+  assert.match(captions[0] || "", /weather/i, "the caption got the words");
   const box = main.getByLabel("Message Yami");
   await box.click();
   await box.fill("");
@@ -84,7 +103,9 @@ try {
   for (let i = 0; i < 20 && !(await box.inputValue()); i++) await wait(100);
   assert.match(await box.inputValue(), /weather/i, "typed into Yami's own box");
   assert.deepEqual(errors, []);
-  console.log(JSON.stringify({ passed: true, text, downloadMs, dictateMs }));
+  console.log(
+    JSON.stringify({ passed: true, text, downloadMs, dictateMs, partialMs }),
+  );
 } finally {
   await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), saved);
   await app.close();

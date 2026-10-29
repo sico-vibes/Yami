@@ -379,6 +379,7 @@ export function createModuleHost(deps: Deps) {
     handles(method: string) {
       return (
         Workbench.handles(method) ||
+        method === "dictation.partial" ||
         /^(modules|setup|packs|tune|feeds|agentlink|palette|remote|browser|vault|spotify|watch|mailcatcher)\./.test(
           method,
         )
@@ -386,6 +387,13 @@ export function createModuleHost(deps: Deps) {
     },
     async invoke(method: string, a: any = {}, sender?: WebContents) {
       if (method === "modules.list") return registry.list();
+      // Live caption words while dictating with Whistle; never typed.
+      if (method === "dictation.partial") {
+        if (store.state.settings.dictationEngine !== "whistle") return "";
+        const text = await speechCore().speech.partial(String(a.data || ""));
+        if (text) deps.broadcast({ type: "transcript", role: "user", text });
+        return text;
+      }
       if (method.startsWith("mailcatcher.")) {
         mail ||= new MailCatcher({
           dataDir: path.dirname(store.file),
