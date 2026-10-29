@@ -43,6 +43,8 @@ type Deps = {
   engines?: EngineStore;
   /** Adds a folder to Projects; absent while the AI workspace is off. */
   addProject?: (folder: string) => Promise<unknown>;
+  /** False when Yami Terminal is not available. */
+  openTerminal?: (cwd: string) => boolean;
 };
 
 export function createWheel(deps: Deps) {
@@ -443,7 +445,9 @@ export function createWheel(deps: Deps) {
           if (petal.id.startsWith("action:")) {
             await runFileAction(petal.id, files, deps.notify, {
               addProject: deps.addProject,
+              openTerminal: deps.openTerminal,
               iconFile: process.env.YAMI_TEST_ICON,
+              moveTo: process.env.YAMI_TEST_MOVE_TO,
             });
             closeWheel();
             return { action: petal.id };

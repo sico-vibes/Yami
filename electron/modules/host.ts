@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
-  clipboard,
   dialog,
   safeStorage,
   shell,
@@ -32,22 +31,18 @@ import { DnsController } from "../tune/dns";
 import { helperPath } from "../workbench/terminal";
 import { agentLinkPort, startAgentLink } from "../agentlink/server";
 import { agentTools } from "../agentlink/tools";
-import { startRemote, type RemoteAbility } from "../remote/server";
+import { type RemoteAbility } from "../remote/server";
+import { loadRemote, remoteAbilities, type Remote } from "../remote/load";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
-import { createScreenShare as screenShare } from "../remote/screen";
 import { createWallpaperRotation } from "../wallpaper-rotation";
 import { MailCatcher } from "../workbench/mail-catcher";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
 import { maskSecrets } from "../mask";
 import { darkAt, nextSwitch } from "../../src/theme-schedule";
 import { resolveInput, webOnly } from "../../src/browser-rules";
-import { activeAgents } from "../../src/agent-rank";
-import { agentClis } from "../../src/dev-types";
-import { mediaAction, nativeScript } from "../platform";
-import os from "node:os";
 import { randomBytes } from "node:crypto";
 
 type Tune = {
@@ -57,22 +52,12 @@ type Tune = {
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type AgentLink = ReturnType<typeof startAgentLink> & { error: string };
-type Remote = ReturnType<typeof startRemote> & { error: string };
 type Browser = {
   browser: ReturnType<typeof createBrowser>;
   vault: Vault;
   linked: ReturnType<typeof createLinked>;
   filters: FilterLists;
 };
-const remoteAbilities: RemoteAbility[] = [
-  "approvals",
-  "media",
-  "clipboard",
-  "screen",
-  "control",
-];
-const agentName = (id: string) =>
-  agentClis.find((c) => c.id === id)?.name || id;
 const agentToolNames = [
   "notify",
   "ask_user",
@@ -259,76 +244,13 @@ export function createModuleHost(deps: Deps) {
         },
       },
       remote: {
-        load: (): Remote => {
-          if (!store.key("provider:remote"))
-            store.setKeys({
-              "provider:remote": randomBytes(24).toString("hex"),
-            });
-          const allowed = (name: string) =>
-            Array.isArray(store.state.settings.remoteAllow) &&
-            store.state.settings.remoteAllow.includes(name);
-          const link: Remote = {
-            ...startRemote({
-              token: () => store.key("provider:remote"),
-              allowed,
-              state: async () => {
-                const wb = registry.peek<Workbench>("workbench");
-                return {
-                  pc: os.hostname(),
-                  allow: Object.fromEntries(
-                    remoteAbilities.map((n) => [n, allowed(n)]),
-                  ),
-                  agents: wb
-                    ? activeAgents(wb.data.state.sessions).map(
-                        ({ agent, project, phase, detail }) => ({
-                          agent: agentName(agent),
-                          project,
-                          phase,
-                          detail: detail.slice(0, 300),
-                        }),
-                      )
-                    : [],
-                  requests:
-                    wb && allowed("approvals")
-                      ? wb.data.state.requests
-                          .filter(
-                            (r) =>
-                              r.kind === "permission" &&
-                              r.expiresAt > Date.now(),
-                          )
-                          .map(({ id, agent, title, detail }) => ({
-                            id,
-                            agent: agentName(agent),
-                            title,
-                            detail: detail.slice(0, 2000),
-                          }))
-                      : [],
-                  media: allowed("media")
-                    ? await nativeScript("Media").catch(() => null)
-                    : null,
-                };
-              },
-              approve: (id, decision) => {
-                const wb = registry.peek<Workbench>("workbench");
-                if (!wb) throw new Error("No agent is waiting.");
-                // The phone showed the request, which counts as seen.
-                wb.agents.acknowledge(id);
-                wb.agents.finish(id, decision);
-              },
-              media: (action) => mediaAction(action),
-              clipboard: (text) => {
-                clipboard.writeText(text);
-                deps.notify("Text from your phone is on the clipboard.");
-              },
-              ...screenShare({ native, notify: deps.notify }),
-            }),
-            error: "",
-          };
-          link.ready.catch((e: Error) => {
-            link.error = e.message;
-          });
-          return link;
-        },
+        load: (): Remote =>
+          loadRemote({
+            store,
+            native,
+            notify: deps.notify,
+            workbench: () => registry.peek<Workbench>("workbench"),
+          }),
         dispose: (link: Remote) => void link.close(),
       },
       agentLink: {
@@ -398,6 +320,9 @@ export function createModuleHost(deps: Deps) {
                 throw new Error("Turn on the AI workspace to keep projects.");
               return workbench().dev.add(folder);
             },
+            // Yami Terminal when the workspace is on, else Windows' own.
+            openTerminal: (cwd) =>
+              registry.enabled("workbench") && workbench().dev.launch({ cwd }),
           }),
         dispose: (w: Wheel) => w.dispose(),
       },

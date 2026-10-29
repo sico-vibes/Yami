@@ -19,8 +19,11 @@ export async function runFileAction(
   notify: (message: string) => void,
   extra: {
     addProject?: (folder: string) => Promise<unknown>;
+    /** Opens a Yami Terminal tab, or says false; PowerShell is the fallback. */
+    openTerminal?: (cwd: string) => boolean;
     /** Set by the desktop check, which cannot use the file dialog. */
     iconFile?: string;
+    moveTo?: string;
   } = {},
 ) {
   if (id === "action:size") {
@@ -144,10 +147,12 @@ export async function runFileAction(
     return;
   }
   if (id === "action:move") {
-    const picked = await dialog.showOpenDialog({
-      properties: ["openDirectory"],
-      title: "Move files to",
-    });
+    const picked = extra.moveTo
+      ? { canceled: false, filePaths: [extra.moveTo] }
+      : await dialog.showOpenDialog({
+          properties: ["openDirectory"],
+          title: "Move files to",
+        });
     if (picked.canceled || !picked.filePaths[0]) return;
     for (const file of files) {
       const dest = destinationFor(
@@ -180,9 +185,12 @@ export async function runFileAction(
   if (id === "action:terminal") {
     if (process.platform !== "win32")
       throw new Error("The terminal action is available on Windows.");
-    const launch = terminalLaunch(
-      files[0].folder ? files[0].path : path.dirname(files[0].path),
-    );
+    const cwd = files[0].folder ? files[0].path : path.dirname(files[0].path);
+    if (extra.openTerminal?.(cwd)) {
+      notify("Opened Yami Terminal.");
+      return;
+    }
+    const launch = terminalLaunch(cwd);
     const child = spawn(launch.command, launch.args, {
       detached: true,
       stdio: "ignore",

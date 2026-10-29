@@ -16,7 +16,14 @@ fs.writeFileSync(path.join(site, "index.html"), "<h1>demo</h1>");
 fs.writeFileSync(path.join(site, "css", "a.css"), "h1{}");
 const icon = path.join(profile, "work", "star.ico");
 fs.writeFileSync(icon, "icon");
-const env = { ...process.env, YAMI_DATA_DIR: profile, YAMI_TEST_ICON: icon };
+const moveTo = path.join(profile, "work", "moved-here");
+fs.mkdirSync(moveTo, { recursive: true });
+const env = {
+  ...process.env,
+  YAMI_DATA_DIR: profile,
+  YAMI_TEST_ICON: icon,
+  YAMI_TEST_MOVE_TO: moveTo,
+};
 delete env.ELECTRON_RUN_AS_NODE;
 const app = await _electron.launch({ args: [path.resolve(".")], env });
 const errors = [];
@@ -155,6 +162,58 @@ try {
     "trip-02.txt",
   ]);
   assert.equal(fs.readFileSync(path.join(shots, "trip-01.txt"), "utf8"), "a");
+  // Copy puts the files on the clipboard (put back afterwards), Move moves
+  // them into a folder, Terminal here opens a Yami Terminal tab there.
+  const loose = path.join(profile, "work", "loose.txt");
+  fs.writeFileSync(loose, "loose");
+  const savedClip = await app.evaluate(({ clipboard }) => clipboard.readText());
+  try {
+    await call("wheel.shelf.drop", { paths: [loose] });
+    await call("wheel.swap", { mode: "actions" });
+    await call("wheel.choose", { petalId: "action:copy" });
+    const copied = execFileSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-STA",
+        "-Command",
+        "Get-Clipboard -Format FileDropList | ForEach-Object { $_.FullName }",
+      ],
+      { encoding: "utf8" },
+    );
+    assert.match(copied, /loose\.txt/, "the file is on the clipboard");
+  } finally {
+    await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), savedClip);
+  }
+  await call("wheel.shelf.drop", { paths: [loose] });
+  await call("wheel.swap", { mode: "actions" });
+  await call("wheel.choose", { petalId: "action:move" });
+  assert.ok(fs.existsSync(path.join(moveTo, "loose.txt")), "moved");
+  assert.ok(!fs.existsSync(loose), "the original is gone");
+  await call("modules.set", { id: "workbench", enabled: true });
+  await call("wheel.shelf.drop", { paths: [moveTo] });
+  await call("wheel.swap", { mode: "actions" });
+  await call("wheel.choose", { petalId: "action:terminal" });
+  let term;
+  for (let i = 0; i < 100 && !term; i++) {
+    term = app.windows().find((p) => p.url().includes("window=terminal"));
+    if (!term) await new Promise((r) => setTimeout(r, 100));
+  }
+  assert.ok(term, "Yami Terminal opened");
+  await term.locator("[data-session]").first().waitFor({ timeout: 20000 });
+  for (let i = 0; i < 60; i++) {
+    if ((await term.locator(".terminal-footer").innerText()).includes(moveTo))
+      break;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  assert.ok(
+    (await term.locator(".terminal-footer").innerText()).includes(moveTo),
+  );
+  for (const tab of await term.locator("[data-session]").all())
+    await term.evaluate(
+      (id) => window.yami.invoke("terminal.end", { session: id }),
+      await tab.getAttribute("data-session"),
+    );
   // Flatten through its tool window: subfolder files move up, clashes get
   // " (2)", emptied folders go.
   const nest = path.join(profile, "work", "nest");

@@ -63,7 +63,7 @@ In Settings › File wheel › **Watch folders**, choose a conversion (PDF, PNG,
 
 Folders work on the wheel too: drag one, select it in File Explorer and use the shortcut, use Send to, or drop it on the shelf. Converting and tools need files, so a selection with a folder offers the actions wheel:
 - **Copy**, **Move** (across drives it copies everything first and removes the original only after the copy succeeded) and **Copy path**.
-- **Terminal here**, which opens inside the folder.
+- **Terminal here**, which opens a Yami Terminal tab inside the folder (Windows PowerShell when the AI workspace module is off).
 - **Folder size**, which counts the files and bytes. It stops after 200,000 entries or 15 seconds and then says "at least"; links and junctions are not followed.
 - **Zip**, which writes `<folder>.zip` beside it. A zip over 200 MB is refused, with a pointer to 7-Zip.
 - **Find duplicates** groups identical files by size and then SHA-256, bounded like Folder size, and copies the list to the clipboard with how much space repeats. Nothing is deleted.
@@ -80,7 +80,7 @@ Folders work on the wheel too: drag one, select it in File Explorer and use the 
 | 1 | Engines, jobs, naming, image/audio/video conversion, compress, details, background, PDF merge, archive extract | Command plans, naming, zip/tar, PDF merge, and the checksum gate are unit-tested and the PDF/zip paths were executed here. ffmpeg, ImageMagick, 7-Zip, and ExifTool were not downloaded or run. |
 | 2 | Remaining image, video, audio, and PDF tools, plus QR | Image adjust, markup, crop, redact, and collage save a canvas PNG. PDF split and organize were executed in tests. QR reading was executed on a generated code. ffmpeg command plans for mute, trim, crop, speed, join, snapshots, split, redact, normalize, channels, bleep, and the visualizer are unit-tested and were not run. |
 | 3 | Documents, spreadsheets, subtitles, PDF to image/text, OCR, slides | Subtitles, a small Markdown/HTML/text path, DOCX, EPUB, CSV/TSV/XLSX, archive repack, plain-text PDF, and PDF text extraction were executed in tests. Slides and page pictures call LibreOffice if it is already installed. That program was not run, and it is not downloaded. OCR uses Windows' own engine. XLS and ODS are refused with a message. |
-| 4 | HEIC encode, float shelf, file actions | HEIC stays off the wheel until ffmpeg, already installed, reports both an HEVC encoder and an HEIC muxer. That probe was not run here. Float opens a small always-on-top list. Copy path is real. Copy, move, and the terminal are implemented for Windows and were not run. |
+| 4 | HEIC encode, float shelf, file actions | HEIC stays off the wheel until ffmpeg, already installed, reports both an HEVC encoder and an HEIC muxer. That probe was not run here. Float opens a small always-on-top list. Copy path is real. Copy (files onto the clipboard), Move (into a chosen folder) and Terminal here (a Yami Terminal tab in that folder, or Windows PowerShell when the AI workspace is off) were checked on Windows on 2026-10-28 on temporary files. |
 
 ## Windows drag, unverified
 
