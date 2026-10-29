@@ -12,13 +12,15 @@ type Area = {
 type Result = { freed: number; removed: number; skipped: number };
 
 export const bytesText = (n: number) =>
-  n >= 1024 ** 3
-    ? `${(n / 1024 ** 3).toFixed(1)} GB`
-    : n >= 1024 ** 2
-      ? `${Math.round(n / 1024 ** 2)} MB`
-      : n >= 1024
-        ? `${Math.round(n / 1024)} KB`
-        : `${n} bytes`;
+  n >= 1024 ** 4
+    ? `${(n / 1024 ** 4).toFixed(1)} TB`
+    : n >= 1024 ** 3
+      ? `${(n / 1024 ** 3).toFixed(1)} GB`
+      : n >= 1024 ** 2
+        ? `${Math.round(n / 1024 ** 2)} MB`
+        : n >= 1024
+          ? `${Math.round(n / 1024)} KB`
+          : `${n} bytes`;
 
 /**
  * Tune › Cleanup: measure first, pick the areas, confirm, then remove. The

@@ -360,6 +360,52 @@ export function previewModules(
           user: true,
         },
       ];
+    case "tune.space.drives":
+      return [
+        { path: "C:\\", total: 1_000_000_000_000, free: 212_000_000_000 },
+        { path: "D:\\", total: 2_000_000_000_000, free: 1_400_000_000_000 },
+      ];
+    case "tune.space":
+      return {
+        folder: String(a.folder || "C:\\"),
+        parent: /^[A-Z]:[\\/]?$/i.test(String(a.folder || ""))
+          ? undefined
+          : "C:\\",
+        total: 640_000_000_000,
+        items: [
+          {
+            name: "Users",
+            dir: true,
+            bytes: 410_000_000_000,
+            files: 820_114,
+            capped: false,
+          },
+          {
+            name: "Program Files",
+            dir: true,
+            bytes: 120_000_000_000,
+            files: 301_552,
+            capped: false,
+          },
+          {
+            name: "Windows",
+            dir: true,
+            bytes: 98_000_000_000,
+            files: 290_008,
+            capped: false,
+          },
+          {
+            name: "pagefile.sys",
+            dir: false,
+            bytes: 12_000_000_000,
+            files: 1,
+            capped: false,
+          },
+        ],
+        rest: { count: 0, bytes: 0 },
+      };
+    case "tune.space.reveal":
+      throw new Error("Preview only — Explorer was not opened.");
     case "tune.cleanup":
       return [
         {

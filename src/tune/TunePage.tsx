@@ -13,6 +13,7 @@ import { ShieldSection } from "./ShieldSection";
 import { AdminSection } from "./AdminSection";
 import { AppsSection } from "./AppsSection";
 import { CleanupSection } from "./CleanupSection";
+import { SpaceSection } from "./SpaceSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -123,6 +124,7 @@ export default function TunePage({
       />
       <AdminSection report={report} />
       <CleanupSection report={report} />
+      <SpaceSection report={report} />
       <AppsSection report={report} />
       <section>
         <h3 className="group-title">Startup apps</h3>

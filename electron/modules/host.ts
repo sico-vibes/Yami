@@ -149,7 +149,10 @@ export function createModuleHost(deps: Deps) {
       },
       tune: {
         load: () => loadTune(path.dirname(store.file)),
-        dispose: (t: Tune) => t.shield.stop(),
+        dispose: (t: Tune) => {
+          t.shield.stop();
+          t.space.stop();
+        },
       },
       browser: {
         load: (): Browser => {
