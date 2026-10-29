@@ -138,6 +138,9 @@ Workspace verification commands:
 - `node scripts/verify-windows-search.mjs [name]`: isolated profile; finds a file name through
   Windows Search under the user's folder and checks the launcher refuses to open a path it never
   listed. Nothing is opened.
+- `node scripts/verify-passwords.mjs`: isolated profile and a local sign-in page; imports a
+  fixture CSV, deletes it on request, fills the page from the toolbar key, and checks a fill cannot
+  be asked for from outside the browser window.
 - `node scripts/verify-fanout.mjs`: isolated profile; puts stand-in `claude.cmd` and
   `codex.cmd` first on PATH so no real agent starts, fans one task out in a throwaway
   repository, and checks the two branches, the task files, that git ignores them, the

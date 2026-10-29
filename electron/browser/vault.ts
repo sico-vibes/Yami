@@ -7,6 +7,12 @@ import {
   readFirefoxPlaces,
   type Visit,
 } from "./history-import.ts";
+import {
+  mergeLogins,
+  originOf,
+  readLoginCsv,
+  type Login,
+} from "./passwords.ts";
 
 export type Bookmark = {
   title: string;
@@ -73,6 +79,7 @@ type Crypto = {
 export class Vault {
   private bookmarks: Bookmark[] = [];
   private visits: Visit[] = [];
+  private logins: Login[] = [];
   constructor(
     private file: string,
     private crypto: Crypto,
@@ -81,6 +88,7 @@ export class Vault {
       const saved = JSON.parse(crypto.decrypt(fs.readFileSync(file)));
       this.bookmarks = saved.bookmarks || [];
       this.visits = saved.history || [];
+      this.logins = saved.logins || [];
     } catch {}
   }
   list() {
@@ -88,6 +96,32 @@ export class Vault {
   }
   history() {
     return this.visits;
+  }
+  /** Logins from an exported CSV's text; the file itself is not kept. */
+  importLogins(csv: string) {
+    const { logins, added } = mergeLogins(this.logins, readLoginCsv(csv));
+    this.logins = logins;
+    this.save();
+    return { added, total: this.logins.length };
+  }
+  loginCount() {
+    return this.logins.length;
+  }
+  /** What the toolbar may show for a page: names only, never passwords. */
+  loginsFor(url: string) {
+    const origin = originOf(url);
+    return this.logins
+      .filter((l) => origin && l.origin === origin)
+      .map(({ id, username, name }) => ({ id, username, name }));
+  }
+  /** One login, for filling; stays in the main process. */
+  login(id: string) {
+    return this.logins.find((l) => l.id === id);
+  }
+  clearLogins() {
+    this.logins = [];
+    this.save();
+    return 0;
   }
   sources(local: string, roaming = "") {
     const firefox = roaming ? firefoxPlaces(roaming) : "";
@@ -156,6 +190,7 @@ export class Vault {
   clear() {
     this.bookmarks = [];
     this.visits = [];
+    this.logins = [];
     fs.rmSync(this.file, { force: true });
     return this.bookmarks;
   }
@@ -169,7 +204,11 @@ export class Vault {
     fs.writeFileSync(
       temp,
       this.crypto.encrypt(
-        JSON.stringify({ bookmarks: this.bookmarks, history: this.visits }),
+        JSON.stringify({
+          bookmarks: this.bookmarks,
+          history: this.visits,
+          logins: this.logins,
+        }),
       ),
     );
     fs.renameSync(temp, this.file);

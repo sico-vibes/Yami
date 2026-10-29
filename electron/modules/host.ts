@@ -37,6 +37,7 @@ import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
 import { createLinked } from "../browser/linked";
 import { FilterLists } from "../browser/filter-lists";
+import { fillScript } from "../browser/passwords";
 import { createWallpaperRotation } from "../wallpaper-rotation";
 import { MailCatcher } from "../workbench/mail-catcher";
 import { authorizeUrl, pkce, Spotify, waitForCode } from "../spotify";
@@ -153,6 +154,7 @@ export function createModuleHost(deps: Deps) {
   );
 
   let mail: MailCatcher | undefined;
+  let csvJustRead = "";
   const registry = new ModuleRegistry({
     settings: () => store.state.settings as unknown as Record<string, unknown>,
     save: () => {
@@ -599,6 +601,52 @@ export function createModuleHost(deps: Deps) {
             return browser.clearHistory();
           case "browser.reader":
             return browser.reader();
+          case "browser.logins": {
+            const url = browser
+              .state()
+              .tabs.find((t) => t.id === browser.state().active)?.url;
+            return url ? vault.loginsFor(url) : [];
+          }
+          case "browser.fill": {
+            // Only the browser window's own toolbar may ask, on a click.
+            if (!sender || !browser.owns(sender))
+              throw new Error("Choose the login in the browser.");
+            const login = vault.login(String(a.id));
+            if (!login) throw new Error("That login is gone.");
+            return browser.fill(
+              login.origin,
+              fillScript(login.username, login.password),
+            );
+          }
+          case "vault.passwords": {
+            if (a.action === "clear") return vault.clearLogins();
+            if (a.action === "delete-file") {
+              // Only the file just imported, which holds passwords in plain text.
+              if (!csvJustRead || a.file !== csvJustRead)
+                throw new Error("Nothing to delete.");
+              fs.rmSync(csvJustRead, { force: true });
+              csvJustRead = "";
+              return true;
+            }
+            if (a.action !== "import") return vault.loginCount();
+            // The desktop check names its fixture instead of using the dialog.
+            const file =
+              process.env.YAMI_TEST_CSV ||
+              (
+                await dialog.showOpenDialog({
+                  title: "Choose the passwords file you exported",
+                  properties: ["openFile"],
+                  filters: [
+                    { name: "Exported passwords", extensions: ["csv"] },
+                  ],
+                })
+              ).filePaths[0] ||
+              "";
+            if (!file) return null;
+            const result = vault.importLogins(fs.readFileSync(file, "utf8"));
+            csvJustRead = file;
+            return { ...result, file };
+          }
           case "browser.linked":
             return {
               browsers: linked.list().map(({ id, name }) => ({ id, name })),

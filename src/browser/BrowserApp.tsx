@@ -4,6 +4,7 @@ import { bangList, newTab } from "../browser-rules";
 import { TooltipLayer } from "../controls";
 import { Empty, Icon, IconButton } from "../ui";
 import { FilterListsCard } from "./FilterListsCard";
+import { LoginButton, PasswordsCard } from "./Passwords";
 
 type Tab = {
   id: string;
@@ -202,6 +203,11 @@ export default function BrowserApp() {
                 : void api("browser.reader").then(setReading).catch(fail)
             }
           />
+          <LoginButton
+            url={current?.url || ""}
+            loading={!!current?.loading}
+            fail={fail}
+          />
           <button
             className={"browser-shield" + (blocking ? " on" : "")}
             aria-pressed={blocking}
@@ -371,6 +377,7 @@ function NewTab({
         </section>
       )}
       <FilterListsCard fail={fail} />
+      <PasswordsCard fail={fail} />
       <div className="browser-import">
         {sources
           .filter((s) => s.found)

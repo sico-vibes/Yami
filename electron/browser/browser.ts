@@ -384,6 +384,25 @@ export function createBrowser(deps: {
         publish();
       }
     },
+    /**
+     * Fills a login into the active page, only while that page is on the
+     * login's own site. World 997 is Yami's; the page sees only the values.
+     */
+    async fill(origin: string, script: string) {
+      const wc = tab(active)?.view?.webContents;
+      if (!wc) throw new Error("Open the sign-in page first.");
+      let here = "";
+      try {
+        here = new URL(wc.getURL()).origin;
+      } catch {}
+      if (here !== origin) throw new Error("That login is for another site.");
+      const result = await wc.executeJavaScriptInIsolatedWorld(997, [
+        { code: script },
+      ]);
+      if (!result?.filled)
+        throw new Error("No password field is showing on this page.");
+      return true;
+    },
     owns(sender: Electron.WebContents) {
       return !!win && !win.isDestroyed() && win.webContents.id === sender.id;
     },
