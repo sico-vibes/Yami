@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { DailyBrief } from "./DailyBrief";
 import { AsciiSkeleton } from "./AsciiSkeleton";
 import type { State, Tab, YamiEvent } from "./shared";
 import { api, asset } from "./api";
@@ -344,6 +345,7 @@ function Home({
               <span>to talk</span>
             </div>
           )}
+          <DailyBrief state={state} />
         </div>
       )}
       <div className="composer-wrap">

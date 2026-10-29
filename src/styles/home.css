@@ -228,3 +228,41 @@
 .selection-preview .icon-button {
   margin-left: auto;
 }
+/* Home: the day in a few lines, from what Yami already holds. */
+.daily-brief {
+  display: grid;
+  gap: var(--space-1);
+  width: min(460px, 100%);
+  margin: var(--space-5) auto 0;
+  padding: 0;
+  list-style: none;
+}
+.daily-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.daily-line:disabled {
+  cursor: default;
+}
+.daily-line:not(:disabled):hover,
+.daily-line:not(:disabled):focus-visible {
+  border-color: var(--selected-line);
+  color: var(--text);
+}
+.daily-line span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
