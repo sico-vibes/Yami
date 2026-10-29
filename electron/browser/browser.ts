@@ -4,6 +4,7 @@ import {
   type BrowserWindow,
   type Session,
 } from "electron";
+import { catchDownloads } from "../downloads/index";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -78,6 +79,7 @@ export function createBrowser(deps: {
       done(false),
     );
     profile.setPermissionCheckHandler(() => false);
+    catchDownloads(profile);
     // Known ad and tracker hosts never get a request.
     profile.webRequest.onBeforeRequest((details, done) => {
       let host = "";

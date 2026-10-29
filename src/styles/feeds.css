@@ -257,3 +257,50 @@ html[data-reduced="true"] .inbox-item {
   color: var(--muted);
   font-size: var(--fs-xs);
 }
+/* Desk › Downloads. */
+.downloads-list {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.download-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  box-shadow: var(--highlight);
+}
+.download-row > .ph {
+  color: var(--glow);
+  flex-shrink: 0;
+}
+.download-row.is-done > .ph {
+  color: var(--mint);
+}
+.download-row.is-error > .ph {
+  color: var(--danger);
+}
+.download-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+}
+.download-main strong {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.download-main small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.downloads-empty {
+  margin-top: var(--space-5);
+  text-align: center;
+}

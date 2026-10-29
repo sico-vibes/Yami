@@ -271,6 +271,61 @@ export function installPreviewBridge() {
         case "workspaces.restore":
         case "workspaces.remove":
           throw new Error("Preview only — no windows were touched.");
+        case "downloads":
+          return {
+            settings: {
+              connections: 4,
+              active: 3,
+              folder: "C:\\Users\\demo\\Downloads",
+            },
+            jobs: [
+              {
+                id: "d1",
+                url: "https://example.com/big.iso",
+                name: "big.iso",
+                size: 4_200_000_000,
+                received: 1_650_000_000,
+                state: "downloading",
+                parts: [1, 2, 3, 4],
+                speed: 18_400_000,
+                added: Date.now() - 90_000,
+              },
+              {
+                id: "d2",
+                url: "https://example.com/photos.zip",
+                name: "photos.zip",
+                size: 320_000_000,
+                received: 120_000_000,
+                state: "paused",
+                parts: [1, 2, 3, 4],
+                speed: 0,
+                added: Date.now() - 600_000,
+              },
+              {
+                id: "d3",
+                url: "https://example.com/readme.pdf",
+                name: "readme.pdf",
+                size: 2_100_000,
+                received: 2_100_000,
+                state: "done",
+                parts: [1, 2],
+                speed: 0,
+                added: Date.now() - 3_600_000,
+                finished: Date.now() - 3_500_000,
+                file: "C:/demo/readme.pdf",
+              },
+            ],
+          };
+        case "downloads.add":
+        case "downloads.pause":
+        case "downloads.resume":
+        case "downloads.remove":
+        case "downloads.clear":
+        case "downloads.settings":
+        case "downloads.open":
+        case "downloads.reveal":
+        case "downloads.folder":
+          throw new Error("Preview only — nothing was downloaded.");
         case "awake":
         case "awake.stop":
           return { on: false, screen: false, until: 0 };

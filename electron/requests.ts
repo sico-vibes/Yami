@@ -7,6 +7,7 @@ import { Radio } from "./radio";
 import { Workspaces } from "./workspaces";
 import { accentState } from "./accent-overlay";
 import { openPeek } from "./peek";
+import { downloadsRequest, initDownloads } from "./downloads/index";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -109,6 +110,7 @@ export function createRequestHandler(ctx: RequestContext) {
     closePanel: () => setPanel(false),
     broadcast,
   });
+  initDownloads({ dataDir: path.dirname(store.file), broadcast });
   const rates = new Rates();
   const radio = new Radio(path.dirname(store.file));
   const workspaces = new Workspaces(
@@ -487,6 +489,17 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "downloads":
+      case "downloads.add":
+      case "downloads.pause":
+      case "downloads.resume":
+      case "downloads.remove":
+      case "downloads.clear":
+      case "downloads.settings":
+      case "downloads.open":
+      case "downloads.reveal":
+      case "downloads.folder":
+        return downloadsRequest(method, a);
       case "peek.open":
         return openPeek(String(a.path || ""));
       case "accent.state":

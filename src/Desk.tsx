@@ -4,8 +4,13 @@ import type { State } from "./shared";
 import { Plans } from "./Plans";
 
 const Inbox = lazy(() => import("./feeds/Inbox"));
+const Downloads = lazy(() =>
+  import("./Downloads").then((m) => ({ default: m.Downloads })),
+);
 
-/** Desk: plans, plus the feeds inbox while that module is on. */
+type View = "plans" | "inbox" | "downloads";
+
+/** Desk: plans, downloads, and the feeds inbox while that module is on. */
 export function Desk({
   state,
   report,
@@ -13,32 +18,37 @@ export function Desk({
   state: State;
   report: (message: string) => void;
 }) {
-  const [view, setView] = useState<"plans" | "inbox">("plans");
-  if (!state.settings.feedsEnabled)
-    return <Plans state={state} report={report} />;
+  const [view, setView] = useState<View>("plans");
+  const views: [View, string][] = [
+    ["plans", "Plans"],
+    ...(state.settings.feedsEnabled
+      ? ([["inbox", "Inbox"]] as [View, string][])
+      : []),
+    ["downloads", "Downloads"],
+  ];
+  const shown = views.some(([id]) => id === view) ? view : "plans";
   return (
     <>
       <div className="page-rail desk-rail" role="tablist" aria-label="Desk">
-        {(
-          [
-            ["plans", "Plans"],
-            ["inbox", "Inbox"],
-          ] as const
-        ).map(([id, label]) => (
+        {views.map(([id, label]) => (
           <button
             key={id}
             role="tab"
-            aria-selected={view === id}
-            className={view === id ? "selected" : ""}
+            aria-selected={shown === id}
+            className={shown === id ? "selected" : ""}
             onClick={() => setView(id)}
           >
             {label}
           </button>
         ))}
       </div>
-      {view === "inbox" ? (
+      {shown === "inbox" ? (
         <Suspense fallback={<AsciiSkeleton label="Opening Inbox…" />}>
           <Inbox report={report} />
+        </Suspense>
+      ) : shown === "downloads" ? (
+        <Suspense fallback={<AsciiSkeleton label="Opening Downloads…" />}>
+          <Downloads report={report} />
         </Suspense>
       ) : (
         <Plans state={state} report={report} />
