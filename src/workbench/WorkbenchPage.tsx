@@ -114,7 +114,9 @@ export default function WorkbenchPage({
                       <div className="drawer-ai-row" key={s.id}>
                         <span className="entry-icon">
                           <Icon
-                            name={s.phase === "waiting" ? "hand" : "terminal-window"}
+                            name={
+                              s.phase === "waiting" ? "hand" : "terminal-window"
+                            }
                             size={16}
                           />
                         </span>
@@ -131,7 +133,10 @@ export default function WorkbenchPage({
               ) : (
                 <div className="drawer-ai-empty">
                   <Icon name="robot" size={28} />
-                  <p>Connect your CLIs from the AI workspace to see activity here.</p>
+                  <p>
+                    Connect your CLIs from the AI workspace to see activity
+                    here.
+                  </p>
                 </div>
               )}
             </section>
@@ -163,14 +168,22 @@ export default function WorkbenchPage({
                     )
                     .slice(0, 3)
                     .map((w) => (
-                      <div className="drawer-meter" key={w.provider + w.id + w.group}>
+                      <div
+                        className="drawer-meter"
+                        key={w.provider + w.id + w.group}
+                      >
                         <span>
                           {w.provider} · {w.label}
                           <b>
-                            {w.used === null ? "—" : `${Math.round(w.used * 100)}%`}
+                            {w.used === null
+                              ? "—"
+                              : `${Math.round(w.used * 100)}%`}
                           </b>
                         </span>
-                        <Meter value={w.used} label={`${w.provider} ${w.label} used`} />
+                        <Meter
+                          value={w.used}
+                          label={`${w.provider} ${w.label} used`}
+                        />
                       </div>
                     ))
                 ) : (

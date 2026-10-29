@@ -313,7 +313,11 @@ export function LocalServer({
             }
             options={[
               { value: "", label: "Choose a model" },
-              ...models.map((model) => ({ value: model, label: model, icon: "cpu" })),
+              ...models.map((model) => ({
+                value: model,
+                label: model,
+                icon: "cpu",
+              })),
             ]}
           />
         </label>

@@ -156,6 +156,15 @@ export function previewWorkbench(
     });
     return false;
   }
+  if (method === "dev.osv")
+    return {
+      packages: 312,
+      checkedAt: Date.now(),
+      findings: [
+        { name: "demo-lib", version: "1.2.3", ids: ["GHSA-demo-0001-0001"] },
+      ],
+      details: { "GHSA-demo-0001-0001": "Demo advisory: example only" },
+    };
   if (method === "terminal.folder") return "";
   if (method === "terminal.ports")
     return [{ port: 5173, name: "node", url: "http://localhost:5173/" }];

@@ -86,12 +86,20 @@ export function WorkspaceSettings({
             value={s.terminalShell}
             onChange={(terminalShell) => patch({ terminalShell })}
             options={[
-              { value: "auto", label: "Automatic", hint: "PowerShell 7 when installed" },
+              {
+                value: "auto",
+                label: "Automatic",
+                hint: "PowerShell 7 when installed",
+              },
               { value: "pwsh", label: "PowerShell 7" },
               { value: "powershell", label: "Windows PowerShell" },
               { value: "cmd", label: "Command Prompt" },
               { value: "bash", label: "Git Bash", hint: "Git for Windows" },
-              { value: "wsl", label: "WSL", hint: "Your default Linux distribution" },
+              {
+                value: "wsl",
+                label: "WSL",
+                hint: "Your default Linux distribution",
+              },
             ]}
           />
         </div>
@@ -181,8 +189,8 @@ export function WorkspaceSettings({
           <div>
             <strong>Shell integration</strong>
             <p>
-              Shells Yami opens report their folder and mark each prompt, so
-              you can jump between commands, see exit codes and copy the last
+              Shells Yami opens report their folder and mark each prompt, so you
+              can jump between commands, see exit codes and copy the last
               command's output. Your own prompt is kept. Applies to new
               sessions.
             </p>
@@ -197,8 +205,8 @@ export function WorkspaceSettings({
           <div>
             <strong>Reopen last tabs</strong>
             <p>
-              When the terminal opens, bring back its tabs with their shells
-              and folders. Programs that were running, such as agents, are not
+              When the terminal opens, bring back its tabs with their shells and
+              folders. Programs that were running, such as agents, are not
               started again.
             </p>
           </div>

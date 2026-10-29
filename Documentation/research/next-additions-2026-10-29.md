@@ -46,7 +46,7 @@ Each one is fetched only when a card opens or the palette is asked, and cached.
 | **Wikipedia** (already used) | `define <word>` and "what is" summaries in the palette | Already in use | Add Wiktionary definitions |
 | **REST Countries, World time** | Time-zone and country facts in the palette ("time in Tokyo") | No key | Windows' own time-zone data can answer most of it offline, which is better |
 | **USGS earthquakes, NASA APOD** | Optional Today cards | USGS no key; NASA works with `DEMO_KEY` (low limits) or a free key | Fun, low priority |
-| **OSV.dev** (`api.osv.dev`) | AI workspace: check a project's lockfile for known vulnerabilities | No key | Fits the Dev hub's project cards |
+| **OSV.dev** (`api.osv.dev`) | **Built 2026-10-29:** Check packages on AI workspace project cards (npm lockfiles) | No key | Fits the Dev hub's project cards |
 
 ## Tier 3: companion and AI
 

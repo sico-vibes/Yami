@@ -5,7 +5,11 @@ export function Recap({ data }: { data: WorkbenchState }) {
   const recent = data.history.filter((e) => e.at > Date.now() - 7 * 86400000);
   const projects = [...new Set(recent.map((e) => e.project))];
   const stats: [string, number, string][] = [
-    ["check-circle", recent.filter((e) => e.phase === "finished").length, "completed-turn events"],
+    [
+      "check-circle",
+      recent.filter((e) => e.phase === "finished").length,
+      "completed-turn events",
+    ],
     ["terminal-window", new Set(recent.map((e) => e.session)).size, "sessions"],
     ["folder-simple", projects.length, "projects"],
   ];

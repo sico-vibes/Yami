@@ -8,6 +8,7 @@ import {
   desktopCapturer,
   type WebContents,
 } from "electron";
+import { checkProject } from "./osv";
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -608,6 +609,11 @@ export class Workbench {
     if (method === "dev.compare") return this.dev.compare(a);
     if (method === "dev.compare.file") return this.dev.compareFile(a);
     if (method === "dev.task.remove") return this.dev.removeTask(a);
+    if (method === "dev.osv") {
+      const project = this.data.state.projects.find((p) => p.id === a.id);
+      if (!project) throw new Error("That project is not in the list.");
+      return checkProject(project.path);
+    }
     throw new Error("Unknown Dev request.");
   }
   prepareChat(a: any) {

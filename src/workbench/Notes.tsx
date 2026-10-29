@@ -117,8 +117,12 @@ export function Notes({
             <Icon name={recording ? "record" : "microphone"} />
           </span>
           <span className="entry-heading">
-            <strong>{recording ? "Recording a meeting" : "Record a meeting"}</strong>
-            <small>Transcribe a call into a note, only when you start it.</small>
+            <strong>
+              {recording ? "Recording a meeting" : "Record a meeting"}
+            </strong>
+            <small>
+              Transcribe a call into a note, only when you start it.
+            </small>
           </span>
         </summary>
         <p className="setting-note">
@@ -296,44 +300,44 @@ export function Notes({
         </section>
       </div>
       {note.summary && (
-            <div className="workbench-prose note-summary">
-              <h2>Summary and proposed actions</h2>
-              <pre>{note.summary}</pre>
-              {note.summary
-                .split("\n")
-                .filter((line) => /^\s*[-*]\s+\[ \]\s+/.test(line))
-                .map((line, i) => {
-                  const title = line.replace(/^\s*[-*]\s+\[ \]\s+/, "");
-                  return (
-                    <button
-                      key={i}
-                      className="summary-task"
-                      data-tip="Add to Desk"
-                      aria-label={`Add to Desk: ${title}`}
-                      onClick={() =>
-                        void api("todo.add", { title })
-                          .then(() => report("Added to Desk."))
-                          .catch((e) => report(e.message))
-                      }
-                    >
-                      <Icon name="plus-circle" size={16} />
-                      <span>{title}</span>
-                    </button>
-                  );
-                })}
-              <button
-                className="soft-button summary-attach"
-                onClick={() =>
-                  void api("context.use", {
-                    title: note.title || "Meeting summary",
-                    text: note.summary,
-                  }).catch((e) => report(e.message))
-                }
-              >
-                Attach summary to chat
-              </button>
-            </div>
-          )}
+        <div className="workbench-prose note-summary">
+          <h2>Summary and proposed actions</h2>
+          <pre>{note.summary}</pre>
+          {note.summary
+            .split("\n")
+            .filter((line) => /^\s*[-*]\s+\[ \]\s+/.test(line))
+            .map((line, i) => {
+              const title = line.replace(/^\s*[-*]\s+\[ \]\s+/, "");
+              return (
+                <button
+                  key={i}
+                  className="summary-task"
+                  data-tip="Add to Desk"
+                  aria-label={`Add to Desk: ${title}`}
+                  onClick={() =>
+                    void api("todo.add", { title })
+                      .then(() => report("Added to Desk."))
+                      .catch((e) => report(e.message))
+                  }
+                >
+                  <Icon name="plus-circle" size={16} />
+                  <span>{title}</span>
+                </button>
+              );
+            })}
+          <button
+            className="soft-button summary-attach"
+            onClick={() =>
+              void api("context.use", {
+                title: note.title || "Meeting summary",
+                text: note.summary,
+              }).catch((e) => report(e.message))
+            }
+          >
+            Attach summary to chat
+          </button>
+        </div>
+      )}
     </>
   );
 }

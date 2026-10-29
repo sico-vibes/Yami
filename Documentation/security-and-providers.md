@@ -100,6 +100,7 @@ Scheduled work is narrower than the full tool set. The accepted inner actions ar
 - **Whistle offline dictation (opt-in download):** choosing Whistle downloads `needle.exe` and `whistle.cact` from `https://huggingface.co/Cactus-Compute/`, pinned to a repository commit and checked against a SHA-256 before use. After that, dictation sends nothing anywhere: the recording is written to a temporary WAV, transcribed by the local runner, and deleted.
 - **Feeds inbox (opt-in module):** the addresses you add, such as `https://www.reddit.com/r/<name>/.rss`, `https://news.ycombinator.com/rss`, `https://github.com/<owner>/<repo>/releases.atom` and `https://www.youtube.com/feeds/videos.xml`. They are read only when the Inbox opens or you refresh, with the user agent "Yami desktop feed reader". No account, cookie or key is sent.
 - **UV and air quality (with weather):** the forecast's latitude and longitude, to four decimals, are also sent to `https://air-quality-api.open-meteo.com/v1/air-quality`.
+- **Package check (AI workspace, on request):** package names and exact versions from a project's `package-lock.json` go to `https://api.osv.dev/v1/querybatch`, and advisory ids to `/v1/vulns/<id>`.
 - **Podcast search (Feeds module, on request):** the typed show name goes to `https://itunes.apple.com/search?media=podcast`; following a result stores its HTTPS feed address like any other feed.
 - **Public holidays (opt-in, Today):** sends the year and Windows' two-letter region code to `https://date.nager.at/api/v3/PublicHolidays/<year>/<country>`; the list is cached on disk for 30 days.
 - **Currency in the launcher (on request):** typing a conversion sends the two currency codes (never the amount) to `https://api.frankfurter.dev/v2/rate/<from>/<to>` from the main process; no key, cached six hours per pair.
@@ -122,6 +123,16 @@ Scheduled work is narrower than the full tool set. The accepted inner actions ar
 - **External links:** the app opens HTTP or HTTPS URLs in the default browser. It rejects other protocols and URLs containing embedded credentials.
 - **App shortcuts:** launcher destinations include websites such as Gmail, YouTube, and Amazon. No account login information is read by Yami.
 - **Optional location, microphone, and OS settings:** opening Windows settings is a local operation. Microphone capture requires the user to begin a voice/dictation action and is subject to Windows permission.
+
+## Yami's own dependency advisories (2026-10-29)
+
+Running **Check packages** on Yami found three packages with OSV advisories. None is fixed yet, because the fixed releases are younger than the two-week minimum age Yami uses for dependency updates:
+
+| Package | Advisory | Effect on Yami | Fixed in (published) | Update after |
+| --- | --- | --- | --- | --- |
+| electron 44.8.0 | GHSA-jr5w-w6x2-84p9 (compromised eMudhra intermediate certificates) | Affects HTTPS trust inside Yami's windows and the Yami Browser | 44.9.1 (2026-10-20) | 2026-11-03 |
+| systeminformation 5.33.15 | GHSA-3f7j-7jwc-fxfj (command injection in `services()`) | Yami never calls `services()` | 5.33.16 (2026-10-19) | 2026-11-02 |
+| fast-uri 3.1.8 | GHSA-333x-w4r6-6crp and three more | Only in electron-builder (packaging tool), not shipped in the app | 3.1.9, through an electron-builder or ajv update | When a two-week-old electron-builder release carries it |
 
 ## Local storage
 

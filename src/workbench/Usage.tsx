@@ -109,10 +109,13 @@ export function Usage({
               onClick={() => read(provider)}
             >
               <Icon
-                name={busy.includes(provider) ? "circle-notch" : "arrow-clockwise"}
+                name={
+                  busy.includes(provider) ? "circle-notch" : "arrow-clockwise"
+                }
                 size={16}
               />
-              {!compact && (busy.includes(provider) ? "Reading…" : "Read usage")}
+              {!compact &&
+                (busy.includes(provider) ? "Reading…" : "Read usage")}
             </button>
           );
         };
@@ -144,10 +147,7 @@ export function Usage({
                         .map((w) => (
                           <div className="usage-window" key={w.id + w.group}>
                             <span className="usage-label">{w.label}</span>
-                            <Meter
-                              value={w.used}
-                              label={`${w.label} used`}
-                            />
+                            <Meter value={w.used} label={`${w.label} used`} />
                             <strong>
                               {w.used === null
                                 ? "Unknown"

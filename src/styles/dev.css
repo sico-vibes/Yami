@@ -347,3 +347,43 @@ html[data-reduced="true"] .agent-launch {
 .diff-line.meta {
   color: var(--muted);
 }
+/* Known vulnerabilities in a project's npm packages (OSV.dev). */
+.package-check-row {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+.package-check {
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+}
+.package-check p {
+  margin: 0;
+}
+.package-finding {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-sm);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.package-finding b {
+  color: var(--text);
+  font-weight: 500;
+}
+.package-ids {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.package-ids .text-button {
+  font:
+    500 var(--fs-2xs) "Cascadia Mono",
+    Consolas,
+    monospace;
+}

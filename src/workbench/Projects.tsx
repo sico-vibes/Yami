@@ -10,6 +10,7 @@ import {
 } from "../dev-types";
 import { Empty, Icon, IconButton } from "../ui";
 import { ProjectTasks } from "./ProjectTasks";
+import { PackageCheck } from "./PackageCheck";
 import { MailCatcher } from "./MailCatcher";
 import type { WorkbenchState } from "../workbench-types";
 
@@ -221,6 +222,11 @@ export function Projects({
                       agents={installed}
                       report={report}
                     />
+                  )}
+                  {p.exists && (
+                    <div className="package-check-row">
+                      <PackageCheck id={p.id} name={p.name} report={report} />
+                    </div>
                   )}
                   <footer className="entry-foot">
                     <button
