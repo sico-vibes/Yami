@@ -114,7 +114,7 @@ const explorer = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer";
 export const tweaks: Tweak[] = [
   {
     // The values Settings › Personalization › Colours writes. The accent is a
-    // deeper violet from Yami's glow (#bcaaff), so white text stays readable.
+    // deeper violet than Yami's --glow token, so white text stays readable.
     id: "yamiAccent",
     name: "Yami's violet as the Windows accent",
     detail:
