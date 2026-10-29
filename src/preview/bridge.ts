@@ -226,6 +226,15 @@ export function installPreviewBridge() {
           return { clientId: "", connected: false };
         case "spotify.connect":
           throw new Error("Preview only — Spotify was not contacted.");
+        case "color.history":
+          return ["#bcaaff", "#7ee0c3", "#ff9ab8"];
+        case "color.clear":
+          return [];
+        case "window.pinned":
+          return { window: "Notepad", pinned: false };
+        case "color.pick":
+        case "window.pin":
+          throw new Error("Preview only — the screen was not touched.");
         case "awake":
         case "awake.stop":
           return { on: false, screen: false, until: 0 };

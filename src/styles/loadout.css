@@ -562,6 +562,7 @@
 }
 html[data-window="island"],
 html[data-window="lasso"],
+html[data-window="picker"],
 html[data-window="transition"] {
   background: transparent;
   overflow: hidden;

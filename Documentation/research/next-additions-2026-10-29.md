@@ -30,7 +30,7 @@ The current PowerToys README names 31 utilities. These are the ones Yami does no
 | **PowerRename** | Batch rename with find/replace, regex and preview | The wheel already has batch rename; add regex and preview | None |
 | **Workspaces** | Save the open apps and their window positions, then restore them with one click | Window list and `MoveWindow` exist; launching apps exists | None |
 
-**Recommended first three:** Keep awake, Color picker and Always on top. They are small, they are used daily, and they reuse code Yami already has. **Keep awake is built** (Controls card, 2026-10-29).
+**Recommended first three:** Keep awake, Color picker and Always on top. They are small, they are used daily, and they reuse code Yami already has. **Keep awake, Color picker and Always on top are built** (Controls card, 2026-10-29).
 
 ## Tier 2: free data, shown as Yami cards and palette answers
 

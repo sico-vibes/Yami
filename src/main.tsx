@@ -15,6 +15,7 @@ const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =
     browser: () => import("./browser/BrowserApp"),
     island: () => import("./Island").then((m) => ({ default: m.Island })),
     lasso: () => import("./Lasso").then((m) => ({ default: m.Lasso })),
+    picker: () => import("./Picker").then((m) => ({ default: m.Picker })),
     effect: () => import("./Effects").then((m) => ({ default: m.Effects })),
     stray: () => import("./Stray").then((m) => ({ default: m.Stray })),
     widget: () =>

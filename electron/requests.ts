@@ -1,5 +1,6 @@
 import { findLyrics } from "./lyrics";
 import { KeepAwake } from "./keep-awake";
+import { createScreenTools } from "./screen-tools";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -96,6 +97,12 @@ export function createRequestHandler(ctx: RequestContext) {
     approvals,
   } = ctx;
   // Every window sees the same keep-awake state, including the island.
+  const tools = createScreenTools({
+    native,
+    dataDir: path.dirname(store.file),
+    closePanel: () => setPanel(false),
+    broadcast,
+  });
   const awake = new KeepAwake(powerSaveBlocker, (state) =>
     broadcast({ type: "keep-awake", state }),
   );
@@ -465,6 +472,22 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "color.pick":
+        return tools.pick();
+      case "color.capture":
+        return tools.capture();
+      case "color.done":
+        return tools.done(a.hex);
+      case "color.cancel":
+        return tools.cancel();
+      case "color.history":
+        return tools.history();
+      case "color.clear":
+        return tools.clear();
+      case "window.pin":
+        return tools.pin();
+      case "window.pinned":
+        return tools.pinned();
       case "awake":
         return awake.status();
       case "awake.set":

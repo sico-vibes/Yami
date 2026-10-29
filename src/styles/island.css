@@ -133,16 +133,15 @@
   margin: 0 8px;
   background:
     var(--stars),
-    radial-gradient(520px 220px at 50% -8%, color-mix(in srgb, var(--soul, #b8c6ff) 12%, transparent), transparent 70%),
+    radial-gradient(
+      520px 220px at 50% -8%,
+      color-mix(in srgb, var(--soul, #b8c6ff) 12%, transparent),
+      transparent 70%
+    ),
     radial-gradient(520px 320px at -6% 108%, #4a33a038, transparent 70%),
     radial-gradient(520px 320px at 106% 108%, #8a3a7a2a, transparent 70%),
     linear-gradient(var(--notch), var(--ink-1) 38%, #0a0920);
-  background-size:
-    var(--stars-size),
-    auto,
-    auto,
-    auto,
-    auto;
+  background-size: var(--stars-size), auto, auto, auto, auto;
   border: 1px solid var(--line);
   border-top: 0;
   border-radius: 0 0 26px 26px;
@@ -601,7 +600,8 @@
   padding: 0;
   border: 0;
   border-radius: 4px;
-  background: var(--grad-aurora) 0 0 / var(--value) 100% no-repeat,
+  background:
+    var(--grad-aurora) 0 0 / var(--value) 100% no-repeat,
     var(--track);
   box-shadow: none;
   cursor: pointer;
@@ -677,7 +677,9 @@
   border: 0;
   appearance: none;
   border-radius: 4px;
-  background: var(--grad-aurora) 0 0 / var(--value) 100% no-repeat, var(--track);
+  background:
+    var(--grad-aurora) 0 0 / var(--value) 100% no-repeat,
+    var(--track);
 }
 .app-volume .icon-button {
   width: 26px;
@@ -727,4 +729,47 @@
 .keep-awake-row strong {
   font-size: var(--fs-sm);
   font-weight: 500;
+}
+/* Controls card: colour picker, recent colours and always on top. */
+.screen-tools {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.screen-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.screen-tools-row .soft-button {
+  flex: 1;
+  min-width: 0;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.screen-tools-row .soft-button.active {
+  background: var(--selected);
+  border-color: var(--selected-line);
+}
+.screen-tools-colors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+  cursor: pointer;
+}
+.color-swatch:hover,
+.color-swatch:focus-visible {
+  box-shadow: 0 0 0 2px var(--glow);
 }

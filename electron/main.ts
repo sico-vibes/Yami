@@ -13,6 +13,7 @@ import {
   safeStorage,
   session as electronSession,
 } from "electron";
+import { noteForeground } from "./screen-tools";
 import { spawn } from "node:child_process";
 import { runPowerShell, nativeScript } from "./platform";
 import { randomUUID } from "node:crypto";
@@ -60,9 +61,7 @@ const focusTimer = createFocusTimer({
   notify: (message) => notify(message),
   broadcast: (event) => broadcast(event),
 });
-let island: BrowserWindow,
-  lasso: BrowserWindow | undefined,
-  tray: Tray;
+let island: BrowserWindow, lasso: BrowserWindow | undefined, tray: Tray;
 let launcherFiles: { name: string; path: string }[] = [];
 let quitting = false,
   panelOpen = false,
@@ -627,6 +626,7 @@ async function effect(kind: string, before?: any, after?: any) {
 async function nativeEvent(e: any) {
   if (modules?.onNative(e)) return;
   if (e.eventName === "foreground") {
+    noteForeground(e);
     const aliases: Record<string, string> = {
       chrome: "Google Chrome",
       msedge: "Microsoft Edge",

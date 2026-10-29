@@ -77,7 +77,7 @@ class Host {
     }
     static void Send(object value) { lock(OutputLock) { Console.WriteLine(Json.Serialize(value)); Console.Out.Flush(); } }
     internal static void Emit(object value) { Send(value); }
-    static void ForegroundChanged(IntPtr hook,uint evt,IntPtr h,int obj,int child,uint thread,uint time){try{uint pid;GetWindowThreadProcessId(h,out pid);var p=Process.GetProcessById((int)pid);Send(new{eventName="foreground",process=p.ProcessName});}catch{}}
+    static void ForegroundChanged(IntPtr hook,uint evt,IntPtr h,int obj,int child,uint thread,uint time){try{uint pid;GetWindowThreadProcessId(h,out pid);var p=Process.GetProcessById((int)pid);Send(new{eventName="foreground",process=p.ProcessName,pid=(int)pid,handle=h.ToInt64()});}catch{}}
     static void ReadLoop() {
         string line;
         while((line = Console.ReadLine()) != null) {
@@ -151,6 +151,8 @@ class Host {
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
             // SPI_SETCURSORS: Windows reads the pointer values in Control Panel\Cursors again.
+            case "topmost": return WindowPin.Toggle(Convert.ToInt64(a["handle"]));
+            case "topmostState": return WindowPin.IsPinned(Convert.ToInt64(a["handle"]));
             case "cursorsReload": return SystemParametersInfo(0x57,0,null,3);
             case "listeningPorts": return NetPorts.Listening(Num(a,"root"));
             case "audioOutputs": return AudioDevices.List();
@@ -202,7 +204,7 @@ class Host {
         Rectangle r=SystemInformation.VirtualScreen;
         if(a.ContainsKey("width"))r=new Rectangle(Num(a,"x"),Num(a,"y"),Math.Max(1,Num(a,"width")),Math.Max(1,Num(a,"height")));
         if(r.Width>20000||r.Height>15000)throw new Exception("Capture region is too large.");
-        using(var bitmap=new Bitmap(r.Width,r.Height))using(var g=Graphics.FromImage(bitmap))using(var stream=new MemoryStream()) {g.CopyFromScreen(r.Location,Point.Empty,r.Size);bitmap.Save(stream,ImageFormat.Jpeg);return new {data=Convert.ToBase64String(stream.ToArray()),mimeType="image/jpeg",x=r.X,y=r.Y,width=r.Width,height=r.Height};}
+        using(var bitmap=new Bitmap(r.Width,r.Height))using(var g=Graphics.FromImage(bitmap))using(var stream=new MemoryStream()) {g.CopyFromScreen(r.Location,Point.Empty,r.Size);bool png=Str(a,"format")=="png";bitmap.Save(stream,png?ImageFormat.Png:ImageFormat.Jpeg);return new {data=Convert.ToBase64String(stream.ToArray()),mimeType=png?"image/png":"image/jpeg",x=r.X,y=r.Y,width=r.Width,height=r.Height};}
     }
     static void InsertText(string text,IntPtr target) {
         if(string.IsNullOrWhiteSpace(text))return;
