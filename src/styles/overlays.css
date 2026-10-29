@@ -547,3 +547,122 @@ html[data-window="accent"] body {
   background: var(--grad-glow);
   color: var(--ink-0);
 }
+/* Yami's dock: a glass shelf along the bottom; icons grow toward the pointer. */
+html[data-window="dock"],
+html[data-window="dock"] body {
+  background: transparent;
+  overflow: hidden;
+}
+.dock {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+}
+.dock-shelf {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink-0) 82%, transparent);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-float);
+}
+.dock-slot {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.dock-gap {
+  width: 1px;
+  height: 40px;
+  margin: 0 6px 8px;
+  background: var(--line-strong);
+}
+.dock-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  padding: 4px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  cursor: pointer;
+  transform: scale(var(--grow, 1));
+  transform-origin: 50% 100%;
+  transition: transform 140ms var(--ease-fluid, ease-out);
+}
+.dock-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.dock-letter {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: var(--selected);
+  color: var(--glow);
+  font-weight: 600;
+  font-size: 20px;
+}
+.dock-name {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(calc(1 / var(--grow, 1)));
+  transform-origin: 50% 100%;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--ink-0);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+.dock-item:hover .dock-name,
+.dock-item:focus-visible .dock-name {
+  opacity: 1;
+}
+.dock-item:focus-visible {
+  outline: 2px solid var(--glow);
+  outline-offset: 2px;
+}
+.dock-dot {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+}
+.dock-dot.on {
+  background: var(--glow);
+}
+.dock-empty {
+  padding: 14px 12px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock-item {
+    transform: none;
+    transition: none;
+  }
+}
+html[data-reduced="true"] .dock-item {
+  transform: none;
+  transition: none;
+}

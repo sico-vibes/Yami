@@ -13,6 +13,7 @@ import {
   safeStorage,
   session as electronSession,
 } from "electron";
+import { dockForeground } from "./dock";
 import { peekSelection } from "./peek";
 import { onAccent } from "./accent-overlay";
 import { handleRadio, radioScheme } from "./radio";
@@ -633,6 +634,7 @@ async function nativeEvent(e: any) {
   if (e.eventName === "peek") return void peekSelection(notify).catch(() => {});
   if (e.eventName === "foreground") {
     noteForeground(e);
+    dockForeground();
     const aliases: Record<string, string> = {
       chrome: "Google Chrome",
       msedge: "Microsoft Edge",

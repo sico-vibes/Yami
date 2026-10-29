@@ -51,6 +51,13 @@ export type Settings = {
   quickAccent: boolean;
   /** Ctrl+Space in File Explorer previews the selected file. */
   quickLook: boolean;
+  /** Yami's dock along the bottom of the main screen. */
+  dockEnabled: boolean;
+  /** Auto-hide the Windows taskbar while the dock is on. */
+  dockHideTaskbar: boolean;
+  dockPinned: { path: string; name: string }[];
+  /** Set when Yami hid the taskbar, so turning the dock off shows it again. */
+  taskbarAutoHideBefore?: boolean;
   terminalEnabled: boolean;
   desktopEnabled: boolean;
   voice: string;

@@ -16,6 +16,7 @@ const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =
     island: () => import("./Island").then((m) => ({ default: m.Island })),
     lasso: () => import("./Lasso").then((m) => ({ default: m.Lasso })),
     picker: () => import("./Picker").then((m) => ({ default: m.Picker })),
+    dock: () => import("./Dock").then((m) => ({ default: m.Dock })),
     accent: () =>
       import("./AccentStrip").then((m) => ({ default: m.AccentStrip })),
     effect: () => import("./Effects").then((m) => ({ default: m.Effects })),

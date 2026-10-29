@@ -138,6 +138,35 @@ static class WindowPin
         return true;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    struct AppBarData { public int Size; public IntPtr Hwnd; public uint Message; public uint Edge; public Rect Rc; public IntPtr Param; }
+    [DllImport("shell32.dll")] static extern UIntPtr SHAppBarMessage(uint message, ref AppBarData data);
+    [DllImport("user32.dll", EntryPoint = "FindWindowW", CharSet = CharSet.Unicode)] static extern IntPtr FindTopWindow(string cls, string title);
+
+    static AppBarData Taskbar()
+    {
+        var d = new AppBarData();
+        d.Size = Marshal.SizeOf(typeof(AppBarData));
+        d.Hwnd = FindTopWindow("Shell_TrayWnd", null);
+        return d;
+    }
+
+    /** Whether the Windows taskbar hides itself (Settings › Taskbar behaviours). */
+    public static bool TaskbarAutoHide()
+    {
+        var d = Taskbar();
+        return (SHAppBarMessage(4, ref d).ToUInt64() & 1) != 0; // ABM_GETSTATE, ABS_AUTOHIDE
+    }
+
+    /** The same switch as Settings › Taskbar › Automatically hide the taskbar. */
+    public static bool SetTaskbarAutoHide(bool on)
+    {
+        var d = Taskbar();
+        d.Param = new IntPtr(on ? 1 : 2); // ABS_AUTOHIDE or ABS_ALWAYSONTOP
+        SHAppBarMessage(10, ref d); // ABM_SETSTATE
+        return TaskbarAutoHide();
+    }
+
     public static bool IsPinned(long handle)
     {
         var h = new IntPtr(handle);

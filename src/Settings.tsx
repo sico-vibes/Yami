@@ -360,6 +360,17 @@ export function Settings({
                 toggle("alwaysOnTop", "Keep window on top"),
               )}
               {row(
+                "Dock",
+                "Your pinned and open apps along the bottom of the screen. Right-click an app to keep it there.",
+                toggle("dockEnabled", "Dock"),
+              )}
+              {s.dockEnabled &&
+                row(
+                  "Hide the Windows taskbar",
+                  "Turns on Windows' own auto-hide while the dock is on, and puts it back when you turn this off.",
+                  toggle("dockHideTaskbar", "Hide the Windows taskbar"),
+                )}
+              {row(
                 "Light and dark on a schedule",
                 "Windows switches to dark mode in the evening and back to light in the morning. One timer waits for the next switch.",
                 toggle("themeScheduleEnabled", "Light and dark on a schedule"),

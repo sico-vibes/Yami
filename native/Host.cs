@@ -160,6 +160,7 @@ class Host {
             case "accentFeed": return QuickAccent.Feed(((System.Collections.ArrayList)a["steps"]).ToArray());
             case "appWindows": return WindowPin.Windows((uint)Num(a,"skip"));
             case "placeWindow": return WindowPin.Place(Convert.ToInt64(a["handle"]),Num(a,"x"),Num(a,"y"),Num(a,"width"),Num(a,"height"),Flag(a,"maximized"));
+            case "taskbarAutoHide": return a.ContainsKey("on") ? WindowPin.SetTaskbarAutoHide(Flag(a,"on")) : WindowPin.TaskbarAutoHide();
             case "snap": return WindowPin.Snap(Convert.ToInt64(a["handle"]),Str(a,"layout"));
             case "topmost": return WindowPin.Toggle(Convert.ToInt64(a["handle"]));
             case "topmostState": return WindowPin.IsPinned(Convert.ToInt64(a["handle"]));

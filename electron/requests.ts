@@ -6,6 +6,7 @@ import { Holidays } from "./holidays";
 import { Radio } from "./radio";
 import { Workspaces } from "./workspaces";
 import { accentState } from "./accent-overlay";
+import { createDock } from "./dock";
 import { openPeek } from "./peek";
 import { downloadsRequest, initDownloads } from "./downloads/index";
 import { mediaAction, windowsSearch } from "./platform";
@@ -111,6 +112,8 @@ export function createRequestHandler(ctx: RequestContext) {
     broadcast,
   });
   initDownloads({ dataDir: path.dirname(store.file), broadcast });
+  const dock = createDock({ native, store, changed, launch: launchApp });
+  void dock.sync().catch(() => {});
   const rates = new Rates();
   const radio = new Radio(path.dirname(store.file));
   const workspaces = new Workspaces(
@@ -163,6 +166,7 @@ export function createRequestHandler(ctx: RequestContext) {
         assistant.stopLive();
         broadcast({ type: "cancel-recording" });
         changed();
+        void dock.sync().catch(() => {});
         return store.publicState();
       }
       case "shortcuts.capture":
@@ -507,6 +511,14 @@ export function createRequestHandler(ctx: RequestContext) {
         return downloadsRequest(method, a);
       case "peek.open":
         return openPeek(String(a.path || ""));
+      case "dock.items":
+        return dock.items();
+      case "dock.activate":
+        return dock.activate(a.key);
+      case "dock.menu":
+        return dock.menu(a.key);
+      case "dock.pin":
+        return dock.pin(a.path, a.name);
       case "accent.state":
         return accentState();
       case "accent.feed":
