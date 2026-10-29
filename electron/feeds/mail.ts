@@ -1,5 +1,6 @@
 import tls from "node:tls";
 import type { Duplex } from "node:stream";
+import { xoauth2 } from "./microsoft.ts";
 
 export type MailGlance = {
   unread: number;
@@ -104,8 +105,14 @@ class Session {
         continue;
       }
       this.buffer = this.buffer.subarray(end + 2);
-      this.lines.push(line);
       const w = this.waiting;
+      // A refused XOAUTH2 sign-in asks to continue; an empty line ends it
+      // with the tagged NO that carries the reason.
+      if (w && w.tag !== "*" && line.startsWith("+")) {
+        this.socket.write("\r\n");
+        continue;
+      }
+      this.lines.push(line);
       if (!w) continue;
       if (w.tag === "*" && line.startsWith("* ")) {
         this.waiting = undefined;
@@ -138,7 +145,14 @@ class Session {
  * and BODY.PEEK leaves messages unread; nothing is sent or deleted.
  */
 export async function mailGlance(
-  account: { host: string; port?: number; user: string; password: string },
+  account: {
+    host: string;
+    port?: number;
+    user: string;
+    password?: string;
+    /** An OAuth access token (Outlook.com), used instead of a password. */
+    token?: string;
+  },
   connect: (host: string, port: number) => Duplex = (host, port) =>
     tls.connect({ host, port, servername: host, minVersion: "TLSv1.2" }),
   count = 5,
@@ -157,11 +171,17 @@ export async function mailGlance(
   try {
     await session.greeting;
     await session
-      .send(`LOGIN ${quote(account.user)} ${quote(account.password)}`)
+      .send(
+        account.token
+          ? `AUTHENTICATE XOAUTH2 ${xoauth2(account.user, account.token)}`
+          : `LOGIN ${quote(account.user)} ${quote(account.password || "")}`,
+      )
       .catch((e: Error) => {
         throw new Error(
           /AUTHENTICATIONFAILED|invalid|failed|credentials/i.test(e.message)
-            ? "The mail server refused that address or app password."
+            ? account.token
+              ? "The mail server refused the Microsoft sign-in. Remove the account and add it again."
+              : "The mail server refused that address or app password."
             : e.message,
         );
       });
@@ -191,10 +211,14 @@ export async function mailGlance(
   }
 }
 
-/** Mail servers Yami knows; Outlook.com needs OAuth, which is not built. */
+/** Mail servers Yami knows; Outlook.com signs in with Microsoft (OAuth). */
 export const mailServers: Record<string, { host: string; web: string }> = {
   gmail: { host: "imap.gmail.com", web: "https://mail.google.com/" },
   fastmail: { host: "imap.fastmail.com", web: "https://app.fastmail.com/" },
   yahoo: { host: "imap.mail.yahoo.com", web: "https://mail.yahoo.com/" },
   icloud: { host: "imap.mail.me.com", web: "https://www.icloud.com/mail" },
+  outlook: {
+    host: "outlook.office365.com",
+    web: "https://outlook.live.com/mail/",
+  },
 };

@@ -52,6 +52,7 @@ export const defaults: Settings = {
   browserEnabled: false,
   browserBlocking: true,
   spotifyClientId: "",
+  microsoftClientId: "",
   maskSecrets: true,
   themeScheduleEnabled: false,
   themeLightAt: "07:00",

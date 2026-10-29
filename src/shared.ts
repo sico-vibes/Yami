@@ -74,6 +74,8 @@ export type Settings = {
   browserBlocking: boolean;
   /** The user's own Spotify app (public client ID; PKCE, no secret). */
   spotifyClientId: string;
+  /** Microsoft app (client) ID for Outlook.com sign-in; public, not a secret. */
+  microsoftClientId: string;
   /** Hide recognisable credentials before chat text reaches Gemini. */
   maskSecrets: boolean;
   themeScheduleEnabled: boolean;

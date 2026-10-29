@@ -232,6 +232,40 @@ export function previewModules(
           },
         },
       ];
+    case "feeds.bluesky":
+    case "feeds.bluesky.refresh":
+      return {
+        handle: "demo.bsky.social",
+        fetchedAt: Date.now() - 60_000,
+        posts: [
+          {
+            id: "demo-1",
+            author: "Demo Writer",
+            handle: "writer.example.com",
+            text: "Shipped a small tool today. Local first, no account needed.",
+            link: "https://bsky.app/",
+            at: Date.now() - 20 * 60_000,
+          },
+          {
+            id: "demo-2",
+            author: "Sample Studio",
+            handle: "studio.example.com",
+            text: "New wallpaper pack is out.",
+            link: "https://bsky.app/",
+            at: Date.now() - 2 * 3600_000,
+            note: "Reposted by Demo Writer",
+          },
+        ],
+      };
+    case "feeds.bluesky.signIn":
+    case "feeds.bluesky.signOut":
+    case "feeds.mail.outlook.start":
+    case "feeds.mail.outlook.finish":
+      throw new Error("Preview only — no account was contacted.");
+    case "feeds.mail.outlook.clientId":
+      return "";
+    case "feeds.mail.outlook.cancel":
+      return [];
     case "feeds.mail.add":
     case "feeds.mail.remove":
       throw new Error("Preview only — no mail account was touched.");

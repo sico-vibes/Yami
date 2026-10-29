@@ -4,6 +4,7 @@ import { relativeTime, Select, StatusChip } from "../controls";
 import { feedKinds, type FeedKind, type FeedsView } from "../feeds-types";
 import { Empty, Icon, IconButton } from "../ui";
 import { MailGlance } from "./MailGlance";
+import { BlueskyHome } from "./BlueskyHome";
 
 /** Freshly read sources are not read again for this long when Desk opens. */
 const freshFor = 10 * 60_000;
@@ -106,6 +107,7 @@ export default function Inbox({
         </section>
       )}
       <MailGlance report={report} />
+      <BlueskyHome report={report} />
       <h3 className="group-title">Feeds</h3>
       <div className="inbox-add">
         <Select

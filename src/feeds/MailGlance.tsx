@@ -9,6 +9,7 @@ const providers = [
   { value: "fastmail", label: "Fastmail", icon: "envelope-simple" },
   { value: "icloud", label: "iCloud Mail", icon: "envelope-simple" },
   { value: "yahoo", label: "Yahoo Mail", icon: "envelope-simple" },
+  { value: "outlook", label: "Outlook.com", icon: "microsoft-outlook-logo" },
   { value: "custom", label: "Other IMAP server", icon: "envelope-simple" },
 ];
 const web: Record<string, string> = {
@@ -16,6 +17,7 @@ const web: Record<string, string> = {
   fastmail: "https://app.fastmail.com/",
   icloud: "https://www.icloud.com/mail",
   yahoo: "https://mail.yahoo.com/",
+  outlook: "https://outlook.live.com/mail/",
 };
 
 /**
@@ -29,8 +31,32 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
     [host, setHost] = useState(""),
     [user, setUser] = useState(""),
     [password, setPassword] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [clientId, setClientId] = useState(""),
+    // The Microsoft code to enter, while Yami waits for the sign-in.
+    [code, setCode] = useState<{
+      userCode: string;
+      verificationUri: string;
+    } | null>(null);
   const fail = (e: Error) => report(e.message);
+  const microsoft = () => {
+    setBusy(true);
+    void api("feeds.mail.outlook.start", { clientId })
+      .then((started) => {
+        setCode(started);
+        return api("feeds.mail.outlook.finish").then((list) => {
+          setAccounts(list);
+          setAdding(false);
+        });
+      })
+      .catch((e) => {
+        if (!/cancelled/i.test(e.message)) fail(e);
+      })
+      .finally(() => {
+        setCode(null);
+        setBusy(false);
+      });
+  };
   useEffect(() => {
     void api("feeds.mail")
       .then((list: MailAccount[]) => {
@@ -57,7 +83,15 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
       <div className="mail-head">
         <h3 className="group-title">Mail</h3>
         {!adding && (
-          <button className="text-button" onClick={() => setAdding(true)}>
+          <button
+            className="text-button"
+            onClick={() => {
+              setAdding(true);
+              void api("feeds.mail.outlook.clientId")
+                .then(setClientId)
+                .catch(() => {});
+            }}
+          >
             <Icon name="plus" size={14} />
             Add mail
           </button>
@@ -131,38 +165,94 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
                 onChange={(e) => setHost(e.target.value)}
               />
             )}
-            <input
-              aria-label="Mail address"
-              placeholder="you@example.com"
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
-            />
-            <input
-              aria-label="App password"
-              type="password"
-              placeholder="App password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            {provider === "outlook" ? (
+              <input
+                aria-label="Microsoft app (client) ID"
+                placeholder="App (client) ID, 1a2b3c4d-…"
+                value={clientId}
+                disabled={busy}
+                onChange={(e) => setClientId(e.target.value)}
+              />
+            ) : (
+              <>
+                <input
+                  aria-label="Mail address"
+                  placeholder="you@example.com"
+                  value={user}
+                  onChange={(e) => setUser(e.target.value)}
+                />
+                <input
+                  aria-label="App password"
+                  type="password"
+                  placeholder="App password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </>
+            )}
           </div>
+          {code && (
+            <div className="mail-code" role="status">
+              <span>
+                Go to <b>{code.verificationUri}</b> and enter
+              </span>
+              <strong className="mail-code-value">{code.userCode}</strong>
+              <IconButton
+                icon="copy"
+                label="Copy the code"
+                onClick={() =>
+                  void navigator.clipboard.writeText(code.userCode).catch(fail)
+                }
+              />
+              <button
+                className="soft-button"
+                onClick={() =>
+                  void api("open.external", {
+                    url: code.verificationUri,
+                  }).catch(fail)
+                }
+              >
+                <Icon name="arrow-square-out" size={14} />
+                Open the page
+              </button>
+            </div>
+          )}
           <p className="setting-note">
-            Use an app password from your mail account's security settings, not
-            your normal password. It is kept encrypted on this PC. Yami opens
-            INBOX read-only: nothing is marked as read, moved or sent, and no
-            message body or image is loaded. Outlook.com needs Microsoft
-            sign-in, which Yami does not support yet.
+            {provider === "outlook"
+              ? "Outlook.com signs in with Microsoft: you enter a short code in your browser, and Yami never sees your password. Microsoft asks for an app (client) ID: register a free app at entra.microsoft.com (App registrations, personal Microsoft accounts, Allow public client flows on) and paste its ID here. Yami keeps the sign-in encrypted on this PC and opens INBOX read-only."
+              : "Use an app password from your mail account's security settings, not your normal password. It is kept encrypted on this PC. Yami opens INBOX read-only: nothing is marked as read, moved or sent, and no message body or image is loaded."}
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setAdding(false)}>
+            <button
+              className="soft-button"
+              onClick={() => {
+                if (code) void api("feeds.mail.outlook.cancel").catch(() => {});
+                setAdding(false);
+              }}
+            >
               Cancel
             </button>
-            <button
-              className="primary-button"
-              disabled={busy || !user.trim() || !password}
-              onClick={add}
-            >
-              {busy ? "Checking…" : "Sign in and add"}
-            </button>
+            {provider === "outlook" ? (
+              <button
+                className="primary-button"
+                disabled={busy || !clientId.trim()}
+                onClick={microsoft}
+              >
+                {code
+                  ? "Waiting for Microsoft…"
+                  : busy
+                    ? "Starting…"
+                    : "Sign in with Microsoft"}
+              </button>
+            ) : (
+              <button
+                className="primary-button"
+                disabled={busy || !user.trim() || !password}
+                onClick={add}
+              >
+                {busy ? "Checking…" : "Sign in and add"}
+              </button>
+            )}
           </div>
         </div>
       )}

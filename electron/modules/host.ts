@@ -24,6 +24,8 @@ import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
 import { FeedsController } from "../feeds/feeds";
 import { MailAccounts } from "../feeds/mail-accounts";
+import { validClientId } from "../feeds/microsoft";
+import { BlueskyHome } from "../feeds/bluesky";
 import { loadTune, shieldWanted, tuneRequest, type Tune } from "../tune/load";
 import { agentLinkPort } from "../agentlink/server";
 import {
@@ -46,7 +48,11 @@ import { darkAt, nextSwitch } from "../../src/theme-schedule";
 import { resolveInput, webOnly } from "../../src/browser-rules";
 import { randomBytes } from "node:crypto";
 
-type Feeds = { feeds: FeedsController; mail: MailAccounts };
+type Feeds = {
+  feeds: FeedsController;
+  mail: MailAccounts;
+  bluesky: BlueskyHome;
+};
 type Browser = {
   browser: ReturnType<typeof createBrowser>;
   vault: Vault;
@@ -142,6 +148,16 @@ export function createModuleHost(deps: Deps) {
               get: (id) => store.key(`connection:mail-${id}`),
               set: (id, value) =>
                 store.setKeys({ [`connection:mail-${id}`]: value }),
+            },
+            undefined,
+            () => store.state.settings.microsoftClientId || "",
+          ),
+          bluesky: new BlueskyHome(
+            path.join(path.dirname(store.file), "bluesky.json"),
+            {
+              get: () => store.key("connection:bluesky"),
+              set: (_id, value) =>
+                store.setKeys({ "connection:bluesky": value }),
             },
           ),
         }),
@@ -664,11 +680,28 @@ export function createModuleHost(deps: Deps) {
         };
       }
       if (method.startsWith("feeds.")) {
-        const { feeds, mail } = registry.get<Feeds>("feeds");
+        const { feeds, mail, bluesky } = registry.get<Feeds>("feeds");
         if (method === "feeds.mail") return mail.list();
         if (method === "feeds.mail.refresh") return mail.refresh();
         if (method === "feeds.mail.add") return mail.add(a);
         if (method === "feeds.mail.remove") return mail.remove(String(a.id));
+        if (method === "feeds.bluesky") return bluesky.status();
+        if (method === "feeds.bluesky.refresh") return bluesky.refresh();
+        if (method === "feeds.bluesky.signIn")
+          return bluesky.signIn(a.handle, a.password);
+        if (method === "feeds.bluesky.signOut") return bluesky.signOut();
+        if (method === "feeds.mail.outlook.start") {
+          const clientId = String(a.clientId || "").trim();
+          if (!validClientId(clientId))
+            throw new Error("Enter the app (client) ID, like 1a2b3c4d-….");
+          store.state.settings.microsoftClientId = clientId;
+          deps.changed();
+          return mail.startOutlook();
+        }
+        if (method === "feeds.mail.outlook.clientId")
+          return store.state.settings.microsoftClientId || "";
+        if (method === "feeds.mail.outlook.finish") return mail.finishOutlook();
+        if (method === "feeds.mail.outlook.cancel") return mail.cancelOutlook();
         if (method === "feeds.list") return feeds.view();
         if (method === "feeds.brief") {
           // Explicit only: the newest headlines, sent as data, to Gemini.

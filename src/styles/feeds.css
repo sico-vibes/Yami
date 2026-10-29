@@ -59,8 +59,8 @@
 .inbox-item:hover,
 .inbox-item:focus-visible {
   border-color: var(--selected-line);
-  background: linear-gradient(160deg, var(--selected), transparent 60%),
-    var(--surface-1);
+  background:
+    linear-gradient(160deg, var(--selected), transparent 60%), var(--surface-1);
 }
 .inbox-item strong {
   font-size: var(--fs-sm);
@@ -167,4 +167,70 @@ html[data-reduced="true"] .inbox-item {
   white-space: pre-wrap;
   font-size: var(--fs-sm);
   line-height: 1.6;
+}
+/* The Microsoft sign-in code, shown while Yami waits for it. */
+.mail-code {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--r-md);
+  background: var(--selected);
+  border: 1px solid var(--selected-line);
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+}
+.mail-code-value {
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: var(--fs-h2);
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+.bluesky-posts {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0 0 0 50px;
+  padding: 0;
+  list-style: none;
+}
+.bluesky-post {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.bluesky-post:hover,
+.bluesky-post:focus-visible {
+  background: var(--surface-2);
+}
+.bluesky-meta {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  min-width: 0;
+  font-size: var(--fs-xs);
+}
+.bluesky-meta small {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bluesky-text {
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
