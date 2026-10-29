@@ -9,6 +9,7 @@ import {
 } from "../tune-types";
 import { Icon, Modal, Toggle } from "../ui";
 import { DnsSection } from "./DnsSection";
+import { AdminSection } from "./AdminSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -105,6 +106,7 @@ export default function TunePage({
         </section>
       ))}
       <DnsSection report={report} />
+      <AdminSection report={report} />
       <section>
         <h3 className="group-title">Startup apps</h3>
         <p className="setting-note">

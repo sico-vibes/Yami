@@ -315,6 +315,25 @@ export function previewModules(
       };
     case "mailcatcher.open":
       throw new Error("Preview only — no mail app was opened.");
+    case "tune.admin":
+      return [
+        {
+          name: "DiagTrack",
+          label: "Connected User Experiences and Telemetry",
+          start: "Automatic",
+          running: true,
+        },
+        {
+          name: "MapsBroker",
+          label: "Downloaded Maps Manager",
+          start: "Disabled",
+          running: false,
+          savedStart: "Automatic",
+        },
+      ];
+    case "tune.admin.service":
+    case "tune.admin.restorePoint":
+      throw new Error("Preview only — nothing was changed.");
     case "tune.dns":
       return [
         {

@@ -28,6 +28,7 @@ import { MailAccounts } from "../feeds/mail-accounts";
 import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
 import { DnsController } from "../tune/dns";
+import { AdminController } from "../tune/admin";
 import { helperPath } from "../workbench/terminal";
 import { agentLinkPort } from "../agentlink/server";
 import {
@@ -54,6 +55,7 @@ type Tune = {
   tweaks: TuneController;
   startup: StartupController;
   dns: DnsController;
+  admin: AdminController;
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type Browser = {
@@ -209,6 +211,10 @@ export function createModuleHost(deps: Deps) {
               sandbox ? undefined : readMachineKey,
             ),
             dns: new DnsController(helperPath("Dns.ps1")),
+            admin: new AdminController(
+              helperPath("Admin.ps1"),
+              path.join(path.dirname(store.file), "tune-admin.json"),
+            ),
           };
         },
         dispose: () => {},
@@ -748,7 +754,16 @@ export function createModuleHost(deps: Deps) {
         throw new Error("Unknown feeds request.");
       }
       if (method.startsWith("tune.")) {
-        const { tweaks: tune, startup, dns } = registry.get<Tune>("tune");
+        const {
+          tweaks: tune,
+          startup,
+          dns,
+          admin,
+        } = registry.get<Tune>("tune");
+        if (method === "tune.admin") return admin.list();
+        if (method === "tune.admin.service")
+          return admin.setService(a.name, a.off);
+        if (method === "tune.admin.restorePoint") return admin.restorePoint();
         if (method === "tune.dns") return dns.list();
         if (method === "tune.dns.set")
           return dns.set(a.index, a.profile, a.encrypted);
@@ -894,6 +909,7 @@ export function createModuleHost(deps: Deps) {
           "mail.json",
           "vault.bin",
           "terminal-layout.json",
+          "tune-admin.json",
           "mail-catcher",
         ])
           fs.rmSync(path.join(dir, file), { force: true, recursive: true });
