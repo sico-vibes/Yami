@@ -22,16 +22,9 @@ import { EngineStore } from "../wheel/engines.ts";
 import { modules } from "../../src/modules.ts";
 import { ModuleRegistry, validPacks, workbenchDuties } from "./registry";
 import { PackManager } from "./packs";
-import { TuneController } from "../tune/tune";
 import { FeedsController } from "../feeds/feeds";
 import { MailAccounts } from "../feeds/mail-accounts";
-import { readMachineKey, regExe } from "../tune/registry";
-import { StartupController } from "../tune/startup";
-import { DnsController } from "../tune/dns";
-import { AdminController } from "../tune/admin";
-import { AppsController } from "../tune/apps";
-import { NetworkShield, shieldWanted } from "../tune/shield";
-import { helperPath } from "../workbench/terminal";
+import { loadTune, shieldWanted, tuneRequest, type Tune } from "../tune/load";
 import { agentLinkPort } from "../agentlink/server";
 import {
   agentToolNames,
@@ -53,14 +46,6 @@ import { darkAt, nextSwitch } from "../../src/theme-schedule";
 import { resolveInput, webOnly } from "../../src/browser-rules";
 import { randomBytes } from "node:crypto";
 
-type Tune = {
-  tweaks: TuneController;
-  startup: StartupController;
-  dns: DnsController;
-  admin: AdminController;
-  apps: AppsController;
-  shield: NetworkShield;
-};
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type Browser = {
   browser: ReturnType<typeof createBrowser>;
@@ -68,7 +53,6 @@ type Browser = {
   linked: ReturnType<typeof createLinked>;
   filters: FilterLists;
 };
-import { execFile, spawn } from "node:child_process";
 
 type Wheel = ReturnType<typeof createWheel>;
 type Deps = {
@@ -86,33 +70,6 @@ type Deps = {
     options: Electron.BrowserWindowConstructorOptions,
   ) => BrowserWindow;
 };
-
-/** Ends Explorer and starts it again if Windows did not. Asked for first. */
-function restartExplorer() {
-  return new Promise<boolean>((resolve) => {
-    execFile(
-      "taskkill.exe",
-      ["/f", "/im", "explorer.exe"],
-      { windowsHide: true, timeout: 8000 },
-      () =>
-        setTimeout(() => {
-          execFile(
-            "tasklist.exe",
-            ["/fi", "imagename eq explorer.exe", "/nh"],
-            { windowsHide: true, timeout: 8000 },
-            (_e, stdout) => {
-              if (!/explorer\.exe/i.test(String(stdout)))
-                spawn("explorer.exe", [], {
-                  detached: true,
-                  stdio: "ignore",
-                }).unref();
-              resolve(true);
-            },
-          );
-        }, 2000),
-    );
-  });
-}
 
 /**
  * Owns the optional modules: builds the AI workspace and the file wheel on
@@ -191,42 +148,7 @@ export function createModuleHost(deps: Deps) {
         dispose: () => {},
       },
       tune: {
-        load: (): Tune => {
-          // The sandbox root of the desktop check also hides machine entries
-          // and uses its own Startup folder.
-          const sandbox = process.env.YAMI_TUNE_ROOT;
-          const io = regExe(sandbox);
-          return {
-            tweaks: new TuneController(
-              path.join(path.dirname(store.file), "tune.json"),
-              io,
-            ),
-            startup: new StartupController(
-              io,
-              process.env.YAMI_TUNE_STARTUP_DIR ||
-                path.join(
-                  process.env.APPDATA || "",
-                  "Microsoft",
-                  "Windows",
-                  "Start Menu",
-                  "Programs",
-                  "Startup",
-                ),
-              sandbox ? undefined : readMachineKey,
-            ),
-            dns: new DnsController(helperPath("Dns.ps1")),
-            apps: new AppsController(helperPath("Apps.ps1")),
-            // YAMI_SHIELD_PORT moves it off port 53 for the desktop check.
-            shield: new NetworkShield({
-              dir: path.dirname(store.file),
-              port: Number(process.env.YAMI_SHIELD_PORT) || 53,
-            }),
-            admin: new AdminController(
-              helperPath("Admin.ps1"),
-              path.join(path.dirname(store.file), "tune-admin.json"),
-            ),
-          };
-        },
+        load: () => loadTune(path.dirname(store.file)),
         dispose: (t: Tune) => t.shield.stop(),
       },
       browser: {
@@ -766,33 +688,8 @@ export function createModuleHost(deps: Deps) {
         if (method === "feeds.remove") return feeds.remove(String(a.id));
         throw new Error("Unknown feeds request.");
       }
-      if (method.startsWith("tune.")) {
-        const {
-          tweaks: tune,
-          startup,
-          dns,
-          admin,
-          apps,
-          shield,
-        } = registry.get<Tune>("tune");
-        if (method.startsWith("tune.shield")) return shield.request(method, a);
-        if (method === "tune.apps") return apps.list();
-        if (method === "tune.apps.uninstall") return apps.uninstall(a.id);
-        if (method === "tune.admin") return admin.list();
-        if (method === "tune.admin.service")
-          return admin.setService(a.name, a.off);
-        if (method === "tune.admin.restorePoint") return admin.restorePoint();
-        if (method === "tune.dns") return dns.list();
-        if (method === "tune.dns.set")
-          return dns.set(a.index, a.profile, a.encrypted);
-        if (method === "tune.list") return tune.list();
-        if (method === "tune.apply") return tune.apply(a.ids);
-        if (method === "tune.undo") return tune.undo(a.ids);
-        if (method === "tune.startup") return startup.list();
-        if (method === "tune.startup.set") return startup.set(a.id, a.enabled);
-        if (method === "tune.restartExplorer") return restartExplorer();
-        throw new Error("Unknown tune-up request.");
-      }
+      if (method.startsWith("tune."))
+        return tuneRequest(registry.get<Tune>("tune"), method, a);
       if (method.startsWith("packs.")) {
         const [id] = validPacks([a.id]);
         if (method === "packs.install") packs.install([id]);

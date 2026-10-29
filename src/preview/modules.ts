@@ -360,6 +360,47 @@ export function previewModules(
           user: true,
         },
       ];
+    case "tune.cleanup":
+      return [
+        {
+          id: "temp",
+          name: "Temporary files",
+          detail: "Files apps left in your temp folder, untouched for a day",
+          bytes: 1_840_000_000,
+          files: 12840,
+        },
+        {
+          id: "shaders",
+          name: "Graphics shader caches",
+          detail:
+            "DirectX, NVIDIA and AMD build these again the next time a game or app needs them",
+          bytes: 412_000_000,
+          files: 903,
+        },
+        {
+          id: "reports",
+          name: "Error reports",
+          detail: "Problem reports Windows saved after apps crashed or hung",
+          bytes: 0,
+          files: 0,
+        },
+        {
+          id: "dumps",
+          name: "Crash dumps",
+          detail: "Memory snapshots apps saved when they crashed",
+          bytes: 96_000_000,
+          files: 3,
+        },
+        {
+          id: "recycle",
+          name: "Recycle Bin",
+          detail:
+            "Files you deleted, on every drive. They cannot be restored after this",
+          bytes: 2_300_000_000,
+          files: 41,
+        },
+      ];
+    case "tune.cleanup.run":
     case "tune.apps.uninstall":
     case "tune.admin.service":
     case "tune.admin.restorePoint":

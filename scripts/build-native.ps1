@@ -27,7 +27,7 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $manifestTarget = Join-Path $targetDir 'host-manifest.json'
 [IO.File]::WriteAllText("$manifestTarget.tmp", (@{ executable = $executable } | ConvertTo-Json -Compress), [Text.UTF8Encoding]::new($false))
 Move-Item -LiteralPath "$manifestTarget.tmp" -Destination $manifestTarget -Force
-foreach ($helperName in @('Hook')) {
+foreach ($helperName in @('Hook', 'FileStats')) {
   $helperSource = Join-Path $projectRoot "native\$helperName.cs"
   if (-not (Test-Path -LiteralPath $helperSource)) { continue }
   $helperTarget = Join-Path $targetDir "Yami.$helperName.exe"

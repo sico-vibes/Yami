@@ -345,7 +345,9 @@ kbd {
 .app-shell {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  /* clip, not hidden: the blurred wallpaper reaches 60px past the edges,
+     and a hidden box can still be scrolled sideways by scrollIntoView. */
+  overflow: clip;
   position: relative;
   border-radius: 14px;
   background:

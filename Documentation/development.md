@@ -165,6 +165,7 @@ Workspace verification commands:
   `reg.exe`, confined to a throwaway `HKCU\Software\YamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the
   sandbox. It never restarts Explorer.
+- `node scripts/verify-cleanup.mjs`: cleans only a throwaway folder through the page (`YAMI_CLEANUP_ROOT`): measures, picks the Recycle Bin by hand, confirms, and checks what was removed and kept. A second launch measures this PC's real folders and removes nothing. `tests/cleanup.test.mjs` covers the day-old rule, kept folders, junctions not followed, and that `Yami.FileStats.exe` agrees with the Node walk.
 - `node scripts/verify-shield.mjs`: needs the internet; isolated profile. Turns the network shield on through the page on a spare port (`YAMI_SHIELD_PORT`), downloads and parses the StevenBlack list in its child process, checks a listed name gets `0.0.0.0`, `example.com` is answered by Quad9 over DNS over HTTPS and a local-only name is not sent out, reads the counts on the page, and checks that off closes the port. It never changes an adapter's DNS. `tests/shield.test.mjs` covers list parsing, the packed name search, DNS messages, truncation and the TCP retry, and your own rules.
 - `node scripts/verify-apps.mjs`: isolated profile; registers fake apps in a throwaway
   `HKCU\Software\YamiAppsVerify-<time>` key through `YAMI_APPS_ROOT`, checks which are
