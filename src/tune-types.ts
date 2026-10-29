@@ -112,6 +112,48 @@ const content =
 const explorer = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer";
 
 export const tweaks: Tweak[] = [
+  {
+    // The values Settings › Personalization › Colours writes. The accent is a
+    // deeper violet from Yami's glow (#bcaaff), so white text stays readable.
+    id: "yamiAccent",
+    name: "Yami's violet as the Windows accent",
+    detail:
+      "Start, the taskbar's highlights, selections and buttons take Yami's violet. Undo puts your own colour back.",
+    category: "Look and feel",
+    values: [
+      {
+        key: explorer + "\\Accent",
+        name: "AccentPalette",
+        type: "REG_BINARY",
+        data: "D9CFFF00BCAAFF00A48CFA008B6FF0006F53D6005539B3003B238A00F1A7D600",
+      },
+      {
+        key: explorer + "\\Accent",
+        name: "AccentColorMenu",
+        type: "REG_DWORD",
+        data: "4293947275",
+      },
+      {
+        key: explorer + "\\Accent",
+        name: "StartColorMenu",
+        type: "REG_DWORD",
+        data: "4292236143",
+      },
+      {
+        key: "Software\\Microsoft\\Windows\\DWM",
+        name: "AccentColor",
+        type: "REG_DWORD",
+        data: "4293947275",
+      },
+      {
+        key: "Software\\Microsoft\\Windows\\DWM",
+        name: "ColorizationColor",
+        type: "REG_DWORD",
+        data: "3297472496",
+      },
+    ],
+    restartExplorer: true,
+  },
   // Yami's own versions of popular Explorer and taskbar mods: settings
   // Windows already reads, so nothing is injected into Explorer.
   {
