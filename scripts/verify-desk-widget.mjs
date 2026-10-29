@@ -86,15 +86,15 @@ try {
     Math.abs(fit - Math.max(96, Math.round(cardHeight))) <= 2,
     `${fit} vs ${cardHeight}`,
   );
-  // The widget's own renderer process, which is what switching it on adds.
-  const own = await app.evaluate(({ app, BrowserWindow }) => {
-    const w = BrowserWindow.getAllWindows().find((b) =>
-      b.webContents.getURL().includes("window=widget"),
-    );
-    const pid = w.webContents.getOSProcessId();
-    const m = app.getAppMetrics().find((p) => p.pid === pid);
-    return Math.round((m?.memory.privateBytes || 0) / 1024);
+  // The widget runs in the island's renderer process instead of its own.
+  const shared = await app.evaluate(({ BrowserWindow }) => {
+    const pid = (mode) =>
+      BrowserWindow.getAllWindows()
+        .find((b) => b.webContents.getURL().includes("window=" + mode))
+        ?.webContents.getOSProcessId();
+    return pid("widget") === pid("island");
   });
+  assert.ok(shared, "the widget shares the island's process");
   await card.screenshot({ path: path.join(profile, "desk-widget.png") });
   await call("settings", { deskWidget: false });
   for (let i = 0; i < 50 && widget(); i++) await wait(100);
@@ -105,7 +105,8 @@ try {
       passed: true,
       clock,
       windowHeight: fit,
-      privateMb: { treeBefore: before, treeAfter: after, widgetRenderer: own },
+      privateMb: { treeBefore: before, treeAfter: after },
+      sharesIslandProcess: shared,
       screenshot: path.join(profile, "desk-widget.png"),
     }),
   );

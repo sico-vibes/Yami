@@ -3,7 +3,7 @@ import path from "node:path";
 import { app, Menu, screen, shell, type BrowserWindow } from "electron";
 import type { Native } from "./native";
 import type { Store } from "./store";
-import { makeWindow } from "./windows";
+import { makeSmallWindow } from "./windows";
 
 // Yami's dock: pinned apps and the apps that are open, along the bottom of
 // the main screen, in one small window that never takes focus. It reads the
@@ -37,11 +37,15 @@ export function createDock(deps: {
   store: Store;
   changed: () => void;
   launch: (path: string) => Promise<unknown>;
+  /** The island, whose renderer process the dock shares. */
+  host: () => BrowserWindow | undefined;
 }) {
   let win: BrowserWindow | undefined;
   let items: DockItem[] = [];
   let timer: NodeJS.Timeout | undefined;
+  let opening: Promise<void> | undefined;
   const icons = new Map<string, string>();
+  const infos = new Map<string, { name: string; icon: string }>();
   const targets = new Map<string, string>();
   const settings = () => deps.store.state.settings;
 
@@ -54,6 +58,20 @@ export function createDock(deps: {
     } catch {}
     icons.set(file, url);
     return url;
+  };
+  /**
+   * The program's own name and the icon its window shows, as the taskbar
+   * does; Store apps' files give Electron no icon. Kept once an icon is found.
+   */
+  const info = async (exe: string, handle: number) => {
+    const k = exe.toLowerCase();
+    if (infos.has(k)) return infos.get(k)!;
+    const got: { name?: string; icon?: string } = await deps.native
+      .call("appInfo", { exe, handle })
+      .catch(() => ({}));
+    const out = { name: got.name || "", icon: got.icon || "" };
+    if (out.icon) infos.set(k, out);
+    return out;
   };
   /** A shortcut's program, so a pinned app shows when it is running. */
   const target = (file: string) => {
@@ -82,7 +100,9 @@ export function createDock(deps: {
       out.push({
         key: "pin:" + p.path,
         name: p.name,
-        icon: await icon(p.path),
+        icon:
+          (await icon(p.path)) ||
+          (open[0] ? (await info(open[0].exe, open[0].handle)).icon : ""),
         path: p.path,
         handles: open.map((r) => r.handle),
         pinned: true,
@@ -94,15 +114,20 @@ export function createDock(deps: {
         const k = r.exe.toLowerCase();
         groups.set(k, [...(groups.get(k) || []), r]);
       }
-    for (const [k, list] of groups)
+    for (const [k, list] of groups) {
+      const about = await info(list[0].exe, list[0].handle);
       out.push({
         key: "run:" + k,
-        name: path.basename(list[0].exe, ".exe"),
-        icon: await icon(list[0].exe),
+        name: about.name || path.basename(list[0].exe, ".exe"),
+        // File Explorer's window icon follows the folder; its own is the folder.
+        icon:
+          (!/[\\/]explorer\.exe$/i.test(k) && about.icon) ||
+          (await icon(list[0].exe)),
         path: list[0].exe,
         handles: list.map((r) => r.handle),
         pinned: false,
       });
+    }
     items = out.slice(0, 24);
     place();
     win?.webContents.send("yami:event", { type: "dock", items });
@@ -124,9 +149,9 @@ export function createDock(deps: {
     });
   };
 
-  const open = () => {
-    if (win && !win.isDestroyed()) return;
-    win = makeWindow("dock", {
+  const open = async () => {
+    if ((win && !win.isDestroyed()) || opening) return opening;
+    const options = {
       width: 400,
       height: HEIGHT,
       transparent: true,
@@ -135,17 +160,26 @@ export function createDock(deps: {
       resizable: false,
       focusable: false,
       hasShadow: false,
-    });
-    win.setAlwaysOnTop(true, "floating");
-    win.once("ready-to-show", () => win?.showInactive());
-    win.on("closed", () => (win = undefined));
-    void read();
+    };
+    opening = (async () => {
+      const next = await makeSmallWindow(deps.host(), "dock", options);
+      win = next;
+      win.setAlwaysOnTop(true, "floating");
+      win.once("ready-to-show", () => next?.showInactive());
+      win.on("closed", () => {
+        if (win === next) win = undefined;
+      });
+      // Turned off while it was opening.
+      if (!settings().dockEnabled) win.close();
+      else void read();
+    })().finally(() => (opening = undefined));
+    return opening;
   };
 
   const api = {
     /** Opens or closes the dock and the taskbar choice to match settings. */
     async sync() {
-      if (settings().dockEnabled) open();
+      if (settings().dockEnabled) await open();
       else if (win && !win.isDestroyed()) win.close();
       const want = !!(settings().dockEnabled && settings().dockHideTaskbar);
       const now = await deps.native

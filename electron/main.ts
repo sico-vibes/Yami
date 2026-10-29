@@ -801,6 +801,7 @@ else {
         showMain,
         broadcast,
         fullscreen: () => native.call("fullscreen").catch(() => false),
+        host: () => island,
       });
       overlays.syncStray();
       modules = createModuleHost({

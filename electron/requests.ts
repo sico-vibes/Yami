@@ -112,7 +112,13 @@ export function createRequestHandler(ctx: RequestContext) {
     broadcast,
   });
   initDownloads({ dataDir: path.dirname(store.file), broadcast });
-  const dock = createDock({ native, store, changed, launch: launchApp });
+  const dock = createDock({
+    native,
+    store,
+    changed,
+    launch: launchApp,
+    host: () => island,
+  });
   void dock.sync().catch(() => {});
   const rates = new Rates();
   const radio = new Radio(path.dirname(store.file));

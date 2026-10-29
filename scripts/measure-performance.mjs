@@ -19,6 +19,10 @@ fs.writeFileSync(
       // flame animating at idle.
       roam: !process.argv.includes("--no-roam"),
       livingFlame: process.argv.includes("--living-flame"),
+      // --dock opens Yami's dock; the taskbar is never hidden here.
+      dockEnabled: process.argv.includes("--dock"),
+      // --widget shows the desk widget.
+      deskWidget: process.argv.includes("--widget"),
     },
   }),
 );
@@ -71,6 +75,14 @@ try {
     samples.push(await snapshot());
     if (i < 2) await sleep(5000);
   }
+  // A test copy of Yami answers Yami's own shortcuts too, so a key press
+  // during the run can open its main window; the list shows when one did.
+  const windows = await app.evaluate(({ BrowserWindow }) =>
+    BrowserWindow.getAllWindows().map((w) => ({
+      window: new URL(w.webContents.getURL()).searchParams.get("window"),
+      process: w.webContents.getOSProcessId(),
+    })),
+  );
   const evidence = {
     date: new Date().toISOString(),
     build: packaged ? "packaged" : "production-source",
@@ -78,7 +90,8 @@ try {
     cpu: os.cpus()[0].model,
     logicalCPUs: os.cpus().length,
     systemRAMGB: +(os.totalmem() / 1024 ** 3).toFixed(1),
-    scenario: `Hidden main window, collapsed island, roaming ${process.argv.includes("--no-roam") ? "off" : "on"}, living flame ${process.argv.includes("--living-flame") ? "on" : "off"}, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.`,
+    scenario: `Hidden main window, collapsed island, roaming ${process.argv.includes("--no-roam") ? "off" : "on"}, living flame ${process.argv.includes("--living-flame") ? "on" : "off"}, dock ${process.argv.includes("--dock") ? "on" : "off"}, desk widget ${process.argv.includes("--widget") ? "on" : "off"}, no provider session, clipboard/context/weather disabled; startup settled 10s; three snapshots 5s apart.`,
+    windows,
     method:
       "Windows Win32_PerfFormattedData_PerfProc_Process for the full current parent/child tree. WorkingSet includes shared pages; privateWorkingSet is resident private RAM. CPU is normalized by logical CPU count. Snapshots do not prove a peak or 15-minute stability.",
     samples,

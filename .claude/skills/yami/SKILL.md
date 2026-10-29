@@ -122,7 +122,8 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 - **Native host:** `native.call(name, args)` sends one JSON line; asynchronous
   events (shortcuts, foreground window, ability clicks) arrive in `nativeEvent`.
 - **Windows:** `makeWindow(mode, options)` loads the same bundle with
-  `?window=<mode>`; `src/main.tsx` picks the component. Transparent overlays use
+  `?window=<mode>`; `src/main.tsx` picks the component. Always-open small
+  windows use `makeSmallWindow` to share the island's renderer process. Transparent overlays use
   `showInactive`, `focusable: false` and `setIgnoreMouseEvents` so they never
   steal focus.
 - **Preview:** `src/preview/bridge.ts` fakes `window.yami` with fixtures. Every

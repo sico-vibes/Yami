@@ -16,6 +16,7 @@ $sources = @(
   (Join-Path $projectRoot 'native\AudioDevices.cs'),
   (Join-Path $projectRoot 'native\Ports.cs'),
   (Join-Path $projectRoot 'native\WindowPin.cs'),
+  (Join-Path $projectRoot 'native\AppInfo.cs'),
   (Join-Path $projectRoot 'native\QuickAccent.cs')
 )
 $fingerprint = ($sources | ForEach-Object { [IO.File]::ReadAllText($_) }) -join "`n"

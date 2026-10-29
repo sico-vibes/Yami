@@ -1,6 +1,6 @@
 import { BrowserWindow, powerMonitor, screen } from "electron";
 import type { Store } from "./store";
-import { makeWindow } from "./windows";
+import { makeSmallWindow, makeWindow } from "./windows";
 import { toolActivity } from "./activity";
 import { createDeskWidget } from "./desk-widget";
 
@@ -19,8 +19,11 @@ export function createOverlays({
   showMain,
   broadcast,
   fullscreen,
+  host,
 }: {
   store: Store;
+  /** The island, whose renderer process the stray and desk widget share. */
+  host: () => BrowserWindow | undefined;
   showMain: () => void;
   broadcast: (event: any) => void;
   // True while a fullscreen app, game or presentation is in front.
@@ -35,10 +38,11 @@ export function createOverlays({
     undockTimer: NodeJS.Timeout | undefined,
     docked = false,
     covered = false,
+    strayOpening = false,
     busy = false,
     activityId = 0,
     captionData = emptyCaption();
-  const desk = createDeskWidget(store);
+  const desk = createDeskWidget(store, host);
   const alive = (w?: BrowserWindow): w is BrowserWindow =>
     !!w && !w.isDestroyed();
   const send = (w: BrowserWindow | undefined, event: any) => {
@@ -125,9 +129,10 @@ export function createOverlays({
   }
   function syncStray() {
     const roam = store.state.settings.roam;
-    if (roam && !alive(stray)) {
+    if (roam && !alive(stray) && !strayOpening) {
       const spot = home || restingSpot();
-      stray = makeWindow("stray", {
+      strayOpening = true;
+      void makeSmallWindow(host(), "stray", {
         ...spot,
         ...STRAY,
         transparent: true,
@@ -136,18 +141,24 @@ export function createOverlays({
         resizable: false,
         hasShadow: false,
         focusable: false,
+      }).then((w) => {
+        strayOpening = false;
+        stray = w;
+        w.setAlwaysOnTop(true, "floating");
+        w.setIgnoreMouseEvents(true, { forward: true });
+        w.once("ready-to-show", () => {
+          if (alive(w) && !docked && !covered) w.showInactive();
+        });
+        w.on("closed", () => {
+          if (stray !== w) return;
+          stray = undefined;
+          clearInterval(glide);
+          clearTimeout(drift);
+        });
+        // Turned off while it was opening.
+        if (!store.state.settings.roam) w.close();
+        else scheduleDrift();
       });
-      stray.setAlwaysOnTop(true, "floating");
-      stray.setIgnoreMouseEvents(true, { forward: true });
-      stray.once("ready-to-show", () => {
-        if (alive(stray) && !docked && !covered) stray.showInactive();
-      });
-      stray.on("closed", () => {
-        stray = undefined;
-        clearInterval(glide);
-        clearTimeout(drift);
-      });
-      scheduleDrift();
     } else if (!roam && alive(stray)) stray.close();
   }
   function dock() {

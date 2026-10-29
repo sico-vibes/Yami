@@ -44,6 +44,15 @@ try {
     if (!dock) await wait(100);
   }
   assert.ok(dock, "the dock window opened");
+  const pids = await app.evaluate(({ BrowserWindow }) =>
+    Object.fromEntries(
+      BrowserWindow.getAllWindows().map((w) => [
+        new URL(w.webContents.getURL()).searchParams.get("window"),
+        w.webContents.getOSProcessId(),
+      ]),
+    ),
+  );
+  assert.equal(pids.dock, pids.island, "the dock shares the island's process");
   let items = await call("dock.items");
   const test = items.find((i) => /powershell/i.test(i.name));
   assert.ok(

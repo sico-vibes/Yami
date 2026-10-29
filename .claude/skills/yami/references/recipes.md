@@ -48,6 +48,11 @@ proves other data (messages, keys) is untouched.
 Create it with `makeWindow("<mode>", options)` from `electron/windows.ts`, add
 `mode === "<mode>"` to `src/main.tsx`, make html/body transparent in
 `src/styles/overlays.css`, and create it only when needed and close it when idle.
+A small window that stays open at idle (like the roaming Yami, the dock and the
+desk widget) should use `makeSmallWindow(island, "<mode>", options)` instead: it
+opens from the island's page and shares its renderer process (about 25 MB less
+per window). It resolves asynchronously, so guard against opening twice and
+check the setting again once it arrives.
 For click-through windows use `setIgnoreMouseEvents(true, { forward: true })`
 and toggle on hover from the renderer. Add a preview screen in
 `src/preview/bootstrap.tsx` and to `scripts/verify-preview.mjs`.

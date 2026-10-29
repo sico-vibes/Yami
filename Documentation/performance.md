@@ -6,7 +6,7 @@ Yami is designed to sit quietly on a Windows desktop for long periods. The app s
 
 | State | Working set target | CPU target | Status |
 | --- | ---: | --- | --- |
-| Idle with island and tray, no request active | 100–200 MB private working set for the Yami process tree | Near-zero sustained CPU, with short event-driven wakeups | Earlier samples (165–172 MB private) fall inside this budget; they were short runs, not soak tests. Every optional module must still cost nothing while off. |
+| Idle with island and tray, no request active | 100–200 MB private working set for the Yami process tree | Near-zero sustained CPU, with short event-driven wakeups | The latest packaged samples (153 MB by default, 166–185 MB with the dock and desk widget, 2026-10-29) fall inside this budget; they were short runs, not soak tests. Every optional module must still cost nothing while off. |
 | Active feature use | Keep the Yami process tree below 600–700 MB when practical | Bound expensive polling and release temporary media/capture buffers | Ceiling target; provider, Electron renderer, and selected feature can create short-lived spikes. |
 
 The owner raised the idle budget from 50–100 MB to 100–200 MB on 2026-10-27 so optional modules have room; the dated measurements below were recorded against the earlier 50–100 MB target and say so.
@@ -77,13 +77,29 @@ Rebuilt with `npx electron-builder --win --dir` after the day's features, then `
 
 After the network shield, Cleanup, Disk space, the mouse pointer, environment and hosts editors, Keep awake, the colour picker, always on top, window layouts, workspaces, accent characters, quick look, radio, podcasts, currency, holidays, air quality, package checks, focus sessions, the daily brief, and Outlook and Bluesky sign-in, the packaged build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged`, default settings, same PC) measured **165.1 MB**, and on a second run **169.3–174.6 MB**, private working set across 8 processes at idle, with 0% sampled CPU. The previous packaged figure was 168.0–168.1 MB, so the additions cost little or nothing at idle; they load when used, and the optional ones (shield, accent characters, quick look) are off by default. The run-to-run spread is about 10 MB.
 
+## One renderer for the small windows (2026-10-29)
+
+Each Electron window normally starts its own renderer process, about 25–50 MB private each. The roaming Yami, the dock and the desk widget are now opened with `window.open` from the island's page, so Chromium keeps them in the island's renderer: the windows stay separate (own bounds, focus rules and IPC sender), but share one process. Opening is queued, because each opening briefly sets the island's window-open rule, and a window that cannot be hosted falls back to its own process. A side effect: if the island's renderer ends, those windows close with it and reopen on the next settings sync. The voice caption keeps its own short-lived process.
+
+Packaged build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged [--dock] [--widget]`), Ryzen 5 5600X, 32 GB, Windows build 26300, default settings otherwise (roaming on):
+
+| Scenario | Before | After |
+| --- | --- | --- |
+| Default (island, roaming Yami) | 168.0 MB, 8 processes | **152.6–153.0 MB, 7 processes** |
+| Dock on | 217.6–222.8 MB, 9 processes | **166.1–172.3 MB, 7 processes** |
+| Dock and desk widget on | not measured (≈207 MB with only the dock shared) | **180.2–184.9 MB, 7 processes** |
+
+CPU sampled 0–1.75% at idle. All three are inside the 100–200 MB idle budget. `scripts/verify-dock.mjs` and `scripts/verify-desk-widget.mjs` now assert that their window shares the island's process.
+
+**Measuring on a PC in use.** A test copy of Yami is a full Yami: its roaming Yami walks your real desktop and its shortcuts are live, so a click on it or a shortcut press can open its main window (about +65 MB) or change its throwaway settings. Several runs on 2026-10-29 were spoiled that way (readings of 230–300 MB with a main window open). The measurement now lists the windows that were open at the end (`windows` in `.artifacts/performance-results.json`); discard runs that show `main`.
+
 ## Whistle dictation (2026-10-28)
 
 `needle.exe` (Needle 3, pinned) transcribing a 5-second 16 kHz WAV with `whistle.cact`: 384 ms wall time, 118 ms to the first token, peak working set about 42 MB (38 MB private), sampled every 20 ms with PowerShell. The runner exits after each utterance, so nothing stays resident. Through Yami (write WAV, run, apply Your words, paste) the whole dictation took about 1 second.
 
 ## Desk widget (2026-10-28)
 
-The optional desk widget adds one renderer process. With the widget on (media playing, no agents) the desktop check read that renderer at **36–39 MB** private bytes from `app.getAppMetrics()` in four source-build runs. The whole-tree number in the same runs moved by ±15 MB with the main window and Playwright attached, so it is not a usable delta; a packaged idle measurement with the widget on has not been run. It is off by default, and switching it off closes the window.
+The optional desk widget used to add one renderer process (see *One renderer for the small windows*, 2026-10-29: it now shares the island's). With the widget on (media playing, no agents) the desktop check read that renderer at **36–39 MB** private bytes from `app.getAppMetrics()` in four source-build runs. The whole-tree number in the same runs moved by ±15 MB with the main window and Playwright attached, so it is not a usable delta; a packaged idle measurement with the widget on has not been run. It is off by default, and switching it off closes the window.
 
 ## Browser filter lists (2026-10-28)
 
@@ -120,7 +136,7 @@ measure a terminal/agent task peak or long-term recording/model ceiling. See
 - Main process checks due tasks every five seconds. A separate Windows waitable timer asks the operating system to wake at the next scheduled action.
 - Clipboard history polls every 1.8 seconds while enabled; polling skips known private contexts and pauses briefly after Yami writes text.
 - Global keyboard and mouse hooks remain active while Yami is running and shortcuts are enabled. These hooks support hold-to-talk, dictation, lasso, launcher, and ability input.
-- The tray and island remain active while the main window is hidden. Electron windows use `backgroundThrottling: true`. The cat spirit requests animation frames only while active and cancels its loop once settled (zero frames at idle in the browser preview). The optional **Living flame** setting deliberately keeps one animation loop per visible Yami running at idle. The roaming window adds one small transparent renderer when **Let Yami roam** is on and hides while a fullscreen app is in front; it does not poll the cursor (hover arrives through forwarded mouse events) and runs one drift timer every 3–6 minutes. The caption window exists only during a voice or dictation turn. The island no longer polls media every eight seconds: it reads media on start, on foreground-app changes, on hover and when the drawer closes, and polls every 15 seconds only while something is playing. See the v0.2.0 comparison above for measured idle figures.
+- The tray and island remain active while the main window is hidden. Electron windows use `backgroundThrottling: true`. The cat spirit requests animation frames only while active and cancels its loop once settled (zero frames at idle in the browser preview). The optional **Living flame** setting deliberately keeps one animation loop per visible Yami running at idle. The roaming window, the dock and the desk widget are opened from the island's page, so they run in the island's renderer process instead of adding one each (`makeSmallWindow` in `electron/windows.ts`; if the island cannot host them they fall back to a process of their own). The roaming window hides while a fullscreen app is in front; it does not poll the cursor (hover arrives through forwarded mouse events) and runs one drift timer every 3–6 minutes. The caption window exists only during a voice or dictation turn. The island no longer polls media every eight seconds: it reads media on start, on foreground-app changes, on hover and when the drawer closes, and polls every 15 seconds only while something is playing. See the v0.2.0 comparison above for measured idle figures.
 - Hardware metrics refresh while the Stats view is mounted (every 2.5 seconds). CPU load and memory are read directly; GPU, disk, process and network queries run in the background on 10/30/8/2-second schedules only while Stats keeps asking, so the tab opens without waiting for Windows queries.
 - Controls refresh every six seconds while that panel is open, the island media card re-reads media every five seconds only while it is open, and Windows media-script results are cached for six seconds while active or 30 seconds while inactive. In-flight PowerShell/native-script requests are deduplicated.
 - A live Gemini socket and audio buffers exist during an explicit voice session. They should close and release temporary data after the user ends the turn/session.
