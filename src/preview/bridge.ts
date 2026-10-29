@@ -316,6 +316,19 @@ export function installPreviewBridge() {
               },
             ],
           };
+        case "downloads.link":
+        case "downloads.link.set":
+        case "downloads.link.open":
+          return {
+            on: method !== "downloads.link" || false,
+            running: true,
+            folder: "C:/Users/demo/AppData/Roaming/Yami/extension",
+            prepared: true,
+            browsers: [
+              { id: "chrome", name: "Google Chrome" },
+              { id: "edge", name: "Microsoft Edge" },
+            ],
+          };
         case "downloads.add":
         case "downloads.pause":
         case "downloads.resume":

@@ -50,6 +50,10 @@
       {
         "from": "Documentation/assets/third-party",
         "to": "licenses"
+      },
+      {
+        "from": "extension",
+        "to": "extension"
       }
     ],
     "win": {

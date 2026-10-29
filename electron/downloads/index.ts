@@ -1,6 +1,7 @@
 import path from "node:path";
 import { app, shell, type Session } from "electron";
 import { DownloadManager } from "./manager.ts";
+import { BrowserLink } from "./link.ts";
 
 // One download manager for Yami: the Downloads page, the Yami Browser and
 // the browser extension all hand links to it. Built when first used.
@@ -8,8 +9,30 @@ import { DownloadManager } from "./manager.ts";
 let manager: DownloadManager | undefined;
 let config: { dataDir: string; broadcast: (event: any) => void } | undefined;
 
+let link: BrowserLink | undefined;
+
 export function initDownloads(c: NonNullable<typeof config>) {
   config = c;
+  void browserLink().resume();
+}
+
+/** The Yami Home extension's link to this download manager. */
+export function browserLink() {
+  if (!config) throw new Error("Downloads are not ready yet.");
+  link ||= new BrowserLink(
+    config.dataDir,
+    app.isPackaged
+      ? path.join(process.resourcesPath, "extension")
+      : path.join(app.getAppPath(), "extension"),
+    (url, name) => {
+      downloads().add(url, { name });
+      config?.broadcast({
+        type: "toast",
+        message: "A download from your browser is in Yami.",
+      });
+    },
+  );
+  return link;
 }
 
 export function downloads() {
@@ -61,6 +84,15 @@ export async function downloadsRequest(method: string, a: any = {}) {
       const error = await shell.openPath(job.file);
       if (error) throw new Error(error);
     }
+    return true;
+  }
+  if (method === "downloads.link") return browserLink().status();
+  if (method === "downloads.link.set") return browserLink().set(a.on);
+  if (method === "downloads.link.prepare") return browserLink().prepare();
+  if (method === "downloads.link.open")
+    return browserLink().openBrowser(a.browser);
+  if (method === "downloads.link.folder") {
+    await shell.openPath(browserLink().folder());
     return true;
   }
   if (method === "downloads.folder") {

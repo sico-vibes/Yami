@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>New tab</title>
+    <link rel="stylesheet" href="newtab.css" />
+  </head>
+  <body>
+    <div class="backdrop" id="backdrop"></div>
+    <main>
+      <section class="hello">
+        <time id="clock">--:--</time>
+        <p id="greeting"></p>
+      </section>
+      <form class="search" id="search">
+        <input id="query" autocomplete="off" placeholder="Search the web" aria-label="Search the web" />
+      </form>
+      <nav class="folders" id="folders" aria-label="Folders"></nav>
+      <section class="tiles" id="tiles" aria-label="Bookmarks"></section>
+    </main>
+    <button class="gear" id="open-settings" aria-label="Customize">⚙</button>
+    <aside class="panel" id="panel" hidden>
+      <h2>Customize</h2>
+      <label>Background picture <input type="file" id="background" accept="image/*" /></label>
+      <button id="clear-background" type="button">Use the night sky</button>
+      <label>Search with
+        <select id="engine">
+          <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+          <option value="https://www.google.com/search?q=">Google</option>
+          <option value="https://www.bing.com/search?q=">Bing</option>
+          <option value="https://search.brave.com/search?q=">Brave Search</option>
+        </select>
+      </label>
+      <label>Your name <input id="name" maxlength="40" /></label>
+      <label class="check"><input type="checkbox" id="send-all" /> Send all downloads to Yami</label>
+      <p class="link" id="link-status">Checking Yami…</p>
+      <h3>Folders</h3>
+      <div class="row"><input id="new-folder" placeholder="New folder" maxlength="30" /><button id="add-folder" type="button">Add</button></div>
+      <h3>Bookmark</h3>
+      <div class="row">
+        <input id="tile-name" placeholder="Name" maxlength="40" />
+        <input id="tile-url" placeholder="https://…" />
+        <button id="add-tile" type="button">Add</button>
+      </div>
+      <button id="import" type="button">Import my bookmarks bar</button>
+      <button id="close-settings" type="button" class="primary">Done</button>
+    </aside>
+    <script src="newtab.js"></script>
+  </body>
+</html>

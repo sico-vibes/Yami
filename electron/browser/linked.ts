@@ -70,8 +70,11 @@ export function linkedArgs(
   port: number,
   url: string,
   headless = false,
+  /** Yami Home, loaded into this Yami-only profile when the link is on. */
+  extension?: string,
 ) {
   return [
+    ...(extension ? [`--load-extension=${extension}`] : []),
     `--user-data-dir=${profile}`,
     `--remote-debugging-port=${port}`,
     "--remote-debugging-address=127.0.0.1",
@@ -106,7 +109,12 @@ async function cdp(wsUrl: string, method: string, params: object, ms = 10000) {
   });
 }
 
-export function createLinked(deps: { profileRoot: string; port?: number }) {
+export function createLinked(deps: {
+  profileRoot: string;
+  port?: number;
+  /** The prepared Yami Home folder, or undefined when the link is off. */
+  extension?: () => string | undefined;
+}) {
   const port = deps.port ?? 47824;
   let child: ChildProcess | undefined;
   let current: LinkedBrowser | undefined;
@@ -137,11 +145,15 @@ export function createLinked(deps: { profileRoot: string; port?: number }) {
       }
       const profile = path.join(deps.profileRoot, "linked-" + browser.id);
       fs.mkdirSync(profile, { recursive: true });
-      child = spawn(browser.exe, linkedArgs(profile, port, url, headless), {
-        detached: false,
-        stdio: "ignore",
-        windowsHide: headless,
-      });
+      child = spawn(
+        browser.exe,
+        linkedArgs(profile, port, url, headless, deps.extension?.()),
+        {
+          detached: false,
+          stdio: "ignore",
+          windowsHide: headless,
+        },
+      );
       current = browser;
       child.once("exit", () => {
         child = undefined;

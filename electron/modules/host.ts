@@ -26,6 +26,7 @@ import { FeedsController } from "../feeds/feeds";
 import { MailAccounts } from "../feeds/mail-accounts";
 import { validClientId } from "../feeds/microsoft";
 import { BlueskyHome } from "../feeds/bluesky";
+import { browserLink } from "../downloads/index";
 import { searchPodcasts } from "../feeds/podcasts";
 import { loadTune, shieldWanted, tuneRequest, type Tune } from "../tune/load";
 import { agentLinkPort } from "../agentlink/server";
@@ -193,7 +194,13 @@ export function createModuleHost(deps: Deps) {
               decrypt: (data) => safeStorage.decryptString(data),
               available: () => safeStorage.isEncryptionAvailable(),
             }),
-            linked: createLinked({ profileRoot: path.dirname(store.file) }),
+            linked: createLinked({
+              profileRoot: path.dirname(store.file),
+              extension: () => {
+                const s = browserLink().status();
+                return s.on && s.prepared ? s.folder : undefined;
+              },
+            }),
           };
         },
         dispose: (b: Browser) => {

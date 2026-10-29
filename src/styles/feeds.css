@@ -304,3 +304,24 @@ html[data-reduced="true"] .inbox-item {
   margin-top: var(--space-5);
   text-align: center;
 }
+.browser-link {
+  margin-top: var(--space-5);
+}
+.link-steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-7, 36px);
+  border-radius: var(--r-md);
+  background: var(--selected);
+  border: 1px solid var(--selected-line);
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+}
+.link-steps code {
+  display: block;
+  margin-top: var(--space-1);
+  font: 500 var(--fs-xs) "Cascadia Mono", Consolas, monospace;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}

@@ -499,6 +499,11 @@ export function createRequestHandler(ctx: RequestContext) {
       case "downloads.open":
       case "downloads.reveal":
       case "downloads.folder":
+      case "downloads.link":
+      case "downloads.link.set":
+      case "downloads.link.prepare":
+      case "downloads.link.open":
+      case "downloads.link.folder":
         return downloadsRequest(method, a);
       case "peek.open":
         return openPeek(String(a.path || ""));

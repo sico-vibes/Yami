@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Yami Home",
+  "version": "1.0.0",
+  "description": "A calm new tab with your background and bookmark folders, and downloads that go to Yami.",
+  "icons": { "128": "icon.png" },
+  "chrome_url_overrides": { "newtab": "newtab.html" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["storage", "contextMenus", "downloads", "bookmarks"],
+  "host_permissions": ["http://127.0.0.1:47823/*"],
+  "action": { "default_title": "Yami Home" }
+}

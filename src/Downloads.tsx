@@ -3,6 +3,7 @@ import { api } from "./api";
 import { Meter, Select, relativeTime } from "./controls";
 import { bytesText } from "./tune/CleanupSection";
 import { Icon, IconButton } from "./ui";
+import { BrowserLinkCard } from "./BrowserLinkCard";
 
 type Job = {
   id: string;
@@ -193,6 +194,7 @@ export function Downloads({ report }: { report: (m: string) => void }) {
           Clear finished
         </button>
       )}
+      <BrowserLinkCard report={report} />
     </div>
   );
 }
