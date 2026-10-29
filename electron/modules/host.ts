@@ -29,6 +29,7 @@ import { readMachineKey, regExe } from "../tune/registry";
 import { StartupController } from "../tune/startup";
 import { DnsController } from "../tune/dns";
 import { AdminController } from "../tune/admin";
+import { AppsController } from "../tune/apps";
 import { helperPath } from "../workbench/terminal";
 import { agentLinkPort } from "../agentlink/server";
 import {
@@ -56,6 +57,7 @@ type Tune = {
   startup: StartupController;
   dns: DnsController;
   admin: AdminController;
+  apps: AppsController;
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type Browser = {
@@ -211,6 +213,7 @@ export function createModuleHost(deps: Deps) {
               sandbox ? undefined : readMachineKey,
             ),
             dns: new DnsController(helperPath("Dns.ps1")),
+            apps: new AppsController(helperPath("Apps.ps1")),
             admin: new AdminController(
               helperPath("Admin.ps1"),
               path.join(path.dirname(store.file), "tune-admin.json"),
@@ -759,7 +762,10 @@ export function createModuleHost(deps: Deps) {
           startup,
           dns,
           admin,
+          apps,
         } = registry.get<Tune>("tune");
+        if (method === "tune.apps") return apps.list();
+        if (method === "tune.apps.uninstall") return apps.uninstall(a.id);
         if (method === "tune.admin") return admin.list();
         if (method === "tune.admin.service")
           return admin.setService(a.name, a.off);

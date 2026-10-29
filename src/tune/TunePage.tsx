@@ -10,6 +10,7 @@ import {
 import { Icon, Modal, Toggle } from "../ui";
 import { DnsSection } from "./DnsSection";
 import { AdminSection } from "./AdminSection";
+import { AppsSection } from "./AppsSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -107,6 +108,7 @@ export default function TunePage({
       ))}
       <DnsSection report={report} />
       <AdminSection report={report} />
+      <AppsSection report={report} />
       <section>
         <h3 className="group-title">Startup apps</h3>
         <p className="setting-note">

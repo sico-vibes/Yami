@@ -331,6 +331,34 @@ export function previewModules(
           savedStart: "Automatic",
         },
       ];
+    case "tune.apps":
+      return [
+        {
+          id: "a1",
+          name: "Demo Editor",
+          publisher: "Demo Co",
+          version: "2.4.1",
+          sizeKb: 412000,
+          user: true,
+        },
+        {
+          id: "a2",
+          name: "Sample Game",
+          publisher: "Example Studio",
+          version: "1.0",
+          sizeKb: 3800000,
+          user: false,
+        },
+        {
+          id: "a3",
+          name: "Tiny Tool",
+          publisher: "",
+          version: "0.3",
+          sizeKb: 900,
+          user: true,
+        },
+      ];
+    case "tune.apps.uninstall":
     case "tune.admin.service":
     case "tune.admin.restorePoint":
       throw new Error("Preview only — nothing was changed.");

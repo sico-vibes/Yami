@@ -162,9 +162,14 @@ Workspace verification commands:
   command each stand-in received, the refusals (one agent, an uninstalled one, a
   repeat), the Compare view for their two different changes, and removing both worktrees.
 - `node scripts/verify-tune.mjs`: applies and undoes every Tune tweak with real
-  `reg.exe`, confined to a throwaway `HKCUSoftwareYamiTuneVerify-<time>` key through
+  `reg.exe`, confined to a throwaway `HKCU\Software\YamiTuneVerify-<time>` key through
   `YAMI_TUNE_ROOT`, checks that real Explorer settings did not change, and deletes the
   sandbox. It never restarts Explorer.
+- `node scripts/verify-apps.mjs`: isolated profile; registers fake apps in a throwaway
+  `HKCU\Software\YamiAppsVerify-<time>` key through `YAMI_APPS_ROOT`, checks which are
+  listed (duplicates, system components, updates and entries without an uninstaller are
+  left out), searches and uninstalls one through the page, and checks that its fixture
+  uninstaller (a `.cmd` that writes a marker file) ran. No real app is removed.
 - `node scripts/verify-feeds.mjs`: needs the internet. Reads Hacker News, the
   electron/electron releases feed and r/rust in an isolated profile, then opens the Inbox.
 - `node scripts/verify-agentlink.mjs`: isolated profile; turns on Yami for your

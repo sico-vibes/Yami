@@ -35,3 +35,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.apps-search .search-field {
+  flex: 1;
+}
