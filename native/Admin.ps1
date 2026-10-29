@@ -1,4 +1,4 @@
-param([string]$Mode = 'read', [string]$Name = '', [string]$Start = '', [string]$Out = '', [string]$Run = '')
+param([string]$Mode = 'read', [string]$Name = '', [string]$Start = '', [string]$Out = '', [string]$Run = '', [string]$Source = '')
 $ErrorActionPreference = 'Stop'
 # Tune's administrator actions. Reading needs no rights; 'service' and
 # 'restore-point' run elevated (one UAC prompt each). Only these services
@@ -35,6 +35,25 @@ try {
     Checkpoint-Computer -Description 'Before changes in Yami Tune' -RestorePointType MODIFY_SETTINGS
     $after = @(Get-ComputerRestorePoint -ErrorAction SilentlyContinue).Count
     Reply @{ ok = $true; created = ($after -gt $before) }
+    exit
+  }
+  if ($Mode -eq 'hosts') {
+    # The hosts file Yami prepared: every line must be blank, a comment, or
+    # an IP address followed by host names. Anything else is refused.
+    $text = [IO.File]::ReadAllText($Source)
+    if ($text.Length -gt 1MB) { throw 'That hosts file is too large.' }
+    foreach ($line in ($text -split "`r?`n")) {
+      $t = $line.Trim()
+      if ($t -eq '' -or $t.StartsWith('#')) { continue }
+      $parts = ($t -split '#')[0].Trim() -split '\s+'
+      $ip = $null
+      if ($parts.Count -lt 2 -or -not [Net.IPAddress]::TryParse($parts[0], [ref]$ip)) { throw "Not a hosts line: $t" }
+      foreach ($h in $parts[1..($parts.Count - 1)]) { if ($h -notmatch '^[A-Za-z0-9._-]{1,253}$') { throw "Not a host name: $h" } }
+    }
+    $hosts = Join-Path $env:SystemRoot 'System32\drivers\etc\hosts'
+    [IO.File]::WriteAllText($hosts, $text, (New-Object Text.UTF8Encoding $false))
+    Clear-DnsClientCache
+    Reply @{ ok = $true }
     exit
   }
   throw 'Unknown request.'

@@ -16,6 +16,7 @@ import { CleanupSection } from "./CleanupSection";
 import { SpaceSection } from "./SpaceSection";
 import { CursorSection } from "./CursorSection";
 import { EnvSection } from "./EnvSection";
+import { HostsSection } from "./HostsSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -126,6 +127,7 @@ export default function TunePage({
         onDns={() => setDnsKey((k) => k + 1)}
       />
       <AdminSection report={report} />
+      <HostsSection report={report} />
       <CleanupSection report={report} />
       <EnvSection report={report} />
       <SpaceSection report={report} />

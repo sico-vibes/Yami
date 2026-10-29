@@ -13,6 +13,7 @@ import { NetworkShield } from "./shield";
 import { SpaceController } from "./space";
 import { CursorController } from "./cursors";
 import { EnvController } from "./env";
+import { HostsController } from "./hosts";
 import { shell } from "electron";
 
 export { shieldWanted } from "./shield";
@@ -28,6 +29,7 @@ export type Tune = {
   space: SpaceController;
   cursors: CursorController;
   env: EnvController;
+  hosts: HostsController;
   shield: NetworkShield;
 };
 
@@ -42,7 +44,28 @@ export function loadTune(
   // uses its own Startup folder.
   const sandbox = process.env.YAMI_TUNE_ROOT;
   const io = regExe(sandbox);
+  const admin = new AdminController(
+    helperPath("Admin.ps1"),
+    path.join(dataDir, "tune-admin.json"),
+  );
+  // YAMI_HOSTS_FILE points the desktop check at a copy, written directly.
+  const hostsFile =
+    process.env.YAMI_HOSTS_FILE ||
+    path.join(
+      process.env.SystemRoot || "C:\\Windows",
+      "System32",
+      "drivers",
+      "etc",
+      "hosts",
+    );
   return {
+    hosts: new HostsController(
+      hostsFile,
+      path.join(dataDir, "tune-hosts-original.txt"),
+      process.env.YAMI_HOSTS_FILE
+        ? async (prepared) => fs.copyFileSync(prepared, hostsFile)
+        : (prepared) => admin.elevated(["-Mode", "hosts", "-Source", prepared]),
+    ),
     tweaks: new TuneController(path.join(dataDir, "tune.json"), io),
     startup: new StartupController(
       io,
@@ -81,16 +104,18 @@ export function loadTune(
       dir: dataDir,
       port: Number(process.env.YAMI_SHIELD_PORT) || 53,
     }),
-    admin: new AdminController(
-      helperPath("Admin.ps1"),
-      path.join(dataDir, "tune-admin.json"),
-    ),
+    admin,
   };
 }
 
 /** Answers `tune.*` requests from the page. */
 export function tuneRequest(t: Tune, method: string, a: any = {}) {
   if (method.startsWith("tune.shield")) return t.shield.request(method, a);
+  if (method === "tune.hosts") return t.hosts.list();
+  if (method === "tune.hosts.add") return t.hosts.add(a.ip, a.name);
+  if (method === "tune.hosts.toggle") return t.hosts.toggle(a.line, a.on);
+  if (method === "tune.hosts.remove") return t.hosts.remove(a.line);
+  if (method === "tune.hosts.restore") return t.hosts.restore();
   if (method === "tune.env") return t.env.list();
   if (method === "tune.env.set") return t.env.set(a);
   if (method === "tune.env.remove") return t.env.remove(a.name);

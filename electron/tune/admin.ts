@@ -82,7 +82,7 @@ export class AdminController {
   }
 
   /** Runs one elevated step and returns what it wrote. */
-  private async elevated(params: string[]) {
+  async elevated(params: string[]) {
     const out = path.join(
       os.tmpdir(),
       `yami-admin-${process.pid}-${Date.now()}.json`,

@@ -407,6 +407,19 @@ export function previewModules(
           user: true,
         },
       ];
+    case "tune.hosts":
+      return {
+        entries: [
+          { line: 21, ip: "127.0.0.1", names: ["dev.local"], on: true },
+          { line: 22, ip: "0.0.0.0", names: ["ads.example.com"], on: false },
+        ],
+        changed: false,
+      };
+    case "tune.hosts.add":
+    case "tune.hosts.toggle":
+    case "tune.hosts.remove":
+    case "tune.hosts.restore":
+      throw new Error("Preview only — the hosts file was not touched.");
     case "tune.env":
     case "tune.env.set":
     case "tune.env.remove":
