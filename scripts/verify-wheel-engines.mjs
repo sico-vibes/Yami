@@ -80,6 +80,15 @@ function wav(file) {
   fs.writeFileSync(file, Buffer.concat([head, data]));
 }
 
+// Optional: reuse engines another run already downloaded (all but ImageMagick,
+// so its install runs again), to skip the long ffmpeg download.
+const reuse = process.argv[2];
+if (reuse)
+  for (const id of fs.readdirSync(reuse))
+    if (id !== "magick")
+      fs.cpSync(path.join(reuse, id), path.join(profile, "engines", id), {
+        recursive: true,
+      });
 const image = path.join(work, "gradient.png");
 const tone = path.join(work, "tone.wav");
 png(image);

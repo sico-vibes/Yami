@@ -2,7 +2,12 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { unpackZip } from "./archive.ts";
-import { engines as defaultEngines, type EngineId, type EngineSpec } from "./engine-catalog.ts";
+import { runProcess } from "./spawn.ts";
+import {
+  engines as defaultEngines,
+  type EngineId,
+  type EngineSpec,
+} from "./engine-catalog.ts";
 
 export type CommandRunner = {
   run: (command: string, args: string[]) => Promise<void>;
@@ -19,15 +24,24 @@ async function walk(dir: string): Promise<string[]> {
 }
 
 function findExe(files: string[], name: string) {
-  const matches = files.filter((file) => path.basename(file).toLowerCase() === name.toLowerCase());
-  return (
-    matches.find((file) => /x64|bin/i.test(file)) ||
-    matches[0] ||
-    ""
+  const matches = files.filter(
+    (file) => path.basename(file).toLowerCase() === name.toLowerCase(),
   );
+  return matches.find((file) => /x64|bin/i.test(file)) || matches[0] || "";
 }
 
 export type EngineProgress = (received: number, total: number) => void;
+
+const extract7z: CommandRunner = {
+  async run(command, args) {
+    const result = await runProcess(command, args);
+    if (result.code !== 0)
+      throw new Error(
+        result.stderr.trim().split(/\r?\n/).at(-1) ||
+          "The pack could not be unpacked.",
+      );
+  },
+};
 
 export class EngineStore {
   // One download per engine, shared by the wheel and Settings › Modules.
@@ -37,7 +51,9 @@ export class EngineStore {
     private readonly root: string,
     private readonly specs: EngineSpec[] = defaultEngines,
     private readonly fetchImpl: typeof fetch = fetch,
-    private readonly runner: CommandRunner = { async run() {} },
+    // A real process runner: 7z packs (ImageMagick, 7-Zip extra) are
+    // unpacked by running the 7-Zip pack's 7zr.exe.
+    private readonly runner: CommandRunner = extract7z,
   ) {}
 
   list() {
@@ -53,7 +69,10 @@ export class EngineStore {
     return this.pending.has(id);
   }
 
-  ensure(id: EngineId, options: { signal?: AbortSignal; progress?: EngineProgress } = {}) {
+  ensure(
+    id: EngineId,
+    options: { signal?: AbortSignal; progress?: EngineProgress } = {},
+  ) {
     const spec = this.spec(id);
     const cached = this.readyExe(spec);
     if (cached) return Promise.resolve(cached);
@@ -68,17 +87,24 @@ export class EngineStore {
   /** Installs from a file the user downloaded; the same pin applies. */
   async installFile(id: EngineId, file: string) {
     const spec = this.spec(id);
-    if (this.pending.has(id)) throw new Error(`${spec.id} is already downloading.`);
+    if (this.pending.has(id))
+      throw new Error(`${spec.id} is already downloading.`);
     const bytes = await fs.promises.readFile(file);
-    const job = this.install(spec, bytes).finally(() => this.pending.delete(id));
+    const job = this.install(spec, bytes).finally(() =>
+      this.pending.delete(id),
+    );
     this.pending.set(id, job);
     return job;
   }
 
   async remove(id: EngineId) {
     const spec = this.spec(id);
-    if (this.pending.has(id)) throw new Error(`Wait for ${spec.id} to finish downloading.`);
-    await fs.promises.rm(path.join(this.root, spec.id), { recursive: true, force: true });
+    if (this.pending.has(id))
+      throw new Error(`Wait for ${spec.id} to finish downloading.`);
+    await fs.promises.rm(path.join(this.root, spec.id), {
+      recursive: true,
+      force: true,
+    });
   }
 
   private spec(id: EngineId) {
@@ -92,7 +118,8 @@ export class EngineStore {
     options: { signal?: AbortSignal; progress?: EngineProgress },
   ) {
     const response = await this.fetchImpl(spec.url, { signal: options.signal });
-    if (!response.ok) throw new Error(`${spec.id} download failed (${response.status}).`);
+    if (!response.ok)
+      throw new Error(`${spec.id} download failed (${response.status}).`);
     const total = Number(response.headers.get("content-length")) || 0;
     const chunks: Uint8Array[] = [];
     let received = 0;
@@ -114,7 +141,9 @@ export class EngineStore {
     const payload = path.join(dir, "payload");
     const hash = createHash("sha256").update(bytes).digest("hex");
     if (hash !== spec.sha256)
-      throw new Error(`${spec.id} did not match its pinned checksum. It was not run.`);
+      throw new Error(
+        `${spec.id} did not match its pinned checksum. It was not run.`,
+      );
     await fs.promises.rm(dir, { recursive: true, force: true });
     await fs.promises.mkdir(dir, { recursive: true });
     await fs.promises.writeFile(payload, bytes);
@@ -134,7 +163,9 @@ export class EngineStore {
     }
     let files = await walk(filesDir);
     if (spec.id === "exiftool" && !findExe(files, "exiftool.exe")) {
-      const wrapped = files.find((file) => path.basename(file).toLowerCase() === "exiftool(-k).exe");
+      const wrapped = files.find(
+        (file) => path.basename(file).toLowerCase() === "exiftool(-k).exe",
+      );
       if (wrapped) {
         const renamed = path.join(path.dirname(wrapped), "exiftool.exe");
         await fs.promises.copyFile(wrapped, renamed);
@@ -142,7 +173,8 @@ export class EngineStore {
       }
     }
     const exe = findExe(files, spec.exe);
-    if (!exe) throw new Error(`${spec.id} downloaded, but ${spec.exe} was not inside.`);
+    if (!exe)
+      throw new Error(`${spec.id} downloaded, but ${spec.exe} was not inside.`);
     await fs.promises.writeFile(
       path.join(dir, "ready.json"),
       JSON.stringify({ sha256: spec.sha256, exe }),
@@ -153,9 +185,13 @@ export class EngineStore {
   private readyExe(spec: EngineSpec) {
     try {
       const marker = JSON.parse(
-        fs.readFileSync(path.join(this.root, spec.id, spec.version, "ready.json"), "utf8"),
+        fs.readFileSync(
+          path.join(this.root, spec.id, spec.version, "ready.json"),
+          "utf8",
+        ),
       );
-      if (marker.sha256 === spec.sha256 && fs.existsSync(marker.exe)) return String(marker.exe);
+      if (marker.sha256 === spec.sha256 && fs.existsSync(marker.exe))
+        return String(marker.exe);
     } catch {}
     return "";
   }
