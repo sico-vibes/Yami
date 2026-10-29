@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { dnsProfiles, type DnsAdapter } from "../../src/tune-types.ts";
@@ -21,6 +24,7 @@ export function elevatedArgs(
   index: number,
   profile: string,
   encrypt: "on" | "off" = "off",
+  out = "",
 ) {
   const inner = [
     "-NoProfile",
@@ -36,6 +40,7 @@ export function elevatedArgs(
     profile,
     "-Encrypt",
     encrypt,
+    ...(out ? ["-Out", `"${out}"`] : []),
   ];
   return [
     "-NoProfile",
@@ -102,21 +107,43 @@ export class DnsController {
     // The shield is on this PC; it encrypts its own lookups.
     const mode =
       encrypt === true && id !== "automatic" && id !== "yami" ? "on" : "off";
+    // The elevated script writes its answer here, so its error can be shown.
+    const out = path.join(
+      os.tmpdir(),
+      `yami-dns-${process.pid}-${Date.now()}.json`,
+    );
+    let failure = "",
+      timedOut = false;
     try {
-      await exec("powershell.exe", elevatedArgs(this.script, n, id, mode), {
-        windowsHide: true,
-        timeout: 120000,
-      });
+      await exec(
+        "powershell.exe",
+        elevatedArgs(this.script, n, id, mode, out),
+        { windowsHide: true, timeout: 120000 },
+      );
     } catch (error) {
-      const text = String(
+      failure = String(
         (error as { stderr?: string }).stderr || (error as Error).message,
       );
-      throw new Error(
-        /canceled by the user|cancelled/i.test(text)
-          ? "Windows did not get administrator approval, so DNS was not changed."
-          : "Windows could not change DNS for that adapter.",
-      );
     }
+    let reply: { error?: string } = {};
+    try {
+      reply = JSON.parse(fs.readFileSync(out, "utf8"));
+    } catch {}
+    fs.rmSync(out, { force: true });
+    if (/canceled by the user|cancelled/i.test(failure))
+      throw new Error(
+        "Windows did not get administrator approval, so DNS was not changed.",
+      );
+    if (reply.error || failure)
+      throw new Error(
+        `Windows could not change DNS for that adapter${
+          reply.error
+            ? `: ${reply.error}`
+            : timedOut
+              ? ": the administrator prompt was not answered in two minutes."
+              : "."
+        }`,
+      );
     return this.list();
   }
 }

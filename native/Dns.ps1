@@ -1,4 +1,4 @@
-param([string]$Mode = 'read', [int]$Index = 0, [string]$Profile = '', [string]$Encrypt = 'off')
+param([string]$Mode = 'read', [int]$Index = 0, [string]$Profile = '', [string]$Encrypt = 'off', [string]$Out = '')
 $ErrorActionPreference = 'Stop'
 # Fixed profiles only; nothing typed by the page reaches a command line.
 $profiles = @{
@@ -72,5 +72,13 @@ try {
     }
   }
   Clear-DnsClientCache
-  @{ ok = $true } | ConvertTo-Json -Compress
-} catch { @{ error = $_.Exception.Message } | ConvertTo-Json -Compress; exit 1 }
+  $json = @{ ok = $true } | ConvertTo-Json -Compress
+  # An elevated run cannot hand its output back, so it also writes it to $Out.
+  if ($Out) { [IO.File]::WriteAllText($Out, $json) }
+  $json
+} catch {
+  $json = @{ error = $_.Exception.Message } | ConvertTo-Json -Compress
+  if ($Out) { [IO.File]::WriteAllText($Out, $json) }
+  $json
+  exit 1
+}
