@@ -3,6 +3,7 @@ import type { AppItem, State } from "./shared";
 import { api } from "./api";
 import { Empty, Icon, IconButton, Modal } from "./ui";
 import { paletteItems, type PaletteItem } from "./palette";
+import { formatMoney, parseCurrency } from "./currency";
 export function Launcher({
   state,
   report,
@@ -19,7 +20,9 @@ export function Launcher({
     [projects, setProjects] = useState<
       { id: string; name: string; path: string }[]
     >([]),
-    [agents, setAgents] = useState<string[]>([]);
+    [agents, setAgents] = useState<string[]>([]),
+    // A currency answer for the query, when it asks for one.
+    [money, setMoney] = useState<PaletteItem | null>(null);
   useEffect(() => {
     api("apps")
       .then(setApps)
@@ -40,6 +43,26 @@ export function Launcher({
     }, 200);
     return () => clearTimeout(timer);
   }, [query]);
+  useEffect(() => {
+    const ask = parseCurrency(query);
+    setMoney(null);
+    if (!ask) return;
+    const timer = setTimeout(() => {
+      api("currency.convert", ask)
+        .then((r) => {
+          const text = formatMoney(r.value, r.to);
+          setMoney({
+            id: "currency",
+            title: `${formatMoney(r.amount, r.from)} = ${text}`,
+            hint: `Rate from ${r.date} (Frankfurter) · Enter copies`,
+            icon: "currency-circle-dollar",
+            run: { copy: text },
+          });
+        })
+        .catch(() => {});
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [query]);
   const filtered = apps.filter((a) =>
     a.name.toLowerCase().includes(query.toLowerCase()),
   );
@@ -58,7 +81,10 @@ export function Launcher({
           filtered.filter((a) => !state.favorites.includes(a.path)),
         ],
       ] as const);
-  const commands = paletteItems(query, state.settings, projects, agents);
+  const commands = [
+    ...(money ? [money] : []),
+    ...paletteItems(query, state.settings, projects, agents),
+  ];
   const run = ({ run: action }: PaletteItem) => {
     const done =
       "copy" in action

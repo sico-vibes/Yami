@@ -1,6 +1,7 @@
 import { findLyrics } from "./lyrics";
 import { KeepAwake } from "./keep-awake";
 import { createScreenTools } from "./screen-tools";
+import { Rates } from "./currency";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -103,6 +104,7 @@ export function createRequestHandler(ctx: RequestContext) {
     closePanel: () => setPanel(false),
     broadcast,
   });
+  const rates = new Rates();
   const awake = new KeepAwake(powerSaveBlocker, (state) =>
     broadcast({ type: "keep-awake", state }),
   );
@@ -472,6 +474,8 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "currency.convert":
+        return rates.convert(a);
       case "color.pick":
         return tools.pick();
       case "color.capture":
