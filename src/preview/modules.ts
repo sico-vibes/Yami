@@ -232,6 +232,19 @@ export function previewModules(
           },
         },
       ];
+    case "feeds.podcasts":
+      return [
+        {
+          name: "Demo Show",
+          author: "Sample Studio",
+          feed: "https://example.com/demo.xml",
+        },
+        {
+          name: "Another Demo",
+          author: "Example Radio",
+          feed: "https://example.com/another.xml",
+        },
+      ];
     case "feeds.bluesky":
     case "feeds.bluesky.refresh":
       return {

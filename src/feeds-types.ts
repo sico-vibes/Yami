@@ -8,7 +8,8 @@ export type FeedKind =
   | "youtube"
   | "bluesky"
   | "mastodon"
-  | "url";
+  | "url"
+  | "podcast";
 
 export type FeedSource = {
   id: string;
@@ -87,6 +88,12 @@ export const feedKinds: {
     label: "YouTube channel",
     icon: "youtube-logo",
     placeholder: "Channel ID (UC…)",
+  },
+  {
+    kind: "podcast",
+    label: "Podcast",
+    icon: "microphone-stage",
+    placeholder: "Search podcasts by name",
   },
   {
     kind: "bluesky",

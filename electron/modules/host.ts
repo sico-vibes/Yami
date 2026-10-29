@@ -26,6 +26,7 @@ import { FeedsController } from "../feeds/feeds";
 import { MailAccounts } from "../feeds/mail-accounts";
 import { validClientId } from "../feeds/microsoft";
 import { BlueskyHome } from "../feeds/bluesky";
+import { searchPodcasts } from "../feeds/podcasts";
 import { loadTune, shieldWanted, tuneRequest, type Tune } from "../tune/load";
 import { agentLinkPort } from "../agentlink/server";
 import {
@@ -723,7 +724,8 @@ export function createModuleHost(deps: Deps) {
         }
         if (method === "feeds.refresh")
           return feeds.refresh(a.id ? String(a.id) : undefined);
-        if (method === "feeds.add") return feeds.add(a.kind, a.value);
+        if (method === "feeds.add") return feeds.add(a.kind, a.value, a.name);
+        if (method === "feeds.podcasts") return searchPodcasts(a.term);
         if (method === "feeds.remove") return feeds.remove(String(a.id));
         throw new Error("Unknown feeds request.");
       }

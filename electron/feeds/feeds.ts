@@ -26,6 +26,7 @@ const kinds = [
   "youtube",
   "bluesky",
   "mastodon",
+  "podcast",
   "url",
 ];
 
@@ -65,7 +66,7 @@ export class FeedsController {
     return { sources, items, status };
   }
 
-  add(kind: unknown, value: unknown) {
+  add(kind: unknown, value: unknown, label?: unknown) {
     if (!kinds.includes(String(kind))) throw new Error("Choose a feed type.");
     const { url, name } = feedAddress(
       kind as FeedSource["kind"],
@@ -78,7 +79,11 @@ export class FeedsController {
     const source: FeedSource = {
       id: randomUUID(),
       kind: kind as FeedSource["kind"],
-      name,
+      // A podcast keeps the show's name from the search.
+      name:
+        kind === "podcast" && typeof label === "string" && label.trim()
+          ? label.trim().slice(0, 120)
+          : name,
       url,
       added: Date.now(),
     };
@@ -142,7 +147,14 @@ export class FeedsController {
             : `The feed returned HTTP ${response.status}.`,
         );
       }
-      const items = parseFeed(await boundedText(response), source.id);
+      // Podcast feeds list every episode and are often several megabytes.
+      const items = parseFeed(
+        await boundedText(
+          response,
+          source.kind === "podcast" ? 8 * 1024 * 1024 : undefined,
+        ),
+        source.id,
+      );
       this.saved.cache[source.id] = {
         etag: response.headers.get("etag") || undefined,
         modified: response.headers.get("last-modified") || undefined,

@@ -234,3 +234,26 @@ html[data-reduced="true"] .inbox-item {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.podcast-results {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+.podcast-result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+}
+.podcast-result > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.podcast-result small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}

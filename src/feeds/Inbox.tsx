@@ -17,6 +17,10 @@ export default function Inbox({
 }) {
   const [view, setView] = useState<FeedsView | null>(null),
     [kind, setKind] = useState<FeedKind>("reddit"),
+    // Podcast search results, shown under the add row.
+    [shows, setShows] = useState<
+      { name: string; author: string; feed: string }[] | null
+    >(null),
     [value, setValue] = useState(""),
     [only, setOnly] = useState(""),
     [reading, setReading] = useState(false),
@@ -45,6 +49,20 @@ export default function Inbox({
       .catch(fail);
   }, []);
   const spec = feedKinds.find((k) => k.kind === kind)!;
+  const search = () =>
+    void api("feeds.podcasts", { term: value }).then(setShows).catch(fail);
+  const follow = (show: { name: string; feed: string }) =>
+    void api("feeds.add", {
+      kind: "podcast",
+      value: show.feed,
+      name: show.name,
+    })
+      .then((source) => {
+        setShows(null);
+        setValue("");
+        return refresh(source.id);
+      })
+      .catch(fail);
   const add = () =>
     void api("feeds.add", { kind, value })
       .then((source) => {
@@ -113,7 +131,10 @@ export default function Inbox({
         <Select
           label="Feed type"
           value={kind}
-          onChange={(k) => setKind(k as FeedKind)}
+          onChange={(k) => {
+            setKind(k as FeedKind);
+            setShows(null);
+          }}
           options={feedKinds.map((k) => ({
             value: k.kind,
             label: k.label,
@@ -126,18 +147,43 @@ export default function Inbox({
             placeholder={spec.placeholder}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && value.trim() && add()}
+            onKeyDown={(e) =>
+              e.key === "Enter" &&
+              value.trim() &&
+              (kind === "podcast" ? search() : add())
+            }
           />
         )}
         <button
           className="primary-button"
           disabled={kind !== "hackernews" && !value.trim()}
-          onClick={add}
+          onClick={kind === "podcast" ? search : add}
         >
-          <Icon name="plus" />
-          Add
+          <Icon name={kind === "podcast" ? "magnifying-glass" : "plus"} />
+          {kind === "podcast" ? "Search" : "Add"}
         </button>
       </div>
+      {kind === "podcast" && shows && (
+        <div className="podcast-results">
+          {!shows.length && <p className="muted">No podcasts found.</p>}
+          {shows.map((s) => (
+            <div className="podcast-result" key={s.feed}>
+              <Icon name="microphone-stage" />
+              <div>
+                <b>{s.name}</b>
+                <small>{s.author}</small>
+              </div>
+              <button className="soft-button" onClick={() => follow(s)}>
+                Follow
+              </button>
+            </div>
+          ))}
+          <p className="setting-note">
+            Found with Apple's podcast search; Yami then reads the show's own
+            public feed.
+          </p>
+        </div>
+      )}
       {!!view?.sources.length && (
         <div className="inbox-sources" role="group" aria-label="Show feed">
           <button
