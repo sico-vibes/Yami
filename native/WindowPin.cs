@@ -35,6 +35,54 @@ static class WindowPin
         return new { pinned = pin, title = title.ToString() };
     }
 
+    [DllImport("user32.dll")] static extern IntPtr MonitorFromWindow(IntPtr h, uint flags);
+    [DllImport("user32.dll")] static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+    [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr h, int command);
+    [DllImport("user32.dll")] static extern bool IsZoomed(IntPtr h);
+    [DllImport("user32.dll")] static extern bool IsIconic(IntPtr h);
+    [StructLayout(LayoutKind.Sequential)] struct Rect { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] struct MonitorInfo { public int Size; public Rect Monitor, Work; public uint Flags; }
+
+    /**
+     * Snaps a window to part of its monitor's work area (the screen minus the
+     * taskbar): halves, quarters, thirds, centred, or maximised.
+     */
+    public static object Snap(long handle, string layout)
+    {
+        var h = new IntPtr(handle);
+        if (handle == 0 || !IsWindow(h)) throw new Exception("That window is closed. Click the window to arrange, then try again.");
+        if (layout == "maximize") { ShowWindow(h, 3); return new { layout = layout }; }
+        var info = new MonitorInfo(); info.Size = Marshal.SizeOf(typeof(MonitorInfo));
+        if (!GetMonitorInfo(MonitorFromWindow(h, 2), ref info)) throw new Exception("Windows did not say which screen that window is on.");
+        int x = info.Work.Left, y = info.Work.Top, w = info.Work.Right - x, ht = info.Work.Bottom - y;
+        int hw = w / 2, hh = ht / 2, tw = w / 3;
+        int[] r;
+        switch (layout)
+        {
+            case "left": r = new[] { x, y, hw, ht }; break;
+            case "right": r = new[] { x + hw, y, w - hw, ht }; break;
+            case "top": r = new[] { x, y, w, hh }; break;
+            case "bottom": r = new[] { x, y + hh, w, ht - hh }; break;
+            case "top-left": r = new[] { x, y, hw, hh }; break;
+            case "top-right": r = new[] { x + hw, y, w - hw, hh }; break;
+            case "bottom-left": r = new[] { x, y + hh, hw, ht - hh }; break;
+            case "bottom-right": r = new[] { x + hw, y + hh, w - hw, ht - hh }; break;
+            case "left-third": r = new[] { x, y, tw, ht }; break;
+            case "center-third": r = new[] { x + tw, y, tw, ht }; break;
+            case "right-third": r = new[] { x + 2 * tw, y, w - 2 * tw, ht }; break;
+            case "left-two-thirds": r = new[] { x, y, 2 * tw, ht }; break;
+            case "right-two-thirds": r = new[] { x + tw, y, w - tw, ht }; break;
+            case "center": r = new[] { x + w / 6, y + ht / 8, w * 2 / 3, ht * 3 / 4 }; break;
+            default: throw new Exception("Unknown layout.");
+        }
+        // A maximised or minimised window is restored first, or it ignores the move.
+        if (IsZoomed(h) || IsIconic(h)) ShowWindow(h, 9);
+        // SWP_NOZORDER | SWP_NOACTIVATE
+        if (!SetWindowPos(h, IntPtr.Zero, r[0], r[1], r[2], r[3], 0x0004 | 0x0010))
+            throw new Exception("Windows did not let Yami move that window.");
+        return new { layout = layout, x = r[0], y = r[1], width = r[2], height = r[3] };
+    }
+
     public static bool IsPinned(long handle)
     {
         var h = new IntPtr(handle);

@@ -498,6 +498,8 @@ export function createRequestHandler(ctx: RequestContext) {
         return tools.clear();
       case "window.pin":
         return tools.pin();
+      case "window.snap":
+        return tools.snap(a.layout);
       case "window.pinned":
         return tools.pinned();
       case "awake":

@@ -151,6 +151,7 @@ class Host {
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
             // SPI_SETCURSORS: Windows reads the pointer values in Control Panel\Cursors again.
+            case "snap": return WindowPin.Snap(Convert.ToInt64(a["handle"]),Str(a,"layout"));
             case "topmost": return WindowPin.Toggle(Convert.ToInt64(a["handle"]));
             case "topmostState": return WindowPin.IsPinned(Convert.ToInt64(a["handle"]));
             case "cursorsReload": return SystemParametersInfo(0x57,0,null,3);

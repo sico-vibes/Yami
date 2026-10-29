@@ -109,6 +109,31 @@ try {
   assert.equal((await call("window.pinned")).pinned, true);
   r = await call("window.pin");
   assert.equal(r.pinned, false);
+  // Arrange: the same test window to the left half, then centred.
+  const snapped = await main.evaluate(() =>
+    window.yami.invoke("window.snap", { layout: "left" }),
+  );
+  assert.equal(snapped.layout, "left");
+  const box = await app.evaluate(
+    ({ screen }) => screen.getPrimaryDisplay().workArea,
+  );
+  const rect = JSON.parse(
+    (await import("node:child_process")).execFileSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        "Add-Type -Name W -Namespace Y -MemberDefinition '[DllImport(\"user32.dll\")] public static extern IntPtr FindWindow(string c, string t); [DllImport(\"user32.dll\")] public static extern bool GetWindowRect(IntPtr h, out RECT r); public struct RECT { public int L, T, R, B; }'; $h = [Y.W]::FindWindow([NullString]::Value, 'Yami pin test'); $r = New-Object Y.W+RECT; [void][Y.W]::GetWindowRect($h, [ref]$r); @{ l = $r.L; t = $r.T; r = $r.R; b = $r.B } | ConvertTo-Json -Compress",
+      ],
+      { encoding: "utf8" },
+    ),
+  );
+  assert.ok(rect.r - rect.l > 200, JSON.stringify(rect));
+  assert.ok(
+    Math.abs(rect.l - box.x) < 40 || rect.l < 40,
+    "moved to the left edge: " + JSON.stringify(rect),
+  );
+  await assert.rejects(call("window.snap", { layout: "diagonal" }), /layout/);
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ passed: true, copied, pinned: r.title }));
 } finally {

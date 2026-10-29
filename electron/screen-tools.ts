@@ -3,6 +3,7 @@ import path from "node:path";
 import { clipboard, screen, type BrowserWindow } from "electron";
 import type { Native } from "./native";
 import { makeWindow } from "./windows";
+import { windowLayouts } from "../src/window-layouts.ts";
 
 // Two PowerToys ideas built into Yami's own windows:
 // - Color picker: one lossless screenshot of the display under the pointer,
@@ -116,6 +117,17 @@ export function createScreenTools(deps: {
         handle: lastWindow.handle,
       });
       return { ...result, process: lastWindow.process };
+    },
+    /** Moves the last window you used to part of its monitor. */
+    async snap(layout: unknown) {
+      if (!windowLayouts.some((l) => l.id === layout))
+        throw new Error("Choose a layout.");
+      if (!lastWindow)
+        throw new Error(
+          "Click the window you want to arrange first, then try again.",
+        );
+      await deps.native.call("snap", { handle: lastWindow.handle, layout });
+      return { window: lastWindow.process, layout };
     },
     async pinned() {
       if (!lastWindow) return { window: "", pinned: false };

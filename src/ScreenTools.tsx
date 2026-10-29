@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { Icon } from "./ui";
+import { Select } from "./controls";
+import { windowLayouts } from "./window-layouts";
 
 /**
  * Controls card: pick a colour from the screen, recent colours (click to
@@ -58,6 +60,27 @@ export function ScreenTools({ report }: { report: (m: string) => void }) {
           {pin.pinned ? `Unpin ${name}` : `Keep ${name} on top`}
         </button>
       </div>
+      <Select
+        label={`Arrange ${name}`}
+        value=""
+        onChange={(layout) =>
+          void api("window.snap", { layout })
+            .then((r) =>
+              report(
+                `${r.window} moved: ${windowLayouts.find((l) => l.id === layout)?.label.toLowerCase()}.`,
+              ),
+            )
+            .catch(fail)
+        }
+        options={[
+          { value: "", label: `Arrange ${name}…`, icon: "layout" },
+          ...windowLayouts.map((l) => ({
+            value: l.id,
+            label: l.label,
+            icon: l.icon,
+          })),
+        ]}
+      />
       {!!colors.length && (
         <div className="screen-tools-colors" aria-label="Recent colours">
           {colors.map((c) => (

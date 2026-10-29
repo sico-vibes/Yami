@@ -1,5 +1,6 @@
 import { calculate, formatResult } from "./calc.ts";
 import { convertUnits } from "./units.ts";
+import { windowLayouts } from "./window-layouts.ts";
 import { resolveInput } from "./browser-rules.ts";
 import { agentClis } from "./dev-types.ts";
 import type { Settings, Tab } from "./shared";
@@ -119,6 +120,26 @@ export function paletteItems(
         ? { method: "browser.show", args: { url } }
         : { method: "open.external", args: { url } },
     });
+  }
+  // "snap left", "snap top right", "arrange centre": the last window used.
+  const snap = /^(snap|arrange|move window)\s+(.+)$/i.exec(q);
+  if (snap) {
+    const want = snap[2]
+      .toLowerCase()
+      .replace(/centre/g, "center")
+      .replace(/\s+/g, " ");
+    for (const l of windowLayouts)
+      if (
+        l.label.toLowerCase().includes(want) ||
+        l.id.replace(/-/g, " ").includes(want)
+      )
+        out.push({
+          id: "snap:" + l.id,
+          title: `Snap window: ${l.label}`,
+          hint: "Moves the last window you used",
+          icon: l.icon,
+          run: { method: "window.snap", args: { layout: l.id } },
+        });
   }
   for (const p of pages)
     if ((!p.when || settings[p.when]) && matches(q, p.title, p.words))
