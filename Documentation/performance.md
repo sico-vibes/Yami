@@ -85,6 +85,10 @@ The optional desk widget adds one renderer process. With the widget on (media pl
 
 Parsing EasyList and EasyPrivacy (131,795 rules) inside the main process raised its private bytes from about 111 MB to 243 MB, and they stayed there 15 seconds later. A worker thread gave the same numbers, since the memory stays with the process. The build now runs in a short-lived `ELECTRON_RUN_AS_NODE` child process that writes the compact engine file and exits: the main process went 108 → 145 MB right after the build and back to 112 MB 15 seconds later. On a later start, loading the saved engine when the browser opens added 14–16 MB to the main process (114 → 128–130 MB). Source build, short runs; these figures are the Electron main process only, not the full tree.
 
+## Network shield (2026-10-29)
+
+Measured on the development PC with a source build and an isolated profile, reading the main process's private bytes (`process.getProcessMemoryInfo()`) 25 seconds after launch, with the StevenBlack list already downloaded: **114 MB** with the shield off and **117–119 MB** with it on (two launches each). So the listener, the 76,147 names and the HTTP/2 resolver connection cost about 4 MB. The names are one sorted file (1.6 MB) read into a buffer and searched in place; held as a JavaScript `Set`, both lists (255,438 names) took 22 MB of heap. The first download and parse is a one-time spike. With the download streamed to disk and the parse in a child process, the main process went from 100 to 123 MB in `scripts/verify-shield.mjs` and stayed there 20 seconds later. Holding the download in memory as text made it 30 MB. The weekly refresh repeats that spike. The shield has no timer when idle: it saves counts a minute after lookups, and it checks list age when a lookup arrives.
+
 ## Current sources of background work
 
 The AI workspace starts no PTY/helper/model at idle. Monitoring, transcript

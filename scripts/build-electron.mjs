@@ -26,6 +26,14 @@ await build({
   target: "node22",
 });
 await build({
+  entryPoints: ["electron/tune/shield-build.ts"],
+  bundle: true,
+  platform: "node",
+  format: "cjs",
+  outfile: "dist-electron/shield-build.cjs",
+  target: "node22",
+});
+await build({
   entryPoints: ["electron/preload.ts"],
   bundle: true,
   platform: "node",

@@ -5,7 +5,14 @@ import { dnsProfiles, type DnsAdapter } from "../tune-types";
 import { Modal, Toggle } from "../ui";
 
 /** DNS per adapter: a fixed list of public resolvers, or back to automatic. */
-export function DnsSection({ report }: { report: (m: string) => void }) {
+export function DnsSection({
+  report,
+  onChange,
+}: {
+  report: (m: string) => void;
+  /** After an adapter changed, so the network shield reads it again. */
+  onChange?: () => void;
+}) {
   const [adapters, setAdapters] = useState<DnsAdapter[] | null>(null),
     [pending, setPending] = useState<{
       adapter: DnsAdapter;
@@ -26,6 +33,7 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
     void api("tune.dns.set", { index: adapter.index, profile: id, encrypted })
       .then((next: DnsAdapter[]) => {
         setAdapters(next);
+        onChange?.();
         const now = next.find((a) => a.index === adapter.index);
         report(
           `${adapter.name} now uses ${profile(id)?.name || id} DNS${
@@ -75,37 +83,42 @@ export function DnsSection({ report }: { report: (m: string) => void }) {
                     encrypted: a.encrypted && id !== "automatic",
                   })
                 }
-                options={dnsProfiles.map((p) => ({
-                  value: p.id,
-                  label: p.name,
-                  icon: p.id === "automatic" ? "network" : "shield-check",
-                }))}
+                // The shield is chosen in its own section, where it can be on.
+                options={dnsProfiles
+                  .filter((p) => p.id !== "yami" || a.profile === "yami")
+                  .map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                    icon: p.id === "automatic" ? "network" : "shield-check",
+                  }))}
               />
             </div>,
-            profile(a.profile) && a.profile !== "automatic" && (
-              <div className="setting-row" key={`${a.index}-doh`}>
-                <div>
-                  <strong>Encrypt {a.name} lookups</strong>
-                  <p>
-                    {a.encrypted
-                      ? "DNS over HTTPS only: your network cannot read or change the lookups."
-                      : "Uses Windows 11's DNS over HTTPS so your network cannot read or change the lookups."}
-                  </p>
+            profile(a.profile) &&
+              a.profile !== "automatic" &&
+              a.profile !== "yami" && (
+                <div className="setting-row" key={`${a.index}-doh`}>
+                  <div>
+                    <strong>Encrypt {a.name} lookups</strong>
+                    <p>
+                      {a.encrypted
+                        ? "DNS over HTTPS only: your network cannot read or change the lookups."
+                        : "Uses Windows 11's DNS over HTTPS so your network cannot read or change the lookups."}
+                    </p>
+                  </div>
+                  <Toggle
+                    label={`Encrypt DNS for ${a.name}`}
+                    value={a.encrypted}
+                    disabled={busy}
+                    onChange={(on) =>
+                      setPending({
+                        adapter: a,
+                        profile: a.profile,
+                        encrypted: on,
+                      })
+                    }
+                  />
                 </div>
-                <Toggle
-                  label={`Encrypt DNS for ${a.name}`}
-                  value={a.encrypted}
-                  disabled={busy}
-                  onChange={(on) =>
-                    setPending({
-                      adapter: a,
-                      profile: a.profile,
-                      encrypted: on,
-                    })
-                  }
-                />
-              </div>
-            ),
+              ),
           ])
         )}
       </div>

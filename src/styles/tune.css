@@ -13,8 +13,8 @@
   margin: var(--space-4) 0;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--r-lg);
-  background: linear-gradient(160deg, var(--selected), transparent 70%),
-    var(--surface-1);
+  background:
+    linear-gradient(160deg, var(--selected), transparent 70%), var(--surface-1);
   border: 1px solid var(--selected-line);
   color: var(--text-soft);
   font-size: var(--fs-sm);
@@ -38,4 +38,23 @@
 
 .apps-search .search-field {
   flex: 1;
+}
+.shield-subtitle {
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  font-weight: 500;
+  margin: var(--space-4) var(--space-1) var(--space-2);
+}
+.shield-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+.shield-columns .startup-app,
+.shield-recent .startup-app {
+  flex: 1;
+}
+.shield-stats {
+  flex-wrap: wrap;
+  padding-inline: var(--space-1);
 }

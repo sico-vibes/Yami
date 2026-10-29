@@ -53,6 +53,15 @@ These programs are not bundled in the Yami package. A job downloads one into `%L
 | jsQR | Read a QR code from an image in the tool window | Apache-2.0. Loaded only when that tool opens. | npm lockfile. |
 | PDF.js (`pdfjs-dist`) | Read text from a PDF | Apache-2.0. Loaded only when a PDF is converted to text, Markdown, or EPUB. The package stays outside the main bundle so its font files can be read from disk. | npm lockfile. |
 
+## Network shield block lists
+
+Not bundled. The shield downloads them into Yami's data folder (`shield/`) when it needs them, keeps only the parsed name files, and refreshes them once they are a week old.
+
+| List | License | Source |
+| --- | --- | --- |
+| StevenBlack unified hosts | MIT | `https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts` (license checked 2026-10-29) |
+| AdGuard DNS filter | GPL-3.0. Downloaded at the user's choice, never shipped. | `https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt` (license checked 2026-10-29) |
+
 No code, artwork, or wording was copied from the Mac utility used as a behaviour reference, or from Hyoi, Holdem, Wedge, Kando, or PowerToys.
 
 ## Release checklist for asset changes

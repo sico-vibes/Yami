@@ -36,3 +36,12 @@ The [repository adaptation review](research/adaptation-review.md) applies these 
 - **Behaviour mapping:** WinUtil's tweaks set registry values, services and apps, and its undo writes fixed "original" values. Yami's Tune saves the exact earlier value of each registry value before it applies and restores that value, or removes it when it was not set.
 - **Platform differences:** Tune's tweaks write only `HKEY_CURRENT_USER` values, so they need no administrator rights. Tune's Administrator section adds a restore point and two services (DiagTrack, MapsBroker), and Installed apps runs an app's own registered uninstaller, as Settings › Apps does. WinUtil's other machine-wide tweaks and services, its winget and AppX removal lists, and Windows Update modes are **gaps**, not parity.
 - **Checks:** `tests/tune.test.mjs` covers exact undo, created-key removal and already-set tweaks. `scripts/verify-tune.mjs` applies and undoes all fourteen tweaks with real `reg.exe` in a sandbox key.
+
+
+## AdGuard Home → Network shield (2026-10-29)
+
+- **Source:** the behaviour of [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) (GPL-3.0), used as a reference only. No code, wording or interface was copied, and AdGuard Home is not installed or run.
+- **Behaviour mapping:** like AdGuard Home, Yami's shield is a local DNS server that answers blocked names with `0.0.0.0` / `::`, forwards the rest to an encrypted upstream, honours `@@` exceptions in AdGuard-syntax lists, and shows lookups, blocked share, top blocked and top looked-up domains, a recent-lookups list, and per-domain allow and block rules.
+- **Platform differences:** Yami listens on loopback only, for this PC, rather than serving a network. It points adapters at itself through Tune's existing elevated DNS script, with Quad9 second so lookups keep working when Yami is not running.
+- **Gaps:** wildcard, regular-expression and modifier rules (`$client`, `$dnstype`, `$denyallow`, `$dnsrewrite`), DNS rewrites, per-client settings, DHCP, safe search, parental control, blocked services, a persisted query log, upstream load balancing, DNSSEC, and the hourly chart are not built.
+- **Checks:** `tests/shield.test.mjs` and `scripts/verify-shield.mjs` (see Development).

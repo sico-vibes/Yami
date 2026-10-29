@@ -7,6 +7,9 @@ $profiles = @{
   quad9 = @('9.9.9.9', '149.112.112.112')
   adguard = @('94.140.14.14', '94.140.15.15')
   google = @('8.8.8.8', '8.8.4.4')
+  # Yami's network shield on this PC first (IPv4 and IPv6, so neither family
+  # goes around it), and Quad9 for when Yami is not running.
+  yami = @('127.0.0.1', '::1', '9.9.9.9')
 }
 # The DNS-over-HTTPS address each profile publishes.
 $templates = @{
@@ -40,15 +43,18 @@ try {
   if ($Profile -eq 'automatic') {
     Set-DnsClientServerAddress -InterfaceIndex $Index -ResetServerAddresses
   } elseif ($profiles.ContainsKey($Profile)) {
+    # Leaving the shield: its IPv6 entry goes back to automatic as well.
+    $v6 = @((Get-DnsClientServerAddress -InterfaceIndex $Index -AddressFamily IPv6 -ErrorAction SilentlyContinue).ServerAddresses)
+    if ($Profile -ne 'yami' -and $v6 -contains '::1') { Set-DnsClientServerAddress -InterfaceIndex $Index -ResetServerAddresses }
     Set-DnsClientServerAddress -InterfaceIndex $Index -ServerAddresses $profiles[$Profile]
   } else { throw 'Unknown DNS profile.' }
   $guid = (Get-NetAdapter -InterfaceIndex $Index).InterfaceGuid
-  $known = @($profiles.Values | ForEach-Object { $_ })
+  $known = @($templates.Keys | ForEach-Object { $profiles[$_] })
   # Clear this adapter's encryption for the servers Yami knows; others stay.
   foreach ($ip in $known) {
     if (Test-Path (DohKey $guid $ip)) { Remove-Item (DohKey $guid $ip) -Recurse -Force }
   }
-  if ($Encrypt -eq 'on' -and $profiles.ContainsKey($Profile)) {
+  if ($Encrypt -eq 'on' -and $templates.ContainsKey($Profile)) {
     foreach ($ip in $profiles[$Profile]) {
       $doh = @{ ServerAddress = $ip; DohTemplate = $templates[$Profile]; AutoUpgrade = $true; AllowFallbackToUdp = $false }
       if (Get-DnsClientDohServerAddress -ServerAddress $ip -ErrorAction SilentlyContinue) {

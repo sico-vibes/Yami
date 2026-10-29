@@ -74,7 +74,67 @@ export const dnsProfiles: {
     detail: "No filtering",
     servers: ["8.8.8.8", "8.8.4.4"],
   },
+  {
+    id: "yami",
+    name: "Yami shield",
+    detail:
+      "Yami's network shield on this PC answers first; Quad9 answers when Yami is not running",
+    servers: ["127.0.0.1", "9.9.9.9"],
+  },
 ];
+
+/** Where the network shield sends lookups it does not block (DNS over HTTPS). */
+export const shieldUpstreams = [
+  { id: "quad9", name: "Quad9", url: "https://dns.quad9.net/dns-query" },
+  {
+    id: "cloudflare",
+    name: "Cloudflare",
+    url: "https://cloudflare-dns.com/dns-query",
+  },
+  {
+    id: "google",
+    name: "Google Public DNS",
+    url: "https://dns.google/dns-query",
+  },
+] as const;
+
+export type ShieldStatus = {
+  /** The user turned it on; it then starts with Yami. */
+  on: boolean;
+  /** Answering on this PC right now. */
+  running: boolean;
+  error?: string;
+  updating: boolean;
+  upstream: string;
+  lists: {
+    id: string;
+    name: string;
+    detail: string;
+    licence: string;
+    enabled: boolean;
+    updated: number;
+    rules: number;
+  }[];
+  allow: string[];
+  block: string[];
+  stats: {
+    since: number;
+    queries: number;
+    blocked: number;
+    /** The last 24 hours, oldest first. */
+    hours: { at: number; queries: number; blocked: number }[];
+    topBlocked: [string, number][];
+    topAsked: [string, number][];
+    /** The latest lookups, newest first; kept in memory only. */
+    recent: {
+      at: number;
+      name: string;
+      type: string;
+      blocked: boolean;
+      by?: string;
+    }[];
+  };
+};
 
 export type DnsAdapter = {
   index: number;

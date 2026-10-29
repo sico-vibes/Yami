@@ -99,7 +99,9 @@ export class DnsController {
       !dnsProfiles.some((p) => p.id === id && p.servers.length)
     )
       throw new Error("Choose a DNS profile.");
-    const mode = encrypt === true && id !== "automatic" ? "on" : "off";
+    // The shield is on this PC; it encrypts its own lookups.
+    const mode =
+      encrypt === true && id !== "automatic" && id !== "yami" ? "on" : "off";
     try {
       await exec("powershell.exe", elevatedArgs(this.script, n, id, mode), {
         windowsHide: true,

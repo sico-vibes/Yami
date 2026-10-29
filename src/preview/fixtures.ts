@@ -52,9 +52,24 @@ export function createFixture(): State {
     currentWallpaper: "/wallpapers/starter-01.jpg",
     // Demo entries only; the preview never reads the system clipboard.
     clipboard: [
-      { id: "demo-clip-1", text: "Meeting moved to Thursday, 3 PM.", at: new Date(Date.now() - 600000).toISOString(), pinned: true },
-      { id: "demo-clip-2", text: "npm run preview:web", at: new Date(Date.now() - 1800000).toISOString(), pinned: false },
-      { id: "demo-clip-3", text: "The quiet ones are usually listening.", at: new Date(Date.now() - 7200000).toISOString(), pinned: false },
+      {
+        id: "demo-clip-1",
+        text: "Meeting moved to Thursday, 3 PM.",
+        at: new Date(Date.now() - 600000).toISOString(),
+        pinned: true,
+      },
+      {
+        id: "demo-clip-2",
+        text: "npm run preview:web",
+        at: new Date(Date.now() - 1800000).toISOString(),
+        pinned: false,
+      },
+      {
+        id: "demo-clip-3",
+        text: "The quiet ones are usually listening.",
+        at: new Date(Date.now() - 7200000).toISOString(),
+        pinned: false,
+      },
     ],
     embers: 67,
     owned: ["yami", "chad", "Charon"],

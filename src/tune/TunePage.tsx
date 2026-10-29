@@ -9,6 +9,7 @@ import {
 } from "../tune-types";
 import { Icon, Modal, Toggle } from "../ui";
 import { DnsSection } from "./DnsSection";
+import { ShieldSection } from "./ShieldSection";
 import { AdminSection } from "./AdminSection";
 import { AppsSection } from "./AppsSection";
 
@@ -28,7 +29,10 @@ export default function TunePage({
     [busy, setBusy] = useState(""),
     [restart, setRestart] = useState(false),
     [asking, setAsking] = useState(false),
-    [startup, setStartup] = useState<StartupApp[] | null>(null);
+    [startup, setStartup] = useState<StartupApp[] | null>(null),
+    // Bumped when one DNS section changes an adapter, so the other reads it.
+    [dnsKey, setDnsKey] = useState(0),
+    [shieldKey, setShieldKey] = useState(0);
   useEffect(() => {
     void api("tune.list")
       .then(setStates)
@@ -106,7 +110,16 @@ export default function TunePage({
           </div>
         </section>
       ))}
-      <DnsSection report={report} />
+      <DnsSection
+        key={dnsKey}
+        report={report}
+        onChange={() => setShieldKey((k) => k + 1)}
+      />
+      <ShieldSection
+        report={report}
+        dnsKey={shieldKey}
+        onDns={() => setDnsKey((k) => k + 1)}
+      />
       <AdminSection report={report} />
       <AppsSection report={report} />
       <section>

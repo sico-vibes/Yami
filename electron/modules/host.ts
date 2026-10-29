@@ -30,6 +30,7 @@ import { StartupController } from "../tune/startup";
 import { DnsController } from "../tune/dns";
 import { AdminController } from "../tune/admin";
 import { AppsController } from "../tune/apps";
+import { NetworkShield, shieldWanted } from "../tune/shield";
 import { helperPath } from "../workbench/terminal";
 import { agentLinkPort } from "../agentlink/server";
 import {
@@ -58,6 +59,7 @@ type Tune = {
   dns: DnsController;
   admin: AdminController;
   apps: AppsController;
+  shield: NetworkShield;
 };
 type Feeds = { feeds: FeedsController; mail: MailAccounts };
 type Browser = {
@@ -214,13 +216,18 @@ export function createModuleHost(deps: Deps) {
             ),
             dns: new DnsController(helperPath("Dns.ps1")),
             apps: new AppsController(helperPath("Apps.ps1")),
+            // YAMI_SHIELD_PORT moves it off port 53 for the desktop check.
+            shield: new NetworkShield({
+              dir: path.dirname(store.file),
+              port: Number(process.env.YAMI_SHIELD_PORT) || 53,
+            }),
             admin: new AdminController(
               helperPath("Admin.ps1"),
               path.join(path.dirname(store.file), "tune-admin.json"),
             ),
           };
         },
-        dispose: () => {},
+        dispose: (t: Tune) => t.shield.stop(),
       },
       browser: {
         load: (): Browser => {
@@ -366,6 +373,9 @@ export function createModuleHost(deps: Deps) {
       registry.get("agentLink");
     if (registry.enabled("remote") && !registry.loaded("remote"))
       registry.get("remote");
+    // The network shield answers DNS from the moment Yami starts.
+    if (registry.enabled("tune") && shieldWanted(path.dirname(store.file)))
+      void registry.get<Tune>("tune").shield.resume();
     if (!registry.enabled("workbench") || registry.loaded("workbench")) return;
     const { settings, connections } = speechCore().data.state;
     if (workbenchDuties(settings, connections, store.state.settings.hotkeys))
@@ -763,7 +773,9 @@ export function createModuleHost(deps: Deps) {
           dns,
           admin,
           apps,
+          shield,
         } = registry.get<Tune>("tune");
+        if (method.startsWith("tune.shield")) return shield.request(method, a);
         if (method === "tune.apps") return apps.list();
         if (method === "tune.apps.uninstall") return apps.uninstall(a.id);
         if (method === "tune.admin") return admin.list();

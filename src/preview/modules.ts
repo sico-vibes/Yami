@@ -9,6 +9,7 @@ import {
   type PackStatus,
 } from "../modules";
 import { tweaks } from "../tune-types";
+import { previewShield } from "./shield";
 import type { FeedItem, FeedSource, FeedsView } from "../feeds-types";
 
 const sizes: Record<PackId, number> = {
@@ -167,6 +168,7 @@ export function previewModules(
     if (!found) throw new Error("Unknown module.");
     return found;
   };
+  if (method.startsWith("tune.shield")) return previewShield(method, a);
   switch (method) {
     case "modules.list":
       return list(state);
