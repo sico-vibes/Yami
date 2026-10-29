@@ -81,11 +81,14 @@ export async function mediaAction(action: string, seconds = 0) {
   if (!mediaActions.includes(action as (typeof mediaActions)[number]))
     throw new Error("Unknown media action.");
   const at = Math.max(0, Math.min(86400, Number(seconds) || 0));
+  // The player last shown, so the button acts on what the user saw.
+  const shown = String(cache.get("Media")?.value?.app || "");
   const value = await executeNativeScript("Media", [
     "-Action",
     action,
     "-Seconds",
     String(at),
+    ...(shown ? ["-App", shown] : []),
   ]);
   if (value.error) throw new Error(value.error);
   cache.set("Media", { value, until: Date.now() + 6000 });

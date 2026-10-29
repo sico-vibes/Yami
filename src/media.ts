@@ -19,6 +19,16 @@ export async function mediaControl(action: MediaAction, seconds?: number) {
   try {
     return await api("media.action", { action, seconds });
   } catch (error) {
+    // Spotify's app accepts shuffle and repeat from Windows without applying
+    // them; with the Spotify connection on, its own service does it.
+    if (
+      (action === "shuffle" || action === "repeat") &&
+      /^Spotify accepted/.test((error as Error).message)
+    ) {
+      const done = await api("spotify.act", { action }).catch(() => null);
+      if (done) return api("media");
+      throw error;
+    }
     const key = keys[action];
     if (!key) throw error;
     await api("control", { method: "mediaKey", args: { action: key } });

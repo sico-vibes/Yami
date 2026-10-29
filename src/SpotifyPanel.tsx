@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./api";
 import { Select } from "./controls";
-import { Icon } from "./ui";
+import { Icon, IconButton } from "./ui";
 
 type Status = { clientId: string; connected: boolean };
 type Now = {
@@ -11,6 +11,8 @@ type Now = {
   artist?: string;
   device?: string;
   volume?: number | null;
+  shuffle?: boolean;
+  repeat?: string;
 };
 type Device = { id: string; name: string; type: string; active: boolean };
 
@@ -107,6 +109,24 @@ export function SpotifyPanel({ report }: { report: (m: string) => void }) {
           </p>
         </div>
         <div className="setting-control">
+          <IconButton
+            icon="shuffle"
+            label={now?.shuffle ? "Shuffle is on" : "Shuffle is off"}
+            active={!!now?.shuffle}
+            onClick={() => act("shuffle")}
+          />
+          <IconButton
+            icon={now?.repeat === "track" ? "repeat-once" : "repeat"}
+            label={
+              now?.repeat === "track"
+                ? "Repeating this track"
+                : now?.repeat === "context"
+                  ? "Repeating the playlist"
+                  : "Repeat is off"
+            }
+            active={!!now?.repeat && now.repeat !== "off"}
+            onClick={() => act("repeat")}
+          />
           <button
             className="soft-button"
             onClick={() => act(now?.playing ? "pause" : "play")}

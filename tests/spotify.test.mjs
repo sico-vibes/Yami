@@ -85,6 +85,21 @@ test("tokens refresh, the refresh token is stored, and Premium errors read plain
     calls.some(([m, u]) => m === "PUT" && u.endsWith("volume_percent=100")),
     "clamped",
   );
+  // Shuffle and repeat go through Spotify's own service.
+  await spotify.act("shuffle");
+  await spotify.act("repeat");
+  assert.ok(
+    calls.some(
+      ([m, u]) => m === "PUT" && u.endsWith("/me/player/shuffle?state=true"),
+    ),
+    "shuffle turned on",
+  );
+  assert.ok(
+    calls.some(
+      ([m, u]) => m === "PUT" && u.endsWith("/me/player/repeat?state=context"),
+    ),
+    "repeat moved from off to the playlist",
+  );
   await assert.rejects(spotify.act("transfer", "bad id!"), /Choose a device/);
   await assert.rejects(spotify.act("shutdown"), /Unknown/);
   spotify.disconnect();

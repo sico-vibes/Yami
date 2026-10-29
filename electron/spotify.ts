@@ -202,6 +202,18 @@ export class Spotify {
       const v = Math.max(0, Math.min(100, Math.round(Number(value))));
       if (!Number.isFinite(v)) throw new Error("Choose a volume.");
       await this.call("PUT", `/me/player/volume?volume_percent=${v}`);
+    } else if (action === "shuffle") {
+      // The desktop app ignores shuffle and repeat sent through Windows;
+      // Spotify's own service applies them.
+      const now = await this.now();
+      await this.call("PUT", `/me/player/shuffle?state=${!now?.shuffle}`);
+    } else if (action === "repeat") {
+      const now = await this.now();
+      const next =
+        { off: "context", context: "track", track: "off" }[
+          String(now?.repeat || "off") as "off" | "context" | "track"
+        ] || "off";
+      await this.call("PUT", `/me/player/repeat?state=${next}`);
     } else if (action === "transfer") {
       const id = String(value || "");
       if (!/^[A-Za-z0-9]{10,64}$/.test(id)) throw new Error("Choose a device.");

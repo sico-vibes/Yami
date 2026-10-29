@@ -1,4 +1,4 @@
-param([string]$Action = '', [double]$Seconds = 0)
+param([string]$Action = '', [double]$Seconds = 0, [string]$App = '')
 $ErrorActionPreference = 'Stop'
 try {
   Add-Type -AssemblyName System.Runtime.WindowsRuntime
@@ -11,6 +11,12 @@ try {
   }
   $manager = Await-WinRT ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager]::RequestAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager])
   $session = $manager.GetCurrentSession()
+  # An action goes to the player Yami showed, not whichever became current
+  # since (pausing one player can make another the current one).
+  if ($Action -and $App) {
+    $session = @($manager.GetSessions()) | Where-Object { $_.SourceAppUserModelId -eq $App } | Select-Object -First 1
+    if ($null -eq $session) { throw 'That player has closed.' }
+  }
   if ($null -eq $session) { @{active=$false} | ConvertTo-Json -Compress; exit }
   # Actions go to the playing app's own media session (Spotify, a browser, …),
   # so shuffle, repeat and seek work where the app supports them.
@@ -30,6 +36,21 @@ try {
     }
     if (-not $done) { throw 'The player did not accept that.' }
     Start-Sleep -Milliseconds 250
+    # Some players (Spotify's desktop app among them) accept shuffle and
+    # repeat but never apply them; say so instead of pretending it worked.
+    if ($Action -eq 'shuffle' -or $Action -eq 'repeat') {
+      $applied = $false
+      for ($i = 0; $i -lt 6 -and -not $applied; $i++) {
+        $now = $session.GetPlaybackInfo()
+        $applied = if ($Action -eq 'shuffle') { [bool]$now.IsShuffleActive -ne [bool]$info.IsShuffleActive } else { [string]$now.AutoRepeatMode -ne [string]$info.AutoRepeatMode }
+        if (-not $applied) { Start-Sleep -Milliseconds 250 }
+      }
+      if (-not $applied) {
+        $name = if ($session.SourceAppUserModelId -match 'Spotify') { 'Spotify' } else { 'This player' }
+        $hint = if ($name -eq 'Spotify') { ' Connect Spotify in Settings > Music to change it from Yami.' } else { '' }
+        throw "$name accepted the $Action change but did not apply it.$hint"
+      }
+    }
   }
   $properties = Await-WinRT ($session.TryGetMediaPropertiesAsync()) ([Windows.Media.Control.GlobalSystemMediaTransportControlsSessionMediaProperties])
   $timeline = $session.GetTimelineProperties()
