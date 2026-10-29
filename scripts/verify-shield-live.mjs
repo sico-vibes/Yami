@@ -63,13 +63,23 @@ try {
   const listed = names[Math.floor(names.length / 3)];
   const before = (await call("tune.shield")).stats.queries;
   // Windows' own resolver, the one every app uses.
-  const blocked = await dns.lookup(listed, { family: 4 });
+  // Windows' getaddrinfo reports a 0.0.0.0 answer as "not found"; either
+  // way the name does not reach a server, and the shield must have said so.
+  const blocked = await dns.lookup(listed, { family: 4 }).then(
+    (r) => r.address,
+    (e) => e.code,
+  );
   const normal = await dns.lookup("example.com", { family: 4 });
   const counted = (await call("tune.shield")).stats;
-  result.lookups = { listed, blocked: blocked.address, normal: normal.address };
-  assert.equal(blocked.address, "0.0.0.0", "listed name blocked for every app");
+  result.lookups = { listed, blocked, normal: normal.address };
+  assert.ok(["0.0.0.0", "ENOENT", "ENOTFOUND"].includes(blocked), blocked);
+  assert.ok(
+    counted.recent.some((r) => r.name === listed && r.blocked),
+    "the shield answered the blocked name",
+  );
   assert.notEqual(normal.address, "0.0.0.0");
   assert.ok(counted.queries > before, "lookups went through the shield");
+  result.counted = { queries: counted.queries, blocked: counted.blocked };
   result.page = await (await fetch("https://example.com/")).status;
 } catch (error) {
   result.failed = error.message;
