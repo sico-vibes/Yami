@@ -72,6 +72,8 @@ export function findShell(name: string): string | undefined {
   return findExecutable(`${name}.exe`);
 }
 
+type Port = { port: number; pid: number; address: string; name: string };
+
 export class TerminalController {
   window?: BrowserWindow;
   child?: ChildProcessWithoutNullStreams;
@@ -104,6 +106,8 @@ export class TerminalController {
     private notice: (text: string) => void = () => {},
     /** Where the tab layout is kept between sessions. */
     private layoutFile = "",
+    /** Ports a process and everything it started listen on (native host). */
+    private ports: (pid: number) => Promise<Port[]> = async () => [],
   ) {}
   open() {
     if (this.window && !this.window.isDestroyed()) {
@@ -373,6 +377,20 @@ export class TerminalController {
     const session = this.sessions.get(a.session);
     if (!session || session.owner !== owner)
       throw new Error("Terminal session is closed.");
+    if (method === "terminal.ports") {
+      if (!session.pid) return [];
+      const seen = new Set<number>();
+      // One row per port; a server often listens on IPv4 and IPv6 alike.
+      return (await this.ports(session.pid))
+        .filter((p) => !seen.has(p.port) && seen.add(p.port))
+        .sort((x, y) => x.port - y.port)
+        .map((p) => ({
+          port: p.port,
+          name: String(p.name || "").replace(/\.exe$/i, ""),
+          // 127.0.0.1 or every address; :: and 0.0.0.0 both reach localhost.
+          url: `http://localhost:${p.port}/`,
+        }));
+    }
     if (method === "terminal.finished") {
       // A long command ended; say so only when nobody is looking.
       if (this.window?.isVisible() && this.window.isFocused()) return false;

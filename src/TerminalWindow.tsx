@@ -53,6 +53,10 @@ export default function TerminalWindow() {
   // never overwrites it.
   const restored = useRef(false);
   const [finding, setFinding] = useState(false),
+    // Ports the selected tab's processes listen on; null when hidden.
+    [ports, setPorts] = useState<
+      { port: number; name: string; url: string }[] | null
+    >(null),
     [needle, setNeedle] = useState(""),
     [shells, setShells] = useState<string[]>([]),
     [sshHosts, setSshHosts] = useState<string[]>([]),
@@ -158,6 +162,16 @@ export default function TerminalWindow() {
     layout();
   }
   const report = (e: any) => setError(e.message || String(e));
+  const readPorts = (session: string) =>
+    session
+      ? api("terminal.ports", { session }).then(setPorts).catch(report)
+      : setPorts([]);
+  // Another tab: its own servers, if the strip is open.
+  const portsOpen = useRef(false);
+  portsOpen.current = ports !== null;
+  useEffect(() => {
+    if (portsOpen.current) void readPorts(selected);
+  }, [selected]);
   function output(event: any) {
     const view = views.current.get(event.session);
     if (!view) {
@@ -564,6 +578,14 @@ export default function TerminalWindow() {
           }}
         />
         <IconButton
+          icon="plugs-connected"
+          label="Servers this tab started"
+          active={ports !== null}
+          onClick={() =>
+            ports !== null ? setPorts(null) : void readPorts(selected)
+          }
+        />
+        <IconButton
           icon="folder-open"
           label="Open shell in a folder"
           onClick={() =>
@@ -594,6 +616,38 @@ export default function TerminalWindow() {
           End session
         </button>
       </nav>
+      {ports !== null && (
+        <div className="terminal-ports" role="status">
+          {ports.length ? (
+            ports.map((p) => (
+              <button
+                key={p.port}
+                className="soft-button"
+                onClick={() =>
+                  void api("open.external", { url: p.url }).catch(report)
+                }
+              >
+                <Icon name="arrow-square-out" size={14} />
+                localhost:{p.port}
+                {p.name && <span className="terminal-port-name">{p.name}</span>}
+              </button>
+            ))
+          ) : (
+            <span>Nothing in this tab is listening on a port yet.</span>
+          )}
+          <span className="spacer" />
+          <IconButton
+            icon="arrows-clockwise"
+            label="Look again"
+            onClick={() => void readPorts(selected)}
+          />
+          <IconButton
+            icon="x"
+            label="Hide servers"
+            onClick={() => setPorts(null)}
+          />
+        </div>
+      )}
       {finding && (
         <form
           className="terminal-find"

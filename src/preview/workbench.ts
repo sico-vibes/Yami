@@ -157,6 +157,8 @@ export function previewWorkbench(
     return false;
   }
   if (method === "terminal.folder") return "";
+  if (method === "terminal.ports")
+    return [{ port: 5173, name: "node", url: "http://localhost:5173/" }];
   if (method === "terminal.shells")
     return ["pwsh", "powershell", "cmd", "bash"];
   if (method === "context.pick" || method === "context.windows") return [];
