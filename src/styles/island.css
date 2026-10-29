@@ -683,3 +683,9 @@
   width: 26px;
   height: 26px;
 }
+.audio-output {
+  margin: var(--space-2) 0 0;
+}
+.audio-output .select {
+  width: 100%;
+}

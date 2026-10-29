@@ -226,6 +226,24 @@ export function installPreviewBridge() {
           return { clientId: "", connected: false };
         case "spotify.connect":
           throw new Error("Preview only — Spotify was not contacted.");
+        case "audio.outputs":
+        case "audio.output": {
+          const pick = method === "audio.output" ? String(a?.id) : "";
+          return [
+            [
+              "{0.0.0.00000000}.{11111111-1111-1111-1111-111111111111}",
+              "Speakers (demo)",
+            ],
+            [
+              "{0.0.0.00000000}.{22222222-2222-2222-2222-222222222222}",
+              "Headphones (demo)",
+            ],
+          ].map(([id, name], i) => ({
+            id,
+            name,
+            isDefault: pick ? id === pick : i === 0,
+          }));
+        }
         case "audio.apps":
         case "audio.app":
           return [

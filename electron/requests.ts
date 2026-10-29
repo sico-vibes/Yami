@@ -459,6 +459,15 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "audio.outputs":
+        return native.call("audioOutputs");
+      case "audio.output": {
+        const id = String(a.id || "");
+        // Core Audio endpoint ids look like {0.0.0.00000000}.{guid}.
+        if (!/^\{[0-9.]+\}\.\{[0-9a-f-]{36}\}$/i.test(id))
+          throw new Error("Choose an output device.");
+        return native.call("audioOutputSet", { id });
+      }
       case "audio.apps":
         return native.call("audioSessions");
       case "audio.app": {
