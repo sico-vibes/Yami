@@ -360,6 +360,22 @@ export function previewModules(
           user: true,
         },
       ];
+    case "tune.cursors":
+    case "tune.cursors.set":
+    case "tune.cursors.restore":
+      return {
+        schemes: [
+          { id: "system:Windows Aero", name: "Windows Default" },
+          { id: "system:Windows Black", name: "Windows Black" },
+          { id: "system:Windows Inverted", name: "Windows Inverted" },
+        ],
+        current:
+          a.scheme === "system:Windows Black"
+            ? "Windows Black"
+            : "Windows Default",
+        size: Number(a.size) || 1,
+        saved: method === "tune.cursors.set",
+      };
     case "tune.space.drives":
       return [
         { path: "C:\\", total: 1_000_000_000_000, free: 212_000_000_000 },

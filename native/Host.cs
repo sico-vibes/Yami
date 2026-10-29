@@ -150,6 +150,8 @@ class Host {
             case "wallpaperSet": { string path=Path.GetFullPath(Str(a,"path")); if(!File.Exists(path)) throw new Exception("Wallpaper file does not exist."); if(!SystemParametersInfo(20,0,path,3)) throw new Exception("Windows could not apply this wallpaper."); return path; }
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
+            // SPI_SETCURSORS: Windows reads the pointer values in Control Panel\Cursors again.
+            case "cursorsReload": return SystemParametersInfo(0x57,0,null,3);
             case "listeningPorts": return NetPorts.Listening(Num(a,"root"));
             case "audioOutputs": return AudioDevices.List();
             case "audioOutputSet": return AudioDevices.SetDefault(Str(a,"id"));

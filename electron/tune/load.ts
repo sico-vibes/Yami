@@ -11,6 +11,7 @@ import { AppsController } from "./apps";
 import { CleanupController, nativeStats } from "./cleanup";
 import { NetworkShield } from "./shield";
 import { SpaceController } from "./space";
+import { CursorController } from "./cursors";
 import { shell } from "electron";
 
 export { shieldWanted } from "./shield";
@@ -24,10 +25,15 @@ export type Tune = {
   apps: AppsController;
   cleanup: CleanupController;
   space: SpaceController;
+  cursors: CursorController;
   shield: NetworkShield;
 };
 
-export function loadTune(dataDir: string): Tune {
+export function loadTune(
+  dataDir: string,
+  /** Asks Windows to read the pointer values again (native host). */
+  reloadCursors: () => Promise<unknown> = async () => {},
+): Tune {
   // The sandbox root of the desktop check also hides machine entries and
   // uses its own Startup folder.
   const sandbox = process.env.YAMI_TUNE_ROOT;
@@ -54,6 +60,13 @@ export function loadTune(dataDir: string): Tune {
       nativeStats(helperPath("Yami.FileStats.exe")),
     ),
     space: new SpaceController(helperPath("Yami.FileStats.exe")),
+    // In the sandbox the real pointers are never reloaded.
+    cursors: new CursorController(
+      io,
+      readMachineKey,
+      path.join(dataDir, "tune-cursors.json"),
+      sandbox ? async () => {} : reloadCursors,
+    ),
     // YAMI_SHIELD_PORT moves it off port 53 for the desktop check.
     shield: new NetworkShield({
       dir: dataDir,
@@ -69,6 +82,9 @@ export function loadTune(dataDir: string): Tune {
 /** Answers `tune.*` requests from the page. */
 export function tuneRequest(t: Tune, method: string, a: any = {}) {
   if (method.startsWith("tune.shield")) return t.shield.request(method, a);
+  if (method === "tune.cursors") return t.cursors.status();
+  if (method === "tune.cursors.set") return t.cursors.apply(a);
+  if (method === "tune.cursors.restore") return t.cursors.restore();
   if (method === "tune.space.drives") return t.space.drives();
   if (method === "tune.space") return t.space.list(a.folder);
   if (method === "tune.space.reveal") return reveal(a.folder, a.name);

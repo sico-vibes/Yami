@@ -15,7 +15,7 @@ export type RegValue = {
   key: string;
   /** Empty for the key's default value. */
   name: string;
-  type: "REG_DWORD" | "REG_SZ" | "REG_BINARY";
+  type: "REG_DWORD" | "REG_SZ" | "REG_EXPAND_SZ" | "REG_BINARY";
   data: string;
 };
 

@@ -14,6 +14,7 @@ import { AdminSection } from "./AdminSection";
 import { AppsSection } from "./AppsSection";
 import { CleanupSection } from "./CleanupSection";
 import { SpaceSection } from "./SpaceSection";
+import { CursorSection } from "./CursorSection";
 
 const sourceLabel: Record<StartupApp["source"], string> = {
   user: "Your account",
@@ -112,6 +113,7 @@ export default function TunePage({
           </div>
         </section>
       ))}
+      <CursorSection report={report} />
       <DnsSection
         key={dnsKey}
         report={report}
