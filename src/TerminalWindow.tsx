@@ -70,54 +70,92 @@ export default function TerminalWindow() {
   };
   const backlog = useRef(new Map<string, any[]>()),
     mounted = useRef(true);
-  // Split view: the selected tab on the left, a partner tab on the right.
-  const partner = useRef("");
-  const [split, setSplit] = useState("");
+  // Split view: up to four tabs at once. One fills the window, two sit side
+  // by side, three put one on the left and two on the right, four make a
+  // grid. The active pane takes input; the others are dimmed a little.
+  const panes = useRef<string[]>([]);
+  const [split, setSplit] = useState(0);
+  const slots: Record<number, [number, number, number, number][]> = {
+    1: [[0, 0, 1, 1]],
+    2: [
+      [0, 0, 0.5, 1],
+      [0.5, 0, 1, 1],
+    ],
+    3: [
+      [0, 0, 0.5, 1],
+      [0.5, 0, 1, 0.5],
+      [0.5, 0.5, 1, 1],
+    ],
+    4: [
+      [0, 0, 0.5, 0.5],
+      [0.5, 0, 1, 0.5],
+      [0, 0.5, 0.5, 1],
+      [0.5, 0.5, 1, 1],
+    ],
+  };
   function layout() {
-    const pair = partner.current;
+    panes.current = panes.current.filter((id) => views.current.has(id));
+    if (!panes.current.includes(active.current))
+      panes.current = active.current ? [active.current] : [];
+    const shown = panes.current;
+    const many = shown.length > 1;
     for (const view of views.current.values()) {
-      view.element.hidden = view.id !== active.current && view.id !== pair;
+      const at = shown.indexOf(view.id);
+      view.element.hidden = at < 0;
       view.element.classList.toggle(
         "pane-a",
-        !!pair && view.id === active.current,
+        many && view.id === active.current,
       );
-      view.element.classList.toggle("pane-b", !!pair && view.id === pair);
-      if (!view.element.hidden) view.fit.fit();
+      view.element.classList.toggle(
+        "pane-b",
+        many && at >= 0 && view.id !== active.current,
+      );
+      const [l, t, r, b] = (slots[shown.length] || slots[1])[Math.max(0, at)];
+      // 12px/16px is the usual inset; 6px either side of a shared edge.
+      const edge = (v: number, outer: string) =>
+        v === 0 || v === 1 ? outer : `calc(${v * 100}% + 6px)`;
+      view.element.style.left = edge(l, "16px");
+      view.element.style.top = edge(t, "12px");
+      view.element.style.right =
+        r === 1 ? "16px" : `calc(${(1 - r) * 100}% + 6px)`;
+      view.element.style.bottom =
+        b === 1 ? "12px" : `calc(${(1 - b) * 100}% + 6px)`;
+      if (at >= 0) view.fit.fit();
     }
+    setSplit(shown.length);
   }
   function select(id: string) {
-    // Choosing the right-hand pane swaps the two.
-    if (partner.current && id === partner.current)
-      partner.current = active.current;
+    // A tab that is not on screen takes the active pane's place.
+    if (!panes.current.includes(id)) {
+      const at = panes.current.indexOf(active.current);
+      if (at >= 0) panes.current[at] = id;
+    }
     active.current = id;
     setSelected(id);
-    setSplit(partner.current);
     layout();
     views.current.get(id)?.terminal.focus();
   }
-  async function toggleSplit() {
-    if (partner.current) {
-      partner.current = "";
-      setSplit("");
+  /** Adds a pane: the newest tab not shown yet, or a new one. */
+  async function addPane() {
+    if (panes.current.length >= 4) return;
+    const other = [...views.current.keys()]
+      .reverse()
+      .find((k) => !panes.current.includes(k));
+    if (other) {
+      panes.current = [...panes.current, other];
       layout();
       return;
     }
-    const other = [...views.current.keys()]
-      .reverse()
-      .find((k) => k !== active.current);
-    if (other) {
-      partner.current = other;
-      setSplit(other);
+    const before = [...panes.current];
+    await create();
+    if (active.current && !before.includes(active.current)) {
+      panes.current = [...before, active.current];
       layout();
-    } else {
-      const left = active.current;
-      await create();
-      if (left && views.current.has(left) && left !== active.current) {
-        partner.current = left;
-        setSplit(left);
-        layout();
-      }
     }
+  }
+  function onePane() {
+    panes.current = active.current ? [active.current] : [];
+    layout();
   }
   const report = (e: any) => setError(e.message || String(e));
   function output(event: any) {
@@ -414,13 +452,16 @@ export default function TerminalWindow() {
       view.terminal.dispose();
       view.element.remove();
       views.current.delete(selected);
-      // Ending either pane leaves split view.
-      partner.current = "";
-      setSplit("");
+      // The other panes stay; the next one shown takes input.
+      panes.current = panes.current.filter((id) => id !== selected);
       setList((old) => old.filter((v) => v.id !== selected));
-      const next = [...views.current.keys()][0];
+      const next = panes.current[0] || [...views.current.keys()][0];
       if (next) select(next);
-      else setSelected("");
+      else {
+        active.current = "";
+        setSelected("");
+        layout();
+      }
     } catch (e) {
       report(e);
     }
@@ -493,12 +534,17 @@ export default function TerminalWindow() {
           label="New terminal session"
           onClick={() => void create()}
         />
-        <IconButton
-          icon="columns"
-          label={split ? "Show one tab" : "Split: two tabs side by side"}
-          active={!!split}
-          onClick={() => void toggleSplit()}
-        />
+        {split < 4 && (
+          <IconButton
+            icon={split >= 2 ? "squares-four" : "columns"}
+            label={`Split: add a pane (${Math.max(1, split)} of 4)`}
+            active={split > 1}
+            onClick={() => void addPane()}
+          />
+        )}
+        {split > 1 && (
+          <IconButton icon="square" label="Show one tab" onClick={onePane} />
+        )}
         <IconButton
           icon="magnifying-glass"
           label="Search this tab (Ctrl+Shift+F)"

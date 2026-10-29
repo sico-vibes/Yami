@@ -160,7 +160,8 @@ Workspace verification commands:
   while that is the current session. Your own player is never acted on.
 - `node scripts/verify-terminal-shells.mjs`: lists the detected shells, opens a Git Bash
   tab when Git for Windows is installed, runs a harmless `echo`, and finds its output with
-  the scrollback search, then checks split view: two panes, swapping, and back to one. It then opens
+  the scrollback search, then checks split view: two panes, swapping, three and four panes in a
+  2×2 grid, and back to one. It then opens
   each installed shell in a temporary folder and checks the folder, `Exit 4` and the copied last
   block from shell integration (restoring the clipboard), and the hidden-window notice for a long command.
 - `node scripts/verify-workbench.mjs`: isolated Windows Electron profile; native

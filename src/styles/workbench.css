@@ -378,19 +378,15 @@ html[data-reduced="true"] .terminal-sessions > button {
   min-width: 0;
   height: 32px;
 }
-/* Split view: the selected tab left, its partner right, a hairline between. */
+/* Split view: each pane framed by a hairline; the one taking input glows. */
+.terminal-view.pane-a,
+.terminal-view.pane-b {
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 1px var(--line);
+}
 .terminal-view.pane-a {
-  right: calc(50% + 6px);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--glow) 45%, transparent);
 }
 .terminal-view.pane-b {
-  left: calc(50% + 6px);
   opacity: 0.82;
-}
-.terminal-view.pane-b::before {
-  content: "";
-  position: absolute;
-  left: -7px;
-  top: 0;
-  bottom: 0;
-  border-left: 1px solid var(--line);
 }

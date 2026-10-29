@@ -106,6 +106,25 @@ try {
     .locator("[data-session].selected")
     .getAttribute("data-session");
   assert.notEqual(after, before, "the right pane took input");
+  // Up to four panes: three, then a 2×2 grid, then the Split button goes.
+  for (const want of [3, 4]) {
+    await terminal.getByRole("button", { name: /^Split/ }).click();
+    for (let i = 0; i < 60 && (await shown().count()) < want; i++)
+      await wait(250);
+    assert.equal(await shown().count(), want, `${want} panes`);
+  }
+  const boxes = await shown().evaluateAll((els) =>
+    els.map((e) => {
+      const r = e.getBoundingClientRect();
+      return [Math.round(r.left), Math.round(r.top)];
+    }),
+  );
+  assert.equal(new Set(boxes.map((b) => b[0])).size, 2, "two columns");
+  assert.equal(new Set(boxes.map((b) => b[1])).size, 2, "two rows");
+  assert.equal(
+    await terminal.getByRole("button", { name: /^Split/ }).count(),
+    0,
+  );
   await terminal.getByRole("button", { name: "Show one tab" }).click();
   await wait(300);
   assert.equal(await shown().count(), 1, "back to one");
