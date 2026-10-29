@@ -73,6 +73,10 @@ After terminal links, SSH hosts, layout restore and four panes, Fan out compare,
 
 Rebuilt with `npx electron-builder --win --dir` after the day's features, then `node scripts/measure-performance.mjs --packaged`: **168.0–168.1 MB** private working set across 8 processes at idle, with roaming on and optional modules at their defaults. That is about 2 MB above the morning's packaged run and inside the 100–200 MB budget. `node scripts/verify-packaged.mjs` passed on the same build (native host, wallpaper apply and restore, metrics, DPAPI, transparent island). Short run, not a soak test.
 
+## Packaged build after the next additions (2026-10-29)
+
+After the network shield, Cleanup, Disk space, the mouse pointer, environment and hosts editors, Keep awake, the colour picker, always on top, window layouts, workspaces, accent characters, quick look, radio, podcasts, currency, holidays, air quality, package checks, focus sessions, the daily brief, and Outlook and Bluesky sign-in, the packaged build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged`, default settings, same PC) measured **165.1 MB**, and on a second run **169.3–174.6 MB**, private working set across 8 processes at idle, with 0% sampled CPU. The previous packaged figure was 168.0–168.1 MB, so the additions cost little or nothing at idle; they load when used, and the optional ones (shield, accent characters, quick look) are off by default. The run-to-run spread is about 10 MB.
+
 ## Whistle dictation (2026-10-28)
 
 `needle.exe` (Needle 3, pinned) transcribing a 5-second 16 kHz WAV with `whistle.cact`: 384 ms wall time, 118 ms to the first token, peak working set about 42 MB (38 MB private), sampled every 20 ms with PowerShell. The runner exits after each utterance, so nothing stays resident. Through Yami (write WAV, run, apply Your words, paste) the whole dictation took about 1 second.
