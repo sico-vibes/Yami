@@ -322,7 +322,12 @@ export function installPreviewBridge() {
         }
         case "weather":
           return state.settings.weatherEnabled
-            ? { place: "Kyoto", temperature: 21, condition: "partlycloudy_day" }
+            ? {
+                place: "Kyoto",
+                temperature: 21,
+                condition: "partlycloudy_day",
+                air: { uv: 3.2, aqi: 42 },
+              }
             : null;
         case "timer.state":
           return { endsAt: 0, duration: 0 };

@@ -16,6 +16,19 @@ function occursOn(task: Task, day: Date) {
   return sameDay(at, day);
 }
 const pad = (n: number) => String(n).padStart(2, "0");
+/** US AQI bands in a word, as AirNow names them. */
+export const airWord = (aqi: number) =>
+  aqi <= 50
+    ? "good"
+    : aqi <= 100
+      ? "moderate"
+      : aqi <= 150
+        ? "unhealthy for some"
+        : aqi <= 200
+          ? "unhealthy"
+          : aqi <= 300
+            ? "very unhealthy"
+            : "hazardous";
 
 export function Today({
   state,
@@ -110,6 +123,22 @@ export function Today({
               <Icon name={look.icon} size={26} />
               <b>{Math.round(weather.temperature)}°C</b>
               <small>{look.label || weather.place}</small>
+              {weather.air &&
+                (weather.air.uv !== undefined ||
+                  weather.air.aqi !== undefined) && (
+                  <small
+                    className="weather-air"
+                    data-tip="UV and air quality (US AQI) from Open-Meteo, CC BY 4.0"
+                  >
+                    {[
+                      weather.air.uv !== undefined && `UV ${weather.air.uv}`,
+                      weather.air.aqi !== undefined &&
+                        `Air ${airWord(weather.air.aqi)}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </small>
+                )}
             </>
           ) : (
             <button

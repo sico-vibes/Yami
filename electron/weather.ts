@@ -34,6 +34,9 @@ export async function readWeather(store: Store, assetRoot: () => string) {
     lon = r.longitude;
     place = r.city;
   }
+  // UV and air quality from Open-Meteo (free, no key, CC BY 4.0), asked
+  // alongside the forecast; the forecast still shows when it fails.
+  const air = readAir(lat, lon).catch(() => undefined);
   const response = await fetch(
     `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`,
     {
@@ -48,5 +51,28 @@ export async function readWeather(store: Store, assetRoot: () => string) {
     place,
     temperature: now.data.instant.details.air_temperature,
     condition: now.data.next_1_hours?.summary.symbol_code || "",
+    air: await air,
+  };
+}
+
+/** The current US AQI and UV index; undefined values are left out. */
+export async function readAir(
+  lat: number,
+  lon: number,
+  fetcher: typeof fetch = fetch,
+) {
+  const response = await fetcher(
+    `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&current=us_aqi,uv_index`,
+    { signal: AbortSignal.timeout(10000) },
+  );
+  if (!response.ok) return undefined;
+  const now = ((await response.json()) as any).current || {};
+  const aqi = now.us_aqi,
+    uv = now.uv_index;
+  return {
+    ...(typeof aqi === "number" &&
+      Number.isFinite(aqi) && { aqi: Math.round(aqi) }),
+    ...(typeof uv === "number" &&
+      Number.isFinite(uv) && { uv: Math.round(uv * 10) / 10 }),
   };
 }
