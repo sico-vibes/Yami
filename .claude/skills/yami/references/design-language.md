@@ -24,7 +24,8 @@ then stops.
 4. **Reuse components.** Never ship a native `<select>` or a `title` tooltip in
    a shipped screen:
    - choices → `Select` from `src/controls.tsx` (human option labels, stored
-     values unchanged);
+     values unchanged; its open menu follows its button when the page scrolls
+     or shifts, and closes only once the button leaves the screen);
    - hints → `data-tip` (the per-window `TooltipLayer` renders it);
    - states → `StatusChip` (tone from `src/status-tone.ts`, tested);
    - shares → `Meter`; read-only values → `.value-pill`;

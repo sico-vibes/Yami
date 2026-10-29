@@ -56,20 +56,26 @@ export function Select({
     [active, setActive] = useState(0),
     [place, setPlace] = useState<Place | null>(null);
   const selected = items.find((o) => o.value === value);
-  const show = () => {
-    if (disabled || !trigger.current) return;
-    const r = trigger.current.getBoundingClientRect(),
-      want = Math.min(288, items.length * 38 + 12),
+  /** Where the menu goes for the trigger's place now; null when it is off screen. */
+  const measure = (): Place | null => {
+    if (!trigger.current) return null;
+    const r = trigger.current.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return null;
+    const want = Math.min(288, items.length * 38 + 12),
       below = innerHeight - r.bottom - 10,
       above = r.top - 10,
       up = below < want && above > below,
       width = Math.max(r.width, 168),
       left = Math.min(Math.max(8, r.left), innerWidth - width - 8);
-    setPlace(
-      up
-        ? { left, width, bottom: innerHeight - r.top + 6, maxHeight: Math.min(288, above) }
-        : { left, width, top: r.bottom + 6, maxHeight: Math.min(288, below) },
-    );
+    return up
+      ? { left, width, bottom: innerHeight - r.top + 6, maxHeight: Math.min(288, above) }
+      : { left, width, top: r.bottom + 6, maxHeight: Math.min(288, below) };
+  };
+  const show = () => {
+    if (disabled || !trigger.current) return;
+    const where = measure();
+    if (!where) return;
+    setPlace(where);
     setActive(Math.max(0, items.findIndex((o) => o.value === value)));
     setOpen(true);
     trigger.current.focus();
@@ -136,13 +142,21 @@ export function Select({
         setOpen(false);
     };
     const close = () => setOpen(false);
+    // The page moved (it scrolled, or a section above finished loading):
+    // the menu follows its button and closes only once the button is gone.
+    const follow = (e: Event) => {
+      if (menu.current?.contains(e.target as Node)) return;
+      const where = measure();
+      if (where) setPlace(where);
+      else setOpen(false);
+    };
     addEventListener("pointerdown", outside, true);
-    addEventListener("scroll", outside, true);
+    addEventListener("scroll", follow, true);
     addEventListener("resize", close);
     addEventListener("blur", close);
     return () => {
       removeEventListener("pointerdown", outside, true);
-      removeEventListener("scroll", outside, true);
+      removeEventListener("scroll", follow, true);
       removeEventListener("resize", close);
       removeEventListener("blur", close);
     };
