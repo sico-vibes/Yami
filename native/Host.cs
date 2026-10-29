@@ -96,6 +96,10 @@ class Host {
     static bool IsDown(params int[] values) { return values.Any(v => Keys.Contains(v)); }
     static int[] ParseKeys(string value) {return value.Split('+').Select(k=>k=="Ctrl"?0x11:k=="Win"?0x5B:k=="Alt"?0x12:k=="Shift"?0x10:(int)Enum.Parse(typeof(System.Windows.Forms.Keys),k,true)).ToArray();}
     static bool Combo(int[] keys) {return keys.All(k=>k==0x11?IsDown(0xA2,0xA3,0x11):k==0x12?IsDown(0xA4,0xA5,0x12):k==0x10?IsDown(0xA0,0xA1,0x10):k==0x5B?IsDown(0x5B,0x5C):IsDown(k));}
+    static bool QuickLook;
+    [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr h, System.Text.StringBuilder name, int max);
+    // Quick look answers only in a File Explorer folder window.
+    static bool ExplorerInFront(){var name=new System.Text.StringBuilder(64);GetClassName(GetForegroundWindow(),name,64);return name.ToString()=="CabinetWClass";}
     static IntPtr KeyboardHook(int code, IntPtr w, IntPtr l) {
         if(code >= 0) {
             int key=Marshal.ReadInt32(l); long message=w.ToInt64();
@@ -109,6 +113,7 @@ class Host {
             if(lasso && !Lasso) Send(new {eventName="lasso-start"}); Lasso=lasso;
             if(key==0x1B && message==0x100) Send(new {eventName="escape"});
             if(AbilityArmed&&AbilityButton.StartsWith("K:")&&key.ToString()==AbilityButton.Substring(2)&&(message==0x100||message==0x104))Send(new{eventName="ability-click"});
+            if(QuickLook&&ctrl&&!alt&&!win&&key==0x20&&message==0x100&&ExplorerInFront()){Send(new{eventName="peek"});return new IntPtr(1);}
             if(QuickAccent.OnKey(key,message,(Marshal.ReadInt32(l,8)&0x10)!=0,shift,ctrl||alt||win)) return new IntPtr(1);
             FileWheel.OnKey(key, message, Voice||Dictation||Lasso);
             if(Hotkeys&&win&&key==0x41&&message==0x100){Send(new{eventName="launcher"});return new IntPtr(1);}
@@ -129,7 +134,7 @@ class Host {
     static object Dispatch(string method, Dictionary<string, object> a) {
         switch(method) {
             case "ping": return new {ok=true, platform=Environment.OSVersion.ToString()};
-            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));if(a.ContainsKey("quickAccent"))QuickAccent.Enabled=Flag(a,"quickAccent");FileWheel.Configure(a);return true;
+            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));if(a.ContainsKey("quickAccent"))QuickAccent.Enabled=Flag(a,"quickAccent");if(a.ContainsKey("quickLook"))QuickLook=Flag(a,"quickLook");FileWheel.Configure(a);return true;
             case "clipboardFiles": FileWheel.SetFileDrop(a.ContainsKey("paths")?a["paths"]:null); return true;
             case "wake": {if(!a.ContainsKey("at")){CancelWaitableTimer(WakeTimer);return true;}long due=DateTime.Parse(Str(a,"at"),null,System.Globalization.DateTimeStyles.RoundtripKind).ToUniversalTime().ToFileTimeUtc();return SetWaitableTimer(WakeTimer,ref due,0,IntPtr.Zero,IntPtr.Zero,true);}
             case "context": return Context();

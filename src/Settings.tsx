@@ -283,6 +283,11 @@ export function Settings({
                 "Hold a letter, press Space, pick é, ñ or ü; release to type it.",
                 toggle("quickAccent", "Accent characters"),
               )}
+              {row(
+                "Quick look",
+                "Ctrl+Space on a file in File Explorer previews it; Esc closes.",
+                toggle("quickLook", "Quick look"),
+              )}
             </div>
             <p className="setting-note">
               Focus a shortcut and press your preferred combination. Esc cancels

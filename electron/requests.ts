@@ -6,6 +6,7 @@ import { Holidays } from "./holidays";
 import { Radio } from "./radio";
 import { Workspaces } from "./workspaces";
 import { accentState } from "./accent-overlay";
+import { openPeek } from "./peek";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -486,6 +487,8 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "peek.open":
+        return openPeek(String(a.path || ""));
       case "accent.state":
         return accentState();
       case "accent.feed":

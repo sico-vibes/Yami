@@ -26,7 +26,7 @@ The current PowerToys README names 31 utilities. These are the ones Yami does no
 | **Environment variables** | **Built 2026-10-29:** view and edit your user variables, Path as a folder list, exact Put back. System variables (admin) are still open | HKCU `Environment` through `reg.exe`, then a `WM_SETTINGCHANGE` broadcast | None |
 | **Screen ruler** | Measure pixels between edges on screen | Overlay window while active | None |
 | **Image resizer** | Already covered by the file wheel's resize petal | n/a | n/a |
-| **Peek** (quick look) | Space on a selected Explorer file opens Yami's viewer (images, PDF, text, media) | Explorer selection is already read for the wheel; viewers exist in the tool window | None |
+| **Peek** (quick look) | **Built 2026-10-29:** Ctrl+Space on a selected Explorer file opens a preview (images, PDF, text, media); off by default | Explorer selection is already read for the wheel; viewers exist in the tool window | None |
 | **PowerRename** | Batch rename with find/replace, regex and preview | The wheel already has batch rename; add regex and preview | None |
 | **Workspaces** | **Built 2026-10-29:** save the open apps and their window positions, then restore them with one click | Window list and `MoveWindow` exist; launching apps exists | None |
 

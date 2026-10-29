@@ -49,6 +49,8 @@ export type Settings = {
   holidaysEnabled: boolean;
   /** Hold a letter, press Space: accented characters (native hook). */
   quickAccent: boolean;
+  /** Ctrl+Space in File Explorer previews the selected file. */
+  quickLook: boolean;
   terminalEnabled: boolean;
   desktopEnabled: boolean;
   voice: string;
