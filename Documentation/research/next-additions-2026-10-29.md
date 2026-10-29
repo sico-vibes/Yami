@@ -21,7 +21,7 @@ The current PowerToys README names 31 utilities. These are the ones Yami does no
 | **Text extractor** (OCR anywhere) | Draw a box over any part of the screen and get its text, copied and shown in Yami | The lasso already exists; Windows OCR (`Windows.Media.Ocr`) is already in `native/Ocr.ps1` | None |
 | **Always on top** | Pin the focused window above others with a hotkey; a thin lavender frame shows it | `SetWindowPos(HWND_TOPMOST)` in the native host; the frame is one transparent window only while pinned | One small window while a window is pinned |
 | **Window layouts** (FancyZones, lite) | **Built 2026-10-29:** halves, quarters, thirds, centre and maximise from the Controls card and the launcher. Still open: hotkeys and saved per-monitor layouts | `MoveWindow` already in the host; layouts are JSON | None |
-| **Quick accent** | Hold a letter, press a key, pick é, ü, ñ from a small strip | Low-level keyboard hook already in the host | Hook already present |
+| **Quick accent** | **Built 2026-10-29:** hold a letter, press Space, pick é, ü, ñ from a small strip (off by default) | Low-level keyboard hook already in the host | Hook already present |
 | **Hosts file editor** | **Built 2026-10-29:** list, switch off, add and remove hosts entries, with an exact Put back | One elevated write through the existing admin helper pattern | None |
 | **Environment variables** | **Built 2026-10-29:** view and edit your user variables, Path as a folder list, exact Put back. System variables (admin) are still open | HKCU `Environment` through `reg.exe`, then a `WM_SETTINGCHANGE` broadcast | None |
 | **Screen ruler** | Measure pixels between edges on screen | Overlay window while active | None |

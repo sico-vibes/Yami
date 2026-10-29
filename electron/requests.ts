@@ -5,6 +5,7 @@ import { Rates } from "./currency";
 import { Holidays } from "./holidays";
 import { Radio } from "./radio";
 import { Workspaces } from "./workspaces";
+import { accentState } from "./accent-overlay";
 import { mediaAction, windowsSearch } from "./platform";
 import {
   app,
@@ -485,6 +486,13 @@ export function createRequestHandler(ctx: RequestContext) {
         return metrics();
       case "controls":
         return controls();
+      case "accent.state":
+        return accentState();
+      case "accent.feed":
+        // Only the desktop check; real keys never come this way.
+        if (process.env.YAMI_ACCENT_TEST !== "1")
+          throw new Error("Unknown request.");
+        return native.call("accentFeed", { steps: a.steps });
       case "workspaces":
         return workspaces.list();
       case "workspaces.save":

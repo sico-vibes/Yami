@@ -47,6 +47,8 @@ export type Settings = {
   weatherEnabled: boolean;
   /** Public holidays in Today, from Nager.Date for Windows' region. */
   holidaysEnabled: boolean;
+  /** Hold a letter, press Space: accented characters (native hook). */
+  quickAccent: boolean;
   terminalEnabled: boolean;
   desktopEnabled: boolean;
   voice: string;

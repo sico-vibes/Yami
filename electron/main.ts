@@ -13,6 +13,7 @@ import {
   safeStorage,
   session as electronSession,
 } from "electron";
+import { onAccent } from "./accent-overlay";
 import { handleRadio, radioScheme } from "./radio";
 import { noteForeground } from "./screen-tools";
 import { spawn } from "node:child_process";
@@ -627,6 +628,7 @@ async function effect(kind: string, before?: any, after?: any) {
 }
 async function nativeEvent(e: any) {
   if (modules?.onNative(e)) return;
+  if (e.eventName === "accent") return onAccent(e, broadcast);
   if (e.eventName === "foreground") {
     noteForeground(e);
     const aliases: Record<string, string> = {

@@ -517,3 +517,33 @@ html[data-window="widget"] body {
   font-size: var(--fs-sm);
   pointer-events: none;
 }
+/* Accent choices while a letter is held. */
+html[data-window="accent"],
+html[data-window="accent"] body {
+  background: transparent;
+  overflow: hidden;
+}
+.accent-strip {
+  display: flex;
+  gap: 6px;
+  width: fit-content;
+  margin: 6px auto;
+  padding: 6px;
+  border-radius: var(--r-lg);
+  background: var(--ink-0);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-float);
+}
+.accent-strip span {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 44px;
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 22px;
+}
+.accent-strip span.on {
+  background: var(--grad-glow);
+  color: var(--ink-0);
+}

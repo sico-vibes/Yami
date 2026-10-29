@@ -109,6 +109,7 @@ class Host {
             if(lasso && !Lasso) Send(new {eventName="lasso-start"}); Lasso=lasso;
             if(key==0x1B && message==0x100) Send(new {eventName="escape"});
             if(AbilityArmed&&AbilityButton.StartsWith("K:")&&key.ToString()==AbilityButton.Substring(2)&&(message==0x100||message==0x104))Send(new{eventName="ability-click"});
+            if(QuickAccent.OnKey(key,message,(Marshal.ReadInt32(l,8)&0x10)!=0,shift,ctrl||alt||win)) return new IntPtr(1);
             FileWheel.OnKey(key, message, Voice||Dictation||Lasso);
             if(Hotkeys&&win&&key==0x41&&message==0x100){Send(new{eventName="launcher"});return new IntPtr(1);}
         }
@@ -128,7 +129,7 @@ class Host {
     static object Dispatch(string method, Dictionary<string, object> a) {
         switch(method) {
             case "ping": return new {ok=true, platform=Environment.OSVersion.ToString()};
-            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));FileWheel.Configure(a);return true;
+            case "configure": if(a.ContainsKey("hotkeys"))Hotkeys=Flag(a,"hotkeys");if(a.ContainsKey("abilityArmed"))AbilityArmed=Flag(a,"abilityArmed");if(a.ContainsKey("abilityButton"))AbilityButton=Str(a,"abilityButton","M1");if(a.ContainsKey("voiceShortcut"))VoiceKeys=ParseKeys(Str(a,"voiceShortcut"));if(a.ContainsKey("dictationShortcut"))DictationKeys=ParseKeys(Str(a,"dictationShortcut"));if(a.ContainsKey("circleShortcut"))LassoKeys=ParseKeys(Str(a,"circleShortcut"));if(a.ContainsKey("quickAccent"))QuickAccent.Enabled=Flag(a,"quickAccent");FileWheel.Configure(a);return true;
             case "clipboardFiles": FileWheel.SetFileDrop(a.ContainsKey("paths")?a["paths"]:null); return true;
             case "wake": {if(!a.ContainsKey("at")){CancelWaitableTimer(WakeTimer);return true;}long due=DateTime.Parse(Str(a,"at"),null,System.Globalization.DateTimeStyles.RoundtripKind).ToUniversalTime().ToFileTimeUtc();return SetWaitableTimer(WakeTimer,ref due,0,IntPtr.Zero,IntPtr.Zero,true);}
             case "context": return Context();
@@ -151,6 +152,7 @@ class Host {
             case "controls": return Controls();
             case "audioSessions": return AudioSessions.List();
             // SPI_SETCURSORS: Windows reads the pointer values in Control Panel\Cursors again.
+            case "accentFeed": return QuickAccent.Feed(((System.Collections.ArrayList)a["steps"]).ToArray());
             case "appWindows": return WindowPin.Windows((uint)Num(a,"skip"));
             case "placeWindow": return WindowPin.Place(Convert.ToInt64(a["handle"]),Num(a,"x"),Num(a,"y"),Num(a,"width"),Num(a,"height"),Flag(a,"maximized"));
             case "snap": return WindowPin.Snap(Convert.ToInt64(a["handle"]),Str(a,"layout"));

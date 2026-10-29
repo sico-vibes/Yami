@@ -278,6 +278,11 @@ export function Settings({
                 "Draw around anything on your screen.",
                 shortcut("circleShortcut"),
               )}
+              {row(
+                "Accent characters",
+                "Hold a letter, press Space, pick é, ñ or ü; release to type it.",
+                toggle("quickAccent", "Accent characters"),
+              )}
             </div>
             <p className="setting-note">
               Focus a shortcut and press your preferred combination. Esc cancels
