@@ -1,4 +1,5 @@
 import test from "node:test";
+import { freePort } from "./free-port.mjs";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import net from "node:net";
@@ -87,7 +88,7 @@ test("mail parts, encoded words and HTML read as plain text", () => {
 test("the catcher receives mail over SMTP, keeps it and refuses a taken port", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "yami-mail-"));
   const caught = [];
-  const port = 20000 + Math.floor(Math.random() * 20000);
+  const port = await freePort();
   const catcher = new MailCatcher({
     dataDir: dir,
     port,

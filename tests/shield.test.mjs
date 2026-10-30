@@ -18,6 +18,7 @@ import {
   relay,
 } from "../electron/tune/shield-dns.ts";
 import { NetworkShield } from "../electron/tune/shield.ts";
+import { freePort } from "./free-port.mjs";
 
 /** A query for one name, with an EDNS record when size is given. */
 function query(name, type = 1, size) {
@@ -148,7 +149,7 @@ function doh(asked) {
 
 test("the shield blocks listed names, forwards the rest and counts", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "yami-shield-"));
-  const port = 20000 + Math.floor(Math.random() * 20000);
+  const port = await freePort();
   const asked = [];
   const shield = new NetworkShield({
     dir,

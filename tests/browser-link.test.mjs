@@ -4,11 +4,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { BrowserLink } from "../electron/downloads/link.ts";
+import { freePort } from "./free-port.mjs";
 
 test("the browser link takes downloads only with its key, and only while on", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "yami-link-"));
   const added = [];
-  const port = 40000 + Math.floor(Math.random() * 10000);
+  const port = await freePort();
   const link = new BrowserLink(
     dir,
     path.resolve("extension"),
