@@ -103,7 +103,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "dompurify": "^3.4.17",
     "electron": "^44.8.0",
-    "electron-builder": "^26.15.3",
+    "electron-builder": "^26.17.0",
     "esbuild": "^0.28.2",
     "marked": "^18.1.1",
     "qrcode": "^1.5.4",
