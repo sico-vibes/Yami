@@ -233,7 +233,19 @@ manifest can use `Yami.Native.exe`. See [workspace support limits](workspace.md)
 
 Vite output under `dist/` and Electron output under `dist-electron/` are bundled into the app. The package includes `package.json` plus those outputs and copies the compiled native executable and scripts to a `native` resource directory. User-facing wallpaper, city data, and app icons are copied to `assets`. Electron-builder’s Windows target is `portable`, product name is `Yami`, app ID is `in.yami.desktop`, and executable signing is disabled in current configuration.
 
-The resulting portable binary is not signed. A release owner must decide signing and update behavior before publishing broadly. The Yami repository is intentionally private during development even though the source is intended for MIT open-source distribution.
+The resulting portable binary is not signed, so SmartScreen warns on first run; signing and in-app updates are still open decisions.
+
+### Publishing a release
+
+The repository is public (`sico-vibes/Yami`, since 2026-10-30), and releases are GitHub pre-releases while Yami is in beta. The 0.3.0 beta was published this way:
+
+1. Bump `version` in `package.json` and `package-lock.json` (then `npm run lock:compact`), and add the version's section to `CHANGELOG.md`, which is public-facing.
+2. `npm run verify`, then `npm run package`; run `node scripts/verify-packaged.mjs` and `node scripts/measure-performance.mjs --packaged` against `release/win-unpacked` and record the idle figure in [performance](performance.md).
+3. Commit and push the branch, then fast-forward `main` (`git push origin <branch>:main`); the pre-push hook runs each time.
+4. Copy `release/Yami <version>.exe` to `Yami-<version>-portable.exe` (GitHub replaces spaces in asset names), write `SHA256SUMS.txt`, tag `v<version>` (annotated) and push the tag.
+5. `gh release create v<version> Yami-<version>-portable.exe SHA256SUMS.txt --prerelease --title "Yami <version> (beta)" --notes-file <the changelog section plus a download note> --verify-tag`.
+
+Private vulnerability reporting is on for the repository; `SECURITY.md` points to it.
 
 Windows packaging copies the Electron distribution already installed under `node_modules/electron/dist`, keeping the runtime consistent with the lockfile and avoiding a second archive extraction. If that folder is missing (for example after `npm ci` in a fresh checkout where the Electron binary was not downloaded), run `node node_modules/electron/install.js` before packaging. `npm run package` fails with "electronDist does not exist" until it is present. Build on Windows. A local output override, `--config.directories.output=release/current`, can keep a new build separate from an earlier package.
 

@@ -77,6 +77,10 @@ Rebuilt with `npx electron-builder --win --dir` after the day's features, then `
 
 After the network shield, Cleanup, Disk space, the mouse pointer, environment and hosts editors, Keep awake, the colour picker, always on top, window layouts, workspaces, accent characters, quick look, radio, podcasts, currency, holidays, air quality, package checks, focus sessions, the daily brief, and Outlook and Bluesky sign-in, the packaged build (`npx electron-builder --win --dir`, then `node scripts/measure-performance.mjs --packaged`, default settings, same PC) measured **165.1 MB**, and on a second run **169.3–174.6 MB**, private working set across 8 processes at idle, with 0% sampled CPU. The previous packaged figure was 168.0–168.1 MB, so the additions cost little or nothing at idle; they load when used, and the optional ones (shield, accent characters, quick look) are off by default. The run-to-run spread is about 10 MB.
 
+## 0.3.0 beta release build (2026-10-30)
+
+The published 0.3.0 portable build (`release/win-unpacked`, logging included, default settings with roaming on) measured **151.7–152.0 MB** private working set across 7 processes at 0% sampled CPU, with only the island and roaming Yami open. `scripts/verify-packaged.mjs` passed on the same build.
+
 ## One renderer for the small windows (2026-10-29)
 
 Each Electron window normally starts its own renderer process, about 25–50 MB private each. The roaming Yami, the dock and the desk widget are now opened with `window.open` from the island's page, so Chromium keeps them in the island's renderer: the windows stay separate (own bounds, focus rules and IPC sender), but share one process. Opening is queued, because each opening briefly sets the island's window-open rule, and a window that cannot be hosted falls back to its own process. A side effect: if the island's renderer ends, those windows close with it and reopen on the next settings sync. The voice caption keeps its own short-lived process.

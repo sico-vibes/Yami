@@ -13,7 +13,7 @@ Optional: a free Tavily API key for better web search.
 
 ## 1. Download and run Yami
 
-1. Download the Windows portable file (`Yami <version>.exe`) from the project's release page.
+1. Download `Yami-<version>-portable.exe` from the [Releases page](https://github.com/sico-vibes/Yami/releases). To check the download, compare its SHA-256 with `SHA256SUMS.txt` on the same page.
 2. Double-click the file. No installer is needed.
 3. Windows may show a SmartScreen message because Yami is not signed with a publisher certificate. Select **More info**, then **Run anyway**.
 
