@@ -4,7 +4,7 @@
 // hidden; your own Yami keeps running (its accent and quick look are off by
 // default, so only the test copy answers).
 // - Accent characters: a text box asks you to hold E, press Space twice and
-//   let go; it must end up holding "è".
+//   let go; it must end up holding one of e's accents (è for two presses).
 // - Quick look: a new File Explorer window on a throwaway folder, with a test
 //   file selected, asks for Ctrl+Space; Yami's preview must open. The Explorer
 //   window is closed afterwards.
@@ -80,49 +80,67 @@ try {
     if (!island) await wait(100);
   }
   assert.ok(island, "the test copy started");
+  // Every window Yami opens from now on, seen from the main process.
+  await app.evaluate(({ app }) => {
+    globalThis.yamiSeen = [];
+    app.on("web-contents-created", (_e, contents) =>
+      contents.on("did-start-loading", () =>
+        globalThis.yamiSeen.push(contents.getURL()),
+      ),
+    );
+  });
+  const seen = (mode) =>
+    app.evaluate(
+      (_e, m) => globalThis.yamiSeen.some((u) => u.includes(`window=${m}`)),
+      mode,
+    );
+  console.log("1/3 Yami test copy started.");
   await wait(2500);
   const state = await island.evaluate(() => window.yami.invoke("state"));
   assert.ok(state.settings.quickAccent && state.settings.quickLook);
 
-  // Accent characters: wait for the owner's keys.
-  form = spawn(
-    "powershell.exe",
-    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", formScript],
-    {
-      stdio: "ignore",
-    },
-  );
-  const read = () =>
-    fs.existsSync(typedFile) ? fs.readFileSync(typedFile, "utf8") : "";
-  let strip = false;
-  for (let i = 0; i < 180 && !/[^\x00-\x7f]/.test(read()); i++) {
-    strip ||= app.windows().some((p) => p.url().includes("window=accent"));
-    await wait(500);
+  // Accent characters: wait for the owner's keys (skip with --peek-only).
+  if (!process.argv.includes("--peek-only")) {
+    form = spawn(
+      "powershell.exe",
+      ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", formScript],
+      {
+        stdio: "ignore",
+      },
+    );
+    const read = () =>
+      fs.existsSync(typedFile) ? fs.readFileSync(typedFile, "utf8") : "";
+    for (let i = 0; i < 180 && !/[^\x00-\x7f]/.test(read()); i++)
+      await wait(500);
+    await wait(600);
+    result.typed = read();
+    result.strip =
+      (await seen("accent")) ||
+      app.windows().some((p) => p.url().includes("window=accent"));
+    console.log(
+      `2/3 Accent: the box holds ${JSON.stringify(result.typed)}, strip shown: ${result.strip}.`,
+    );
+    // Space moves along the strip (é è ê ë …), and a held Space repeats,
+    // so any of e's accents is a pass; a plain "e" left behind is not.
+    assert.match(
+      result.typed.trim(),
+      /^[éèêëēęě€]$/,
+      "the held e became an accent",
+    );
+    assert.ok(result.strip, "the accent strip showed while choosing");
+    form.kill();
+    form = undefined;
   }
-  strip ||= app.windows().some((p) => p.url().includes("window=accent"));
-  await wait(600);
-  result.typed = read();
-  result.strip = strip;
-  assert.equal(result.typed.trim(), "è", "the held e became è");
-  assert.ok(strip, "the accent strip showed while choosing");
-  form.kill();
-  form = undefined;
 
   // Quick look: wait for the owner's Ctrl+Space.
-  spawn("explorer.exe", [`/select,${note}`], {
+  // Explorer wants /select,"path" exactly; Node would quote the whole argument.
+  spawn("explorer.exe", [`/select,"${note}"`], {
     detached: true,
     stdio: "ignore",
+    windowsVerbatimArguments: true,
   }).unref();
-  for (let i = 0; i < 40 && !explorerOpen; i++) {
-    explorerOpen = !!Number(
-      await ps([
-        "-Command",
-        `(New-Object -ComObject Shell.Application).Windows() | ${sameFolder} | Select-Object -First 1 | ForEach-Object { $_.HWND }`,
-      ]),
-    );
-    if (!explorerOpen) await wait(250);
-  }
-  assert.ok(explorerOpen, "the throwaway Explorer window opened");
+  // Closed at the end, whether it opened as its own window or as a tab.
+  explorerOpen = true;
   let preview;
   for (let i = 0; i < 180 && !preview; i++) {
     preview = app
@@ -130,6 +148,7 @@ try {
       .find((p) => /^data:text\/html|keys-live/.test(p.url()));
     if (!preview) await wait(500);
   }
+  console.log(`3/3 Quick look: preview opened: ${!!preview}.`);
   assert.ok(preview, "Yami's preview opened");
   await preview.waitForLoadState();
   result.previewText = ((await preview.locator("body").textContent()) || "")
