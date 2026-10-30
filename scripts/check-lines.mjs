@@ -9,6 +9,8 @@ const ignored = new Set([
   ".artifacts",
   ".firecrawl",
   ".impeccable",
+  // Machine-generated; Dependabot writes it in npm's expanded format.
+  "package-lock.json",
 ]);
 const textTypes = new Set([
   ".ts",
