@@ -84,7 +84,7 @@ function Preview() {
         <button onClick={() => frame.current?.contentWindow?.location.reload()}>
           Reset demo
         </button>
-        <a href="/Documentation/index.html" target="_blank" rel="noreferrer">
+        <a href="/docs/internal/index.html" target="_blank" rel="noreferrer">
           Documentation ↗
         </a>
       </header>

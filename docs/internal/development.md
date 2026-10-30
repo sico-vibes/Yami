@@ -17,8 +17,8 @@ Yami’s renderer can be developed in a browser preview, but Windows integration
 | `npm run dev` | Build the native host, start Vite, then run Electron against the development server. |
 | `npm run preview:web` | Start the renderer in a browser with a fixture bridge for UI development; it has no Windows effects or live provider connection. |
 | `npm run build:native` | Compile `native/Host.cs` and copy the PowerShell helper scripts into `native/bin/`. |
-| `npm run docs` | Build the standalone Markdown documentation viewer at `Documentation/index.html` from `Documentation/docs-manifest.json` and its Markdown pages. |
-| `npm run notices` | Collect the installed runtime package graph, upstream license texts and asset attribution into `Documentation/assets/third-party/`. |
+| `npm run docs` | Build the standalone Markdown documentation viewer at `docs/internal/index.html` from `docs/internal/docs-manifest.json` and its Markdown pages. |
+| `npm run notices` | Collect the installed runtime package graph, upstream license texts and asset attribution into `docs/internal/assets/third-party/`. |
 | `npm run check:lines` | Check the repository’s authored-file line limit. Generated/vendor files are handled separately by the script. |
 | `npm run typecheck` | Run TypeScript without emitting output. |
 | `npm run build` | Check the source line limit, build the native host, typecheck, build the Vite renderer, and bundle Electron main/preload. |
@@ -244,5 +244,5 @@ Windows packaging copies the Electron distribution already installed under `node
 
 ## Contribution and security
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) and [SECURITY.md](../SECURITY.md). Report security issues privately while no public advisory process is configured. Yami’s local native host is not a sandbox; terminal access acts with the current user’s privileges.
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) and [SECURITY.md](../../SECURITY.md). Report security issues privately while no public advisory process is configured. Yami’s local native host is not a sandbox; terminal access acts with the current user’s privileges.
 The native test accepts only Windows HRESULT `0x80070490` for the volume operation on machines with no default audio endpoint (such as hosted Windows CI). Other errors fail the test. This does not verify an audio write on CI: volume behavior still needs an interactive Windows device check.

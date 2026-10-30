@@ -25,7 +25,7 @@ Yami already ships a lot of this, so the plan extends what exists rather than re
 
 **Owner decision (2026-10-28): it must feel native.** Third-party libraries, engines and downloaded tools are fine when Yami's own UI drives them (the file wheel's ffmpeg or ImageMagick, Ghostery's ad-block engine, Whistle). What is out is installing another app and sending people to its window. So Mailpit's web inbox became Yami's own mail catcher, and the RustDesk and Windhawk bridges became Yami Remote's screen view and control and Tune's Look and feel tweaks. When an item gets stuck, it is noted and the work moves on. The sections below are kept as written, for the record.
 
-**Measured today:** idle is 165–172 MB private across 8 processes (`Documentation/performance.md`). That sits inside the new budget with about 30 MB of headroom. So every new feature must be **lazy, toggleable, and zero-cost when off**. That is what Phase 0 builds.
+**Measured today:** idle is 165–172 MB private across 8 processes (`docs/internal/performance.md`). That sits inside the new budget with about 30 MB of headroom. So every new feature must be **lazy, toggleable, and zero-cost when off**. That is what Phase 0 builds.
 
 ---
 
@@ -77,7 +77,7 @@ Yami already ships a lot of this, so the plan extends what exists rather than re
 
 ## Phase 0 — Foundation: module system, budget, idle wins
 
-- Update the budget in `AGENTS.md`, `Documentation/performance.md`, `Documentation/reference/product-brief.md` and the Yami skill (idle 100–200 MB).
+- Update the budget in `AGENTS.md`, `docs/internal/performance.md`, `docs/internal/reference/product-brief.md` and the Yami skill (idle 100–200 MB).
 - Add `electron/modules/registry.ts`, plus a `src/modules.ts` mirror with ids, settings keys and cost class (Low/Medium/High). Route `requests.ts` by prefix (`dev.*`, `tune.*`, `feeds.*`…) to the lazily required module.
 - Split the main bundle: `scripts/build-electron.mjs` emits per-module CJS entry points next to `main.cjs`. Add Vite `manualChunks` for heavy renderer libraries (xterm, pdf.js, pdf-lib, jsQR).
 - **Yami Packs and the "Choose your Yami" setup** (the owner's install-time choice):
@@ -115,7 +115,7 @@ Work:
 - **Terminal:** build the theme from tokens. Tabs become the recessed-track pill style. The titlebar matches the main window. Add an ANSI palette token set (`--term-*`) in `src/styles/tokens.css`.
 - **Launcher:** restyle as the command palette (Phase 2 feature) with floating-glass recipe.
 - **Guard:** add `scripts/check-ui.mjs` (wired into `npm run check`). It fails on raw hex/rgba outside `tokens.css`, on `<select`, and on ` title=` in shipped TSX, with an allowlist for canvas or xterm values read from tokens.
-- Re-capture screenshots (`scripts/capture-documentation.mjs`, `capture-workbench.mjs`) and update `Documentation/reference/design-system.md`.
+- Re-capture screenshots (`scripts/capture-documentation.mjs`, `capture-workbench.mjs`) and update `docs/internal/reference/design-system.md`.
 
 ## Phase 2 — Dev & AI hub (the biggest pillar)
 
@@ -337,7 +337,7 @@ Neither is forked. Shipping a Chromium fork would add hundreds of MB and GPL obl
 
 ## Documentation (first step, then every phase)
 
-- Save this plan as `Documentation/research/expansion-plan-2026-10-27.md`, with sources, licences and verify-gaps. Register it in `Documentation/docs-manifest.json` and link it from `roadmap.md`.
+- Save this plan as `docs/internal/research/expansion-plan-2026-10-27.md`, with sources, licences and verify-gaps. Register it in `docs/internal/docs-manifest.json` and link it from `roadmap.md`.
 - Each phase updates:
   - `features-and-settings.md`, `architecture.md` (modules and intervals)
   - `performance.md` (measured before and after), `security-and-providers.md` (new data flows and admin actions)

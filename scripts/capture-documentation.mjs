@@ -32,7 +32,7 @@ try {
     await new Promise((r) => setTimeout(r, 100));
   }
   await page.waitForSelector(".bottom-dock");
-  const target = "Documentation/assets/screenshots";
+  const target = "docs/internal/assets/screenshots";
   fs.mkdirSync(target, { recursive: true });
   // Use a bundled image for the window background only; never change the user's desktop.
   await app

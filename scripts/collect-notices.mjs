@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 const project = process.cwd(),
-  output = path.resolve("Documentation/assets/third-party");
+  output = path.resolve("docs/internal/assets/third-party");
 fs.mkdirSync(output, { recursive: true });
 const root = JSON.parse(fs.readFileSync("package.json", "utf8"));
 const visited = new Set(),

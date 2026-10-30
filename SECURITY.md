@@ -21,7 +21,7 @@ Yami is a local desktop application, not a security boundary between Windows use
 
 Clipboard detection is best effort. Private clipboard markers, password fields, a list of known password-manager processes, and banking-related window names are checked, but no heuristic can identify every sensitive application. Avoid copying secrets while clipboard history is enabled; pinning or exporting data changes the protection described in the data guide.
 
-The application has no first-party telemetry or server. Provider services receive the data described in [Security and provider data flow](Documentation/security-and-providers.md), under your own account and their current terms. Keep API keys out of issues, logs, screenshots, pull requests, and support messages.
+The application has no first-party telemetry or server. Provider services receive the data described in [Security and provider data flow](docs/internal/security-and-providers.md), under your own account and their current terms. Keep API keys out of issues, logs, screenshots, pull requests, and support messages.
 
 ## Supported versions
 

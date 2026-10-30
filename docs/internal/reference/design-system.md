@@ -11,10 +11,10 @@ sizes. It has not yet been verified in the packaged Windows app. Values below
 describe Yami's implementation; they are not recovered values from any
 reference application.
 
-**Source of truth:** [`src/styles/tokens.css`](../../src/styles/tokens.css)
-holds every token. [`src/controls.tsx`](../../src/controls.tsx) holds the
+**Source of truth:** [`src/styles/tokens.css`](../../../src/styles/tokens.css)
+holds every token. [`src/controls.tsx`](../../../src/controls.tsx) holds the
 shared Select, tooltip layer, status chip and meter.
-[`src/ui.tsx`](../../src/ui.tsx) holds Icon, IconButton, Toggle, Empty and
+[`src/ui.tsx`](../../../src/ui.tsx) holds Icon, IconButton, Toggle, Empty and
 Modal. When this page and the code disagree, the code wins and this page is
 corrected.
 
@@ -182,7 +182,7 @@ edge. Pages that scroll the whole window (Home, Bond, Soul, Desk) put
   by 32px. Desk is a card column plus a 290px calendar column.
 - **Stage pages** (Home, Soul): Yami in the centre on the sky, with the
   composer or the loadout hub around her.
-- **Island drawer:** sized per tab by [`src/island-bounds.ts`](../../src/island-bounds.ts),
+- **Island drawer:** sized per tab by [`src/island-bounds.ts`](../../../src/island-bounds.ts),
   shared by the main process and the preview so the preview shows true scale.
   Content must fit the tab's height without scrolling at its default content.
 
@@ -252,7 +252,7 @@ detail; they never carry the only label of a control.
 ### Status chip
 
 `<StatusChip status>` shows the word with a dot. The colour family comes from
-[`src/status-tone.ts`](../../src/status-tone.ts) (unit-tested):
+[`src/status-tone.ts`](../../../src/status-tone.ts) (unit-tested):
 
 | Tone | Words (examples) | Colour |
 | --- | --- | --- |
@@ -407,7 +407,7 @@ Entrances fade and rise 8px. Menus scale from 0.98. Spinners (`circle-notch`)
 turn only while work is running. Every keyframe has a reduced-motion override
 through `html[data-reduced="true"]` and `prefers-reduced-motion`. No
 continuous animation at idle; Yami's own motion budget is described in the
-[Yami skill's design language](../../.claude/skills/yami/references/design-language.md).
+[Yami skill's design language](../../../.claude/skills/yami/references/design-language.md).
 
 ## Accessibility
 

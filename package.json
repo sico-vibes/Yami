@@ -49,7 +49,7 @@
         ]
       },
       {
-        "from": "Documentation/assets/third-party",
+        "from": "docs/internal/assets/third-party",
         "to": "licenses"
       },
       {

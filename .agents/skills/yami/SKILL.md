@@ -15,7 +15,7 @@ then open the reference files you need:
   character rules. Read before any UI work.
 - `references/recipes.md` — step-by-step recipes (new setting, IPC request,
   window, model tool, skin, utility tab, native call) and known pitfalls.
-- `../../../Documentation/adaptation.md` — adaptation rules and the required
+- `../../../docs/internal/adaptation.md` — adaptation rules and the required
   behavior-to-UI mapping. Read before adapting a feature from another project.
 
 `AGENTS.md` at the repo root holds the non-negotiable guardrails. This skill
@@ -33,7 +33,7 @@ expands on them; if they ever disagree, `AGENTS.md` wins.
 3. **Idle comes first.** No polling loops, no animation and no native queries
    when nothing is happening. Animate only for interaction and active work,
    always respect reduced motion, and measure the full process tree when you
-   change background behaviour (`Documentation/performance.md`).
+   change background behaviour (`docs/internal/performance.md`).
 4. **Provider calls stay in the main process.** Keys never reach the renderer,
    logs, fixtures, screenshots or docs. Free tiers first; never enable billing
    or add paid dependencies silently.
@@ -95,7 +95,7 @@ src/             renderer (one bundle, chosen by `?window=` in main.tsx)
 native/          Host.cs, ProcessJobs.cs, Wheel.cs, Hook.cs, Media.ps1, Radios.ps1, Speech.ps1, ExplorerSelection.ps1, SendToLink.ps1
 scripts/         dev, build, docs, icon export, verification and measurement
 tests/           unit and native contract tests
-Documentation/   full docs (Markdown) + generated viewer `index.html`
+docs/internal/   full docs (Markdown) + generated viewer `index.html`
 ```
 
 ## How data flows
@@ -119,10 +119,10 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 
 ## Working loop
 
-1. Read the relevant code and docs first (`Documentation/features-and-settings.md`,
+1. Read the relevant code and docs first (`docs/internal/features-and-settings.md`,
    `architecture.md`, `reference/design-system.md`). For new features or direction,
-   read `Documentation/reference/product-brief.md` and the ranked ideas in
-   `Documentation/research/feature-recommendations-2026-10-18.md` first. Those
+   read `docs/internal/reference/product-brief.md` and the ranked ideas in
+   `docs/internal/research/feature-recommendations-2026-10-18.md` first. Those
    ideas are proposals: check their guardrails (idle cost, off-by-default, preview
    before system changes) and the Windows-API verification gaps before building.
 2. Build UI in the browser preview: `npm run preview:web` →
@@ -140,7 +140,7 @@ Documentation/   full docs (Markdown) + generated viewer `index.html`
 | `node scripts/capture-documentation.mjs`                                       | UI changes that docs screenshots show (isolated profile)                   |
 | `npm run package` then `node scripts/verify-packaged.mjs`                      | release builds (verify-packaged briefly applies then restores a wallpaper) |
 | `node scripts/measure-performance.mjs --packaged [--no-roam] [--living-flame]` | anything touching idle behaviour                                           |
-| `npm run docs`                                                                 | after editing any `Documentation/*.md`                                     |
+| `npm run docs`                                                                 | after editing any `docs/internal/*.md`                                     |
 | `node scripts/verify-workbench.mjs [--packaged]` | native approvals, PTY state, resize, Ctrl+C and owned descendant cleanup using isolated fixtures |
 | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/verify-offline-speech.ps1` | synthetic WAV through installed Windows speech, without microphone/provider |
 | `node scripts/capture-workbench.mjs` | synthetic AI/terminal screenshots and supported-width layout checks |
@@ -164,7 +164,7 @@ use `npx electron-builder --win --dir` without publishing or bumping the version
 
 Before you report a task as done:
 
-1. Update every affected page in `Documentation/`:
+1. Update every affected page in `docs/internal/`:
    `features-and-settings.md` (behaviour, settings table, defaults),
    `architecture.md` (modules, intervals, data flow), `development.md` (commands,
    source map, preview screens), `reference/design-system.md` (visual changes),
@@ -173,8 +173,8 @@ Before you report a task as done:
    `assets-and-licenses.md` (new assets). Keep shipped behaviour, proposals,
    measured results and unknowns clearly separate; never claim a measurement
    you did not run.
-2. Register any new page in `Documentation/docs-manifest.json`.
-3. Run `npm run docs` to regenerate `Documentation/index.html`.
+2. Register any new page in `docs/internal/docs-manifest.json`.
+3. Run `npm run docs` to regenerate `docs/internal/index.html`.
 4. Refresh screenshots with `node scripts/capture-documentation.mjs` when the UI
    they show changed.
 5. Update this skill (`.claude/skills/yami/`) if you changed the stack, project

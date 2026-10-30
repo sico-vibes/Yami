@@ -1,6 +1,6 @@
 # Yami design language (Nightglow)
 
-The full system lives in `Documentation/reference/design-system.md`; every
+The full system lives in `docs/internal/reference/design-system.md`; every
 value lives in `src/styles/tokens.css`. This page is the short version an agent
 needs before touching UI. When you change the look, update all three.
 
@@ -36,7 +36,7 @@ then stops.
 5. **Every page opens with `.page-head`**: 32px light title, one muted line, at
    most one action on the right.
 6. **Function first.** Restyling never removes behaviour, state, errors or
-   accessible names. Follow `Documentation/adaptation.md`.
+   accessible names. Follow `docs/internal/adaptation.md`.
 7. **Check two sizes.** Preview at 1160×790 and 850×610, reduced motion on and
    off; drawer tabs must fit their height in `src/island-bounds.ts`.
 8. **Run `npm run check:ui`.** No native `<select>`, HTML `title` tooltip or
@@ -116,7 +116,7 @@ text, Yami's reply on ink glass with a skin-tinted corner. Roaming bubble:
 - After changing her shape, regenerate the icon:
   `node --experimental-transform-types scripts/export-spirit.mjs` then
   `node scripts/create-icon.mjs`, and copy `public/yami-icon.png` to
-  `Documentation/assets/brand/yami-icon.png`.
+  `docs/internal/assets/brand/yami-icon.png`.
 
 ## Motion rules
 

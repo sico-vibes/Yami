@@ -1,6 +1,6 @@
 # Yami design language
 
-The full, current values live in `Documentation/reference/design-system.md` and
+The full, current values live in `docs/internal/reference/design-system.md` and
 the CSS in `src/styles/`. This page is the short version an agent needs before
 touching UI. When you change the look, update both files.
 
@@ -43,7 +43,7 @@ transparent)` to tint surfaces by the current skin.
 
 Adaptations reuse and extend these existing controls, layouts and interactions.
 Keep the source feature's backend and operating behavior intact while presenting
-it as Yami; see `Documentation/adaptation.md` from the repository root. New tabs,
+it as Yami; see `docs/internal/adaptation.md` from the repository root. New tabs,
 buttons, hover effects and toggles follow existing patterns, not a new UI system.
 
 - Glass: `background: #ffffff0f; backdrop-filter: blur(14px) saturate(1.3);
@@ -102,7 +102,7 @@ border: 1px solid #ffffff1f;` plus an inset top highlight and a soft dark
 - After changing her shape, regenerate the icon:
   `node --experimental-transform-types scripts/export-spirit.mjs` then
   `node scripts/create-icon.mjs`, and copy `public/yami-icon.png` to
-  `Documentation/assets/brand/yami-icon.png`.
+  `docs/internal/assets/brand/yami-icon.png`.
 
 ## Motion rules
 

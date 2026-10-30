@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { build } from "esbuild";
-const root = path.resolve("Documentation");
+const root = path.resolve("docs/internal");
 const manifest = JSON.parse(
   fs.readFileSync(path.join(root, "docs-manifest.json"), "utf8"),
 );
@@ -21,11 +21,11 @@ fs.writeFileSync(
     ";\n",
 );
 await build({
-  entryPoints: ["Documentation/viewer/source.js"],
+  entryPoints: ["docs/internal/viewer/source.js"],
   bundle: true,
   format: "iife",
   minify: true,
-  outfile: "Documentation/viewer/app.js",
+  outfile: "docs/internal/viewer/app.js",
   legalComments: "eof",
 });
 fs.mkdirSync(path.join(root, "assets/brand"), { recursive: true });
@@ -51,5 +51,5 @@ fs.copyFileSync(
   path.join(root, "viewer/DOMPurify-LICENSE.txt"),
 );
 console.log(
-  `Built ${documents.length} guides. Open Documentation/index.html directly; no server required.`,
+  `Built ${documents.length} guides. Open docs/internal/index.html directly; no server required.`,
 );

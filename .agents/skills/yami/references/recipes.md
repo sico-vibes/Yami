@@ -4,7 +4,7 @@ Each recipe ends with the same duty: update the docs (see SKILL.md, "Finish").
 
 ## Adapt an upstream feature
 
-Read `Documentation/adaptation.md` from the repository root. Pin the source
+Read `docs/internal/adaptation.md` from the repository root. Pin the source
 revision and license, define the selected feature's exact functional scope, and
 map backend contracts, states, side effects and failures to existing Yami UI
 patterns. Implement the operating path behind the existing main/native boundary;
@@ -24,7 +24,7 @@ and document unresolved platform differences instead of calling them complete.
 4. If renderers need it outside React state, mirror it on
    `document.documentElement.dataset` in `useYami` (see `syncFlame` in
    `src/ui.tsx`).
-5. Update the settings table in `Documentation/features-and-settings.md`.
+5. Update the settings table in `docs/internal/features-and-settings.md`.
 
 ## Rename or reshape stored data
 

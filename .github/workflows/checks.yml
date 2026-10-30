@@ -15,4 +15,4 @@ jobs:
       - run: npm run check
       - run: npm run build
       - run: npm run docs
-      - run: git diff --exit-code -- Documentation/viewer
+      - run: git diff --exit-code -- docs/internal/viewer

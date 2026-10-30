@@ -14,7 +14,7 @@ try {
   await page.getByRole("heading", { name: "Agent sessions" }).waitFor();
   await page.waitForTimeout(350);
   await page.screenshot({
-    path: "Documentation/assets/screenshots/workspace.png",
+    path: "docs/internal/assets/screenshots/workspace.png",
   });
   for (const width of [1160, 850]) {
     await page.setViewportSize({ width, height: 790 });
@@ -48,7 +48,7 @@ try {
   await page.getByText("Preview 1", { exact: true }).waitFor();
   await page.waitForTimeout(300);
   await page.screenshot({
-    path: "Documentation/assets/screenshots/terminal.png",
+    path: "docs/internal/assets/screenshots/terminal.png",
   });
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);

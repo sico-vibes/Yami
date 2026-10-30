@@ -16,7 +16,7 @@ page.on("request", (r) => {
   if (/^https?:/.test(r.url()) && !r.url().startsWith(origin))
     external.push(r.url());
 });
-const target = "Documentation/assets/screenshots";
+const target = "docs/internal/assets/screenshots";
 fs.mkdirSync(target, { recursive: true });
 try {
   await page.goto(origin);
@@ -151,7 +151,7 @@ try {
     0,
     "Preview must not make provider or public network requests",
   );
-  await page.goto(pathToFileURL(path.resolve("Documentation/index.html")).href);
+  await page.goto(pathToFileURL(path.resolve("docs/internal/index.html")).href);
   await page.waitForSelector("article h1");
   const links = await page.locator(".nav-item").count();
   assert.ok(links >= 10);

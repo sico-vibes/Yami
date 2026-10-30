@@ -80,7 +80,7 @@ The host is not a hardened isolation boundary. It runs as the current Windows us
 
 For a model-requested action, `assistant.ts` sends a declared function tool to Gemini, receives a function call, and passes its name and arguments to the main-process action dispatcher. The dispatcher checks the advanced-tool settings, validates required targets and web URLs, and invokes a confirmation when a tool is sensitive. It then dispatches only known actions to the store, Electron shell, or native host. The tool result or error is returned to Gemini; the app only reports success when an operation returns successfully.
 
-Sensitive actions are enumerated in [`electron/policy.ts`](../electron/policy.ts). A pending confirmation expires after a short timeout and is rejected if the user does not approve. Scheduled tasks run with an `unattended` flag, and sensitive actions are rejected from schedules. The allowed scheduled tool set is separately validated before a plan is stored.
+Sensitive actions are enumerated in [`electron/policy.ts`](../../electron/policy.ts). A pending confirmation expires after a short timeout and is rejected if the user does not approve. Scheduled tasks run with an `unattended` flag, and sensitive actions are rejected from schedules. The allowed scheduled tool set is separately validated before a plan is stored.
 
 ## Background work
 

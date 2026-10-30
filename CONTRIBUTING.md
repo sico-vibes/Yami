@@ -4,9 +4,9 @@ Thanks for helping improve Yami. Keep changes focused, preserve existing user da
 
 ## Before opening a change
 
-1. Read the [architecture](Documentation/architecture.md), [security and provider flow](Documentation/security-and-providers.md), and [performance goals](Documentation/performance.md) when your work touches those areas.
+1. Read the [architecture](docs/internal/architecture.md), [security and provider flow](docs/internal/security-and-providers.md), and [performance goals](docs/internal/performance.md) when your work touches those areas.
 2. Open an issue or describe the problem and intended behavior in your pull request. For a larger change, include the UX, Windows support, privacy, accessibility, and performance consequences.
-3. Check asset and dependency provenance before adding files. New artwork needs source, creator, license, and redistribution terms recorded in [the provenance guide](Documentation/assets-and-licenses.md).
+3. Check asset and dependency provenance before adding files. New artwork needs source, creator, license, and redistribution terms recorded in [the provenance guide](docs/internal/assets-and-licenses.md).
 4. Keep docs aligned with the implementation. Mark future capabilities **Planned** instead of describing them as available.
 
 ## Development setup
@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-The native host is built with the Windows .NET Framework C# compiler through `npm run build:native`; a separate .NET SDK is not required. See [Development, build, and release](Documentation/development.md) for scripts and packaging details.
+The native host is built with the Windows .NET Framework C# compiler through `npm run build:native`; a separate .NET SDK is not required. See [Development, build, and release](docs/internal/development.md) for scripts and packaging details.
 
 Never commit provider keys, user conversations, clipboard contents, screenshots containing private information, or local `.artifacts` evidence. Use synthetic fixtures for tests. Keep fixture responses clearly separate from live Windows or provider behavior.
 

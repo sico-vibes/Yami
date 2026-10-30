@@ -18,3 +18,5 @@ data.json
 *.pcm
 *.dmp
 .claude/settings.local.json
+# Folders other programs create in the working directory
+NVIDIA Corporation/
