@@ -6,6 +6,20 @@ import "@phosphor-icons/web/fill";
 import "./style.css";
 const mode = new URLSearchParams(location.search).get("window") || "main";
 document.documentElement.dataset.window = mode;
+// Errors in any window go to Yami's ERR log (the main process limits them).
+const report = (e: { message?: string; name?: string; stack?: string }, source: string) =>
+  void window.yami
+    ?.invoke("log.report", { message: e.message, name: e.name, stack: e.stack, source })
+    .catch(() => {});
+addEventListener("error", (e) =>
+  report(e.error || { message: e.message }, `${e.filename}:${e.lineno}`),
+);
+addEventListener("unhandledrejection", (e) =>
+  report(
+    e.reason instanceof Error ? e.reason : { message: String(e.reason) },
+    "promise",
+  ),
+);
 // Each window loads only its own screen, so the always-on island and the small
 // overlays never parse the main app's code.
 const screens: Record<string, () => Promise<{ default: React.ComponentType }>> =

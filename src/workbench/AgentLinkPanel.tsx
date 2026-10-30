@@ -22,6 +22,34 @@ const toolText: Record<string, [string, string]> = {
     "Open a terminal",
     "Open a Yami Terminal tab in a project. Runs no command.",
   ],
+  yami_status: [
+    "See Yami's status",
+    "Version, modules on, windows open and the problems seen since start.",
+  ],
+  yami_logs: [
+    "Read Yami's logs",
+    "Errors, triage, activity and debug lines. Secrets are masked.",
+  ],
+  yami_report: [
+    "Collect a report",
+    "The same report as Your data › Collect logs.",
+  ],
+  yami_open: [
+    "Open Yami's pages",
+    "Show a page or a drawer tab, to reproduce what you did.",
+  ],
+  yami_screenshot: [
+    "Picture Yami's windows",
+    "Only Yami's own windows, never the rest of your screen.",
+  ],
+  yami_settings: [
+    "Read Yami's settings",
+    "Values that look like secrets are hidden.",
+  ],
+  yami_set_setting: [
+    "Change a setting",
+    "Asks you in Yami first; no answer counts as no.",
+  ],
 };
 
 /** The other direction of MCP: coding agents calling Yami. */

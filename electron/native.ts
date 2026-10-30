@@ -3,6 +3,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import path from "node:path";
 import readline from "node:readline";
 import { nativeHostPath } from "./native-path";
+import { log } from "./log/index";
 export class Native {
   process?: ChildProcessWithoutNullStreams;
   counter = 0;
@@ -23,7 +24,10 @@ export class Native {
     );
     this.process = spawn(exe, [], { windowsHide: true, stdio: "pipe" });
     this.process.stdin.on("error", (error) => this.fail(error));
-    this.process.stderr.on("data", () => {});
+    // The helper writes only failures to stderr.
+    this.process.stderr.on("data", (d) =>
+      log().error("native", new Error(String(d).trim().slice(0, 2000))),
+    );
     readline
       .createInterface({ input: this.process.stdout })
       .on("line", (line) => {
@@ -42,11 +46,13 @@ export class Native {
         } catch {}
       });
     this.process.on("error", (e) => this.fail(e));
-    this.process.on("exit", () =>
+    this.process.on("exit", (code) => {
+      if (!this.closing)
+        log().error("native", new Error(`The Windows helper stopped (code ${code}).`));
       this.fail(
         new Error("Windows integration stopped. Restart Yami to reconnect."),
-      ),
-    );
+      );
+    });
   }
   fail(error: Error) {
     for (const p of this.pending.values()) {
@@ -79,7 +85,9 @@ export class Native {
       );
     });
   }
+  private closing = false;
   close() {
+    this.closing = true;
     this.process?.kill();
   }
 }

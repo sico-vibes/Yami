@@ -85,6 +85,8 @@ type Deps = {
  */
 export function createModuleHost(deps: Deps) {
   const { store, native } = deps;
+  // Main's request handler, handed over once it exists (agent tools use it).
+  let requests: ((method: string, args: object) => Promise<unknown>) | undefined;
   // Dictation rules live with the workspace data, but dictation is core, so
   // the storage and speech engine exist apart from the workbench module.
   let shared: { data: WorkbenchStorage; speech: SpeechController } | undefined;
@@ -227,6 +229,12 @@ export function createModuleHost(deps: Deps) {
             confirm: deps.confirm,
             projects: () => speechCore().data.state.projects,
             openTerminal: (project) => workbench().dev.launch({ project }),
+            showMain: deps.showMain,
+            setPanel: deps.setPanel,
+            request: (method, args) => {
+              if (!requests) throw new Error("Yami is still starting.");
+              return requests(method, args);
+            },
             browser: () => registry.get<Browser>("browser"),
           }),
         dispose: (link: AgentLink) => void link.close(),
@@ -342,6 +350,14 @@ export function createModuleHost(deps: Deps) {
 
   const host = {
     registry,
+    /** Main's request handler; a settings change also runs afterSettings. */
+    useRequests(handler: (method: string, args: object) => Promise<unknown>) {
+      requests = async (method, args) => {
+        const result = await handler(method, args);
+        if (method === "settings") host.afterSettings();
+        return result;
+      };
+    },
     start() {
       wake();
       syncTheme();

@@ -47,6 +47,7 @@ import {
 } from "./policy";
 import type { AppItem, State, Task } from "../src/shared";
 import { islandSize, peekSize } from "../src/island-bounds";
+import { installLogging, logged } from "./log/index";
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -57,6 +58,7 @@ protocol.registerSchemesAsPrivileged([
 ]);
 if (process.env.YAMI_DATA_DIR)
   app.setPath("userData", process.env.YAMI_DATA_DIR);
+installLogging();
 let store: Store, native: Native, assistant: Assistant;
 let overlays: ReturnType<typeof createOverlays> | undefined;
 let modules: ReturnType<typeof createModuleHost> | undefined;
@@ -911,7 +913,8 @@ else {
         },
         wheel: modules.wheel,
       });
-      ipcMain.handle("yami:invoke", async (event, method, args) => {
+      modules.useRequests(invoke);
+      ipcMain.handle("yami:invoke", logged(async (event, method, args) => {
         if (
           ![...windows].some(
             (w) => !w.isDestroyed() && w.webContents.id === event.sender.id,
@@ -935,7 +938,7 @@ else {
         const result = await invoke(method, args, event.sender);
         if (method === "settings") host.afterSettings();
         return result;
-      });
+      }));
       await native.call("configure", {
         ...store.state.settings,
         abilityArmed: false,

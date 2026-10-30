@@ -252,3 +252,18 @@ Account, device and installed-agent verification limits are listed in the
 - Clipboard and private-window exclusions are heuristics, not a universal privacy detector.
 - The app does not send email, chat messages, or make purchases through its model tools. These are explicitly forbidden by the prompt and no such declared action exists.
 - Terminal and coordinate tools are disabled by default. If enabled, they act with the signed-in Windows user’s privileges.
+
+## Logs and bug reports
+
+Yami writes JSON-lines logs to `<data folder>/logs/`, one file per day and channel, kept seven days, at most 5 MB per file (`electron/log/core.ts`, wired by `electron/log/index.ts`):
+
+- **LOG**: start and quit, slow requests (over 2 s), requests refused with a message, windows that stopped responding.
+- **ERR**: uncaught exceptions and unhandled rejections in the main process, page errors and rejected promises from every window (at most 20 a minute per page), crashed renderers and child processes, the Windows helper's stderr and unexpected exit, and requests that failed with a programming error (TypeError, ReferenceError, RangeError, SyntaxError).
+- **TRG**: triage, written the 1st, 10th, 100th… time a problem is seen. A problem's id hashes its area, message (numbers ignored) and first stack frames. The entry carries the version, modules on, windows open and the 20 entries before it.
+- **DEG**: each request with its duration, only while **Debug logging** (Settings › Your data, off by default) is on.
+- **CLT**: **Collect logs** writes `logs/collected/yami-report-<time>.CLT.md` (the ten newest are kept), with the user's note, system details, problems, triage, the newest errors and log entries, debug lines when on, and settings, and shows it in Explorer. **Report a bug** collects one and opens a GitHub issue with a template that names the file to attach.
+
+Every string passes the secret masker, keys whose names look like credentials become `[hidden]`, the home folder becomes `~`, and strings over 4,000 characters are cut. Callers log names, counts and durations, never chat text, transcripts or file contents. Before the app is ready, an uncaught exception shows a dialog naming the logs folder and quits. Nothing is written at idle. `tests/log.test.mjs` covers the format, masking, the debug switch, triage counts, reports and pruning; `scripts/verify-logs.mjs` checked a page error, a refused request, debug logging, masking and a report on 2026-10-30.
+
+**Tools for agents.** "Yami for your agents" gains seven tools, each off until switched on in AI › MCP: `yami_status` (version, modules, windows, problems), `yami_logs`, `yami_report`, `yami_open` (a main page or drawer tab), `yami_screenshot` (Yami's own windows only, saved in `logs/screenshots`, twenty kept), `yami_settings` (masked) and `yami_set_setting` (existing key, same type, and the user's yes on Yami's approval card, then the ordinary settings request). `scripts/verify-agentlink.mjs` exercised all seven over the MCP endpoint on 2026-10-30.
+

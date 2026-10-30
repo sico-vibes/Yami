@@ -16,6 +16,7 @@ import { SpotifyPanel } from "./SpotifyPanel";
 import { WatchFolders } from "./wheel/WatchFolders";
 import { Icon, IconButton, Modal, Toggle } from "./ui";
 import { Select, StatusChip } from "./controls";
+import { bugReportUrl } from "./bug-report";
 const WorkbenchPage = lazy(() => import("./workbench/WorkbenchPage"));
 const groups = [
   ["user", "Yami"],
@@ -587,6 +588,35 @@ export function Settings({
                 >
                   Delete…
                 </button>,
+              )}
+            </div>
+            <h3 className="group-title">Logs and bug reports</h3>
+            <div className="setting-group">
+              {row(
+                "Debug logging",
+                "Also write a detailed log of each request. Turn it on while you reproduce a problem, then off.",
+                toggle("debugLogging", "Debug logging"),
+              )}
+              {row(
+                "Logs folder",
+                "What Yami did (.LOG), errors (.ERR), problems with what led up to them (.TRG) and debug detail (.DEG), one file a day, kept for a week. Secrets are masked.",
+                button("Open", () => void api("log.open").catch((e) => report(e.message))),
+              )}
+              {row(
+                "Collect logs",
+                "Make one report file of recent logs, system details and settings to share with a person or a coding agent. Read it before you share it.",
+                button("Collect", () => void api("log.collect").catch((e) => report(e.message))),
+              )}
+              {row(
+                "Report a bug",
+                "Collects the report, then opens a new GitHub issue. Attach the report file to it.",
+                button("Report…", () =>
+                  void api("log.collect")
+                    .then(({ file }: { file: string }) =>
+                      api("open.external", { url: bugReportUrl(file.split(/[\\/]/).pop() || "") }),
+                    )
+                    .catch((e) => report(e.message)),
+                ),
               )}
             </div>
             <h3 className="group-title">Your activity</h3>

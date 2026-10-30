@@ -163,6 +163,10 @@ Yami supports export, history clearing, clipboard clearing, and a separately con
 
 Clipboard history is enabled by default, polls every 1.8 seconds, stores a maximum of 500 entries, and removes unpinned entries after a setting of 1, 7, 14, or 30 days. The default is 30 days. It skips empty/duplicate/oversized strings, common API-key patterns, Windows private clipboard markers, password fields, a set of known password-manager process names, and windows whose title resembles a banking product. This is best-effort application detection, not a guarantee that every sensitive window is recognized. Disable clipboard history if that protection is insufficient.
 
+## Logs
+
+Logs stay in the data folder and are never uploaded. They hold request names, durations, error messages and stacks, the window and module names, and (in a collected report) settings. Every string is masked by the same secret masker used before Gemini requests; fields whose names look like credentials are replaced, the home folder is shortened to `~`, and long strings are cut. A report is only made when the user asks (Collect logs, Report a bug, or an agent's `yami_report` tool when the user switched it on). Report a bug opens a GitHub issue page in the browser; the user attaches the file themselves. See [Features and settings](features-and-settings.md#logs-and-bug-reports).
+
 ## Context switches
 
 - **Memory** is enabled by default. Saved user facts stay local and are added to Gemini’s prompt when memory remains enabled. You can edit or delete individual memories or clear all memories.

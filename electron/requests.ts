@@ -10,6 +10,8 @@ import { createDock } from "./dock";
 import { openPeek } from "./peek";
 import { downloadsRequest, initDownloads } from "./downloads/index";
 import { mediaAction, windowsSearch } from "./platform";
+import { logRequest, setLogContext } from "./log/index";
+import { modules as moduleSpecs } from "../src/modules";
 import {
   app,
   BrowserWindow,
@@ -132,11 +134,24 @@ export function createRequestHandler(ctx: RequestContext) {
   const awake = new KeepAwake(powerSaveBlocker, (state) =>
     broadcast({ type: "keep-awake", state }),
   );
+  // Reports include settings (no keys: those live outside settings); the
+  // logger masks anything that looks like a secret.
+  const logSettings = () => store.state.settings;
+  setLogContext(
+    () => ({
+      modulesOn: moduleSpecs
+        .filter((m) => store.state.settings[m.setting])
+        .map((m) => m.id),
+    }),
+    () => !!store.state.settings.debugLogging,
+  );
   return async function invoke(
     method: string,
     a: any = {},
     sender?: Electron.WebContents,
   ): Promise<any> {
+    if (method.startsWith("log.") && sender)
+      return logRequest(method, a, sender, { settings: logSettings });
     switch (method) {
       case "state":
         return store.publicState();

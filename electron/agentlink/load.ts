@@ -1,6 +1,11 @@
 import { randomBytes } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { BrowserWindow } from "electron";
 import { startAgentLink } from "./server";
 import { agentTools } from "./tools";
+import { yamiTools, yamiToolNames } from "./yami-tools";
+import { collectReport, log, logStatus } from "../log/index";
 import type { Store } from "../store";
 import type { Project } from "../../src/dev-types";
 import type { createBrowser } from "../browser/browser";
@@ -21,6 +26,7 @@ export const agentToolNames = [
   "browser_type",
   "browser_select",
   "browser_upload",
+  ...yamiToolNames,
 ];
 
 export function loadAgentLink(deps: {
@@ -30,6 +36,10 @@ export function loadAgentLink(deps: {
   confirm: (title: string, detail: string) => Promise<boolean>;
   projects: () => Project[];
   openTerminal: (project: string) => void;
+  showMain: (tab?: string) => void;
+  setPanel: (open: boolean, tab?: string) => void;
+  /** Yami's own request handler, so changes go through the same checks. */
+  request: (method: string, args: object) => Promise<unknown>;
   /** The browser module, loaded the first time a browser tool runs. */
   browser: () => {
     browser: ReturnType<typeof createBrowser>;
@@ -47,7 +57,8 @@ export function loadAgentLink(deps: {
         const list = store.state.settings.agentLinkTools;
         return Array.isArray(list) && list.includes(name);
       },
-      tools: agentTools({
+      tools: [
+        ...agentTools({
         notify: (message) =>
           deps.broadcast({ type: "caption-notice", message }),
         ask: (title, detail) =>
@@ -71,7 +82,27 @@ export function loadAgentLink(deps: {
           const { browser, linked } = deps.browser();
           return linked.running() ? linked.read() : browser.read();
         },
-      }),
+        }),
+        ...yamiTools({
+          status: logStatus,
+          logs: async (channel, limit, since) => {
+            await log().flush();
+            return log().read(channel as "ERR", limit, since);
+          },
+          report: async (note) => {
+            const file = await collectReport(note, store.state.settings);
+            return { file, text: fs.readFileSync(file, "utf8") };
+          },
+          open: (page) => deps.showMain(page),
+          drawer: (tab) => deps.setPanel(!!tab, tab || undefined),
+          screenshot: (mode) => screenshot(mode, deps.showMain),
+          settings: () => store.state.settings as Record<string, unknown>,
+          setSetting: async (key, value) => {
+            await deps.request("settings", { [key]: value });
+          },
+          ask,
+        }),
+      ],
     }),
     error: "",
   };
@@ -80,4 +111,31 @@ export function loadAgentLink(deps: {
     deps.notify(e.message);
   });
   return link;
+}
+
+/** A picture of one of Yami's own windows, saved next to the logs. */
+async function screenshot(mode: string, showMain: (tab?: string) => void) {
+  const find = () =>
+    BrowserWindow.getAllWindows().find(
+      (w) =>
+        !w.isDestroyed() &&
+        new URL(w.webContents.getURL() || "about:blank").searchParams.get("window") === mode,
+    );
+  let win = find();
+  if (!win && mode === "main") {
+    showMain();
+    for (let i = 0; i < 50 && !(win = find()); i++)
+      await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 800));
+  }
+  if (!win) throw new Error(`The ${mode} window is not open.`);
+  const image = await win.webContents.capturePage();
+  const dir = path.join(log().dir, "screenshots");
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, `${mode}-${new Date().toISOString().replace(/[:.]/g, "-")}.png`);
+  fs.writeFileSync(file, image.toPNG());
+  // Keep the twenty newest.
+  for (const old of fs.readdirSync(dir).filter((n) => n.endsWith(".png")).sort().reverse().slice(20))
+    fs.rmSync(path.join(dir, old), { force: true });
+  return file;
 }

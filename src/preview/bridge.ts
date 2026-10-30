@@ -589,6 +589,15 @@ export function installPreviewBridge() {
         case "open.external":
           toast("External navigation is disabled in preview.");
           return false;
+        // Logs live on the PC; the preview only shows the flow.
+        case "log.report":
+          return true;
+        case "log.open":
+          toast("The logs folder opens in the desktop app.");
+          return "";
+        case "log.collect":
+          toast("In the desktop app this saves a report and shows it in Explorer.");
+          return { file: "yami-report-preview.CLT.md" };
         case "voice.stop":
         case "ability.arm":
         case "shortcuts.capture":

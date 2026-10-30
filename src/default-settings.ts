@@ -29,6 +29,7 @@ export const defaults: Settings = {
   holidaysEnabled: false,
   quickAccent: false,
   quickLook: false,
+  debugLogging: false,
   dockEnabled: false,
   dockHideTaskbar: false,
   dockPinned: [],
