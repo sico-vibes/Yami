@@ -71,7 +71,8 @@
     background var(--dur);
 }
 .module-card.on {
-  background: linear-gradient(160deg, var(--selected), transparent 60%), var(--surface-1);
+  background:
+    linear-gradient(160deg, var(--selected), transparent 60%), var(--surface-1);
   border-color: var(--selected-line);
 }
 .module-blurb {

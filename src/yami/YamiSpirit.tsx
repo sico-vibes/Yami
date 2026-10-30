@@ -116,7 +116,7 @@ export function YamiSpirit({
       last = now;
       t += dt;
       const goal = target();
-      energy += (goal - energy) * (1 - Math.pow(0.94, dt * 60));
+      energy += (goal - energy) * (1 - 0.94 ** (dt * 60));
       const s = live.current;
       particles = stepParticles(particles, dt, goal * 6, Math.random, EMBERS);
       if (goal === 0 && energy < 0.02) {

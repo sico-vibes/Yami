@@ -5,22 +5,27 @@ export function runProcess(
   args: string[],
   onText?: (text: string) => void,
 ) {
-  return new Promise<{ code: number; stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(command, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (text) => {
-      stdout += text;
-      onText?.(text);
-    });
-    child.stderr.on("data", (text) => {
-      stderr += text;
-    });
-    child.on("error", reject);
-    child.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
-  });
+  return new Promise<{ code: number; stdout: string; stderr: string }>(
+    (resolve, reject) => {
+      const child = spawn(command, args, {
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      let stdout = "";
+      let stderr = "";
+      child.stdout.setEncoding("utf8");
+      child.stderr.setEncoding("utf8");
+      child.stdout.on("data", (text) => {
+        stdout += text;
+        onText?.(text);
+      });
+      child.stderr.on("data", (text) => {
+        stderr += text;
+      });
+      child.on("error", reject);
+      child.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
+    },
+  );
 }
 
 export async function runChecked(
@@ -39,7 +44,9 @@ export async function runChecked(
     notify(`${label} ${Math.min(100, Math.round(fraction * 100))}%`);
   });
   if (result.code !== 0)
-    throw new Error(result.stderr.trim().split(/\r?\n/).at(-1) || `${label} failed.`);
+    throw new Error(
+      result.stderr.trim().split(/\r?\n/).at(-1) || `${label} failed.`,
+    );
   return result;
 }
 

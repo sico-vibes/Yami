@@ -45,6 +45,7 @@ export function MainNavigation({
         .filter(([id]) => !hidden.includes(id))
         .map(([id, icon, label]) => (
           <button
+            type="button"
             key={id}
             className={tab === id ? "selected" : ""}
             aria-label={label}

@@ -29,7 +29,7 @@ function glide(
   emit({ type: "stray-move", moving: true, x: dx / len, y: dy / len });
   const step = (now: number) => {
     const t = Math.min(1, (now - start) / ms),
-      e = 1 - Math.pow(1 - t, 3);
+      e = 1 - (1 - t) ** 3;
     pos.x = sx + dx * e;
     pos.y = sy + dy * e;
     place();

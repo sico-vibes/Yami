@@ -39,11 +39,22 @@ export function paintBackground(
   choices: BackgroundChoice[],
   backdrop: CanvasImageSource | null = null,
 ) {
-  const source = image as { naturalWidth?: number; naturalHeight?: number; width?: number; height?: number } | null;
+  const source = image as {
+    naturalWidth?: number;
+    naturalHeight?: number;
+    width?: number;
+    height?: number;
+  } | null;
   const imageWidth = source?.naturalWidth || source?.width || 960;
   const imageHeight = source?.naturalHeight || source?.height || 640;
   const ratio =
-    settings.ratio === "1:1" ? 1 : settings.ratio === "16:9" ? 16 / 9 : settings.ratio === "4:5" ? 4 / 5 : imageWidth / imageHeight;
+    settings.ratio === "1:1"
+      ? 1
+      : settings.ratio === "16:9"
+        ? 16 / 9
+        : settings.ratio === "4:5"
+          ? 4 / 5
+          : imageWidth / imageHeight;
   let width = imageWidth + settings.padding * 2;
   let height = imageHeight + settings.padding * 2;
   if (width / height > ratio) height = width / ratio;
@@ -53,8 +64,16 @@ export function paintBackground(
   canvas.height = Math.max(1, Math.round(height * scale));
   const context = canvas.getContext("2d");
   if (!context) return;
-  const choice = choices.find((item) => item.id === settings.background) || choices[0];
-  fillChoice(context, canvas.width, canvas.height, choice, settings.blur, backdrop);
+  const choice =
+    choices.find((item) => item.id === settings.background) || choices[0];
+  fillChoice(
+    context,
+    canvas.width,
+    canvas.height,
+    choice,
+    settings.blur,
+    backdrop,
+  );
   const drawnWidth = imageWidth * scale;
   const drawnHeight = imageHeight * scale;
   const x = (canvas.width - drawnWidth) / 2;
@@ -95,16 +114,31 @@ function fillChoice(
     if (!backdrop) return;
     context.save();
     if (blur > 0) context.filter = `blur(${blur}px)`;
-    context.drawImage(backdrop, -blur, -blur, width + blur * 2, height + blur * 2);
+    context.drawImage(
+      backdrop,
+      -blur,
+      -blur,
+      width + blur * 2,
+      height + blur * 2,
+    );
     context.filter = "none";
     context.restore();
     return;
   }
   const linear = context.createLinearGradient(0, 0, width, height);
-  choice.stops.forEach((stop, index) => linear.addColorStop(index / Math.max(1, choice.stops.length - 1), stop));
+  choice.stops.forEach((stop, index) =>
+    linear.addColorStop(index / Math.max(1, choice.stops.length - 1), stop),
+  );
   context.fillStyle = linear;
   context.fillRect(0, 0, width, height);
-  const glow = context.createRadialGradient(width * 0.2, height * 0.15, 10, width * 0.2, height * 0.15, width * 0.7);
+  const glow = context.createRadialGradient(
+    width * 0.2,
+    height * 0.15,
+    10,
+    width * 0.2,
+    height * 0.15,
+    width * 0.7,
+  );
   glow.addColorStop(0, "rgba(255,255,255,0.28)");
   glow.addColorStop(1, "rgba(255,255,255,0)");
   context.fillStyle = glow;

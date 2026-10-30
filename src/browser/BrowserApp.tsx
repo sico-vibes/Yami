@@ -101,6 +101,7 @@ export default function BrowserApp() {
               className={"browser-tab" + (t.id === active ? " selected" : "")}
             >
               <button
+                type="button"
                 role="tab"
                 aria-selected={t.id === active}
                 onClick={() =>
@@ -131,6 +132,7 @@ export default function BrowserApp() {
           ))}
         </div>
         <button
+          type="button"
           className="text-button browser-new"
           onClick={() =>
             void api("browser.open", { input: newTab }).catch(fail)
@@ -209,6 +211,7 @@ export default function BrowserApp() {
             fail={fail}
           />
           <button
+            type="button"
             className={"browser-shield" + (blocking ? " on" : "")}
             aria-pressed={blocking}
             data-tip={
@@ -349,6 +352,7 @@ function NewTab({
           <div className="browser-import">
             {linked.browsers.map((b) => (
               <button
+                type="button"
                 key={b.id}
                 className="soft-button"
                 onClick={() =>
@@ -365,6 +369,7 @@ function NewTab({
             ))}
             {linked.open && (
               <button
+                type="button"
                 className="text-button"
                 onClick={() =>
                   void api("browser.linked.close").then(load).catch(fail)
@@ -383,6 +388,7 @@ function NewTab({
           .filter((s) => s.found)
           .map((s) => (
             <button
+              type="button"
               key={s.id}
               className="soft-button"
               onClick={() =>
@@ -401,6 +407,7 @@ function NewTab({
           <div className="mail-head">
             <h3 className="group-title">Recent</h3>
             <button
+              type="button"
               className="text-button"
               onClick={() =>
                 void api("browser.history.clear")
@@ -414,6 +421,7 @@ function NewTab({
           <div className="browser-bookmarks">
             {recent.slice(0, 8).map((r) => (
               <button
+                type="button"
                 key={r.url}
                 className="browser-bookmark"
                 data-tip={r.url}
@@ -431,6 +439,7 @@ function NewTab({
           <div className="mail-head">
             <h3 className="group-title">From your other browsers</h3>
             <button
+              type="button"
               className="text-button"
               onClick={() =>
                 void api("vault.history.clear").then(setImported).catch(fail)
@@ -449,6 +458,7 @@ function NewTab({
               .slice(0, query ? 24 : 8)
               .map((v) => (
                 <button
+                  type="button"
                   key={v.url}
                   className="browser-bookmark"
                   data-tip={v.url}
@@ -475,6 +485,7 @@ function NewTab({
           <div className="browser-bookmarks">
             {shown.map((b) => (
               <button
+                type="button"
                 key={b.url}
                 className="browser-bookmark"
                 data-tip={b.url}

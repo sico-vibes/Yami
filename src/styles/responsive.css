@@ -30,9 +30,7 @@
   inset: 0;
   z-index: 10;
   padding: 16px 20px 10px;
-  background:
-    var(--aurora),
-    rgba(11, 10, 34, 0.9);
+  background: var(--aurora), rgba(11, 10, 34, 0.9);
   backdrop-filter: blur(30px);
   height: 100vh;
 }

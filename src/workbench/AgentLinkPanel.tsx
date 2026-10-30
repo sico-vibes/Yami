@@ -101,13 +101,22 @@ export function AgentLinkPanel({ report }: { report: (text: string) => void }) {
           </p>
           <div className="agent-link-token">
             <code>{shown ? info.token : "•".repeat(24)}</code>
-            <button className="text-button" onClick={() => setShown(!shown)}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setShown(!shown)}
+            >
               {shown ? "Hide" : "Show"}
             </button>
-            <button className="text-button" onClick={() => copy(header)}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => copy(header)}
+            >
               Copy header
             </button>
             <button
+              type="button"
               className="text-button"
               onClick={() =>
                 void api("agentlink.rotate").then(setInfo).catch(fail)
@@ -119,7 +128,11 @@ export function AgentLinkPanel({ report }: { report: (text: string) => void }) {
           <div className="agent-link-command">
             <span className="setting-note">Claude Code</span>
             <code>{shown ? claude : claude.replace(info.token, "…")}</code>
-            <button className="soft-button" onClick={() => copy(claude)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => copy(claude)}
+            >
               <Icon name="copy" size={16} />
               Copy
             </button>

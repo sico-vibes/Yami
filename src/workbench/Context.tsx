@@ -17,6 +17,7 @@ export function ContextView({ report }: { report: (text: string) => void }) {
           </p>
         </div>
         <button
+          type="button"
           className="soft-button"
           onClick={() =>
             void api("context.pick")
@@ -38,6 +39,7 @@ export function ContextView({ report }: { report: (text: string) => void }) {
             </p>
           </div>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void api("context.windows").then(setWindows).catch(error)
@@ -64,6 +66,7 @@ export function ContextView({ report }: { report: (text: string) => void }) {
               ]}
             />
             <button
+              type="button"
               className="soft-button"
               disabled={!selected}
               onClick={() =>
@@ -88,6 +91,7 @@ export function ContextView({ report }: { report: (text: string) => void }) {
           <h2>{item.title}</h2>
           <pre className="confirmation-detail">{item.text}</pre>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void api("context.use", {

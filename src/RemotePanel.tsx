@@ -122,6 +122,7 @@ export function RemotePanel({ report }: { report: (m: string) => void }) {
               it to yourself. A new code unpairs every phone.
             </p>
             <button
+              type="button"
               className="soft-button"
               onClick={() =>
                 void api("remote.rotate").then(setInfo).catch(fail)

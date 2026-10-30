@@ -12,7 +12,11 @@ export function QrTool({ files }: { files: WheelFile[] }) {
   useEffect(() => {
     if (!image) return;
     const canvas = document.createElement("canvas");
-    const fitted = fitSize(sourceSize(image).width, sourceSize(image).height, 360);
+    const fitted = fitSize(
+      sourceSize(image).width,
+      sourceSize(image).height,
+      360,
+    );
     canvas.width = fitted.width;
     canvas.height = fitted.height;
     const ctx = canvas.getContext("2d");
@@ -35,7 +39,11 @@ export function QrTool({ files }: { files: WheelFile[] }) {
           type="button"
           className="primary-button"
           disabled={!text}
-          onClick={() => void api("wheel.copyText", { text }).catch((error: Error) => setNote(error.message))}
+          onClick={() =>
+            void api("wheel.copyText", { text }).catch((error: Error) =>
+              setNote(error.message),
+            )
+          }
         >
           Copy text
         </button>

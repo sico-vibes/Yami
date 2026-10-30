@@ -32,6 +32,7 @@ export function Desk({
       <div className="page-rail desk-rail" role="tablist" aria-label="Desk">
         {views.map(([id, label]) => (
           <button
+            type="button"
             key={id}
             role="tab"
             aria-selected={shown === id}

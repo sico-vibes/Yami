@@ -514,6 +514,7 @@ export default function TerminalWindow() {
         <div className="terminal-sessions">
           {list.map((v, i) => (
             <button
+              type="button"
               key={v.id}
               data-session={v.id}
               className={selected === v.id ? "selected" : ""}
@@ -598,6 +599,7 @@ export default function TerminalWindow() {
         />
         <span className="spacer" />
         <button
+          type="button"
           className="text-button"
           disabled={!selected}
           onClick={() => {
@@ -609,6 +611,7 @@ export default function TerminalWindow() {
           Attach selection
         </button>
         <button
+          type="button"
           className="text-button"
           disabled={!selected}
           onClick={() => void end()}
@@ -621,6 +624,7 @@ export default function TerminalWindow() {
           {ports.length ? (
             ports.map((p) => (
               <button
+                type="button"
                 key={p.port}
                 className="soft-button"
                 onClick={() =>
@@ -708,10 +712,15 @@ export default function TerminalWindow() {
             instead to keep them running.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setEnding(false)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setEnding(false)}
+            >
               Keep running
             </button>
             <button
+              type="button"
               className="primary-button"
               autoFocus
               onClick={() => void end(true)}

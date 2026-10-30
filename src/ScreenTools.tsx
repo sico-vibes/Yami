@@ -33,6 +33,7 @@ export function ScreenTools({ report }: { report: (m: string) => void }) {
     <div className="screen-tools">
       <div className="screen-tools-row">
         <button
+          type="button"
           className="soft-button"
           onClick={() => void api("color.pick").catch(fail)}
         >
@@ -40,6 +41,7 @@ export function ScreenTools({ report }: { report: (m: string) => void }) {
           Pick a colour
         </button>
         <button
+          type="button"
           className={"soft-button" + (pin.pinned ? " active" : "")}
           aria-pressed={pin.pinned}
           onClick={() =>
@@ -85,6 +87,7 @@ export function ScreenTools({ report }: { report: (m: string) => void }) {
         <div className="screen-tools-colors" aria-label="Recent colours">
           {colors.map((c) => (
             <button
+              type="button"
               key={c}
               className="color-swatch"
               style={{ background: c }}
@@ -99,6 +102,7 @@ export function ScreenTools({ report }: { report: (m: string) => void }) {
             />
           ))}
           <button
+            type="button"
             className="text-button"
             onClick={() => void api("color.clear").then(setColors).catch(fail)}
           >

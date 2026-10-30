@@ -67,6 +67,7 @@ export function Mcp({
         </div>
         <div className="workbench-actions">
           <button
+            type="button"
             className="soft-button"
             disabled={busy || !url}
             onClick={() => {
@@ -85,6 +86,7 @@ export function Mcp({
             Connect and list tools
           </button>
           <button
+            type="button"
             className="text-button"
             onClick={() =>
               void api("mcp.disconnect").then(() => {
@@ -139,6 +141,7 @@ export function Mcp({
                 />
               </label>
               <button
+                type="button"
                 className="primary-button"
                 disabled={busy}
                 onClick={() => {

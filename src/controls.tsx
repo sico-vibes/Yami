@@ -68,7 +68,12 @@ export function Select({
       width = Math.max(r.width, 168),
       left = Math.min(Math.max(8, r.left), innerWidth - width - 8);
     return up
-      ? { left, width, bottom: innerHeight - r.top + 6, maxHeight: Math.min(288, above) }
+      ? {
+          left,
+          width,
+          bottom: innerHeight - r.top + 6,
+          maxHeight: Math.min(288, above),
+        }
       : { left, width, top: r.bottom + 6, maxHeight: Math.min(288, below) };
   };
   const show = () => {
@@ -76,7 +81,12 @@ export function Select({
     const where = measure();
     if (!where) return;
     setPlace(where);
-    setActive(Math.max(0, items.findIndex((o) => o.value === value)));
+    setActive(
+      Math.max(
+        0,
+        items.findIndex((o) => o.value === value),
+      ),
+    );
     setOpen(true);
     trigger.current.focus();
   };
@@ -272,7 +282,12 @@ export function TooltipLayer() {
         if (current !== el || !el.isConnected) return;
         const r = el.getBoundingClientRect(),
           below = r.top < 48;
-        setTip({ text, x: r.left + r.width / 2, y: below ? r.bottom + 8 : r.top - 8, below });
+        setTip({
+          text,
+          x: r.left + r.width / 2,
+          y: below ? r.bottom + 8 : r.top - 8,
+          below,
+        });
       }, delay);
     };
     const over = (e: PointerEvent) => {
@@ -336,9 +351,22 @@ export function StatusChip({ status }: { status: string }) {
   );
 }
 /** A slim bar for a 0–1 share; warm past 75%, rose past 90%. */
-export function Meter({ value, label }: { value: number | null; label: string }) {
+export function Meter({
+  value,
+  label,
+}: {
+  value: number | null;
+  label: string;
+}) {
   const share = value === null ? 0 : Math.min(1, Math.max(0, value)),
-    tone = value === null ? "unknown" : share >= 0.9 ? "high" : share >= 0.75 ? "warm" : "calm";
+    tone =
+      value === null
+        ? "unknown"
+        : share >= 0.9
+          ? "high"
+          : share >= 0.75
+            ? "warm"
+            : "calm";
   return (
     <span
       className="meter"

@@ -94,7 +94,11 @@ export function Plans({
           <h1>Your desk</h1>
           <p className="page-description">Say it once. Then forget it.</p>
         </div>
-        <button className="soft-button" onClick={() => setModal(true)}>
+        <button
+          type="button"
+          className="soft-button"
+          onClick={() => setModal(true)}
+        >
           <Icon name="plus" size={17} /> Add a plan
         </button>
       </div>
@@ -136,6 +140,7 @@ export function Plans({
             {state.todos.map((t) => (
               <div className="todo-row" key={t.id}>
                 <button
+                  type="button"
                   className={`check-circle ${t.done ? "checked" : ""}`}
                   aria-label={"Complete " + t.title}
                   onClick={() => void api("todo.toggle", { id: t.id })}
@@ -213,6 +218,7 @@ export function Plans({
                 const today = date.toDateString() === new Date().toDateString();
                 return (
                   <button
+                    type="button"
                     key={day}
                     className={today ? "today" : ""}
                     onClick={() => {
@@ -261,7 +267,11 @@ export function Plans({
                 { value: "open_app", label: "Open an app", icon: "app-window" },
                 { value: "routine", label: "Open several apps", icon: "stack" },
                 { value: "open_url", label: "Open a website", icon: "globe" },
-                { value: "search_site", label: "Search YouTube", icon: "youtube-logo" },
+                {
+                  value: "search_site",
+                  label: "Search YouTube",
+                  icon: "youtube-logo",
+                },
               ]}
             />
           </label>
@@ -301,6 +311,7 @@ export function Plans({
             </label>
           </div>
           <button
+            type="button"
             className="primary-button"
             disabled={
               !title.trim() || !at || (action !== "remind" && !value.trim())

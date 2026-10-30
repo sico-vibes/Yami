@@ -38,8 +38,7 @@ test("the phone API needs the token and respects each ability", async () => {
       state: async () => ({ agents: [], requests: [{ id: "r1" }] }),
       approve: (id, decision) => calls.push(["approve", id, decision]),
       media: async (action) => (
-        calls.push(["media", action]),
-        { active: true }
+        calls.push(["media", action]), { active: true }
       ),
       clipboard: (text) => calls.push(["clip", text]),
     },

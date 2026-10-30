@@ -321,7 +321,10 @@ html[data-reduced="true"] .inbox-item {
 .link-steps code {
   display: block;
   margin-top: var(--space-1);
-  font: 500 var(--fs-xs) "Cascadia Mono", Consolas, monospace;
+  font:
+    500 var(--fs-xs) "Cascadia Mono",
+    Consolas,
+    monospace;
   color: var(--text);
   overflow-wrap: anywhere;
 }

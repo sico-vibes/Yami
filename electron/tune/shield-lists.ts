@@ -127,7 +127,7 @@ export class DomainSet {
   }
   /** The name itself or the closest parent that is in the set. */
   covers(domain: string) {
-    for (let at = 0; at !== -1;) {
+    for (let at = 0; at !== -1; ) {
       const part = domain.slice(at);
       if (!part.includes(".")) return undefined;
       if (this.has(part)) return part;

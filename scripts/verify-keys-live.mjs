@@ -18,17 +18,26 @@ import assert from "node:assert/strict";
 
 const exec = promisify(execFile);
 const ps = (args) =>
-  exec("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", ...args], {
-    windowsHide: true,
-    timeout: 30000,
-  }).then((r) => r.stdout.trim());
+  exec(
+    "powershell.exe",
+    ["-NoProfile", "-ExecutionPolicy", "Bypass", ...args],
+    {
+      windowsHide: true,
+      timeout: 30000,
+    },
+  ).then((r) => r.stdout.trim());
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const profile = path.resolve(".artifacts/keys-live-" + Date.now());
 fs.mkdirSync(profile, { recursive: true });
 fs.writeFileSync(
   path.join(profile, "data.json"),
   JSON.stringify({
-    settings: { setupDone: true, startHidden: true, quickAccent: true, quickLook: true },
+    settings: {
+      setupDone: true,
+      startHidden: true,
+      quickAccent: true,
+      quickLook: true,
+    },
   }),
 );
 // The text box writes what it holds to a file on every change.
@@ -76,10 +85,15 @@ try {
   assert.ok(state.settings.quickAccent && state.settings.quickLook);
 
   // Accent characters: wait for the owner's keys.
-  form = spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", formScript], {
-    stdio: "ignore",
-  });
-  const read = () => (fs.existsSync(typedFile) ? fs.readFileSync(typedFile, "utf8") : "");
+  form = spawn(
+    "powershell.exe",
+    ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", formScript],
+    {
+      stdio: "ignore",
+    },
+  );
+  const read = () =>
+    fs.existsSync(typedFile) ? fs.readFileSync(typedFile, "utf8") : "";
   let strip = false;
   for (let i = 0; i < 180 && !/[^\x00-\x7f]/.test(read()); i++) {
     strip ||= app.windows().some((p) => p.url().includes("window=accent"));
@@ -95,7 +109,10 @@ try {
   form = undefined;
 
   // Quick look: wait for the owner's Ctrl+Space.
-  spawn("explorer.exe", [`/select,${note}`], { detached: true, stdio: "ignore" }).unref();
+  spawn("explorer.exe", [`/select,${note}`], {
+    detached: true,
+    stdio: "ignore",
+  }).unref();
   for (let i = 0; i < 40 && !explorerOpen; i++) {
     explorerOpen = !!Number(
       await ps([
@@ -108,12 +125,16 @@ try {
   assert.ok(explorerOpen, "the throwaway Explorer window opened");
   let preview;
   for (let i = 0; i < 180 && !preview; i++) {
-    preview = app.windows().find((p) => /^data:text\/html|keys-live/.test(p.url()));
+    preview = app
+      .windows()
+      .find((p) => /^data:text\/html|keys-live/.test(p.url()));
     if (!preview) await wait(500);
   }
   assert.ok(preview, "Yami's preview opened");
   await preview.waitForLoadState();
-  result.previewText = ((await preview.locator("body").textContent()) || "").trim().slice(0, 60);
+  result.previewText = ((await preview.locator("body").textContent()) || "")
+    .trim()
+    .slice(0, 60);
   assert.match(result.previewText, /Quick look from a real Ctrl\+Space/);
   console.log(JSON.stringify({ passed: true, ...result }));
 } finally {

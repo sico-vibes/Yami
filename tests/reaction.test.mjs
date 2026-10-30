@@ -24,7 +24,10 @@ test("reactions have their own pose and energy", () => {
   for (const state of ["cheer", "alert", "worried"])
     assert.ok(stateEnergy(state) > 0, state);
   const hop = [0, 0.1, 0.2, 0.3].map((t) => bodyPose("cheer", t, 0.9).bob);
-  assert.ok(hop.every((b) => b <= 0), "cheer only rises");
+  assert.ok(
+    hop.every((b) => b <= 0),
+    "cheer only rises",
+  );
   assert.ok(Math.min(...hop) < -4, "and rises visibly");
   assert.ok(bodyPose("worried", 0, 0.3).tilt < -7, "worried tilts its head");
   assert.ok(bodyPose("alert", 0, 0.5).ear >= 7, "alert perks its ears");

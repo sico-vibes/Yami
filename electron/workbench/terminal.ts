@@ -1,4 +1,10 @@
-import { app, BrowserWindow, dialog, shell, type WebContents } from "electron";
+import {
+  app,
+  type BrowserWindow,
+  dialog,
+  shell,
+  type WebContents,
+} from "electron";
 import {
   spawn,
   execFileSync,
@@ -277,7 +283,8 @@ export class TerminalController {
           .slice(0, 8)
           .map((tab: any) => ({
             shell: shellNames.includes(tab.shell) ? tab.shell : "",
-            cwd: typeof tab.cwd === "string" && isFolder(tab.cwd) ? tab.cwd : "",
+            cwd:
+              typeof tab.cwd === "string" && isFolder(tab.cwd) ? tab.cwd : "",
             title: String(tab.title || "").slice(0, 60),
           }));
       } catch {
@@ -286,13 +293,13 @@ export class TerminalController {
     }
     if (method === "terminal.layout.save") {
       if (!this.layoutFile) return false;
-      const tabs = (Array.isArray(a.tabs) ? a.tabs : []).slice(0, 8).map(
-        (tab: any) => ({
+      const tabs = (Array.isArray(a.tabs) ? a.tabs : [])
+        .slice(0, 8)
+        .map((tab: any) => ({
           shell: shellNames.includes(tab.shell) ? tab.shell : "",
           cwd: String(tab.cwd || "").slice(0, 1024),
           title: String(tab.title || "").slice(0, 60),
-        }),
-      );
+        }));
       fs.mkdirSync(path.dirname(this.layoutFile), { recursive: true });
       fs.writeFileSync(this.layoutFile, JSON.stringify(tabs));
       return true;

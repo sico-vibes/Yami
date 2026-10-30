@@ -17,7 +17,12 @@ export function CropTool({ files }: { files: WheelFile[] }) {
     if (!ctx) return;
     ctx.strokeStyle = token("--paint-glow");
     ctx.lineWidth = 2;
-    ctx.strokeRect(box.x * canvas.current.width, box.y * canvas.current.height, box.w * canvas.current.width, box.h * canvas.current.height);
+    ctx.strokeRect(
+      box.x * canvas.current.width,
+      box.y * canvas.current.height,
+      box.w * canvas.current.width,
+      box.h * canvas.current.height,
+    );
   }, [image, box]);
   const pointer = (event: PointerEvent<HTMLCanvasElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -27,7 +32,10 @@ export function CropTool({ files }: { files: WheelFile[] }) {
     };
   };
   return (
-    <ToolShell title="Crop" note={note || "Drag a rectangle. The saved file is a new PNG."}>
+    <ToolShell
+      title="Crop"
+      note={note || "Drag a rectangle. The saved file is a new PNG."}
+    >
       <div className="tool-preview">
         <canvas
           ref={canvas}
@@ -69,7 +77,9 @@ export function CropTool({ files }: { files: WheelFile[] }) {
               exportCanvas.width,
               exportCanvas.height,
             );
-          await savePng(exportCanvas, "tool:crop").catch((error: Error) => setNote(error.message));
+          await savePng(exportCanvas, "tool:crop").catch((error: Error) =>
+            setNote(error.message),
+          );
         }}
       />
     </ToolShell>
@@ -79,5 +89,10 @@ export function CropTool({ files }: { files: WheelFile[] }) {
 function normalBox(x1: number, y1: number, x2: number, y2: number): Box {
   const x = Math.min(x1, x2);
   const y = Math.min(y1, y2);
-  return { x, y, w: Math.max(0.02, Math.abs(x2 - x1)), h: Math.max(0.02, Math.abs(y2 - y1)) };
+  return {
+    x,
+    y,
+    w: Math.max(0.02, Math.abs(x2 - x1)),
+    h: Math.max(0.02, Math.abs(y2 - y1)),
+  };
 }

@@ -59,29 +59,29 @@ export function loadAgentLink(deps: {
       },
       tools: [
         ...agentTools({
-        notify: (message) =>
-          deps.broadcast({ type: "caption-notice", message }),
-        ask: (title, detail) =>
-          deps.confirm(
-            "A coding agent asks: " + title,
-            detail || "Answer in Yami; no answer counts as no.",
-          ),
-        projects: deps.projects,
-        openTerminal: deps.openTerminal,
-        browserOpen: (url) => {
-          const { browser } = deps.browser();
-          browser.show();
-          browser.open(url);
-        },
-        browserUpload: (target, file) =>
-          deps.browser().browser.upload(target, file, ask),
-        browserAct: (kind, target, value) =>
-          deps.browser().browser.act(kind, target, value, ask),
-        // A signed-in linked browser, when open, is what agents read.
-        browserRead: () => {
-          const { browser, linked } = deps.browser();
-          return linked.running() ? linked.read() : browser.read();
-        },
+          notify: (message) =>
+            deps.broadcast({ type: "caption-notice", message }),
+          ask: (title, detail) =>
+            deps.confirm(
+              "A coding agent asks: " + title,
+              detail || "Answer in Yami; no answer counts as no.",
+            ),
+          projects: deps.projects,
+          openTerminal: deps.openTerminal,
+          browserOpen: (url) => {
+            const { browser } = deps.browser();
+            browser.show();
+            browser.open(url);
+          },
+          browserUpload: (target, file) =>
+            deps.browser().browser.upload(target, file, ask),
+          browserAct: (kind, target, value) =>
+            deps.browser().browser.act(kind, target, value, ask),
+          // A signed-in linked browser, when open, is what agents read.
+          browserRead: () => {
+            const { browser, linked } = deps.browser();
+            return linked.running() ? linked.read() : browser.read();
+          },
         }),
         ...yamiTools({
           status: logStatus,
@@ -119,7 +119,9 @@ async function screenshot(mode: string, showMain: (tab?: string) => void) {
     BrowserWindow.getAllWindows().find(
       (w) =>
         !w.isDestroyed() &&
-        new URL(w.webContents.getURL() || "about:blank").searchParams.get("window") === mode,
+        new URL(w.webContents.getURL() || "about:blank").searchParams.get(
+          "window",
+        ) === mode,
     );
   let win = find();
   if (!win && mode === "main") {
@@ -132,10 +134,18 @@ async function screenshot(mode: string, showMain: (tab?: string) => void) {
   const image = await win.webContents.capturePage();
   const dir = path.join(log().dir, "screenshots");
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `${mode}-${new Date().toISOString().replace(/[:.]/g, "-")}.png`);
+  const file = path.join(
+    dir,
+    `${mode}-${new Date().toISOString().replace(/[:.]/g, "-")}.png`,
+  );
   fs.writeFileSync(file, image.toPNG());
   // Keep the twenty newest.
-  for (const old of fs.readdirSync(dir).filter((n) => n.endsWith(".png")).sort().reverse().slice(20))
+  for (const old of fs
+    .readdirSync(dir)
+    .filter((n) => n.endsWith(".png"))
+    .sort()
+    .reverse()
+    .slice(20))
     fs.rmSync(path.join(dir, old), { force: true });
   return file;
 }

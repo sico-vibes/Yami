@@ -16,10 +16,17 @@ test("dark covers the evening and night, light the day", () => {
 });
 
 test("the next switch is the nearer of the two times, wrapping past midnight", () => {
-  assert.deepEqual(nextSwitch(at(12), "07:00", "19:00"), { at: at(19), dark: true });
+  assert.deepEqual(nextSwitch(at(12), "07:00", "19:00"), {
+    at: at(19),
+    dark: true,
+  });
   const night = nextSwitch(at(23), "07:00", "19:00");
   assert.equal(night.dark, false);
   assert.equal(night.at.getDate(), 29);
   assert.equal(night.at.getHours(), 7);
-  assert.equal(nextSwitch(at(19), "07:00", "19:00").dark, false, "exactly at 19:00 the next is morning");
+  assert.equal(
+    nextSwitch(at(19), "07:00", "19:00").dark,
+    false,
+    "exactly at 19:00 the next is morning",
+  );
 });

@@ -81,6 +81,7 @@ export function Projects({
             }}
           />
           <button
+            type="button"
             className="primary-button"
             onClick={() => void call("dev.projects.add")}
           >
@@ -115,6 +116,7 @@ export function Projects({
           <span className="setting-note">Folders your agents worked in</span>
           {suggested.map((folder) => (
             <button
+              type="button"
               key={folder}
               className="file-chip"
               data-tip={folder}
@@ -200,6 +202,7 @@ export function Projects({
                     >
                       {installed.map((cli) => (
                         <button
+                          type="button"
                           key={cli.id}
                           className={
                             "agent-launch" +
@@ -230,6 +233,7 @@ export function Projects({
                   )}
                   <footer className="entry-foot">
                     <button
+                      type="button"
                       className="text-button"
                       disabled={!p.exists}
                       onClick={() => launch(p)}
@@ -238,6 +242,7 @@ export function Projects({
                       Terminal here
                     </button>
                     <button
+                      type="button"
                       className="text-button"
                       disabled={!p.exists}
                       onClick={() =>
@@ -249,6 +254,7 @@ export function Projects({
                     </button>
                     {editors.map((editor) => (
                       <button
+                        type="button"
                         key={editor}
                         className="text-button"
                         disabled={!p.exists}
@@ -262,6 +268,7 @@ export function Projects({
                     ))}
                     {favourite && (
                       <button
+                        type="button"
                         className="soft-button entry-action"
                         disabled={!p.exists}
                         onClick={() => launch(p, favourite.id)}

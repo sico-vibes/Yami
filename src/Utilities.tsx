@@ -63,6 +63,7 @@ export function Utilities({
       <nav className="utility-tabs">
         {tabs.map((t) => (
           <button
+            type="button"
             className={tab === t ? "selected" : ""}
             key={t}
             onClick={() => setTab(t)}
@@ -138,6 +139,7 @@ function Controls({ report }: { report: (m: string) => void }) {
     wide = false,
   ) => (
     <button
+      type="button"
       className={`control-tile ${wide ? "wide" : ""}`}
       data-on={on}
       disabled={!!pending || !controls}
@@ -271,6 +273,7 @@ function Controls({ report }: { report: (m: string) => void }) {
             onClick={() => play("previous")}
           />
           <button
+            type="button"
             className="play-button"
             aria-label={media?.playing ? "Pause" : "Play"}
             onClick={() => play("toggle")}
@@ -286,6 +289,7 @@ function Controls({ report }: { report: (m: string) => void }) {
         <div className="track-progress">
           {media?.canShuffle && (
             <button
+              type="button"
               className="media-mode"
               aria-label="Shuffle"
               aria-pressed={!!media.shuffle}
@@ -324,6 +328,7 @@ function Controls({ report }: { report: (m: string) => void }) {
           <span>{formatTime(media?.duration || 0)}</span>
           {media?.canRepeat && (
             <button
+              type="button"
               className="media-mode"
               aria-label="Repeat"
               aria-pressed={media.repeat === "List" || media.repeat === "Track"}
@@ -490,6 +495,7 @@ function Stats({ report }: { report: (m: string) => void }) {
           <span>Mbps ↑</span>
         </div>
         <button
+          type="button"
           className="gold-button"
           disabled={testing}
           onClick={() => {
@@ -513,10 +519,15 @@ function Stats({ report }: { report: (m: string) => void }) {
             open dataset. The test transfers real data.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setConsent(false)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setConsent(false)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="primary-button"
               autoFocus
               onClick={() => {
@@ -552,12 +563,14 @@ function Wallpapers({
     <>
       <div className="wallpaper-toolbar">
         <button
+          type="button"
           className={!folder ? "selected" : ""}
           onClick={() => setFolder(false)}
         >
           Recent
         </button>
         <button
+          type="button"
           className={folder ? "selected" : ""}
           onClick={() => setFolder(true)}
         >
@@ -590,6 +603,7 @@ function Wallpapers({
       <div className="wallpaper-fan">
         {files.slice(0, 30).map((p, i) => (
           <button
+            type="button"
             key={p}
             className={selected === p ? "selected" : ""}
             style={{ "--order": i } as React.CSSProperties}
@@ -648,6 +662,7 @@ function Clipboard({
           />
         </label>
         <button
+          type="button"
           className="text-button"
           onClick={() => void api("clipboard.clear")}
         >
@@ -658,6 +673,7 @@ function Clipboard({
         {items.map((c) => (
           <div className="clipboard-item" key={c.id} data-pinned={c.pinned}>
             <button
+              type="button"
               className="clipboard-text"
               onClick={() =>
                 void api("clipboard.copy", { id: c.id }).then(() =>
@@ -707,6 +723,7 @@ function Power({ report }: { report: (m: string) => void }) {
         ["power", "Shut down", "shutdown"],
       ].map(([icon, title, action]) => (
         <button
+          type="button"
           key={action}
           onClick={() =>
             void api("power", { action }).catch((e) => report(e.message))

@@ -93,7 +93,7 @@ export function Lasso() {
       }}
       onPointerUp={() => void finish()}
     >
-      {capture && <img src={"data:image/jpeg;base64," + capture.data} />}
+      {capture && <img src={"data:image/jpeg;base64," + capture.data} alt="" />}
       <div className="lasso-dim" />
       <canvas ref={canvas} />
       <div className="lasso-hint">

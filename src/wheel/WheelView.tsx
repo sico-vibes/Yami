@@ -44,7 +44,10 @@ export function WheelView({
       : `${lead.name} +${files.length - 1}`;
   const move = (step: number) => {
     if (!petals.length) return;
-    const index = Math.max(0, petals.findIndex((petal) => petal.id === activeId));
+    const index = Math.max(
+      0,
+      petals.findIndex((petal) => petal.id === activeId),
+    );
     const next = petals[(index + step + petals.length) % petals.length];
     onActive(next.id);
   };
@@ -100,7 +103,9 @@ export function WheelView({
             onFocus={() => onActive(petal.id)}
             onClick={() => onChoose(petal.id)}
           >
-            {PETAL_ICON[petal.id] && <Icon name={PETAL_ICON[petal.id]} size={dense ? 14 : 16} />}
+            {PETAL_ICON[petal.id] && (
+              <Icon name={PETAL_ICON[petal.id]} size={dense ? 14 : 16} />
+            )}
             {petal.label}
           </button>
         );

@@ -343,9 +343,7 @@ export class Assistant {
   }
   dictationTransform?: (text: string, target: number) => Promise<string>;
   async dictation(data: string, mimeType: string, target: number) {
-    const response = await (
-      await this.client()
-    ).models.generateContent({
+    const response = await (await this.client()).models.generateContent({
       model: this.store.state.settings.textModel,
       contents: [
         { inlineData: { data, mimeType } },
@@ -639,9 +637,7 @@ export class Assistant {
     }
     const queries = [query];
     if (deep) {
-      const r = await (
-        await this.client()
-      ).models.generateContent({
+      const r = await (await this.client()).models.generateContent({
         model: this.store.state.settings.textModel,
         contents: `Write exactly two complementary search queries to investigate this question. Return a JSON array of two strings. Question: ${query}`,
         config: { responseMimeType: "application/json", maxOutputTokens: 1024 },

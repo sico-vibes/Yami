@@ -22,6 +22,22 @@ The native host is built with the Windows .NET Framework C# compiler through `np
 
 Never commit provider keys, user conversations, clipboard contents, screenshots containing private information, or local `.artifacts` evidence. Use synthetic fixtures for tests. Keep fixture responses clearly separate from live Windows or provider behavior.
 
+## Code standards and checks
+
+`npm install` turns on a git pre-push hook (`.githooks/pre-push`) that runs `npm run verify`. The same checks run in CI on every push and pull request:
+
+| Check | Command | What it enforces |
+| --- | --- | --- |
+| File size | `npm run check:lines` | Every authored text file stays at or below 1,000 lines; split by responsibility first. |
+| UI rules | `npm run check:ui` | No raw colours outside the design tokens, no native `<select>`, no `title=` tooltips. |
+| Lint and format | `npm run check:biome` | [Biome](https://biomejs.dev) with the recommended rules (`biome.json`); `npm run format` and `npm run lint` fix and list. Rules that are warnings are known debt to pay down, not new patterns to copy. |
+| Secrets | `npm run check:secrets` | No credentials, profiles, recordings, executables or build output in tracked files. |
+| Types | `npm run typecheck` | TypeScript in strict mode. |
+| Native build | `npm run build:native` | The C# Windows helper compiles. |
+| Tests | `npm test` | Unit tests in `tests/`. |
+
+Code style is what Biome formats: two spaces, double quotes, semicolons, trailing commas, 80 columns. Name things for what they do, keep comments for the why, and match the surrounding code. After an npm install or update, run `npm run lock:compact`. New dependency versions must be at least two weeks old, and must not be paid.
+
 ## Review expectations
 
 - Preserve the user’s local conversations, settings, clipboard data, and provider keys across upgrades. Add a documented migration only when the data shape genuinely requires it.

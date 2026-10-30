@@ -53,6 +53,7 @@ export function MailCatcher({ report }: { report: (m: string) => void }) {
         <h3 className="group-title">Mail catcher</h3>
         {mail.length > 0 && (
           <button
+            type="button"
             className="text-button"
             onClick={() =>
               void api("mailcatcher.clear").then(setMail).catch(fail)
@@ -72,7 +73,12 @@ export function MailCatcher({ report }: { report: (m: string) => void }) {
                 : `A small SMTP server on this PC for testing the mail your app sends. It runs only while started and keeps the newest 500 messages.`}
             </p>
           </div>
-          <button className="soft-button" disabled={busy} onClick={toggle}>
+          <button
+            type="button"
+            className="soft-button"
+            disabled={busy}
+            onClick={toggle}
+          >
             <Icon name={status.running ? "stop" : "play"} size={16} />
             {status.running ? "Stop" : "Start"}
           </button>
@@ -81,6 +87,7 @@ export function MailCatcher({ report }: { report: (m: string) => void }) {
           <div className="task-row mail-row" key={m.id}>
             <Icon name="envelope-simple" size={14} />
             <button
+              type="button"
               className="mail-open"
               onClick={() =>
                 void api("mailcatcher.read", { id: m.id })
@@ -130,6 +137,7 @@ export function MailCatcher({ report }: { report: (m: string) => void }) {
           )}
           <div className="dialog-actions">
             <button
+              type="button"
               className="soft-button"
               onClick={() =>
                 void api("mailcatcher.open", { id: open.id }).catch(fail)
@@ -137,7 +145,11 @@ export function MailCatcher({ report }: { report: (m: string) => void }) {
             >
               Open in mail app
             </button>
-            <button className="primary-button" onClick={() => setOpen(null)}>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={() => setOpen(null)}
+            >
               Done
             </button>
           </div>

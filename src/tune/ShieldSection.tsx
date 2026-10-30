@@ -130,6 +130,7 @@ export function ShieldSection({
                   </p>
                 </div>
                 <button
+                  type="button"
                   className="soft-button"
                   disabled={busy}
                   onClick={() => setPending({ adapter: a, use: !on })}
@@ -183,6 +184,7 @@ export function ShieldSection({
             <p>They also refresh by themselves once they are a week old.</p>
           </div>
           <button
+            type="button"
             className="soft-button"
             disabled={status.updating}
             onClick={() => void call("tune.shield.update")}
@@ -240,6 +242,7 @@ export function ShieldSection({
                   </p>
                 </div>
                 <button
+                  type="button"
                   className="text-button"
                   onClick={() => rule(r.name, r.blocked ? "allow" : "block")}
                 >
@@ -262,6 +265,7 @@ export function ShieldSection({
             />
           </label>
           <button
+            type="button"
             className="soft-button"
             disabled={!domain.trim()}
             onClick={() => rule(domain, "allow")}
@@ -269,6 +273,7 @@ export function ShieldSection({
             Always allow
           </button>
           <button
+            type="button"
             className="soft-button"
             disabled={!domain.trim()}
             onClick={() => rule(domain, "block")}
@@ -285,7 +290,11 @@ export function ShieldSection({
               <strong>{d}</strong>
               <p>{kind}, and every name under it.</p>
             </div>
-            <button className="text-button" onClick={() => rule(d, "none")}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => rule(d, "none")}
+            >
               Remove
             </button>
           </div>
@@ -297,6 +306,7 @@ export function ShieldSection({
               <p>Counting since {new Date(s.since).toLocaleDateString()}.</p>
             </div>
             <button
+              type="button"
               className="soft-button"
               onClick={() => void call("tune.shield.reset")}
             >
@@ -322,10 +332,14 @@ export function ShieldSection({
             Windows asks for administrator approval next.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setPending(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setPending(null)}
+            >
               Cancel
             </button>
-            <button className="primary-button" onClick={point}>
+            <button type="button" className="primary-button" onClick={point}>
               {pending.use ? "Use the shield" : "Back to automatic"}
             </button>
           </div>
@@ -364,7 +378,11 @@ function DomainList({
               <strong>{d}</strong>
               <p>{n.toLocaleString()} times</p>
             </div>
-            <button className="text-button" onClick={() => onAction(d)}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => onAction(d)}
+            >
               {action}
             </button>
           </div>

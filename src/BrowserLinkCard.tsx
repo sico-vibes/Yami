@@ -62,6 +62,7 @@ export function BrowserLinkCard({ report }: { report: (m: string) => void }) {
                 <p>Adds Yami Home with {b.name}'s Load unpacked.</p>
               </div>
               <button
+                type="button"
                 className="soft-button"
                 onClick={() => install(b.id, b.name)}
               >
@@ -99,6 +100,7 @@ export function BrowserLinkCard({ report }: { report: (m: string) => void }) {
           Browsers allow only their own store or Load unpacked for extensions,
           so this one step is yours.{" "}
           <button
+            type="button"
             className="text-button"
             onClick={() => void api("downloads.link.folder").catch(fail)}
           >

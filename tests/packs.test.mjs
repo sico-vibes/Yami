@@ -49,7 +49,11 @@ test("packs download one at a time and report throttled progress", async () => {
   const engines = fakeEngines();
   let changes = 0,
     clock = 1000;
-  const manager = new PackManager(engines, () => changes++, () => clock);
+  const manager = new PackManager(
+    engines,
+    () => changes++,
+    () => clock,
+  );
   manager.install(["ffmpeg", "magick", "ffmpeg"]);
   await tick();
   assert.equal(state(manager, "ffmpeg").state, "downloading");

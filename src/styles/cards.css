@@ -14,7 +14,11 @@
   height: 38px;
   border-radius: 12px;
   color: var(--glow);
-  background: linear-gradient(145deg, rgba(188, 170, 255, 0.2), rgba(147, 169, 255, 0.08));
+  background: linear-gradient(
+    145deg,
+    rgba(188, 170, 255, 0.2),
+    rgba(147, 169, 255, 0.08)
+  );
   border: 1px solid rgba(188, 170, 255, 0.18);
 }
 .entry-heading {
@@ -120,7 +124,10 @@
 }
 .usage-window {
   display: grid;
-  grid-template-columns: minmax(110px, 1fr) minmax(120px, 2fr) 48px minmax(150px, auto);
+  grid-template-columns: minmax(110px, 1fr) minmax(120px, 2fr) 48px minmax(
+      150px,
+      auto
+    );
   align-items: center;
   gap: var(--space-4);
   min-height: 40px;
@@ -407,7 +414,11 @@
   margin: var(--stack-gap) 0 0;
   padding: var(--card-pad);
   border-radius: var(--r-lg);
-  background: linear-gradient(150deg, rgba(188, 170, 255, 0.1), rgba(255, 255, 255, 0.015));
+  background: linear-gradient(
+    150deg,
+    rgba(188, 170, 255, 0.1),
+    rgba(255, 255, 255, 0.015)
+  );
   border: 1px solid var(--selected-line);
 }
 .note-summary h2 {

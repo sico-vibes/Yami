@@ -596,7 +596,9 @@ export function installPreviewBridge() {
           toast("The logs folder opens in the desktop app.");
           return "";
         case "log.collect":
-          toast("In the desktop app this saves a report and shows it in Explorer.");
+          toast(
+            "In the desktop app this saves a report and shows it in Explorer.",
+          );
           return { file: "yami-report-preview.CLT.md" };
         case "voice.stop":
         case "ability.arm":

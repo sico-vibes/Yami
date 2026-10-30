@@ -1,4 +1,4 @@
-import { app, BrowserWindow, clipboard, screen } from "electron";
+import { app, type BrowserWindow, clipboard, screen } from "electron";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import fs from "node:fs";

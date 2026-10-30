@@ -86,6 +86,7 @@ export function CleanupSection({ report }: { report: (m: string) => void }) {
               <p>Measures the folders below; nothing is removed.</p>
             </div>
             <button
+              type="button"
               className="soft-button"
               disabled={!!busy}
               onClick={() => void scan()}
@@ -139,6 +140,7 @@ export function CleanupSection({ report }: { report: (m: string) => void }) {
               </div>
               <div className="setting-control">
                 <button
+                  type="button"
                   className="soft-button"
                   disabled={!!busy}
                   onClick={() => void scan(true)}
@@ -147,6 +149,7 @@ export function CleanupSection({ report }: { report: (m: string) => void }) {
                   Measure again
                 </button>
                 <button
+                  type="button"
                   className="primary-button"
                   disabled={!chosen.length || !!busy}
                   onClick={() => setAsking(true)}
@@ -170,10 +173,15 @@ export function CleanupSection({ report }: { report: (m: string) => void }) {
               : " Windows and your apps make these again when they need them."}
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setAsking(false)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setAsking(false)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className={
                 picked.has("recycle") ? "soft-button danger" : "primary-button"
               }

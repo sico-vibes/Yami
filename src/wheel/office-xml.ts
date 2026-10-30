@@ -3,7 +3,10 @@ import { escapeHtml } from "./prose.ts";
 export type XmlEntry = { name: string; data: Buffer; store?: boolean };
 
 function xml(value: string) {
-  return Buffer.from(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${value}`, "utf8");
+  return Buffer.from(
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n${value}`,
+    "utf8",
+  );
 }
 
 function escapeXml(value: string) {
@@ -15,9 +18,16 @@ function escapeXml(value: string) {
 }
 
 export function docxEntries(text: string): XmlEntry[] {
-  const paragraphs = text.replace(/\r\n/g, "\n").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+  const paragraphs = text
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean);
   const body = (paragraphs.length ? paragraphs : [""])
-    .map((part) => `<w:p><w:r><w:t xml:space="preserve">${escapeXml(part)}</w:t></w:r></w:p>`)
+    .map(
+      (part) =>
+        `<w:p><w:r><w:t xml:space="preserve">${escapeXml(part)}</w:t></w:r></w:p>`,
+    )
     .join("");
   return [
     {
@@ -42,18 +52,33 @@ export function docxEntries(text: string): XmlEntry[] {
 }
 
 export function docxText(entries: { name: string; data: Buffer }[]) {
-  const document = entries.find((entry) => entry.name.toLowerCase() === "word/document.xml");
+  const document = entries.find(
+    (entry) => entry.name.toLowerCase() === "word/document.xml",
+  );
   if (!document) throw new Error("That DOCX has no document.");
   const xmlText = document.data.toString("utf8");
-  const parts = [...xmlText.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map((match) =>
-    match[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&"),
+  const parts = [...xmlText.matchAll(/<w:t[^>]*>([\s\S]*?)<\/w:t>/g)].map(
+    (match) =>
+      match[1]
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, "&"),
   );
   return parts.join("\n\n").trim();
 }
 
 export function tableToCsv(rows: string[][], delimiter: string) {
   return rows
-    .map((row) => row.map((cell) => (new RegExp(`[${delimiter}"\n]`).test(cell) ? `"${cell.replace(/"/g, '""')}"` : cell)).join(delimiter))
+    .map((row) =>
+      row
+        .map((cell) =>
+          new RegExp(`[${delimiter}"\n]`).test(cell)
+            ? `"${cell.replace(/"/g, '""')}"`
+            : cell,
+        )
+        .join(delimiter),
+    )
     .join("\n");
 }
 
@@ -62,7 +87,10 @@ export function parseTable(text: string, delimiter: string) {
   let row: string[] = [];
   let cell = "";
   let quoted = false;
-  const source = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const source = text
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
   for (let index = 0; index < source.length; index += 1) {
     const char = source[index];
     if (quoted) {
@@ -108,7 +136,8 @@ export function xlsxEntries(rows: string[][]): XmlEntry[] {
       const cells = row
         .map((cell, cellIndex) => {
           const ref = `${columnName(cellIndex)}${rowIndex + 1}`;
-          if (/^-?\d+(\.\d+)?$/.test(cell)) return `<c r="${ref}"><v>${cell}</v></c>`;
+          if (/^-?\d+(\.\d+)?$/.test(cell))
+            return `<c r="${ref}"><v>${cell}</v></c>`;
           return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${escapeXml(cell)}</t></is></c>`;
         })
         .join("");
@@ -150,20 +179,29 @@ export function xlsxEntries(rows: string[][]): XmlEntry[] {
 }
 
 export function xlsxRows(entries: { name: string; data: Buffer }[]) {
-  const sheet = entries.find((entry) => /xl\/worksheets\/sheet1\.xml$/i.test(entry.name));
+  const sheet = entries.find((entry) =>
+    /xl\/worksheets\/sheet1\.xml$/i.test(entry.name),
+  );
   if (!sheet) throw new Error("That spreadsheet has no first sheet.");
-  const shared = entries.find((entry) => /xl\/sharedStrings\.xml$/i.test(entry.name));
+  const shared = entries.find((entry) =>
+    /xl\/sharedStrings\.xml$/i.test(entry.name),
+  );
   const strings = shared
-    ? [...shared.data.toString("utf8").matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((match) => decodeXml(match[1]))
+    ? [
+        ...shared.data.toString("utf8").matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g),
+      ].map((match) => decodeXml(match[1]))
     : [];
   const rows: string[][] = [];
-  for (const row of sheet.data.toString("utf8").matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
+  for (const row of sheet.data
+    .toString("utf8")
+    .matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
     const cells: string[] = [];
     for (const cell of row[1].matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/g)) {
       const inline = /<t[^>]*>([\s\S]*?)<\/t>/.exec(cell[2]);
       const value = /<v>([\s\S]*?)<\/v>/.exec(cell[2]);
       if (inline) cells.push(decodeXml(inline[1]));
-      else if (value && /\bt="s"/.test(cell[1])) cells.push(strings[Number(value[1])] || "");
+      else if (value && /\bt="s"/.test(cell[1]))
+        cells.push(strings[Number(value[1])] || "");
       else if (value) cells.push(decodeXml(value[1]));
       else cells.push("");
     }
@@ -173,14 +211,22 @@ export function xlsxRows(entries: { name: string; data: Buffer }[]) {
 }
 
 function decodeXml(value: string) {
-  return value.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&");
 }
 
 export function epubEntries(title: string, html: string): XmlEntry[] {
   const safeTitle = escapeXml(title || "Notes");
   const chapter = `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>${safeTitle}</title></head><body>${html}</body></html>`;
   return [
-    { name: "mimetype", data: Buffer.from("application/epub+zip"), store: true },
+    {
+      name: "mimetype",
+      data: Buffer.from("application/epub+zip"),
+      store: true,
+    },
     {
       name: "META-INF/container.xml",
       data: xml(
@@ -198,7 +244,10 @@ export function epubEntries(title: string, html: string): XmlEntry[] {
 }
 
 export function epubHtml(entries: { name: string; data: Buffer }[]) {
-  const chapter = entries.find((entry) => /chapter\.xhtml$/i.test(entry.name) || /\.xhtml$/i.test(entry.name));
+  const chapter = entries.find(
+    (entry) =>
+      /chapter\.xhtml$/i.test(entry.name) || /\.xhtml$/i.test(entry.name),
+  );
   if (!chapter) throw new Error("That EPUB has no chapter.");
   const html = chapter.data.toString("utf8");
   const body = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(html);

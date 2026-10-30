@@ -5,7 +5,11 @@ import { remotePage } from "./page.ts";
 
 export const remotePort = 47822;
 export type RemoteAbility =
-  "approvals" | "media" | "clipboard" | "screen" | "control";
+  | "approvals"
+  | "media"
+  | "clipboard"
+  | "screen"
+  | "control";
 
 /** The first private IPv4 address of this PC on the home network. */
 export function lanAddress(

@@ -57,7 +57,11 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
               <strong>Show your variables</strong>
               <p>Reads them; nothing changes until you edit one.</p>
             </div>
-            <button className="soft-button" onClick={() => call("tune.env")}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => call("tune.env")}
+            >
               <Icon name="brackets-curly" size={16} />
               Show variables
             </button>
@@ -94,6 +98,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                     onChange={(e) => setFolder(e.target.value)}
                   />
                   <button
+                    type="button"
                     className="soft-button"
                     disabled={!folder.trim()}
                     onClick={() => {
@@ -136,6 +141,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                   <div className="setting-control">
                     {editing?.name === v.name ? (
                       <button
+                        type="button"
                         className="soft-button"
                         onClick={() => call("tune.env.set", editing)}
                       >
@@ -187,6 +193,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                     }
                   />
                   <button
+                    type="button"
                     className="soft-button"
                     disabled={!adding.name.trim()}
                     onClick={save}
@@ -194,6 +201,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                     Add
                   </button>
                   <button
+                    type="button"
                     className="text-button"
                     onClick={() => setAdding(null)}
                   >
@@ -202,6 +210,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                 </div>
               ) : (
                 <button
+                  type="button"
                   className="soft-button"
                   onClick={() => setAdding({ name: "", value: "" })}
                 >
@@ -219,6 +228,7 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
                   </p>
                 </div>
                 <button
+                  type="button"
                   className="soft-button"
                   onClick={() => call("tune.env.restore")}
                 >
@@ -237,10 +247,15 @@ export function EnvSection({ report }: { report: (m: string) => void }) {
             you change your mind.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setAsking(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setAsking(null)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="soft-button danger"
               onClick={() => {
                 asking.run();

@@ -1,0 +1,33 @@
+name: Bug report
+description: Something in Yami does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. In Yami, **Settings › Your data › Report a bug** collects a report file (`.CLT.md`) with recent logs; secrets are masked. Please attach it below. Open it first if you want to see what it contains.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open …\n2. Click …"
+  - type: input
+    id: version
+    attributes:
+      label: Yami version
+      description: Settings › Yami shows it; the report file has it too.
+  - type: textarea
+    id: report
+    attributes:
+      label: Report file
+      description: Drag the .CLT.md file here.

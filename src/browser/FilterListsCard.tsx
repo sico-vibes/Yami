@@ -46,6 +46,7 @@ export function FilterListsCard({ fail }: { fail: (e: Error) => void }) {
       </p>
       <div className="browser-import">
         <button
+          type="button"
           className="soft-button"
           disabled={busy || status.updating}
           onClick={() => run("browser.filters.update")}
@@ -62,6 +63,7 @@ export function FilterListsCard({ fail }: { fail: (e: Error) => void }) {
         </button>
         {status.installed && (
           <button
+            type="button"
             className="text-button"
             disabled={busy}
             onClick={() => run("browser.filters.remove")}

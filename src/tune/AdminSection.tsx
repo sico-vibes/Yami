@@ -75,6 +75,7 @@ export function AdminSection({ report }: { report: (m: string) => void }) {
             <p>A snapshot of system settings that Windows can roll back to.</p>
           </div>
           <button
+            type="button"
             className="soft-button"
             disabled={busy}
             onClick={() => setPending({ kind: "restore" })}
@@ -131,10 +132,14 @@ export function AdminSection({ report }: { report: (m: string) => void }) {
             Windows asks for administrator approval next.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setPending(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setPending(null)}
+            >
               Cancel
             </button>
-            <button className="primary-button" onClick={run}>
+            <button type="button" className="primary-button" onClick={run}>
               Continue
             </button>
           </div>

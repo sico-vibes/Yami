@@ -63,6 +63,7 @@ export function MediaPeek({
   return (
     <div className="media-peek" onMouseLeave={onLeave}>
       <button
+        type="button"
         className="media-peek-art"
         aria-label="Open controls"
         onClick={onOpen}
@@ -90,6 +91,7 @@ export function MediaPeek({
           onClick={() => key("previous")}
         />
         <button
+          type="button"
           className="play-button"
           aria-label={media.playing ? "Pause" : "Play"}
           onClick={() => key("toggle")}

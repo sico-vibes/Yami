@@ -105,6 +105,7 @@ export function Notes({
           </p>
         </div>
         <button
+          type="button"
           className="soft-button"
           onClick={() => setNote({ title: "", text: "" })}
         >
@@ -160,6 +161,7 @@ export function Notes({
             <>
               <strong role="status">Recording audio</strong>
               <button
+                type="button"
                 className="soft-button"
                 disabled={busy}
                 onClick={() => void stop()}
@@ -167,6 +169,7 @@ export function Notes({
                 Stop and transcribe
               </button>
               <button
+                type="button"
                 className="text-button"
                 disabled={busy}
                 onClick={() => void stop(false)}
@@ -181,6 +184,7 @@ export function Notes({
                 it.
               </span>
               <button
+                type="button"
                 className="soft-button"
                 disabled={busy}
                 onClick={() => void stop(true)}
@@ -188,6 +192,7 @@ export function Notes({
                 Retry transcription
               </button>
               <button
+                type="button"
                 className="text-button"
                 disabled={busy}
                 onClick={() => void stop(false)}
@@ -197,6 +202,7 @@ export function Notes({
             </>
           ) : (
             <button
+              type="button"
               className="soft-button"
               disabled={busy || !consent || (!mic && !system)}
               onClick={() => void start()}
@@ -222,6 +228,7 @@ export function Notes({
             .reverse()
             .map((n) => (
               <button
+                type="button"
                 className="workbench-note-link"
                 key={n.id}
                 onClick={() =>
@@ -260,6 +267,7 @@ export function Notes({
           <div className="note-toolbar">
             {note.id && (
               <button
+                type="button"
                 className="text-button danger"
                 onClick={() =>
                   void api("notes.remove", { id: note.id })
@@ -272,6 +280,7 @@ export function Notes({
               </button>
             )}
             <button
+              type="button"
               className="soft-button"
               disabled={busy || !note.text?.trim()}
               onClick={() => {
@@ -286,6 +295,7 @@ export function Notes({
               Summarize with Gemini
             </button>
             <button
+              type="button"
               className="primary-button"
               disabled={busy || !note.text?.trim()}
               onClick={() =>
@@ -310,6 +320,7 @@ export function Notes({
               const title = line.replace(/^\s*[-*]\s+\[ \]\s+/, "");
               return (
                 <button
+                  type="button"
                   key={i}
                   className="summary-task"
                   data-tip="Add to Desk"
@@ -326,6 +337,7 @@ export function Notes({
               );
             })}
           <button
+            type="button"
             className="soft-button summary-attach"
             onClick={() =>
               void api("context.use", {

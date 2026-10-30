@@ -7,7 +7,9 @@ import type { WheelFile } from "./types";
 export function FloatShelf() {
   const [files, setFiles] = useState<WheelFile[]>([]);
   useEffect(() => {
-    void api("wheel.float.get").then((session) => setFiles(session?.files || []));
+    void api("wheel.float.get").then((session) =>
+      setFiles(session?.files || []),
+    );
   }, []);
   return (
     <div className="float-root">
@@ -19,7 +21,11 @@ export function FloatShelf() {
             </span>
             <h1>Float</h1>
           </div>
-          <IconButton icon="x" label="Close" onClick={() => void api("wheel.float.close")} />
+          <IconButton
+            icon="x"
+            label="Close"
+            onClick={() => void api("wheel.float.close")}
+          />
         </header>
         {files.length ? (
           files.map((file) => <p key={file.path}>{file.name}</p>)

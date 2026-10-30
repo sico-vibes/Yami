@@ -11,7 +11,14 @@ import {
   stripMetadataCommand,
   videoTargetBitrate,
 } from "../src/wheel/plans.ts";
-import { packGzip, packTar, packZip, unpackGzip, unpackTar, unpackZip } from "../electron/wheel/archive.ts";
+import {
+  packGzip,
+  packTar,
+  packZip,
+  unpackGzip,
+  unpackTar,
+  unpackZip,
+} from "../electron/wheel/archive.ts";
 import { EngineStore } from "../electron/wheel/engines.ts";
 import { imagesToPdf, mergePdf } from "../electron/wheel/pdf.ts";
 
@@ -34,23 +41,45 @@ test("conversion commands stay on the chosen engine and refuse HEIC encoding", (
   const image = convertCommand("image", "png", "in.jpg", "out.png");
   assert.equal(image.engine, "magick");
   assert.equal(image.args[0], "in.jpg");
-  assert.throws(() => convertCommand("image", "heic", "in.jpg", "out.heic"), /HEIC/);
-  assert.deepEqual(stripMetadataCommand("image", "in.jpg", "out.jpg").args.slice(0, 2), ["-all=", "-o"]);
-  assert.throws(() => editMetadataCommand("in.jpg", "out.jpg", [{ tag: "-all", value: "x" }]), /not allowed/);
+  assert.throws(
+    () => convertCommand("image", "heic", "in.jpg", "out.heic"),
+    /HEIC/,
+  );
+  assert.deepEqual(
+    stripMetadataCommand("image", "in.jpg", "out.jpg").args.slice(0, 2),
+    ["-all=", "-o"],
+  );
+  assert.throws(
+    () =>
+      editMetadataCommand("in.jpg", "out.jpg", [{ tag: "-all", value: "x" }]),
+    /not allowed/,
+  );
   assert.equal(videoTargetBitrate(1_000_000, 10) > 80_000, true);
 });
 
 test("zip and tar round-trip and reject paths that escape the folder", () => {
-  const zip = packZip([{ name: "notes/hello.txt", data: Buffer.from("hello") }]);
+  const zip = packZip([
+    { name: "notes/hello.txt", data: Buffer.from("hello") },
+  ]);
   assert.equal(unpackZip(zip)[0].data.toString(), "hello");
-  const tar = packTar([{ name: "notes/hello.txt", data: Buffer.from("hello") }]);
+  const tar = packTar([
+    { name: "notes/hello.txt", data: Buffer.from("hello") },
+  ]);
   assert.equal(unpackTar(tar)[0].data.toString(), "hello");
-  assert.equal(unpackGzip(packGzip(Buffer.from("zipped"))).toString(), "zipped");
-  assert.throws(() => packZip([{ name: "../secret.txt", data: Buffer.from("no") }]), /unsafe/);
+  assert.equal(
+    unpackGzip(packGzip(Buffer.from("zipped"))).toString(),
+    "zipped",
+  );
+  assert.throws(
+    () => packZip([{ name: "../secret.txt", data: Buffer.from("no") }]),
+    /unsafe/,
+  );
 });
 
 test("an engine download runs only when the pinned checksum matches", async () => {
-  const payload = packZip([{ name: "bin/ffmpeg.exe", data: Buffer.from("MZ-fake") }]);
+  const payload = packZip([
+    { name: "bin/ffmpeg.exe", data: Buffer.from("MZ-fake") },
+  ]);
   const spec = {
     id: "ffmpeg",
     version: "test",
@@ -62,7 +91,11 @@ test("an engine download runs only when the pinned checksum matches", async () =
     source: "test",
   };
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "yami-engine-"));
-  const store = new EngineStore(root, [spec], async () => new Response(payload));
+  const store = new EngineStore(
+    root,
+    [spec],
+    async () => new Response(payload),
+  );
   const exe = await store.ensure("ffmpeg");
   assert.equal(fs.readFileSync(exe, "utf8"), "MZ-fake");
   assert.equal(store.list()[0].installed, true);
@@ -99,5 +132,8 @@ test("pdf merge and image pages are real files", async () => {
   fs.writeFileSync(right, await extra.save());
   const merged = path.join(root, "merged.pdf");
   await mergePdf([pages, right], merged);
-  assert.equal((await PDFDocument.load(fs.readFileSync(merged))).getPageCount(), 3);
+  assert.equal(
+    (await PDFDocument.load(fs.readFileSync(merged))).getPageCount(),
+    3,
+  );
 });

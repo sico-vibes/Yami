@@ -41,7 +41,11 @@ export function HostsSection({ report }: { report: (m: string) => void }) {
               <strong>Show the hosts file</strong>
               <p>Reads it; nothing changes until you do.</p>
             </div>
-            <button className="soft-button" onClick={() => call("tune.hosts")}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => call("tune.hosts")}
+            >
               <Icon name="list-bullets" size={16} />
               Show entries
             </button>
@@ -92,6 +96,7 @@ export function HostsSection({ report }: { report: (m: string) => void }) {
                   onChange={(e) => setName(e.target.value)}
                 />
                 <button
+                  type="button"
                   className="soft-button"
                   disabled={busy || !name.trim()}
                   onClick={() => call("tune.hosts.add", { ip, name })}
@@ -110,6 +115,7 @@ export function HostsSection({ report }: { report: (m: string) => void }) {
                   </p>
                 </div>
                 <button
+                  type="button"
                   className="soft-button"
                   disabled={busy}
                   onClick={() => call("tune.hosts.restore")}
@@ -134,10 +140,15 @@ export function HostsSection({ report }: { report: (m: string) => void }) {
             Switching it off keeps the line; Put back restores the whole file.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setRemoving(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setRemoving(null)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="soft-button danger"
               onClick={() => {
                 call("tune.hosts.remove", { line: removing.line });

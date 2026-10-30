@@ -79,6 +79,7 @@ export function ProjectTasks({
               ]}
             />
             <button
+              type="button"
               className="soft-button"
               disabled={busy || !name.trim()}
               onClick={create}
@@ -87,6 +88,7 @@ export function ProjectTasks({
               {busy ? "Adding…" : "New task"}
             </button>
             <button
+              type="button"
               className="soft-button"
               disabled={agents.filter((a) => a.prompt).length < 2}
               data-tip={
@@ -101,6 +103,7 @@ export function ProjectTasks({
             </button>
             {tasks.length >= 2 && (
               <button
+                type="button"
                 className="soft-button"
                 onClick={() => setComparing(true)}
               >
@@ -169,10 +172,15 @@ export function ProjectTasks({
             changes that are not committed.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setRemoving(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setRemoving(null)}
+            >
               Keep it
             </button>
             <button
+              type="button"
               className="primary-button"
               onClick={() => {
                 const path = removing.path;
@@ -274,10 +282,11 @@ function FanOut({
         </p>
       </div>
       <div className="dialog-actions">
-        <button className="soft-button" onClick={onClose}>
+        <button type="button" className="soft-button" onClick={onClose}>
           Cancel
         </button>
         <button
+          type="button"
           className="primary-button"
           disabled={!ready}
           onClick={() => {

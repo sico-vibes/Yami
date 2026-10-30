@@ -55,6 +55,7 @@ export function Dock() {
               <span className="dock-gap" aria-hidden />
             )}
             <button
+              type="button"
               className="dock-item"
               style={{ "--grow": grow(i) } as React.CSSProperties}
               aria-label={

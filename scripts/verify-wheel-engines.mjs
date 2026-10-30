@@ -63,7 +63,10 @@ function wav(file) {
     samples = rate;
   const data = Buffer.alloc(samples * 2);
   for (let i = 0; i < samples; i++)
-    data.writeInt16LE(Math.round(Math.sin((2 * Math.PI * 440 * i) / rate) * 12000), i * 2);
+    data.writeInt16LE(
+      Math.round(Math.sin((2 * Math.PI * 440 * i) / rate) * 12000),
+      i * 2,
+    );
   const head = Buffer.alloc(44);
   head.write("RIFF", 0);
   head.writeUInt32LE(36 + data.length, 4);
@@ -123,10 +126,15 @@ try {
     const out = result.outputs?.[0];
     results[engine] = {
       ms: Date.now() - started,
-      ...(out ? { output: path.basename(out), bytes: fs.statSync(out).size } : result),
+      ...(out
+        ? { output: path.basename(out), bytes: fs.statSync(out).size }
+        : result),
     };
   }
-  assert.ok(results.ImageMagick.output?.endsWith(".jpg"), JSON.stringify(results));
+  assert.ok(
+    results.ImageMagick.output?.endsWith(".jpg"),
+    JSON.stringify(results),
+  );
   assert.ok(results.ffmpeg.output?.endsWith(".mp3"), JSON.stringify(results));
   assert.ok(results.ffmpeg.bytes > 1000 && results.ImageMagick.bytes > 300);
   assert.deepEqual(errors, []);

@@ -22,7 +22,7 @@ export function Effects() {
         start = performance.now();
       const draw = (now: number) => {
         const t = Math.min(1, (now - start) / 1100),
-          ease = 1 - Math.pow(1 - t, 4);
+          ease = 1 - (1 - t) ** 4;
         ctx.clearRect(0, 0, innerWidth, innerHeight);
         if (data.kind === "wallpaper" && before && after) {
           ctx.drawImage(before, 0, 0, innerWidth, innerHeight);

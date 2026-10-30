@@ -164,19 +164,28 @@ function PackAction({
 }) {
   if (state === "installed")
     return (
-      <button className="text-button" onClick={() => onPack("remove", id)}>
+      <button
+        type="button"
+        className="text-button"
+        onClick={() => onPack("remove", id)}
+      >
         Remove
       </button>
     );
   if (state === "downloading" || state === "queued")
     return (
-      <button className="text-button" onClick={() => onPack("cancel", id)}>
+      <button
+        type="button"
+        className="text-button"
+        onClick={() => onPack("cancel", id)}
+      >
         Cancel
       </button>
     );
   return (
     <span className="pack-actions">
       <button
+        type="button"
         className="text-button"
         aria-label={`Install ${packLabels[id]} from a file`}
         data-tip="Use a file you downloaded yourself. It must match the pinned checksum."
@@ -184,7 +193,11 @@ function PackAction({
       >
         From file
       </button>
-      <button className="soft-button" onClick={() => onPack("install", id)}>
+      <button
+        type="button"
+        className="soft-button"
+        onClick={() => onPack("install", id)}
+      >
         <Icon name="download-simple" size={14} />
         {state === "failed" ? "Try again" : "Download"}
       </button>

@@ -35,7 +35,7 @@ import {
   loadAgentLink,
   type AgentLink,
 } from "../agentlink/load";
-import { type RemoteAbility } from "../remote/server";
+import type { RemoteAbility } from "../remote/server";
 import { loadRemote, remoteAbilities, type Remote } from "../remote/load";
 import { createBrowser } from "../browser/browser";
 import { Vault } from "../browser/vault";
@@ -86,7 +86,9 @@ type Deps = {
 export function createModuleHost(deps: Deps) {
   const { store, native } = deps;
   // Main's request handler, handed over once it exists (agent tools use it).
-  let requests: ((method: string, args: object) => Promise<unknown>) | undefined;
+  let requests:
+    | ((method: string, args: object) => Promise<unknown>)
+    | undefined;
   // Dictation rules live with the workspace data, but dictation is core, so
   // the storage and speech engine exist apart from the workbench module.
   let shared: { data: WorkbenchStorage; speech: SpeechController } | undefined;

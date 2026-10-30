@@ -82,6 +82,7 @@ export function CursorSection({ report }: { report: (m: string) => void }) {
               <p>Restores the scheme and size from before Yami changed them.</p>
             </div>
             <button
+              type="button"
               className="soft-button"
               disabled={busy}
               onClick={() => run("tune.cursors.restore")}

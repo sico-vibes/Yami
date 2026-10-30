@@ -25,7 +25,12 @@ import { QrTool } from "./QrTool";
 import { RenameTool } from "./RenameTool";
 import { FlattenTool } from "./FlattenTool";
 import { RedactTool } from "./RedactTool";
-import { CompressTool, MergeTool, MetadataTool, PendingTool } from "./SimpleTools";
+import {
+  CompressTool,
+  MergeTool,
+  MetadataTool,
+  PendingTool,
+} from "./SimpleTools";
 import type { WheelFile } from "./types";
 
 const preview = import.meta.env.VITE_YAMI_PREVIEW === "true";
@@ -83,9 +88,11 @@ export function ToolApp() {
           options={previewTools.map(([value, label]) => ({ value, label }))}
           onChange={(next) => {
             setTool(next);
-            void api("wheel.tool.sample", { tool: next }).then(() => api("wheel.tool.get")).then((session) => {
-              if (session) setFiles(session.files || []);
-            });
+            void api("wheel.tool.sample", { tool: next })
+              .then(() => api("wheel.tool.get"))
+              .then((session) => {
+                if (session) setFiles(session.files || []);
+              });
           }}
         />
       </div>

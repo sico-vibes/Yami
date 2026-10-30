@@ -38,7 +38,10 @@ try {
   original = await native("wallpaperGet");
   backup = fs.readFileSync(original);
   app = await _electron.launch({
-    executablePath: path.resolve(process.env.YAMI_PACKAGE_DIR || "release", "win-unpacked/Yami.exe"),
+    executablePath: path.resolve(
+      process.env.YAMI_PACKAGE_DIR || "release",
+      "win-unpacked/Yami.exe",
+    ),
     args: [],
     env,
   });
@@ -75,11 +78,13 @@ try {
   });
   assert.equal(encrypted.roundTrip, true);
   assert.equal(encrypted.plaintext, false);
-  const alpha = await app.evaluate(async({ BrowserWindow }) =>{
-    const window=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().includes('window=island'));
+  const alpha = await app.evaluate(async ({ BrowserWindow }) => {
+    const window = BrowserWindow.getAllWindows().find((w) =>
+      w.webContents.getURL().includes("window=island"),
+    );
     return (await window.webContents.capturePage()).toBitmap()[3];
   });
-  assert.equal(alpha,0,'The island must preserve alpha outside its notch');
+  assert.equal(alpha, 0, "The island must preserve alpha outside its notch");
   console.log(
     "PASS: packaged app, bundled native host, external wallpaper resources, actual wallpaper application, metrics, DPAPI encryption and transparent island.",
   );
@@ -97,7 +102,8 @@ try {
           "DPAPI",
           "transparent island",
         ],
-        providers: "not exercised by this isolated packaging test; live evidence is in live-provider-results.json",
+        providers:
+          "not exercised by this isolated packaging test; live evidence is in live-provider-results.json",
       },
       null,
       2,

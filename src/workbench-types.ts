@@ -47,7 +47,12 @@ export type UsageReading = {
   provider: string;
   account: string;
   status:
-    "fresh" | "stale" | "unavailable" | "needs-auth" | "backoff" | "error";
+    | "fresh"
+    | "stale"
+    | "unavailable"
+    | "needs-auth"
+    | "backoff"
+    | "error";
   windows: UsageWindow[];
   fetchedAt: number;
   source: string;
@@ -55,7 +60,13 @@ export type UsageReading = {
   retryAt?: number;
 };
 export type ConnectionKind =
-  "github" | "vercel" | "n8n" | "notion" | "calcom" | "resend" | "stripe";
+  | "github"
+  | "vercel"
+  | "n8n"
+  | "notion"
+  | "calcom"
+  | "resend"
+  | "stripe";
 export type ConnectionConfig = {
   id: string;
   kind: ConnectionKind;

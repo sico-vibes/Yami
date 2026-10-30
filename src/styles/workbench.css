@@ -236,7 +236,7 @@
   content: "";
   position: absolute;
   inset: -40px;
-  background: var(--terminal-image) center/cover;
+  background: var(--terminal-image) center / cover;
   opacity: var(--terminal-opacity);
   filter: blur(var(--terminal-blur));
   z-index: -1;

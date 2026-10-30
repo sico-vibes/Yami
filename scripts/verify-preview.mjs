@@ -107,13 +107,11 @@ try {
     );
   }
   await assert.rejects(
-    page
-      .locator("#preview-frame")
-      .evaluate((f) =>
-        f.contentWindow.yami.invoke("workbench.settings", {
-          usageKey: "fixture",
-        }),
-      ),
+    page.locator("#preview-frame").evaluate((f) =>
+      f.contentWindow.yami.invoke("workbench.settings", {
+        usageKey: "fixture",
+      }),
+    ),
     /never stores credentials/,
   );
   await selector.selectOption("Home");

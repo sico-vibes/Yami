@@ -1,4 +1,4 @@
-import { BrowserWindow, screen } from "electron";
+import { type BrowserWindow, screen } from "electron";
 import type { Store } from "./store";
 import { makeSmallWindow } from "./windows";
 import { SIZE, widgetSpot } from "./desk-spot";

@@ -129,6 +129,7 @@ export function TaskCompare({
                 {c.files.map((f) => (
                   <li key={f.file}>
                     <button
+                      type="button"
                       className={
                         "compare-file" + (file === f.file ? " selected" : "")
                       }

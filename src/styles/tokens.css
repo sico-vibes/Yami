@@ -45,8 +45,9 @@
   /* Opaque ink panels for windows drawn straight over the desktop, where
      backdrop blur cannot reach. */
   --ink-panel: rgba(11, 10, 34, 0.97);
-  --ring-soul: 0 0 0 1px var(--line-strong), 0 0 28px
-      color-mix(in srgb, var(--soul, var(--glow)) 22%, transparent);
+  --ring-soul:
+    0 0 0 1px var(--line-strong),
+    0 0 28px color-mix(in srgb, var(--soul, var(--glow)) 22%, transparent);
 
   /* Terminal ANSI palette, tuned to Nightglow. */
   --term-fg: var(--text);

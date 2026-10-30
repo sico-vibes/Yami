@@ -34,7 +34,7 @@ test("holidays are read once per country and year, and kept a month", async () =
       );
     },
   );
-  let r = await h.year(2026);
+  const r = await h.year(2026);
   assert.deepEqual(r, {
     country: "EG",
     holidays: [

@@ -58,7 +58,11 @@ export function BlueskyHome({ report }: { report: (m: string) => void }) {
       <div className="mail-head">
         <h3 className="group-title">Bluesky</h3>
         {!status.handle && !adding && (
-          <button className="text-button" onClick={() => setAdding(true)}>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => setAdding(true)}
+          >
             <Icon name="plus" size={14} />
             Sign in
           </button>
@@ -100,7 +104,11 @@ export function BlueskyHome({ report }: { report: (m: string) => void }) {
           <ul className="bluesky-posts">
             {status.posts.slice(0, more ? 30 : 8).map((p) => (
               <li key={p.id}>
-                <button className="bluesky-post" onClick={() => open(p.link)}>
+                <button
+                  type="button"
+                  className="bluesky-post"
+                  onClick={() => open(p.link)}
+                >
                   <span className="bluesky-meta">
                     <b>{p.author}</b>
                     <small>
@@ -115,7 +123,11 @@ export function BlueskyHome({ report }: { report: (m: string) => void }) {
             ))}
           </ul>
           {status.posts.length > 8 && (
-            <button className="text-button" onClick={() => setMore(!more)}>
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => setMore(!more)}
+            >
               {more
                 ? "Show fewer"
                 : `Show ${Math.min(30, status.posts.length) - 8} more`}
@@ -147,10 +159,15 @@ export function BlueskyHome({ report }: { report: (m: string) => void }) {
             timeline when the Inbox opens. It cannot post, like or follow.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setAdding(false)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setAdding(false)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="primary-button"
               disabled={busy || !handle.trim() || !password.trim()}
               onClick={signIn}

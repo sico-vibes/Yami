@@ -177,6 +177,7 @@ export function LoadoutHub({
       </div>
       {slots.map((l, i) => (
         <button
+          type="button"
           key={l.slot}
           ref={(el) => {
             buttons.current[i] = el;

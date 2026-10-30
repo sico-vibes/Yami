@@ -69,16 +69,20 @@ export default function TunePage({
       </div>
       <p className="setting-note">
         The tweaks below change your own Windows settings only, with no
-        administrator prompt. Before a change, Yami saves the earlier values,
-        so turning a tweak off puts back what was there. Sections further down
-        that change the whole PC (DNS, the hosts file, Administrator) say so and
-        ask Windows first.
+        administrator prompt. Before a change, Yami saves the earlier values, so
+        turning a tweak off puts back what was there. Sections further down that
+        change the whole PC (DNS, the hosts file, Administrator) say so and ask
+        Windows first.
       </p>
       {restart && (
         <div className="tune-restart" role="status">
           <Icon name="arrows-clockwise" />
           <span>Some changes show after File Explorer restarts.</span>
-          <button className="soft-button" onClick={() => setAsking(true)}>
+          <button
+            type="button"
+            className="soft-button"
+            onClick={() => setAsking(true)}
+          >
             Restart Explorer
           </button>
         </div>
@@ -186,10 +190,15 @@ export default function TunePage({
             back. Files being copied in Explorer stop.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setAsking(false)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setAsking(false)}
+            >
               Not now
             </button>
             <button
+              type="button"
               className="primary-button"
               onClick={() => {
                 setAsking(false);

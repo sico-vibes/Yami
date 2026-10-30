@@ -388,6 +388,7 @@ export function Island() {
         !toast &&
         !currentActivity && (
           <button
+            type="button"
             className="mini-media"
             onClick={() => expand(true, "Controls")}
             onMouseEnter={() => {

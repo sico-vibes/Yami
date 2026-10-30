@@ -56,6 +56,7 @@ export function RadioPanel({ report }: { report: (m: string) => void }) {
       key={s.id}
     >
       <button
+        type="button"
         className="radio-play"
         aria-label={`Play ${s.name}`}
         onClick={() =>
@@ -143,6 +144,7 @@ export function RadioPanel({ report }: { report: (m: string) => void }) {
       </h4>
       {stations === null ? (
         <button
+          type="button"
           className="soft-button"
           disabled={busy}
           onClick={() => search("")}

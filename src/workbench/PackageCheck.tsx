@@ -39,6 +39,7 @@ export function PackageCheck({
   return (
     <>
       <button
+        type="button"
         className="text-button"
         disabled={busy}
         onClick={check}
@@ -63,6 +64,7 @@ export function PackageCheck({
               <span className="package-ids">
                 {f.ids.slice(0, 4).map((advisory) => (
                   <button
+                    type="button"
                     key={advisory}
                     className="text-button"
                     onClick={() => open(advisory)}

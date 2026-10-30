@@ -40,6 +40,7 @@ export function ModulesSettings({
       </div>
       <div className="workbench-actions">
         <button
+          type="button"
           className="soft-button"
           onClick={() => void api("show", { tab: "setup" })}
         >

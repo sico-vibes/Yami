@@ -57,6 +57,7 @@ export function SpaceSection({ report }: { report: (m: string) => void }) {
               <p>Used and free space for each drive.</p>
             </div>
             <button
+              type="button"
               className="soft-button"
               onClick={() =>
                 void api("tune.space.drives")
@@ -82,6 +83,7 @@ export function SpaceSection({ report }: { report: (m: string) => void }) {
                 </p>
               </div>
               <button
+                type="button"
                 className="soft-button"
                 disabled={!!busy}
                 onClick={() => open(d.path)}
@@ -150,6 +152,7 @@ export function SpaceSection({ report }: { report: (m: string) => void }) {
                     />
                     {i.dir && (
                       <button
+                        type="button"
                         className="soft-button"
                         onClick={() =>
                           open(

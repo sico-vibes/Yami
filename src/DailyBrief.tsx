@@ -81,6 +81,7 @@ export function DailyBrief({ state }: { state: State }) {
       {lines.map((l, i) => (
         <li key={i}>
           <button
+            type="button"
             className="daily-line"
             disabled={!l.tab}
             onClick={() => l.tab && open(l.tab)}

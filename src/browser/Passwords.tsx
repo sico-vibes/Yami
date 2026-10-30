@@ -48,6 +48,7 @@ export function LoginButton({
           <div className="browser-bookmarks">
             {logins.map((l) => (
               <button
+                type="button"
                 key={l.id}
                 className="browser-bookmark"
                 onClick={() => fill(l.id)}
@@ -90,6 +91,7 @@ export function PasswordsCard({ fail }: { fail: (e: Error) => void }) {
       </p>
       <div className="browser-import">
         <button
+          type="button"
           className="soft-button"
           onClick={() =>
             void api("vault.passwords", { action: "import" })
@@ -105,6 +107,7 @@ export function PasswordsCard({ fail }: { fail: (e: Error) => void }) {
         </button>
         {count > 0 && (
           <button
+            type="button"
             className="text-button"
             onClick={() =>
               void api("vault.passwords", { action: "clear" })
@@ -127,10 +130,15 @@ export function PasswordsCard({ fail }: { fail: (e: Error) => void }) {
             <code>{imported.file}</code>
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setImported(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setImported(null)}
+            >
               Keep the file
             </button>
             <button
+              type="button"
               className="primary-button"
               onClick={() =>
                 void api("vault.passwords", {

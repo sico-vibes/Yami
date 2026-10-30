@@ -1,4 +1,4 @@
-import { BrowserWindow, powerMonitor, screen } from "electron";
+import { type BrowserWindow, powerMonitor, screen } from "electron";
 import type { Store } from "./store";
 import { makeSmallWindow, makeWindow } from "./windows";
 import { toolActivity } from "./activity";
@@ -96,7 +96,7 @@ export function createOverlays({
     glide = setInterval(() => {
       if (!alive(stray)) return clearInterval(glide);
       const t = Math.min(1, (Date.now() - start) / ms),
-        e = 1 - Math.pow(1 - t, 3);
+        e = 1 - (1 - t) ** 3;
       stray.setPosition(Math.round(sx + dx * e), Math.round(sy + dy * e));
       if (t === 1) {
         clearInterval(glide);

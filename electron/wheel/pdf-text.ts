@@ -13,7 +13,11 @@ const require = pdfjsRequire();
 
 export async function pdfToText(bytes: Buffer) {
   const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  const fonts = path.join(path.dirname(require.resolve("pdfjs-dist/package.json")), "standard_fonts") + "/";
+  const fonts =
+    path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts",
+    ) + "/";
   const task = pdfjs.getDocument({
     data: new Uint8Array(bytes),
     disableWorker: true,
@@ -28,9 +32,7 @@ export async function pdfToText(bytes: Buffer) {
     const page = await doc.getPage(index);
     const content = await page.getTextContent();
     pages.push(
-      content.items
-        .map((item) => ("str" in item ? item.str : ""))
-        .join(" "),
+      content.items.map((item) => ("str" in item ? item.str : "")).join(" "),
     );
   }
   if (doc.numPages > limit) pages.push("Stopped after 200 pages.");

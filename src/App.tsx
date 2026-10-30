@@ -184,7 +184,11 @@ export function App() {
       {toast && (
         <div className="toast" role="status">
           {toast}
-          <button aria-label="Dismiss" onClick={() => setToast("")}>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => setToast("")}
+          >
             <Icon name="x" size={14} />
           </button>
         </div>
@@ -200,6 +204,7 @@ export function App() {
           <pre className="confirmation-detail">{confirmation.detail}</pre>
           <div className="dialog-actions">
             <button
+              type="button"
               className="soft-button"
               onClick={() => {
                 void api("confirm", { id: confirmation.id, approved: false });
@@ -209,6 +214,7 @@ export function App() {
               Cancel
             </button>
             <button
+              type="button"
               className="primary-button"
               onClick={() => {
                 void api("confirm", { id: confirmation.id, approved: true });
@@ -300,6 +306,7 @@ function Home({
                 <div className="sources">
                   {m.sources.map((s, i) => (
                     <button
+                      type="button"
                       key={s.url + i}
                       onClick={() => void api("open.external", { url: s.url })}
                     >
@@ -334,7 +341,11 @@ function Home({
               : "Connect your Gemini key. Then just talk."}
           </p>
           {!state.keys.gemini ? (
-            <button className="soft-button" onClick={openSettings}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={openSettings}
+            >
               <Icon name="key" size={17} /> Connect Yami
             </button>
           ) : (
@@ -423,6 +434,7 @@ function Home({
             }}
           />
           <button
+            type="submit"
             className="send-button"
             aria-label="Send message"
             disabled={!text.trim() || sending || !state.keys.gemini}
@@ -493,7 +505,7 @@ function Memory({
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <button className="soft-button" disabled={!text.trim()}>
+        <button type="submit" className="soft-button" disabled={!text.trim()}>
           {edit ? "Save" : "Remember"}
         </button>
         {edit && (

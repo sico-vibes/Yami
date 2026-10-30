@@ -56,27 +56,37 @@ export function createLogCore(opts: {
     }
     if (depth > 4 || value === null || typeof value !== "object") return value;
     if (value instanceof Error)
-      return clean({ name: value.name, message: value.message, stack: value.stack }, depth);
-    if (Array.isArray(value)) return value.slice(0, 50).map((v) => clean(v, depth + 1));
+      return clean(
+        { name: value.name, message: value.message, stack: value.stack },
+        depth,
+      );
+    if (Array.isArray(value))
+      return value.slice(0, 50).map((v) => clean(v, depth + 1));
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value).slice(0, 50))
-      out[k] = /key|token|secret|password|authorization|cookie/i.test(k) ? "[hidden]" : clean(v, depth + 1);
+      out[k] = /key|token|secret|password|authorization|cookie/i.test(k)
+        ? "[hidden]"
+        : clean(v, depth + 1);
     return out;
   };
 
   const day = (d = now()) => d.toISOString().slice(0, 10);
-  const file = (ch: Channel, d = now()) => path.join(opts.dir, `${day(d)}.${ch}`);
+  const file = (ch: Channel, d = now()) =>
+    path.join(opts.dir, `${day(d)}.${ch}`);
 
   /** Removes day files older than a week, once a day. */
   const prune = () => {
     const today = day();
     if (pruned === today) return;
     pruned = today;
-    const cutoff = new Date(now().getTime() - DAY_FILES_KEPT * 86_400_000).toISOString().slice(0, 10);
+    const cutoff = new Date(now().getTime() - DAY_FILES_KEPT * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     try {
       for (const name of fs.readdirSync(opts.dir)) {
         const m = /^(\d{4}-\d{2}-\d{2})\.(LOG|ERR|DEG|TRG)$/.exec(name);
-        if (m && m[1] < cutoff) fs.rmSync(path.join(opts.dir, name), { force: true });
+        if (m && m[1] < cutoff)
+          fs.rmSync(path.join(opts.dir, name), { force: true });
       }
     } catch {}
   };
@@ -93,7 +103,12 @@ export function createLogCore(opts: {
     if (size > MAX_FILE_BYTES) return;
     const text =
       size + line.length > MAX_FILE_BYTES
-        ? JSON.stringify({ t: now().toISOString(), ch: "LOG", area: "log", msg: "This file reached 5 MB; later lines today are dropped." }) + "\n"
+        ? JSON.stringify({
+            t: now().toISOString(),
+            ch: "LOG",
+            area: "log",
+            msg: "This file reached 5 MB; later lines today are dropped.",
+          }) + "\n"
         : line;
     sizes.set(target, size + (text === line ? line.length : MAX_FILE_BYTES));
     return text;
@@ -128,8 +143,18 @@ export function createLogCore(opts: {
     prune();
   };
 
-  const entry = (ch: Channel, area: string, msg: string, data?: unknown): Entry => {
-    const e: Entry = { t: now().toISOString(), ch, area, msg: String(clean(msg)) };
+  const entry = (
+    ch: Channel,
+    area: string,
+    msg: string,
+    data?: unknown,
+  ): Entry => {
+    const e: Entry = {
+      t: now().toISOString(),
+      ch,
+      area,
+      msg: String(clean(msg)),
+    };
     if (data !== undefined) e.data = clean(data);
     return e;
   };
@@ -167,7 +192,14 @@ export function createLogCore(opts: {
      */
     error(area: string, error: unknown, data?: unknown, sync = false) {
       const err = error instanceof Error ? error : new Error(String(error));
-      const e = entry("ERR", area, err.message, { ...(data && typeof data === "object" ? data : data === undefined ? {} : { detail: data }), stack: err.stack });
+      const e = entry("ERR", area, err.message, {
+        ...(data && typeof data === "object"
+          ? data
+          : data === undefined
+            ? {}
+            : { detail: data }),
+        stack: err.stack,
+      });
       remember(e);
       write(e, sync);
       const id = fingerprint(area, err.message, err.stack);
@@ -213,7 +245,11 @@ export function createLogCore(opts: {
       for (const name of names) {
         let lines: string[] = [];
         try {
-          lines = fs.readFileSync(path.join(opts.dir, name), "utf8").trim().split("\n").reverse();
+          lines = fs
+            .readFileSync(path.join(opts.dir, name), "utf8")
+            .trim()
+            .split("\n")
+            .reverse();
         } catch {}
         for (const l of lines) {
           try {
@@ -230,9 +266,17 @@ export function createLogCore(opts: {
      * A report to attach to a bug or hand to a coding agent: what happened,
      * where, and the evidence, in one Markdown file with JSON blocks.
      */
-    collect(extra: { settings?: unknown; system?: Record<string, unknown>; note?: string }) {
+    collect(extra: {
+      settings?: unknown;
+      system?: Record<string, unknown>;
+      note?: string;
+    }) {
       const stamp = now().toISOString().replace(/[:.]/g, "-");
-      const target = path.join(opts.dir, "collected", `yami-report-${stamp}.CLT.md`);
+      const target = path.join(
+        opts.dir,
+        "collected",
+        `yami-report-${stamp}.CLT.md`,
+      );
       const block = (title: string, value: unknown) =>
         `## ${title}\n\n\`\`\`json\n${JSON.stringify(clean(value), null, 1)}\n\`\`\`\n`;
       const text = [
@@ -242,8 +286,14 @@ export function createLogCore(opts: {
         "",
         "For coding agents: `problems` groups errors by id (the same id appears in the TRG entries). `errors` and `log` are the newest entries, oldest first, one JSON object each. Settings that look like secrets are hidden.",
         "",
-        extra.note ? `## What the user said\n\n${String(clean(extra.note))}\n` : "",
-        block("system", { version: opts.version, ...extra.system, context: opts.context?.() }),
+        extra.note
+          ? `## What the user said\n\n${String(clean(extra.note))}\n`
+          : "",
+        block("system", {
+          version: opts.version,
+          ...extra.system,
+          context: opts.context?.(),
+        }),
         block("problems", api.problems()),
         block("triage", api.read("TRG", 30)),
         block("errors", api.read("ERR", 150)),
@@ -256,7 +306,12 @@ export function createLogCore(opts: {
       // Keep the ten newest reports.
       try {
         const dir = path.dirname(target);
-        const old = fs.readdirSync(dir).filter((n) => n.endsWith(".CLT.md")).sort().reverse().slice(10);
+        const old = fs
+          .readdirSync(dir)
+          .filter((n) => n.endsWith(".CLT.md"))
+          .sort()
+          .reverse()
+          .slice(10);
         for (const n of old) fs.rmSync(path.join(dir, n), { force: true });
       } catch {}
       return target;

@@ -68,9 +68,7 @@ export function WheelApp() {
     if (!activeId || !paths.length) return;
     void api("wheel.choose", { petalId: activeId, paths });
   };
-  const hint = petals.length
-    ? session.hint
-    : emptyHint(session.mode, names);
+  const hint = petals.length ? session.hint : emptyHint(session.mode, names);
   return (
     <div
       className="wheel-root"
@@ -99,7 +97,10 @@ export function WheelApp() {
           <Select
             label="Preview file sample"
             value={sample}
-            options={PREVIEW_SAMPLES.map((item) => ({ value: item.id, label: item.label }))}
+            options={PREVIEW_SAMPLES.map((item) => ({
+              value: item.id,
+              label: item.label,
+            }))}
             onChange={(next) => {
               setSample(next);
               void api("wheel.sample", { id: next });

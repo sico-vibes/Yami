@@ -10,11 +10,18 @@ export function parseCues(text: string): Cue[] {
   const body = text.replace(/^\uFEFF/, "").replace(/^WEBVTT[^\n]*\n+/i, "");
   const cues: Cue[] = [];
   for (const block of body.split(/\r?\n\r?\n/)) {
-    const lines = block.split(/\r?\n/).filter((line) => line.trim() && !/^\d+$/.test(line.trim()));
+    const lines = block
+      .split(/\r?\n/)
+      .filter((line) => line.trim() && !/^\d+$/.test(line.trim()));
     const timing = lines.find((line) => line.includes("-->"));
     if (!timing) continue;
-    const [start, end] = timing.split("-->").map((part) => part.trim().split(" ")[0]);
-    const words = lines.slice(lines.indexOf(timing) + 1).join("\n").trim();
+    const [start, end] = timing
+      .split("-->")
+      .map((part) => part.trim().split(" ")[0]);
+    const words = lines
+      .slice(lines.indexOf(timing) + 1)
+      .join("\n")
+      .trim();
     if (start && end && words) cues.push({ start, end, text: words });
   }
   return cues;

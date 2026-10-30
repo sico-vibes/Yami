@@ -1,7 +1,12 @@
 import { api } from "./api";
 
 export type MediaAction =
-  "toggle" | "next" | "previous" | "seek" | "shuffle" | "repeat";
+  | "toggle"
+  | "next"
+  | "previous"
+  | "seek"
+  | "shuffle"
+  | "repeat";
 
 const keys: Partial<Record<MediaAction, string>> = {
   toggle: "play_pause",

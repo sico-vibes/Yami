@@ -3,7 +3,12 @@ import { api } from "../api";
 import { Icon } from "../ui";
 import { StatusChip } from "../controls";
 
-type EngineRow = { id: string; version: string; installed: boolean; license: string };
+type EngineRow = {
+  id: string;
+  version: string;
+  installed: boolean;
+  license: string;
+};
 const names: Record<string, [string, string]> = {
   ffmpeg: ["FFmpeg", "film-strip"],
   magick: ["ImageMagick", "image"],

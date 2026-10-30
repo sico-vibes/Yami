@@ -4,7 +4,13 @@ import { Save, ToolShell, savePng } from "./ToolShell";
 import type { WheelFile } from "./types";
 import { token } from "./palette";
 
-type Box = { x: number; y: number; w: number; h: number; mode: "solid" | "blur" };
+type Box = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  mode: "solid" | "blur";
+};
 
 export function RedactTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -25,7 +31,10 @@ export function RedactTool({ files }: { files: WheelFile[] }) {
   return (
     <ToolShell
       title="Redact"
-      note={note || "Draw boxes to cover or blur. Face and text finding are not in this build, and nothing is uploaded."}
+      note={
+        note ||
+        "Draw boxes to cover or blur. Face and text finding are not in this build, and nothing is uploaded."
+      }
     >
       <div className="tool-preview">
         <canvas
@@ -36,35 +45,62 @@ export function RedactTool({ files }: { files: WheelFile[] }) {
           onPointerMove={(event) => {
             if (!drag.current || !canvas.current || !image) return;
             const point = at(event);
-            redraw(canvas.current, image, boxes, boxFrom(drag.current, point, mode));
+            redraw(
+              canvas.current,
+              image,
+              boxes,
+              boxFrom(drag.current, point, mode),
+            );
           }}
           onPointerUp={(event) => {
             if (!drag.current) return;
-            setBoxes((current) => [...current, boxFrom(drag.current!, at(event), mode)]);
+            setBoxes((current) => [
+              ...current,
+              boxFrom(drag.current!, at(event), mode),
+            ]);
             drag.current = null;
           }}
         />
       </div>
       <div className="segmented">
-        <button type="button" aria-pressed={mode === "solid"} onClick={() => setMode("solid")}>
+        <button
+          type="button"
+          aria-pressed={mode === "solid"}
+          onClick={() => setMode("solid")}
+        >
           Cover
         </button>
-        <button type="button" aria-pressed={mode === "blur"} onClick={() => setMode("blur")}>
+        <button
+          type="button"
+          aria-pressed={mode === "blur"}
+          onClick={() => setMode("blur")}
+        >
           Blur
         </button>
-        <button type="button" onClick={() => setBoxes((current) => current.slice(0, -1))}>
+        <button
+          type="button"
+          onClick={() => setBoxes((current) => current.slice(0, -1))}
+        >
           Undo
         </button>
       </div>
       <Save
         label="Save redacted copy"
-        onClick={() => savePng(canvas.current, "tool:redact").catch((error: Error) => setNote(error.message))}
+        onClick={() =>
+          savePng(canvas.current, "tool:redact").catch((error: Error) =>
+            setNote(error.message),
+          )
+        }
       />
     </ToolShell>
   );
 }
 
-function boxFrom(start: { x: number; y: number }, end: { x: number; y: number }, mode: Box["mode"]): Box {
+function boxFrom(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  mode: Box["mode"],
+): Box {
   return {
     x: Math.min(start.x, end.x),
     y: Math.min(start.y, end.y),

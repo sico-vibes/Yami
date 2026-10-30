@@ -351,15 +351,9 @@ kbd {
   position: relative;
   border-radius: 14px;
   background:
-    var(--stars),
-    var(--aurora),
+    var(--stars), var(--aurora),
     linear-gradient(165deg, #0e0c28, var(--ink-1) 55%, #0c0a20);
-  background-size:
-    var(--stars-size),
-    auto,
-    auto,
-    auto,
-    auto;
+  background-size: var(--stars-size), auto, auto, auto, auto;
   border: 1px solid var(--line);
 }
 .titlebar {
@@ -420,9 +414,7 @@ kbd {
   border-radius: var(--r-pill);
   background: rgba(22, 19, 52, 0.62);
   border: 1px solid var(--line-strong);
-  box-shadow:
-    var(--highlight),
-    var(--shadow-float);
+  box-shadow: var(--highlight), var(--shadow-float);
   padding: 6px;
   z-index: 5;
   backdrop-filter: var(--blur);
@@ -502,9 +494,7 @@ kbd {
 }
 .boot {
   height: 100vh;
-  background:
-    var(--aurora),
-    var(--ink-1);
+  background: var(--aurora), var(--ink-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -531,13 +521,15 @@ kbd {
 }
 .modal {
   background:
-    radial-gradient(420px 220px at 0 0, rgba(120, 90, 220, 0.18), transparent 70%),
+    radial-gradient(
+      420px 220px at 0 0,
+      rgba(120, 90, 220, 0.18),
+      transparent 70%
+    ),
     linear-gradient(160deg, var(--ink-3), var(--ink-2));
   border: 1px solid var(--line-strong);
   border-radius: 26px;
-  box-shadow:
-    var(--highlight),
-    var(--shadow-float);
+  box-shadow: var(--highlight), var(--shadow-float);
   padding: 28px;
   width: 520px;
   max-width: 100%;

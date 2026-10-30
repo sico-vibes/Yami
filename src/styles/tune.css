@@ -99,7 +99,10 @@
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
-  font: 400 var(--fs-xs) "Cascadia Mono", Consolas, monospace;
+  font:
+    400 var(--fs-xs) "Cascadia Mono",
+    Consolas,
+    monospace;
   color: var(--text-soft);
 }
 .env-folders span {

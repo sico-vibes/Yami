@@ -19,8 +19,15 @@
     "check:lines": "node scripts/check-lines.mjs",
     "check:ui": "node scripts/check-ui.mjs",
     "audit:ui": "node scripts/audit-ui.mjs",
-    "check": "npm run check:lines && npm run check:ui && npm run typecheck && npm run build:native && npm test",
-    "notices": "node scripts/collect-notices.mjs"
+    "check": "npm run check:lines && npm run check:ui && npm run check:biome && npm run check:secrets && npm run typecheck && npm run build:native && npm test",
+    "notices": "node scripts/collect-notices.mjs",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "check:biome": "biome ci",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "verify": "npm run check",
+    "lock:compact": "node -e \"const f=require('fs');f.writeFileSync('package-lock.json',JSON.stringify(JSON.parse(f.readFileSync('package-lock.json','utf8'))))\"",
+    "prepare": "node scripts/install-hooks.mjs"
   },
   "build": {
     "appId": "in.yami.desktop",
@@ -88,6 +95,7 @@
     "systeminformation": "^5.33.15"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
@@ -98,7 +106,6 @@
     "electron-builder": "^26.15.3",
     "esbuild": "^0.28.2",
     "marked": "^18.1.1",
-    "prettier": "^3.9.10",
     "qrcode": "^1.5.4",
     "typescript": "^7.0.2",
     "vite": "^8.3.4"

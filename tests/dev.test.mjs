@@ -90,8 +90,9 @@ test("folders compare like Windows and open as editor links", () => {
 });
 
 test("worktrees list with the main checkout first and plans stay beside it", async () => {
-  const { parseWorktrees, worktreePlan } =
-    await import("../electron/workbench/dev-rules.ts");
+  const { parseWorktrees, worktreePlan } = await import(
+    "../electron/workbench/dev-rules.ts"
+  );
   const list = parseWorktrees(
     [
       "worktree D:/Code/yami",
@@ -179,8 +180,9 @@ test("fan out plans one worktree per agent and types no task text", () => {
 });
 
 test("task comparisons read git's numbers and refuse paths outside the task", async () => {
-  const { parseNumstat, safeRelative } =
-    await import("../electron/workbench/dev-rules.ts");
+  const { parseNumstat, safeRelative } = await import(
+    "../electron/workbench/dev-rules.ts"
+  );
   assert.deepEqual(parseNumstat("3\t1\tsrc/login.ts\n-\t-\tlogo.png\n\n"), [
     { file: "src/login.ts", added: 3, removed: 1 },
     { file: "logo.png", added: 0, removed: 0 },

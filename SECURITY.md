@@ -2,9 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please do not publish an exploitable security issue before a fix is available. The repository is private during development, so use the repository owner’s private contact or the private vulnerability-reporting channel configured when the repository becomes public. Include the affected version or commit, Windows version, impact, and a minimal reproduction. Do not include API keys, private user data, or full clipboard contents.
-
-If no private reporting channel is configured, contact the maintainer directly through an account already associated with the repository and ask for a secure reporting route. Avoid filing a public issue with exploit details.
+Please do not publish an exploitable security issue before a fix is available. Report it privately through GitHub: **Security › Report a vulnerability** on the repository ([new advisory](https://github.com/sico-vibes/Yami/security/advisories/new)). Include the affected version, Windows version, impact, and a minimal reproduction. Do not include API keys, private user data, or full clipboard contents. A report file from Settings › Your data › Collect logs has secrets masked, but read it before you attach it.
 
 ## Scope
 

@@ -10,7 +10,10 @@ export function sourceSize(image: CanvasImageSource) {
   if (image instanceof HTMLVideoElement)
     return { width: image.videoWidth || 720, height: image.videoHeight || 480 };
   if ("width" in image)
-    return { width: Number(image.width) || 720, height: Number(image.height) || 480 };
+    return {
+      width: Number(image.width) || 720,
+      height: Number(image.height) || 480,
+    };
   return { width: 720, height: 480 };
 }
 
@@ -19,7 +22,11 @@ export function paintStill(
   image: CanvasImageSource,
   max = 720,
 ) {
-  const fitted = fitSize(sourceSize(image).width, sourceSize(image).height, max);
+  const fitted = fitSize(
+    sourceSize(image).width,
+    sourceSize(image).height,
+    max,
+  );
   canvas.width = fitted.width;
   canvas.height = fitted.height;
   const ctx = canvas.getContext("2d");
@@ -72,7 +79,8 @@ export function useStills(files: WheelFile[]) {
         const loaded = new Image();
         await new Promise<void>((resolve, reject) => {
           loaded.onload = () => resolve();
-          loaded.onerror = () => reject(new Error(`${file.name} could not be previewed.`));
+          loaded.onerror = () =>
+            reject(new Error(`${file.name} could not be previewed.`));
           loaded.src = url;
         });
         return loaded;

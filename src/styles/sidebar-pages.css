@@ -321,7 +321,8 @@ button.key-binding:hover:not(:disabled) {
   .settings-layout {
     --sidebar-w: 220px;
     gap: var(--space-5);
-    padding: var(--space-2) var(--space-4) calc(var(--dock-safe) - var(--space-3));
+    padding: var(--space-2) var(--space-4)
+      calc(var(--dock-safe) - var(--space-3));
   }
   .settings-content {
     padding-bottom: var(--space-6);

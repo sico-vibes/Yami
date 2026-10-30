@@ -20,7 +20,10 @@ async function send(url, filename) {
   try {
     const r = await fetch(`${YAMI}/download`, {
       method: "POST",
-      headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ url, filename }),
     });
     return r.ok;
@@ -59,7 +62,9 @@ chrome.runtime.onMessage.addListener((message, _sender, reply) => {
     key().then(async (token) => {
       if (!token) return reply({ linked: false });
       try {
-        const r = await fetch(`${YAMI}/ping`, { headers: { authorization: `Bearer ${token}` } });
+        const r = await fetch(`${YAMI}/ping`, {
+          headers: { authorization: `Bearer ${token}` },
+        });
         reply({ linked: r.ok });
       } catch {
         reply({ linked: false });

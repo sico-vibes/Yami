@@ -35,6 +35,7 @@ export function WorkspaceSettings({
             </p>
           </div>
           <button
+            type="button"
             className="key-binding"
             onClick={() => {
               setRecording(true);
@@ -131,6 +132,7 @@ export function WorkspaceSettings({
             </p>
           </div>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void api("workbench.background").catch((e) => report(e.message))
@@ -228,6 +230,7 @@ export function WorkspaceSettings({
             </p>
           </div>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void api("workbench.codexExecutable").catch((e) =>

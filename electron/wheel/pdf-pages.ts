@@ -30,13 +30,21 @@ export async function splitPdf(file: string, directory: string, base: string) {
   return outputs;
 }
 
-export async function organizePdf(file: string, output: string, pages: PageEdit[]) {
+export async function organizePdf(
+  file: string,
+  output: string,
+  pages: PageEdit[],
+) {
   if (!pages.length) throw new Error("Keep at least one page.");
   if (pages.length > 200) throw new Error("Organizing stops at 200 pages.");
   const source = await load(file);
   const total = source.getPageCount();
   const indexes = pages.map((page) => {
-    if (!Number.isInteger(page.sourceIndex) || page.sourceIndex < 0 || page.sourceIndex >= total)
+    if (
+      !Number.isInteger(page.sourceIndex) ||
+      page.sourceIndex < 0 ||
+      page.sourceIndex >= total
+    )
       throw new Error("That page is not in the PDF.");
     if (![0, 90, 180, 270].includes(page.rotation))
       throw new Error("Rotation has to be a quarter turn.");

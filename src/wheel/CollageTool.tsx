@@ -10,7 +10,8 @@ export function CollageTool({ files }: { files: WheelFile[] }) {
   const [columns, setColumns] = useState(2);
   const [gap, setGap] = useState(16);
   useEffect(() => {
-    if (canvas.current && images.length) paintCollage(canvas.current, images, columns, gap);
+    if (canvas.current && images.length)
+      paintCollage(canvas.current, images, columns, gap);
   }, [images, columns, gap]);
   return (
     <ToolShell title="Collage" note={note || "The grid is saved as a new PNG."}>
@@ -19,17 +20,35 @@ export function CollageTool({ files }: { files: WheelFile[] }) {
       </div>
       <label className="tool-row">
         Columns
-        <input type="range" min={1} max={4} value={columns} aria-label="Columns" onChange={(event) => setColumns(Number(event.target.value))} />
+        <input
+          type="range"
+          min={1}
+          max={4}
+          value={columns}
+          aria-label="Columns"
+          onChange={(event) => setColumns(Number(event.target.value))}
+        />
         <span>{columns}</span>
       </label>
       <label className="tool-row">
         Gap
-        <input type="range" min={0} max={48} value={gap} aria-label="Gap" onChange={(event) => setGap(Number(event.target.value))} />
+        <input
+          type="range"
+          min={0}
+          max={48}
+          value={gap}
+          aria-label="Gap"
+          onChange={(event) => setGap(Number(event.target.value))}
+        />
         <span>{gap}</span>
       </label>
       <Save
         label="Save collage"
-        onClick={() => savePng(canvas.current, "tool:collage").catch((error: Error) => setNote(error.message))}
+        onClick={() =>
+          savePng(canvas.current, "tool:collage").catch((error: Error) =>
+            setNote(error.message),
+          )
+        }
       />
     </ToolShell>
   );

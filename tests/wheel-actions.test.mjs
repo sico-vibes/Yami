@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { copyFileArguments, destinationFor, pathText, terminalLaunch } from "../src/wheel/actions.ts";
+import {
+  copyFileArguments,
+  destinationFor,
+  pathText,
+  terminalLaunch,
+} from "../src/wheel/actions.ts";
 import { heicEncodeAvailable } from "../src/wheel/heic.ts";
 import { convertCommand } from "../src/wheel/plans.ts";
 
@@ -28,7 +33,10 @@ test("HEIC encoding stays off unless ffmpeg reports both an encoder and a muxer"
   assert.equal(heicEncodeAvailable("libx265", "hevc"), false);
   assert.equal(heicEncodeAvailable("libx264", "heif"), false);
   assert.equal(heicEncodeAvailable(" V....D libx265", " E heic "), true);
-  assert.throws(() => convertCommand("image", "heic", "in.jpg", "out.heic"), /HEIC/);
+  assert.throws(
+    () => convertCommand("image", "heic", "in.jpg", "out.heic"),
+    /HEIC/,
+  );
   const command = convertCommand("image", "heic", "in.jpg", "out.heic", true);
   assert.equal(command.engine, "ffmpeg");
   assert.ok(command.args.includes("libx265"));

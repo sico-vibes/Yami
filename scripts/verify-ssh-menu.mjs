@@ -60,7 +60,11 @@ try {
         .textContent()) || "";
   }
   assert.match(screen, /ssh yami-demo-box/);
-  assert.match(screen, /refused|timed out|Connection|resolve hostname/i, screen.slice(-300));
+  assert.match(
+    screen,
+    /refused|timed out|Connection|resolve hostname/i,
+    screen.slice(-300),
+  );
   for (const tab of await t.locator("[data-session]").all())
     await t.evaluate(
       (id) => window.yami.invoke("terminal.end", { session: id }),

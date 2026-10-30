@@ -147,7 +147,7 @@ export function Settings({
     />
   );
   const button = (label: string, onClick: () => void) => (
-    <button className="soft-button" onClick={onClick}>
+    <button type="button" className="soft-button" onClick={onClick}>
       {label}
     </button>
   );
@@ -155,6 +155,7 @@ export function Settings({
     api("keys.remove", { provider }).catch((e) => report(e.message));
   const shortcut = (key: keyof Preferences) => (
     <button
+      type="button"
       className="key-binding"
       onClick={() => setCapturing(key)}
       aria-label={"Change " + String(key)}
@@ -201,6 +202,7 @@ export function Settings({
         <nav>
           {groups.map(([icon, title]) => (
             <button
+              type="button"
               key={title}
               className={section === title && !all ? "selected" : ""}
               onClick={() => {
@@ -583,6 +585,7 @@ export function Settings({
                 "Delete all my data",
                 "Erase your local data and API keys. This cannot be undone.",
                 <button
+                  type="button"
                   className="soft-button danger"
                   onClick={() => void api("data.clear")}
                 >
@@ -600,22 +603,32 @@ export function Settings({
               {row(
                 "Logs folder",
                 "What Yami did (.LOG), errors (.ERR), problems with what led up to them (.TRG) and debug detail (.DEG), one file a day, kept for a week. Secrets are masked.",
-                button("Open", () => void api("log.open").catch((e) => report(e.message))),
+                button(
+                  "Open",
+                  () => void api("log.open").catch((e) => report(e.message)),
+                ),
               )}
               {row(
                 "Collect logs",
                 "Make one report file of recent logs, system details and settings to share with a person or a coding agent. Read it before you share it.",
-                button("Collect", () => void api("log.collect").catch((e) => report(e.message))),
+                button(
+                  "Collect",
+                  () => void api("log.collect").catch((e) => report(e.message)),
+                ),
               )}
               {row(
                 "Report a bug",
                 "Collects the report, then opens a new GitHub issue. Attach the report file to it.",
-                button("Report…", () =>
-                  void api("log.collect")
-                    .then(({ file }: { file: string }) =>
-                      api("open.external", { url: bugReportUrl(file.split(/[\\/]/).pop() || "") }),
-                    )
-                    .catch((e) => report(e.message)),
+                button(
+                  "Report…",
+                  () =>
+                    void api("log.collect")
+                      .then(({ file }: { file: string }) =>
+                        api("open.external", {
+                          url: bugReportUrl(file.split(/[\\/]/).pop() || ""),
+                        }),
+                      )
+                      .catch((e) => report(e.message)),
                 ),
               )}
             </div>
@@ -686,6 +699,7 @@ export function Settings({
                 need your instruction and confirmation.
               </p>
               <button
+                type="button"
                 className="text-button"
                 onClick={() =>
                   void api("open.external", {
@@ -806,6 +820,7 @@ export function Settings({
             onChange={(e) => setKey(e.target.value)}
           />
           <button
+            type="button"
             className="primary-button"
             disabled={!key.trim() || saving}
             onClick={async () => {
@@ -825,6 +840,7 @@ export function Settings({
             {saving ? "Checking key…" : "Save and start"}
           </button>
           <button
+            type="button"
             className="text-button"
             onClick={() =>
               void api("open.external", {

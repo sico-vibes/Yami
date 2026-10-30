@@ -50,7 +50,10 @@ try {
   await main.getByRole("button", { name: "Add folder" }).click();
   await main.getByText(folder, { exact: true }).waitFor();
   const after = reg("query", box) || "(no key)";
-  assert.ok(after.includes(folder), "Path changed in the sandbox: " + after.slice(0, 600));
+  assert.ok(
+    after.includes(folder),
+    "Path changed in the sandbox: " + after.slice(0, 600),
+  );
   await main.getByRole("button", { name: "Put back" }).click();
   await main
     .getByRole("button", { name: "Put back" })

@@ -19,7 +19,12 @@ export type ModuleId =
   | "widget";
 export type ModuleCost = "low" | "medium" | "high";
 export type ModulePermission =
-  "network" | "microphone" | "screen" | "clipboard" | "admin" | "files";
+  | "network"
+  | "microphone"
+  | "screen"
+  | "clipboard"
+  | "admin"
+  | "files";
 export type PackId =
   | "ffmpeg"
   | "magick"
@@ -44,10 +49,17 @@ export type ModuleSpec = {
 };
 
 export type SetupPreset =
-  "essentials" | "developer" | "tinkerer" | "everything";
+  | "essentials"
+  | "developer"
+  | "tinkerer"
+  | "everything";
 
 export type PackState =
-  "missing" | "queued" | "downloading" | "installed" | "failed";
+  | "missing"
+  | "queued"
+  | "downloading"
+  | "installed"
+  | "failed";
 
 export type PackStatus = {
   id: PackId;

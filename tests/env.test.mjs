@@ -35,8 +35,8 @@ function memory(initial) {
 test("user variables change, announce, and put back exactly", async () => {
   const before = {
     Environment: {
-      Path: { type: "REG_EXPAND_SZ", data: "%USERPROFILE%\bin;C:\Tools" },
-      TEMP: { type: "REG_EXPAND_SZ", data: "%USERPROFILE%\AppData\Local\Temp" },
+      Path: { type: "REG_EXPAND_SZ", data: "%USERPROFILE%\bin;C:Tools" },
+      TEMP: { type: "REG_EXPAND_SZ", data: "%USERPROFILE%AppDataLocalTemp" },
       EDITOR: { type: "REG_SZ", data: "code" },
       Count: { type: "REG_DWORD", data: "3" },
     },
@@ -58,7 +58,7 @@ test("user variables change, announce, and put back exactly", async () => {
   await assert.rejects(env.set({ name: "X", value: "a\nb" }), /line breaks/);
   list = await env.set({
     name: "path",
-    value: "%USERPROFILE%\bin;C:\Tools;D:\New",
+    value: "%USERPROFILE%\bin;C:Tools;D:New",
   });
   assert.equal(
     io.keys.get("Environment").Path.type,
@@ -67,7 +67,7 @@ test("user variables change, announce, and put back exactly", async () => {
   );
   assert.equal(
     io.keys.get("Environment").Path.data,
-    "%USERPROFILE%\bin;C:\Tools;D:\New",
+    "%USERPROFILE%\bin;C:Tools;D:New",
   );
   await env.set({ name: "NEW_ONE", value: "plain" });
   assert.equal(io.keys.get("Environment").NEW_ONE.type, "REG_SZ");

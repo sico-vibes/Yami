@@ -3,7 +3,7 @@ import DOMPurify from "dompurify";
 const documents = window.YAMI_DOCS;
 const $ = (id) => document.getElementById(id);
 const byPath = new Map(documents.map((d) => [d.path, d.slug]));
-function escape(value) {
+function escapeHtml(value) {
   const e = document.createElement("span");
   e.textContent = value;
   return e.innerHTML;
@@ -68,7 +68,7 @@ function render() {
   $("toc").innerHTML = headings
     .map(
       (h) =>
-        `<a class="${h.tagName === "H3" ? "sub" : ""}" href="#${current.slug}~${h.id}">${escape(h.textContent)}</a>`,
+        `<a class="${h.tagName === "H3" ? "sub" : ""}" href="#${current.slug}~${h.id}">${escapeHtml(h.textContent)}</a>`,
     )
     .join("");
   for (const a of $("article").querySelectorAll("a")) {
@@ -90,10 +90,10 @@ function render() {
     next = documents[index + 1];
   $("neighbors").innerHTML =
     (prev
-      ? `<a href="#${prev.slug}"><small>← PREVIOUS</small>${escape(prev.title)}</a>`
+      ? `<a href="#${prev.slug}"><small>← PREVIOUS</small>${escapeHtml(prev.title)}</a>`
       : "<span></span>") +
     (next
-      ? `<a href="#${next.slug}"><small>NEXT →</small>${escape(next.title)}</a>`
+      ? `<a href="#${next.slug}"><small>NEXT →</small>${escapeHtml(next.title)}</a>`
       : "");
   $("sidebar")?.classList.remove("open");
   document.querySelector(".sidebar").classList.remove("open");
@@ -126,11 +126,12 @@ $("navigation").innerHTML = documents
   .map((d) => {
     const heading =
       d.group !== group
-        ? `<div class="nav-group">${escape(d.group)}</div>`
+        ? `<div class="nav-group">${escapeHtml(d.group)}</div>`
         : "";
     group = d.group;
     return (
-      heading + `<a class="nav-item" href="#${d.slug}">${escape(d.title)}</a>`
+      heading +
+      `<a class="nav-item" href="#${d.slug}">${escapeHtml(d.title)}</a>`
     );
   })
   .join("");
@@ -146,7 +147,7 @@ function search() {
     ? found
         .map(
           (d) =>
-            `<a class="search-result" href="#${d.slug}"><b>${escape(d.title)}</b><small>${escape(d.group)}</small></a>`,
+            `<a class="search-result" href="#${d.slug}"><b>${escapeHtml(d.title)}</b><small>${escapeHtml(d.group)}</small></a>`,
         )
         .join("")
     : '<div class="empty-search">No matching guides. Try “tools”, “wallpaper”, or “privacy”.</div>';

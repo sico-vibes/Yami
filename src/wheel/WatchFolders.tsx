@@ -52,6 +52,7 @@ export function WatchFolders({ report }: { report: (m: string) => void }) {
               }))}
             />
             <button
+              type="button"
               className="soft-button"
               onClick={() =>
                 void api("watch.add", { target }).then(setList).catch(fail)

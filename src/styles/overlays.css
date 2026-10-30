@@ -230,11 +230,7 @@ html[data-reduced="true"] .island-activity {
   padding: 12px 14px;
   border-radius: 22px;
   background:
-    radial-gradient(
-      220px 90px at 0 50%,
-      rgba(183, 123, 208, 0.18),
-      transparent
-    ),
+    radial-gradient(220px 90px at 0 50%, rgba(183, 123, 208, 0.18), transparent),
     linear-gradient(var(--ink-1), var(--ink-0));
   box-shadow:
     inset 0 0 0 1px var(--line),

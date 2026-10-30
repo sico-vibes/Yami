@@ -269,7 +269,7 @@ export class NetworkShield {
   /** Which rule blocks a name: a list id, "your list", or undefined. */
   blockedBy(name: string) {
     const parents = (set: Set<string>) => {
-      for (let at = 0; ;) {
+      for (let at = 0; ; ) {
         if (set.has(name.slice(at))) return true;
         const dot = name.indexOf(".", at);
         if (dot === -1) return false;

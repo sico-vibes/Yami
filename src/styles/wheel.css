@@ -47,7 +47,11 @@ html[data-window="tool"] body {
   gap: var(--space-1);
   pointer-events: none;
   background:
-    radial-gradient(closest-side at 50% 120%, color-mix(in srgb, var(--soul, var(--glow)) 26%, transparent), transparent),
+    radial-gradient(
+      closest-side at 50% 120%,
+      color-mix(in srgb, var(--soul, var(--glow)) 26%, transparent),
+      transparent
+    ),
     var(--ink-0);
   box-shadow: var(--highlight), var(--ring-soul), var(--shadow-float);
 }
@@ -218,9 +222,7 @@ html[data-window="tool"] body {
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-5);
-  background:
-    var(--aurora),
-    var(--ink-1);
+  background: var(--aurora), var(--ink-1);
   border: 1px solid var(--line-strong);
   border-radius: var(--r-lg);
   overflow: auto;

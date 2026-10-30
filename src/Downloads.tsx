@@ -95,6 +95,7 @@ export function Downloads({ report }: { report: (m: string) => void }) {
           }))}
         />
         <button
+          type="button"
           className="primary-button"
           disabled={!url.trim()}
           onClick={() => {
@@ -190,7 +191,11 @@ export function Downloads({ report }: { report: (m: string) => void }) {
         })}
       </div>
       {view.jobs.some((j) => j.state === "done") && (
-        <button className="text-button" onClick={() => call("downloads.clear")}>
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => call("downloads.clear")}
+        >
           Clear finished
         </button>
       )}

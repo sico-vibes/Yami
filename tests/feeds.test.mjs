@@ -121,13 +121,19 @@ test("Bluesky and Mastodon accounts become their public RSS feeds", () => {
     name: "@bsky.app",
   });
   assert.throws(() => feedAddress("bluesky", "not a handle"), /Bluesky handle/);
-  assert.throws(() => feedAddress("bluesky", "evil/../x.com"), /Bluesky handle/);
+  assert.throws(
+    () => feedAddress("bluesky", "evil/../x.com"),
+    /Bluesky handle/,
+  );
   assert.deepEqual(feedAddress("mastodon", "@Gargron@Mastodon.Social"), {
     url: "https://mastodon.social/@Gargron.rss",
     name: "@Gargron@mastodon.social",
   });
   assert.throws(() => feedAddress("mastodon", "@user"), /Mastodon account/);
-  assert.throws(() => feedAddress("mastodon", "@u@host/evil"), /Mastodon account/);
+  assert.throws(
+    () => feedAddress("mastodon", "@u@host/evil"),
+    /Mastodon account/,
+  );
 });
 
 test("untitled social posts use their text as the title", () => {

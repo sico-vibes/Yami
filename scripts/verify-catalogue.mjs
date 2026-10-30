@@ -34,7 +34,7 @@ try {
   const call = (method, args) =>
     page.evaluate(([m, a]) => window.yami.invoke(m, a), [method, args]);
   const node = async (index) => {
-    let r = await page.locator(".loadout-node").nth(index).boundingBox();
+    const r = await page.locator(".loadout-node").nth(index).boundingBox();
     await page.mouse.click(r.x + r.width / 2, r.y + r.height / 2);
   };
   fs.mkdirSync(".impeccable/review/catalogue-corrections", { recursive: true });

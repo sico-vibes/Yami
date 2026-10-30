@@ -14,7 +14,7 @@
   --hover: #d6c38a0d;
   color-scheme: dark;
   font:
-    15px/1.75 Rubik,
+    15px / 1.75 Rubik,
     system-ui,
     sans-serif;
   background: var(--bg);
@@ -260,7 +260,7 @@ article img {
 }
 article code {
   font:
-    12px/1.7 ui-monospace,
+    12px / 1.7 ui-monospace,
     "Cascadia Code",
     Consolas,
     monospace;

@@ -14,9 +14,36 @@ export const yamiToolNames = [
   "yami_set_setting",
 ];
 
-const pages = ["home", "bond", "soul", "desk", "ai", "tune", "settings", "setup"];
-const drawer = ["Controls", "Today", "Stats", "Clipboard", "Apps", "Wallpaper", "Power", "Radio", "AI"];
-const windows = ["main", "island", "dock", "widget", "stray", "browser", "terminal"];
+const pages = [
+  "home",
+  "bond",
+  "soul",
+  "desk",
+  "ai",
+  "tune",
+  "settings",
+  "setup",
+];
+const drawer = [
+  "Controls",
+  "Today",
+  "Stats",
+  "Clipboard",
+  "Apps",
+  "Wallpaper",
+  "Power",
+  "Radio",
+  "AI",
+];
+const windows = [
+  "main",
+  "island",
+  "dock",
+  "widget",
+  "stray",
+  "browser",
+  "terminal",
+];
 
 export function yamiTools(deps: {
   status: () => Record<string, unknown>;
@@ -47,7 +74,10 @@ export function yamiTools(deps: {
         properties: {
           channel: { type: "string", enum: ["ERR", "TRG", "LOG", "DEG"] },
           limit: { type: "number", description: "1–300, default 50." },
-          since: { type: "string", description: "Optional ISO time; only newer entries." },
+          since: {
+            type: "string",
+            description: "Optional ISO time; only newer entries.",
+          },
         },
         required: ["channel"],
       },
@@ -66,10 +96,17 @@ export function yamiTools(deps: {
         "Make the same report as Settings › Your data › Collect logs (system, problems, triage, errors, log, settings; secrets masked) and return its path and text.",
       inputSchema: {
         type: "object",
-        properties: { note: { type: "string", description: "Optional: what you are investigating." } },
+        properties: {
+          note: {
+            type: "string",
+            description: "Optional: what you are investigating.",
+          },
+        },
       },
       run: async (a) => {
-        const r = await deps.report(typeof a.note === "string" ? a.note.slice(0, 1000) : undefined);
+        const r = await deps.report(
+          typeof a.note === "string" ? a.note.slice(0, 1000) : undefined,
+        );
         return `Saved to ${r.file}\n\n${r.text.slice(0, 60_000)}`;
       },
     },
@@ -86,7 +123,10 @@ export function yamiTools(deps: {
         if (t === "close-drawer") deps.drawer(null);
         else if (pages.includes(t.toLowerCase())) deps.open(t.toLowerCase());
         else if (drawer.includes(t)) deps.drawer(t);
-        else throw new Error(`Choose one of: ${[...pages, ...drawer, "close-drawer"].join(", ")}.`);
+        else
+          throw new Error(
+            `Choose one of: ${[...pages, ...drawer, "close-drawer"].join(", ")}.`,
+          );
         return "Opened.";
       },
     },
@@ -100,13 +140,15 @@ export function yamiTools(deps: {
       },
       run: async (a) => {
         const w = String(a.window || "");
-        if (!windows.includes(w)) throw new Error(`Choose one of: ${windows.join(", ")}.`);
+        if (!windows.includes(w))
+          throw new Error(`Choose one of: ${windows.join(", ")}.`);
         return await deps.screenshot(w);
       },
     },
     {
       name: "yami_settings",
-      description: "Read Yami's settings (values that look like secrets are hidden). Keys and types are what yami_set_setting accepts.",
+      description:
+        "Read Yami's settings (values that look like secrets are hidden). Keys and types are what yami_set_setting accepts.",
       inputSchema: { type: "object", properties: {} },
       run: async () => json(deps.settings()),
     },
@@ -118,17 +160,26 @@ export function yamiTools(deps: {
         type: "object",
         properties: {
           key: { type: "string" },
-          value: { description: "The new value, of the setting's current type." },
+          value: {
+            description: "The new value, of the setting's current type.",
+          },
         },
         required: ["key", "value"],
       },
       run: async (a) => {
         const key = String(a.key || "");
         const current = deps.settings();
-        if (!(key in current)) throw new Error("There is no setting called " + key + ".");
-        if (typeof current[key] !== typeof a.value) throw new Error(`${key} takes a ${typeof current[key]}.`);
+        if (!(key in current))
+          throw new Error("There is no setting called " + key + ".");
+        if (typeof current[key] !== typeof a.value)
+          throw new Error(`${key} takes a ${typeof current[key]}.`);
         const shown = JSON.stringify(a.value).slice(0, 200);
-        if (!(await deps.ask(`Change the setting ${key}?`, `A coding agent wants to set ${key} to ${shown}.`)))
+        if (
+          !(await deps.ask(
+            `Change the setting ${key}?`,
+            `A coding agent wants to set ${key} to ${shown}.`,
+          ))
+        )
           return "The user said no.";
         await deps.setSetting(key, a.value);
         return `Set ${key} to ${shown}.`;

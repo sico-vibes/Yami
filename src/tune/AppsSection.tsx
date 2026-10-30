@@ -72,7 +72,12 @@ export function AppsSection({ report }: { report: (m: string) => void }) {
               <strong>Show installed apps</strong>
               <p>Reads the list Windows keeps; nothing is changed.</p>
             </div>
-            <button className="soft-button" disabled={loading} onClick={load}>
+            <button
+              type="button"
+              className="soft-button"
+              disabled={loading}
+              onClick={load}
+            >
               <Icon name="list-magnifying-glass" size={16} />
               {loading ? "Reading…" : "Show apps"}
             </button>
@@ -116,6 +121,7 @@ export function AppsSection({ report }: { report: (m: string) => void }) {
                   </p>
                 </div>
                 <button
+                  type="button"
                   className="soft-button"
                   onClick={() => setPending(a)}
                   aria-label={`Uninstall ${a.name}`}
@@ -142,10 +148,18 @@ export function AppsSection({ report }: { report: (m: string) => void }) {
             . Yami cannot undo this.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setPending(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setPending(null)}
+            >
               Cancel
             </button>
-            <button className="soft-button danger" onClick={uninstall}>
+            <button
+              type="button"
+              className="soft-button danger"
+              onClick={uninstall}
+            >
               Uninstall
             </button>
           </div>

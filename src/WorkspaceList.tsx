@@ -36,6 +36,7 @@ export function WorkspaceList({ report }: { report: (m: string) => void }) {
       <div className="workspace-head">
         <span>Workspaces</span>
         <button
+          type="button"
           className="text-button"
           disabled={!!busy}
           onClick={() =>
@@ -62,6 +63,7 @@ export function WorkspaceList({ report }: { report: (m: string) => void }) {
             </small>
           </div>
           <button
+            type="button"
             className="soft-button"
             disabled={!!busy}
             onClick={() => restore(w)}

@@ -7,7 +7,9 @@ export function statusTone(status: string): StatusTone {
   if (/work|think|running|reading|record|sync|connecting/.test(s))
     return "active";
   if (/wait|auth|backoff|stale|pending|paused/.test(s)) return "attention";
-  if (/finish|fresh|ready|done|connected|enabled|\bok\b|success|complete/.test(s))
+  if (
+    /finish|fresh|ready|done|connected|enabled|\bok\b|success|complete/.test(s)
+  )
     return "good";
   return "quiet";
 }

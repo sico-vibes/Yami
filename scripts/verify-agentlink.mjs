@@ -74,7 +74,15 @@ try {
   await card.getByRole("button", { name: "Confirm" }).click();
   assert.equal((await asking).body.result.content[0].text, "yes");
   // The tools for looking into Yami itself, each switched on here.
-  for (const name of ["yami_status", "yami_logs", "yami_report", "yami_open", "yami_screenshot", "yami_settings", "yami_set_setting"])
+  for (const name of [
+    "yami_status",
+    "yami_logs",
+    "yami_report",
+    "yami_open",
+    "yami_screenshot",
+    "yami_settings",
+    "yami_set_setting",
+  ])
     await call("agentlink.tools", { name, allowed: true });
   const tool = async (name, args = {}) => {
     const r = (await rpc("tools/call", { name, arguments: args })).body.result;
@@ -83,16 +91,37 @@ try {
   const status = JSON.parse((await tool("yami_status")).text);
   assert.match(status.version, /^\d+\.\d+\.\d+/);
   assert.ok(Array.isArray(status.problems) && Array.isArray(status.modulesOn));
-  assert.ok(Array.isArray(JSON.parse((await tool("yami_logs", { channel: "LOG", limit: 5 })).text)));
-  assert.match((await tool("yami_report", { note: "verify" })).text, /^Saved to .*\.CLT\.md/);
-  assert.equal((await tool("yami_open", { target: "settings" })).text, "Opened.");
+  assert.ok(
+    Array.isArray(
+      JSON.parse((await tool("yami_logs", { channel: "LOG", limit: 5 })).text),
+    ),
+  );
+  assert.match(
+    (await tool("yami_report", { note: "verify" })).text,
+    /^Saved to .*\.CLT\.md/,
+  );
+  assert.equal(
+    (await tool("yami_open", { target: "settings" })).text,
+    "Opened.",
+  );
   assert.equal((await tool("yami_open", { target: "nowhere" })).error, true);
   const shot = (await tool("yami_screenshot", { window: "main" })).text;
   assert.match(shot, /screenshots[\\/]main-.*\.png$/);
-  assert.ok(JSON.parse((await tool("yami_settings")).text).debugLogging === false);
-  assert.match((await tool("yami_set_setting", { key: "debugLogging", value: "yes" })).text, /takes a boolean/);
-  const setting = tool("yami_set_setting", { key: "debugLogging", value: true });
-  await card.getByText("A coding agent wants to set debugLogging to true.").waitFor();
+  assert.ok(
+    JSON.parse((await tool("yami_settings")).text).debugLogging === false,
+  );
+  assert.match(
+    (await tool("yami_set_setting", { key: "debugLogging", value: "yes" }))
+      .text,
+    /takes a boolean/,
+  );
+  const setting = tool("yami_set_setting", {
+    key: "debugLogging",
+    value: true,
+  });
+  await card
+    .getByText("A coding agent wants to set debugLogging to true.")
+    .waitFor();
   await card.getByRole("button", { name: "Confirm" }).click();
   assert.equal((await setting).text, "Set debugLogging to true.");
   assert.equal((await call("state")).settings.debugLogging, true);

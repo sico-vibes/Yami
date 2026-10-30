@@ -90,6 +90,7 @@ export default function Inbox({
             onClick={() => void refresh()}
           />
           <button
+            type="button"
             className="soft-button"
             disabled={briefing || !view?.items.length}
             onClick={() => {
@@ -155,6 +156,7 @@ export default function Inbox({
           />
         )}
         <button
+          type="button"
           className="primary-button"
           disabled={kind !== "hackernews" && !value.trim()}
           onClick={kind === "podcast" ? search : add}
@@ -173,7 +175,11 @@ export default function Inbox({
                 <b>{s.name}</b>
                 <small>{s.author}</small>
               </div>
-              <button className="soft-button" onClick={() => follow(s)}>
+              <button
+                type="button"
+                className="soft-button"
+                onClick={() => follow(s)}
+              >
                 Follow
               </button>
             </div>
@@ -187,6 +193,7 @@ export default function Inbox({
       {!!view?.sources.length && (
         <div className="inbox-sources" role="group" aria-label="Show feed">
           <button
+            type="button"
             className={"file-chip" + (only ? "" : " selected")}
             aria-pressed={!only}
             onClick={() => setOnly("")}
@@ -198,6 +205,7 @@ export default function Inbox({
             return (
               <span key={s.id} className="inbox-source">
                 <button
+                  type="button"
                   className={"file-chip" + (only === s.id ? " selected" : "")}
                   aria-pressed={only === s.id}
                   data-tip={status?.error || s.url}

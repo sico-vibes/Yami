@@ -1,6 +1,6 @@
 import {
   app,
-  BrowserWindow,
+  type BrowserWindow,
   ipcMain,
   screen,
   shell,
@@ -234,7 +234,7 @@ async function discoverApps() {
     ),
     walk(
       path.join(
-        process.env.ProgramData || "C:\ProgramData",
+        process.env.ProgramData || "C:ProgramData",
         "Microsoft",
         "Windows",
         "Start Menu",
@@ -288,7 +288,7 @@ async function launchApp(name: string) {
   name = requiredTarget(name);
   if (!apps.length) await discoverApps();
   const query = name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
-  let match =
+  const match =
     apps.find((a) => a.path === name) ||
     apps.find(
       (a) => a.name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "") === query,
@@ -914,31 +914,35 @@ else {
         wheel: modules.wheel,
       });
       modules.useRequests(invoke);
-      ipcMain.handle("yami:invoke", logged(async (event, method, args) => {
-        if (
-          ![...windows].some(
-            (w) => !w.isDestroyed() && w.webContents.id === event.sender.id,
+      ipcMain.handle(
+        "yami:invoke",
+        logged(async (event, method, args) => {
+          if (
+            ![...windows].some(
+              (w) => !w.isDestroyed() && w.webContents.id === event.sender.id,
+            )
           )
-        )
-          throw new Error("Untrusted renderer.");
-        if (method === "window.ready") return mainWindow.ready(event.sender);
-        const host = modules!;
-        if (host.handles(method))
-          return host.invoke(method, args, event.sender);
-        if (method === "shortcuts.capture")
-          host.captureShortcuts(!!args?.active);
-        if (method === "chat") args = host.prepareChat(args);
-        if (
-          method === "dictation" &&
-          store.state.settings.dictationEngine !== "gemini"
-        )
-          return host.offlineDictation(args);
-        if (overlays?.handles(method)) return overlays.invoke(method, args);
-        if (focusTimer.handles(method)) return focusTimer.invoke(method, args);
-        const result = await invoke(method, args, event.sender);
-        if (method === "settings") host.afterSettings();
-        return result;
-      }));
+            throw new Error("Untrusted renderer.");
+          if (method === "window.ready") return mainWindow.ready(event.sender);
+          const host = modules!;
+          if (host.handles(method))
+            return host.invoke(method, args, event.sender);
+          if (method === "shortcuts.capture")
+            host.captureShortcuts(!!args?.active);
+          if (method === "chat") args = host.prepareChat(args);
+          if (
+            method === "dictation" &&
+            store.state.settings.dictationEngine !== "gemini"
+          )
+            return host.offlineDictation(args);
+          if (overlays?.handles(method)) return overlays.invoke(method, args);
+          if (focusTimer.handles(method))
+            return focusTimer.invoke(method, args);
+          const result = await invoke(method, args, event.sender);
+          if (method === "settings") host.afterSettings();
+          return result;
+        }),
+      );
       await native.call("configure", {
         ...store.state.settings,
         abilityArmed: false,

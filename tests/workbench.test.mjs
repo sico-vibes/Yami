@@ -213,82 +213,80 @@ test("hook install/remove preserves unrelated settings and rejects changed previ
   const copilot = JSON.parse(wb.hookPlan("copilot", true, "relay", dir).after);
   assert.ok(!copilot.hooks.sessionStart[0].bash.startsWith("&"));
 });
-test(
-  "named-pipe approvals require valid authentication and display ACK; unattended requests fall back",
-  { timeout: 10000 },
-  async (t) => {
-    const { data } = fixture(t);
-    let onChange = () => {};
-    const hub = new wb.AgentHub(data, () => onChange());
-    hub.start();
-    t.after(() => hub.stop());
-    await once(hub.server, "listening");
-    const config = JSON.parse(fs.readFileSync(hub.configFile, "utf8"));
-    const address =
-      process.platform === "win32"
-        ? `\\\\.\\pipe\\${config.pipe}`
-        : path.join(os.tmpdir(), config.pipe + ".sock");
-    async function send(payload, reply) {
-      const socket = net.connect(address);
-      let response = "";
-      socket.on("data", (chunk) => (response += chunk));
-      socket.on("error", () => {});
-      onChange = () => {
-        const request = data.state.requests[0];
-        if (request && reply) reply(request);
-      };
-      await once(socket, "connect");
-      socket.write(
-        JSON.stringify({
-          token: config.token,
-          yami_agent: "claude",
-          session_id: "fixture",
-          hook_event_name: "PermissionRequest",
-          tool_name: "Bash",
-          tool_input: { command: "echo fixture" },
-          ...payload,
-        }) + "\n",
-      );
-      await once(socket, "end");
-      return JSON.parse(response);
-    }
-    assert.deepEqual(await send({ token: "bad" }), {});
-    assert.equal(data.state.sessions.length, 0);
-    for (const decision of ["allow", "deny"]) {
-      const response = await send({}, (r) => {
-        assert.throws(() => hub.finish(r.id, decision), /Display/);
-        hub.acknowledge(r.id);
-        hub.finish(r.id, decision);
-      });
-      assert.equal(response.hookSpecificOutput.decision.behavior, decision);
-    }
-    assert.deepEqual(await send({}), {});
-    assert.equal(data.state.requests.length, 0);
-    const question = await send(
-      {
-        hook_event_name: "PreToolUse",
-        tool_name: "AskUserQuestion",
-        tool_input: {
-          questions: [
-            {
-              question: "Pick",
-              options: [{ label: "One" }, { label: "Two" }],
-              multiSelect: true,
-            },
-          ],
-        },
-      },
-      (r) => {
-        hub.acknowledge(r.id);
-        assert.throws(() => hub.finish(r.id, "answer", { Pick: [] }), /Answer/);
-        hub.finish(r.id, "answer", { Pick: ["One"] });
-      },
+test("named-pipe approvals require valid authentication and display ACK; unattended requests fall back", {
+  timeout: 10000,
+}, async (t) => {
+  const { data } = fixture(t);
+  let onChange = () => {};
+  const hub = new wb.AgentHub(data, () => onChange());
+  hub.start();
+  t.after(() => hub.stop());
+  await once(hub.server, "listening");
+  const config = JSON.parse(fs.readFileSync(hub.configFile, "utf8"));
+  const address =
+    process.platform === "win32"
+      ? `\\\\.\\pipe\\${config.pipe}`
+      : path.join(os.tmpdir(), config.pipe + ".sock");
+  async function send(payload, reply) {
+    const socket = net.connect(address);
+    let response = "";
+    socket.on("data", (chunk) => (response += chunk));
+    socket.on("error", () => {});
+    onChange = () => {
+      const request = data.state.requests[0];
+      if (request && reply) reply(request);
+    };
+    await once(socket, "connect");
+    socket.write(
+      JSON.stringify({
+        token: config.token,
+        yami_agent: "claude",
+        session_id: "fixture",
+        hook_event_name: "PermissionRequest",
+        tool_name: "Bash",
+        tool_input: { command: "echo fixture" },
+        ...payload,
+      }) + "\n",
     );
-    assert.deepEqual(question.hookSpecificOutput.updatedInput.answers, {
-      Pick: ["One"],
+    await once(socket, "end");
+    return JSON.parse(response);
+  }
+  assert.deepEqual(await send({ token: "bad" }), {});
+  assert.equal(data.state.sessions.length, 0);
+  for (const decision of ["allow", "deny"]) {
+    const response = await send({}, (r) => {
+      assert.throws(() => hub.finish(r.id, decision), /Display/);
+      hub.acknowledge(r.id);
+      hub.finish(r.id, decision);
     });
-  },
-);
+    assert.equal(response.hookSpecificOutput.decision.behavior, decision);
+  }
+  assert.deepEqual(await send({}), {});
+  assert.equal(data.state.requests.length, 0);
+  const question = await send(
+    {
+      hook_event_name: "PreToolUse",
+      tool_name: "AskUserQuestion",
+      tool_input: {
+        questions: [
+          {
+            question: "Pick",
+            options: [{ label: "One" }, { label: "Two" }],
+            multiSelect: true,
+          },
+        ],
+      },
+    },
+    (r) => {
+      hub.acknowledge(r.id);
+      assert.throws(() => hub.finish(r.id, "answer", { Pick: [] }), /Answer/);
+      hub.finish(r.id, "answer", { Pick: ["One"] });
+    },
+  );
+  assert.deepEqual(question.hookSpecificOutput.updatedInput.answers, {
+    Pick: ["One"],
+  });
+});
 test("meeting transcription retains audio on failure and commits before removal", async (t) => {
   const owner = Object.assign(new EventEmitter(), { id: 10 }),
     other = { id: 11 };

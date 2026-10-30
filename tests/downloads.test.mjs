@@ -58,9 +58,11 @@ function server(body, { ranges = true, slow = 0 } = {}) {
   });
   s.keepAliveTimeout = 1;
   return new Promise((r) =>
-    s.unref().listen(0, "127.0.0.1", () =>
-      r({ s, seen, url: `http://127.0.0.1:${s.address().port}/file` }),
-    ),
+    s
+      .unref()
+      .listen(0, "127.0.0.1", () =>
+        r({ s, seen, url: `http://127.0.0.1:${s.address().port}/file` }),
+      ),
   );
 }
 const until = async (check, ms = 8000) => {

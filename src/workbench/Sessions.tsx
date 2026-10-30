@@ -35,6 +35,7 @@ export function Sessions({
           </p>
         </div>
         <button
+          type="button"
           className="soft-button"
           onClick={() => void call("terminal.open")}
         >
@@ -58,6 +59,7 @@ export function Sessions({
               options={agents.map((a) => ({ ...a, icon: "terminal-window" }))}
             />
             <button
+              type="button"
               className="soft-button"
               onClick={() =>
                 void api("agents.preview", { agent, install: true })
@@ -68,6 +70,7 @@ export function Sessions({
               Connect
             </button>
             <button
+              type="button"
               className="text-button"
               onClick={() =>
                 void api("agents.preview", { agent, install: false })
@@ -127,6 +130,7 @@ export function Sessions({
                     <div>
                       {s.files.map((file) => (
                         <button
+                          type="button"
                           className="file-chip"
                           key={file}
                           data-tip={file}
@@ -144,6 +148,7 @@ export function Sessions({
                   </details>
                 )}
                 <button
+                  type="button"
                   className="soft-button entry-action"
                   onClick={() => void call("agents.open", { id: s.id })}
                 >
@@ -175,10 +180,15 @@ export function Sessions({
             {plan.note} A backup is saved before changing an existing file.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setPlan(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setPlan(null)}
+            >
               Cancel
             </button>
             <button
+              type="button"
               className="primary-button"
               onClick={() =>
                 void api("agents.install", plan)
@@ -198,6 +208,7 @@ export function Sessions({
         <Modal title="File changes" onClose={() => setDiff(null)}>
           <pre className="confirmation-detail">{diff}</pre>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void call("context.use", {
@@ -302,6 +313,7 @@ export function AgentApproval({
       </p>
       <div className="dialog-actions">
         <button
+          type="button"
           className="soft-button"
           disabled={busy}
           onClick={() => void reply("ask")}
@@ -311,6 +323,7 @@ export function AgentApproval({
         {request.kind === "permission" ? (
           <>
             <button
+              type="button"
               className="soft-button"
               disabled={busy}
               onClick={() => void reply("deny")}
@@ -318,6 +331,7 @@ export function AgentApproval({
               Deny
             </button>
             <button
+              type="button"
               className="primary-button"
               disabled={busy}
               onClick={() => void reply("allow")}
@@ -327,6 +341,7 @@ export function AgentApproval({
           </>
         ) : (
           <button
+            type="button"
             className="primary-button"
             disabled={
               busy ||

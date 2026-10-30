@@ -14,7 +14,7 @@ import { logRequest, setLogContext } from "./log/index";
 import { modules as moduleSpecs } from "../src/modules";
 import {
   app,
-  BrowserWindow,
+  type BrowserWindow,
   dialog,
   shell,
   nativeImage,

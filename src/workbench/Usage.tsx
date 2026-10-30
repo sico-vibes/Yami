@@ -98,6 +98,7 @@ export function Usage({
             waiting = !!r?.retryAt && r.retryAt > Date.now();
           return (
             <button
+              type="button"
               className={compact ? "icon-button usage-read" : "soft-button"}
               aria-label={`Read ${providerName(provider)} usage`}
               data-tip={
@@ -224,6 +225,7 @@ export function Usage({
           </label>
         </div>
         <button
+          type="button"
           className="soft-button"
           disabled={!customUrl}
           onClick={() =>

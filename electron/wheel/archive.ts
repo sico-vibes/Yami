@@ -1,4 +1,10 @@
-import { crc32, deflateRawSync, gunzipSync, gzipSync, inflateRawSync } from "node:zlib";
+import {
+  crc32,
+  deflateRawSync,
+  gunzipSync,
+  gzipSync,
+  inflateRawSync,
+} from "node:zlib";
 
 export type ArchiveEntry = { name: string; data: Buffer; store?: boolean };
 
@@ -77,13 +83,21 @@ export function unpackZip(buffer: Buffer): ArchiveEntry[] {
     const extraLength = buffer.readUInt16LE(cursor + 30);
     const commentLength = buffer.readUInt16LE(cursor + 32);
     const localAt = buffer.readUInt32LE(cursor + 42);
-    const name = safeName(buffer.toString("utf8", cursor + 46, cursor + 46 + nameLength));
+    const name = safeName(
+      buffer.toString("utf8", cursor + 46, cursor + 46 + nameLength),
+    );
     const localName = buffer.readUInt16LE(localAt + 26);
     const localExtra = buffer.readUInt16LE(localAt + 28);
     const dataAt = localAt + 30 + localName + localExtra;
     const raw = buffer.subarray(dataAt, dataAt + compressed);
-    const data = method === 0 ? Buffer.from(raw) : method === 8 ? inflateRawSync(raw) : null;
-    if (!data) throw new Error("That zip uses a compression method Yami cannot read.");
+    const data =
+      method === 0
+        ? Buffer.from(raw)
+        : method === 8
+          ? inflateRawSync(raw)
+          : null;
+    if (!data)
+      throw new Error("That zip uses a compression method Yami cannot read.");
     if (!name.endsWith("/")) entries.push({ name, data });
     cursor += 46 + nameLength + extraLength + commentLength;
   }
@@ -91,7 +105,10 @@ export function unpackZip(buffer: Buffer): ArchiveEntry[] {
 }
 
 function octal(buffer: Buffer, offset: number, length: number) {
-  const text = buffer.toString("utf8", offset, offset + length).replace(/\0.*$/, "").trim();
+  const text = buffer
+    .toString("utf8", offset, offset + length)
+    .replace(/\0.*$/, "")
+    .trim();
   return text ? parseInt(text, 8) : 0;
 }
 
@@ -101,13 +118,19 @@ export function packTar(entries: ArchiveEntry[]) {
     const name = safeName(entry.name);
     const header = Buffer.alloc(512);
     header.write(name.slice(0, 100), 0, "utf8");
-    header.write(0o644.toString(8).padStart(6, "0"), 100, "utf8");
+    header.write((0o644).toString(8).padStart(6, "0"), 100, "utf8");
     header.write("\0", 106, "utf8");
     header.write("000000\0", 108, "utf8");
     header.write("000000\0", 116, "utf8");
     header.write(entry.data.length.toString(8).padStart(11, "0"), 124, "utf8");
     header.write("\0", 135, "utf8");
-    header.write(Math.floor(Date.now() / 1000).toString(8).padStart(11, "0"), 136, "utf8");
+    header.write(
+      Math.floor(Date.now() / 1000)
+        .toString(8)
+        .padStart(11, "0"),
+      136,
+      "utf8",
+    );
     header.write("\0", 147, "utf8");
     header.fill(0x20, 148, 156);
     header[156] = 48;
@@ -118,7 +141,11 @@ export function packTar(entries: ArchiveEntry[]) {
     header.write(sum.toString(8).padStart(6, "0"), 148, "utf8");
     header[154] = 0;
     header[155] = 0x20;
-    chunks.push(header, entry.data, Buffer.alloc((512 - (entry.data.length % 512)) % 512));
+    chunks.push(
+      header,
+      entry.data,
+      Buffer.alloc((512 - (entry.data.length % 512)) % 512),
+    );
   }
   chunks.push(Buffer.alloc(1024));
   return Buffer.concat(chunks);
@@ -135,8 +162,11 @@ export function unpackTar(buffer: Buffer): ArchiveEntry[] {
     const name = safeName(prefix ? `${prefix}/${shortName}` : shortName);
     const size = octal(header, 124, 12);
     const kind = header[156];
-    const data = Buffer.from(buffer.subarray(offset + 512, offset + 512 + size));
-    if ((kind === 0 || kind === 48) && !name.endsWith("/")) entries.push({ name, data });
+    const data = Buffer.from(
+      buffer.subarray(offset + 512, offset + 512 + size),
+    );
+    if ((kind === 0 || kind === 48) && !name.endsWith("/"))
+      entries.push({ name, data });
     offset += 512 + Math.ceil(size / 512) * 512;
   }
   return entries;

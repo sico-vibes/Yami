@@ -23,19 +23,34 @@ test("media plans stay inside ffmpeg and reject bad ranges", () => {
   assert.match(speed.args.join(" "), /setpts=0\.5000\*PTS/);
   assert.match(speed.args.join(" "), /atempo=2\.0000/);
   assert.throws(() => speedCommand("in.mp4", "out.mp4", 4), /Speed/);
-  assert.ok(videoCropCommand("in.mp4", "out.mp4", { x: 1, y: 2, w: 100, h: 80 }).args.join(" ").includes("crop=100:80:1:2"));
+  assert.ok(
+    videoCropCommand("in.mp4", "out.mp4", { x: 1, y: 2, w: 100, h: 80 })
+      .args.join(" ")
+      .includes("crop=100:80:1:2"),
+  );
   const hidden = videoRedactCommand("in.mp4", "out.mp4", [
     { x: 4, y: 6, w: 20, h: 10, start: 1, end: 2, mode: "blur" },
   ]);
   assert.match(hidden.args.join(" "), /between\(t,1,2\)/);
-  assert.match(bleepCommand("in.wav", "out.wav", 1, 2, 1000).args.join(" "), /sine=frequency=1000/);
-  assert.match(channelsCommand("in.wav", "out.wav", "mono", 1, 1).args.join(" "), /-ac/);
-  assert.equal(concatList(["C:\\a.mp4", "it's.mp4"]), "file 'C:/a.mp4'\nfile 'it'\\''s.mp4'");
+  assert.match(
+    bleepCommand("in.wav", "out.wav", 1, 2, 1000).args.join(" "),
+    /sine=frequency=1000/,
+  );
+  assert.match(
+    channelsCommand("in.wav", "out.wav", "mono", 1, 1).args.join(" "),
+    /-ac/,
+  );
+  assert.equal(
+    concatList(["C:\\a.mp4", "it's.mp4"]),
+    "file 'C:/a.mp4'\nfile 'it'\\''s.mp4'",
+  );
   assert.throws(() => concatList(["a\nb.mp4"]), /cannot be joined/);
 });
 
 test("loudnorm JSON from ffmpeg stderr becomes the second pass", () => {
-  const measured = parseLoudnorm(`noise\n{\n"input_i" : "-23.5",\n"input_tp" : "-7.5",\n"input_lra" : "5.2",\n"input_thresh" : "-34",\n"target_offset" : "0.5"\n}\n`);
+  const measured = parseLoudnorm(
+    `noise\n{\n"input_i" : "-23.5",\n"input_tp" : "-7.5",\n"input_lra" : "5.2",\n"input_thresh" : "-34",\n"target_offset" : "0.5"\n}\n`,
+  );
   assert.equal(measured.i, -23.5);
   assert.equal(parseLoudnorm("no json"), null);
 });
@@ -44,7 +59,10 @@ test("adjust sliders change pixels and leave an untouched copy alone", () => {
   const pixels = new Uint8ClampedArray([255, 255, 255, 255, 10, 10, 10, 255]);
   const same = adjustRgba(pixels, 2, 1, adjustDefaults);
   assert.equal(same[0], 255);
-  const darker = adjustRgba(pixels, 2, 1, { ...adjustDefaults, exposure: -100 });
+  const darker = adjustRgba(pixels, 2, 1, {
+    ...adjustDefaults,
+    exposure: -100,
+  });
   assert.ok(darker[0] < 200);
   const shaded = adjustRgba(pixels, 2, 1, { ...adjustDefaults, vignette: 100 });
   assert.ok(shaded[0] < shaded[4]);
@@ -89,7 +107,8 @@ test("a drawn QR code round-trips through the reader", async () => {
       if (!created.modules.get(x, y)) continue;
       for (let py = 0; py < scale; py += 1) {
         for (let px = 0; px < scale; px += 1) {
-          const index = ((y + quiet) * scale + py) * size + ((x + quiet) * scale + px);
+          const index =
+            ((y + quiet) * scale + py) * size + ((x + quiet) * scale + px);
           data[index * 4] = 0;
           data[index * 4 + 1] = 0;
           data[index * 4 + 2] = 0;

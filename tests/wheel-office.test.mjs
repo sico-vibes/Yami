@@ -19,34 +19,63 @@ async function convert(name, body, target) {
 
 test("subtitles, markdown, and archives convert without an external engine", async () => {
   const vtt = await fs.promises.readFile(
-    await convert("captions.srt", "1\n00:00:01,000 --> 00:00:02,500\nHello grove\n", "vtt"),
+    await convert(
+      "captions.srt",
+      "1\n00:00:01,000 --> 00:00:02,500\nHello grove\n",
+      "vtt",
+    ),
     "utf8",
   );
   assert.match(vtt, /WEBVTT/);
   assert.match(vtt, /00:00:01.000 --> 00:00:02.500/);
-  const html = await fs.promises.readFile(await convert("notes.md", "# Grove\n\nA **tree**.", "html"), "utf8");
+  const html = await fs.promises.readFile(
+    await convert("notes.md", "# Grove\n\nA **tree**.", "html"),
+    "utf8",
+  );
   assert.match(html, /<h1>Grove<\/h1>/);
   assert.match(html, /<strong>tree<\/strong>/);
-  const zip = packZip([{ name: "notes/hello.txt", data: Buffer.from("hello") }]);
+  const zip = packZip([
+    { name: "notes/hello.txt", data: Buffer.from("hello") },
+  ]);
   const tarPath = await convert("bundle.zip", zip, "tar");
-  assert.equal(unpackTar(await fs.promises.readFile(tarPath))[0].data.toString(), "hello");
+  assert.equal(
+    unpackTar(await fs.promises.readFile(tarPath))[0].data.toString(),
+    "hello",
+  );
 });
 
 test("docx, xlsx, epub, and pdf text round-trip", async () => {
   const docx = await convert("notes.txt", "Grove\n\nSecond", "docx");
   assert.match(docxText(unpackZip(await fs.promises.readFile(docx))), /Grove/);
   const sheet = await convert("rows.csv", "name,count\ngrove,2\n", "xlsx");
-  const csv = await fs.promises.readFile(await convert(path.basename(sheet), await fs.promises.readFile(sheet), "csv"), "utf8");
+  const csv = await fs.promises.readFile(
+    await convert(
+      path.basename(sheet),
+      await fs.promises.readFile(sheet),
+      "csv",
+    ),
+    "utf8",
+  );
   assert.match(csv, /grove/);
   const epub = await convert("notes.txt", "Grove chapter", "epub");
-  const html = await fs.promises.readFile(await convert("notes.epub", await fs.promises.readFile(epub), "html"), "utf8");
+  const html = await fs.promises.readFile(
+    await convert("notes.epub", await fs.promises.readFile(epub), "html"),
+    "utf8",
+  );
   assert.match(html, /Grove chapter/);
   const pdf = await convert("notes.txt", "grove", "pdf");
-  const text = await fs.promises.readFile(await convert("notes.pdf", await fs.promises.readFile(pdf), "txt"), "utf8");
+  const text = await fs.promises.readFile(
+    await convert("notes.pdf", await fs.promises.readFile(pdf), "txt"),
+    "utf8",
+  );
   assert.match(text, /grove/);
 });
 
 test("LibreOffice is a separate process and is not required for the text path", () => {
-  assert.deepEqual(sofficeArgs("in.pptx", "C:\\out", "pdf").slice(0, 3), ["--headless", "--norestore", "--convert-to"]);
+  assert.deepEqual(sofficeArgs("in.pptx", "C:\\out", "pdf").slice(0, 3), [
+    "--headless",
+    "--norestore",
+    "--convert-to",
+  ]);
   assert.equal(sofficeArgs("in.pptx", "C:\\out", "png").includes("png"), true);
 });

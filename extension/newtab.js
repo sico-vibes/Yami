@@ -34,7 +34,11 @@ let state = {
   tiles: [
     { name: "GitHub", url: "https://github.com/", folder: "Favourites" },
     { name: "YouTube", url: "https://www.youtube.com/", folder: "Favourites" },
-    { name: "Wikipedia", url: "https://www.wikipedia.org/", folder: "Favourites" },
+    {
+      name: "Wikipedia",
+      url: "https://www.wikipedia.org/",
+      folder: "Favourites",
+    },
   ],
   engine: "https://duckduckgo.com/?q=",
   name: "",
@@ -46,10 +50,22 @@ const save = () => store.set({ ...state });
 
 function clock() {
   const now = new Date();
-  $("clock").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  $("clock").textContent = now.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit",
+  });
   const h = now.getHours();
-  const part = h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-  $("greeting").textContent = state.name ? `${part}, ${state.name}.` : `${part}.`;
+  const part =
+    h < 5
+      ? "Good night"
+      : h < 12
+        ? "Good morning"
+        : h < 18
+          ? "Good afternoon"
+          : "Good evening";
+  $("greeting").textContent = state.name
+    ? `${part}, ${state.name}.`
+    : `${part}.`;
 }
 
 function host(url) {
@@ -62,7 +78,9 @@ function host(url) {
 
 function render() {
   document.body.classList.toggle("custom", !!state.background);
-  $("backdrop").style.backgroundImage = state.background ? `url("${state.background}")` : "";
+  $("backdrop").style.backgroundImage = state.background
+    ? `url("${state.background}")`
+    : "";
   const nav = $("folders");
   nav.replaceChildren(
     ...state.folders.map((f) => {
@@ -120,7 +138,9 @@ $("search").onsubmit = (e) => {
   e.preventDefault();
   const q = $("query").value.trim();
   if (!q) return;
-  location.href = /^https?:\/\/\S+$/.test(q) ? q : state.engine + encodeURIComponent(q);
+  location.href = /^https?:\/\/\S+$/.test(q)
+    ? q
+    : state.engine + encodeURIComponent(q);
 };
 $("open-settings").onclick = () => ($("panel").hidden = false);
 $("close-settings").onclick = () => ($("panel").hidden = true);
@@ -178,7 +198,11 @@ $("add-tile").onclick = () => {
   } catch {
     return;
   }
-  state.tiles.push({ name: $("tile-name").value.trim() || host(url), url, folder: state.folder });
+  state.tiles.push({
+    name: $("tile-name").value.trim() || host(url),
+    url,
+    folder: state.folder,
+  });
   $("tile-name").value = $("tile-url").value = "";
   save();
   render();
@@ -189,7 +213,8 @@ $("import").onclick = async () => {
   const bar = root.children?.[0]?.children || [];
   const add = (nodes, folder) => {
     for (const n of nodes)
-      if (n.url && /^https?:/.test(n.url)) state.tiles.push({ name: n.title, url: n.url, folder });
+      if (n.url && /^https?:/.test(n.url))
+        state.tiles.push({ name: n.title, url: n.url, folder });
       else if (n.children) {
         if (!state.folders.includes(n.title)) state.folders.push(n.title);
         add(n.children, n.title);
@@ -202,7 +227,8 @@ $("import").onclick = async () => {
 
 function linkStatus() {
   if (!globalThis.chrome?.runtime?.sendMessage) {
-    $("link-status").textContent = "Downloads already go to Yami in the Yami Browser.";
+    $("link-status").textContent =
+      "Downloads already go to Yami in the Yami Browser.";
     return;
   }
   chrome.runtime.sendMessage({ type: "yami-status" }, (r) => {

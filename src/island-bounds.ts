@@ -23,7 +23,10 @@ const drawerWidths: Record<string, number> = {
 /** Unclamped island size: the open drawer for `tab`, or the collapsed notch. */
 export function islandSize(open: boolean, tab: string) {
   return open
-    ? { width: drawerWidths[tab] || 730, height: (drawerHeights[tab] || 400) + 34 }
+    ? {
+        width: drawerWidths[tab] || 730,
+        height: (drawerHeights[tab] || 400) + 34,
+      }
     : { width: 220, height: 96 };
 }
 /** The collapsed island grown to fit the media card. */

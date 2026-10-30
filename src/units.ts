@@ -148,7 +148,7 @@ function tidy(value: number) {
 /** "5 km to mi" → { text: "3.10686 mi", … }, or undefined. */
 export function convertUnits(query: string) {
   const m =
-    /^\s*(-?\d+(?:[.,]\d+)?)\s*([^\d\s][^]*?)\s+(?:to|in|as|->|=)?\s*([^\d\s][^]*?)\s*$/i.exec(
+    /^\s*(-?\d+(?:[.,]\d+)?)\s*([^\d\s][\s\S]*?)\s+(?:to|in|as|->|=)?\s*([^\d\s][\s\S]*?)\s*$/i.exec(
       query,
     );
   if (!m) return undefined;

@@ -81,7 +81,10 @@ function Preview() {
             ))}
           </select>
         </label>
-        <button onClick={() => frame.current?.contentWindow?.location.reload()}>
+        <button
+          type="button"
+          onClick={() => frame.current?.contentWindow?.location.reload()}
+        >
           Reset demo
         </button>
         <a href="/docs/internal/index.html" target="_blank" rel="noreferrer">

@@ -31,7 +31,9 @@ test("folders get folder actions only, and Add as project needs one folder", () 
   assert.deepEqual(petalsFor(names, "convert"), []);
   assert.deepEqual(petalsFor(names, "tools"), []);
   assert.match(emptyHint("convert", names), /Folders take actions/);
-  assert.ok(petalsFor(["a.png"], "actions").some((p) => p.id === "action:float"));
+  assert.ok(
+    petalsFor(["a.png"], "actions").some((p) => p.id === "action:float"),
+  );
 });
 
 test("folder size walks the tree, skips links and zips with its folder name", async () => {
@@ -51,7 +53,10 @@ test("folder size walks the tree, skips links and zips with its folder name", as
   await assert.rejects(zipEntries(site, 100), /over 200 MB/);
   const { packZip } = await import("../electron/wheel/archive.ts");
   const round = unpackZip(packZip(entries));
-  assert.equal(round.find((e) => e.name === "site/css/a.css").data.toString(), "y".repeat(24));
+  assert.equal(
+    round.find((e) => e.name === "site/css/a.css").data.toString(),
+    "y".repeat(24),
+  );
   assert.equal(size(1536), "2 KB");
   assert.equal(size(17), "17 bytes");
   assert.equal(size(5 * 1024 ** 3), "5.00 GB");
@@ -68,7 +73,14 @@ test("duplicates are found by content, not by name, and nothing is deleted", asy
   fs.writeFileSync(path.join(root, "empty2"), "");
   const { groups, partial } = await findDuplicates(root);
   assert.equal(partial, false);
-  assert.equal(groups.length, 1, "same size but different content is not a duplicate; empty files are skipped");
-  assert.deepEqual(groups[0].files.map((f) => path.basename(f)).sort(), ["copy.txt", "one.txt"]);
+  assert.equal(
+    groups.length,
+    1,
+    "same size but different content is not a duplicate; empty files are skipped",
+  );
+  assert.deepEqual(groups[0].files.map((f) => path.basename(f)).sort(), [
+    "copy.txt",
+    "one.txt",
+  ]);
   assert.equal(fs.readdirSync(root).length, 4, "nothing was removed");
 });

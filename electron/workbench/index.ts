@@ -19,13 +19,13 @@ import {
   workbenchDefaults,
   type WorkbenchSettings,
 } from "../../src/workbench-types";
-import { WorkbenchStorage } from "./storage";
+import type { WorkbenchStorage } from "./storage";
 import { AgentHub } from "./agents";
 import { shellNames, TerminalController } from "./terminal";
 import { UsageController } from "./usage";
 import { Connections } from "./connections";
 import { LocalModel } from "./local-model";
-import { SpeechController } from "./speech";
+import type { SpeechController } from "./speech";
 import { ContextController } from "./context";
 import { McpClient } from "./mcp";
 import { hookPlan, applyHookPlan } from "./hooks";
@@ -357,12 +357,14 @@ export class Workbench {
       const bytes = await fs.promises.readFile(image);
       if (bytes.length > 15 * 1024 * 1024)
         throw new Error("Background image exceeds 15 MB.");
-      if (!(
-        bytes
-          .subarray(0, 8)
-          .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) ||
-        (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
-      ))
+      if (
+        !(
+          bytes
+            .subarray(0, 8)
+            .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) ||
+          (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255)
+        )
+      )
         throw new Error("Choose a valid PNG or JPEG background.");
       return `data:image/${/\.png$/i.test(image) ? "png" : "jpeg"};base64,${bytes.toString("base64")}`;
     }

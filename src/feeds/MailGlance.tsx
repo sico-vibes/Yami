@@ -84,6 +84,7 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
         <h3 className="group-title">Mail</h3>
         {!adding && (
           <button
+            type="button"
             className="text-button"
             onClick={() => {
               setAdding(true);
@@ -205,6 +206,7 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
                 }
               />
               <button
+                type="button"
                 className="soft-button"
                 onClick={() =>
                   void api("open.external", {
@@ -224,6 +226,7 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
           </p>
           <div className="dialog-actions">
             <button
+              type="button"
               className="soft-button"
               onClick={() => {
                 if (code) void api("feeds.mail.outlook.cancel").catch(() => {});
@@ -234,6 +237,7 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
             </button>
             {provider === "outlook" ? (
               <button
+                type="button"
                 className="primary-button"
                 disabled={busy || !clientId.trim()}
                 onClick={microsoft}
@@ -246,6 +250,7 @@ export function MailGlance({ report }: { report: (m: string) => void }) {
               </button>
             ) : (
               <button
+                type="button"
                 className="primary-button"
                 disabled={busy || !user.trim() || !password}
                 onClick={add}

@@ -71,7 +71,7 @@ export function adjustRgba(
   settings: AdjustSettings,
 ) {
   const out = new Uint8ClampedArray(data);
-  const exposure = Math.pow(2, unit(settings.exposure));
+  const exposure = 2 ** unit(settings.exposure);
   const contrast = 1 + unit(settings.contrast);
   const highlights = unit(settings.highlights);
   const shadows = unit(settings.shadows);
@@ -148,7 +148,12 @@ export function adjustRgba(
   return out;
 }
 
-function sharpen(data: Uint8ClampedArray, width: number, height: number, amount: number) {
+function sharpen(
+  data: Uint8ClampedArray,
+  width: number,
+  height: number,
+  amount: number,
+) {
   if (Math.abs(amount) < 0.01 || width < 3 || height < 3) return;
   const copy = data.slice();
   const strength = amount * 0.85;
@@ -162,7 +167,9 @@ function sharpen(data: Uint8ClampedArray, width: number, height: number, amount:
           copy[index + width * 4 + channel] +
           copy[index - 4 + channel] +
           copy[index + 4 + channel];
-        data[index + channel] = clamp(center + (center - around / 4) * strength);
+        data[index + channel] = clamp(
+          center + (center - around / 4) * strength,
+        );
       }
     }
   }

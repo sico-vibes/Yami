@@ -128,6 +128,7 @@ export function Launcher({
           {snippets.map((s) => (
             <div className="snippet-chip" key={s.id}>
               <button
+                type="button"
                 onClick={() =>
                   void api("snippets.copy", { id: s.id }).then(() =>
                     report("Snippet copied."),
@@ -138,6 +139,7 @@ export function Launcher({
                 {s.name}
               </button>
               <button
+                type="button"
                 aria-label={"Delete snippet " + s.name}
                 onClick={() => void api("snippets.delete", { id: s.id })}
               >
@@ -156,7 +158,7 @@ export function Launcher({
             <h4>Yami</h4>
             {commands.map((c, i) => (
               <div className="launcher-row" key={c.id}>
-                <button onClick={() => run(c)}>
+                <button type="button" onClick={() => run(c)}>
                   <Icon name={c.icon} size={22} />
                   <b>{c.title}</b>
                   <small>{c.hint}</small>
@@ -174,6 +176,7 @@ export function Launcher({
                 {list.slice(0, 80).map((a) => (
                   <div className="launcher-row" key={title + a.path}>
                     <button
+                      type="button"
                       onClick={() =>
                         void api("apps.launch", { path: a.path }).catch((e) =>
                           report(e.message),
@@ -205,6 +208,7 @@ export function Launcher({
             {files.map((f) => (
               <div className="launcher-row" key={f.path}>
                 <button
+                  type="button"
                   onClick={() =>
                     void api("files.open", { path: f.path }).catch((e) =>
                       report(e.message),
@@ -250,6 +254,7 @@ export function Launcher({
             />
           </label>
           <button
+            type="button"
             className="primary-button"
             disabled={!name.trim() || !text.trim()}
             onClick={() =>

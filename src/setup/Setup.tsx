@@ -73,6 +73,7 @@ export function Setup({
       <div className="setup-presets" role="radiogroup" aria-label="Preset">
         {presets.map((p) => (
           <button
+            type="button"
             key={p.id}
             role="radio"
             aria-checked={preset === p.id}
@@ -110,7 +111,12 @@ export function Setup({
             ? ` · ${packs.length} download${packs.length === 1 ? "" : "s"} queued`
             : " · nothing to download yet"}
         </span>
-        <button className="primary-button" disabled={busy} onClick={finish}>
+        <button
+          type="button"
+          className="primary-button"
+          disabled={busy}
+          onClick={finish}
+        >
           {busy
             ? "Saving…"
             : state.settings.setupDone

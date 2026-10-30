@@ -6,14 +6,17 @@ import { emptyHint, kindOf, petalsFor } from "../src/wheel/catalog.ts";
 import { filesFromArgv } from "../src/wheel/argv.ts";
 import { assertWheelPath } from "../electron/wheel/paths.ts";
 
-const ids = (names, mode, caps) => petalsFor(names, mode, caps).map((petal) => petal.id);
+const ids = (names, mode, caps) =>
+  petalsFor(names, mode, caps).map((petal) => petal.id);
 
 test("convert petals follow the file kind and skip a no-op format", () => {
   assert.equal(kindOf("grove.JPEG"), "image");
   assert.ok(ids(["grove.png"], "convert").includes("to:jpg"));
   assert.equal(ids(["grove.png"], "convert").includes("to:png"), false);
   assert.equal(ids(["grove.png"], "convert").includes("to:heic"), false);
-  assert.ok(ids(["grove.png"], "convert", { heicEncode: true }).includes("to:heic"));
+  assert.ok(
+    ids(["grove.png"], "convert", { heicEncode: true }).includes("to:heic"),
+  );
   assert.deepEqual(
     ids(["loop.gif"], "convert").filter((id) => id.startsWith("to:")),
     ["to:mp4", "to:mov", "to:mkv", "to:webm", "to:avi", "to:wmv"],
@@ -26,14 +29,30 @@ test("convert petals follow the file kind and skip a no-op format", () => {
 
 test("tools change when several files are selected", () => {
   assert.ok(ids(["grove.png"], "tools").includes("tool:background"));
-  assert.equal(ids(["grove.png", "orchard.jpg"], "tools").includes("tool:background"), false);
-  assert.ok(ids(["grove.png", "orchard.jpg"], "tools").includes("tool:collage"));
+  assert.equal(
+    ids(["grove.png", "orchard.jpg"], "tools").includes("tool:background"),
+    false,
+  );
+  assert.ok(
+    ids(["grove.png", "orchard.jpg"], "tools").includes("tool:collage"),
+  );
   assert.ok(ids(["notes.pdf", "extra.pdf"], "tools").includes("tool:merge"));
   assert.equal(ids(["notes.pdf"], "tools").includes("tool:merge"), false);
-  assert.deepEqual(ids(["grove.png", "notes.pdf"], "tools"), ["tool:compress", "tool:metadata", "tool:rename"]);
-  assert.equal(ids(["notes.pdf"], "tools").includes("tool:rename"), false, "rename needs several files");
+  assert.deepEqual(ids(["grove.png", "notes.pdf"], "tools"), [
+    "tool:compress",
+    "tool:metadata",
+    "tool:rename",
+  ]);
+  assert.equal(
+    ids(["notes.pdf"], "tools").includes("tool:rename"),
+    false,
+    "rename needs several files",
+  );
   assert.equal(ids(["grove.png", "notes.pdf"], "convert").length, 0);
-  assert.match(emptyHint("convert", ["grove.png", "notes.pdf"]), /different kinds/);
+  assert.match(
+    emptyHint("convert", ["grove.png", "notes.pdf"]),
+    /different kinds/,
+  );
   assert.ok(ids(["bundle.rar"], "tools").includes("tool:extract"));
   assert.equal(ids(["anywhere.txt"], "actions").length, 5);
 });

@@ -35,7 +35,7 @@ test("palette results follow the query and the modules that are on", () => {
     "page:tune",
   );
   assert.equal(paletteItems("modules", settings)[0].id, "page:settings");
-  const projects = [{ id: "p1", name: "yami", path: "D:\Code\yami" }];
+  const projects = [{ id: "p1", name: "yami", path: "D:Codeyami" }];
   const found = paletteItems("yami", settings, projects);
   assert.deepEqual(found.find((i) => i.id === "project:p1").run, {
     method: "dev.launch",

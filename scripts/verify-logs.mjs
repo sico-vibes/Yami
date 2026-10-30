@@ -17,7 +17,13 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const logs = path.join(profile, "logs");
 const read = (ch) => {
   const f = fs.readdirSync(logs).find((n) => n.endsWith("." + ch));
-  return f ? fs.readFileSync(path.join(logs, f), "utf8").trim().split("\n").map((l) => JSON.parse(l)) : [];
+  return f
+    ? fs
+        .readFileSync(path.join(logs, f), "utf8")
+        .trim()
+        .split("\n")
+        .map((l) => JSON.parse(l))
+    : [];
 };
 try {
   await app.firstWindow();
@@ -27,12 +33,20 @@ try {
     if (!main) await wait(100);
   }
   await main.locator(".bottom-dock").waitFor();
-  const call = (m, a) => main.evaluate(([m, a]) => window.yami.invoke(m, a), [m, a]);
+  const call = (m, a) =>
+    main.evaluate(([m, a]) => window.yami.invoke(m, a), [m, a]);
   await wait(500);
-  assert.ok(read("LOG").some((e) => e.msg === "Yami started"), "the start is logged");
+  assert.ok(
+    read("LOG").some((e) => e.msg === "Yami started"),
+    "the start is logged",
+  );
 
   // An error thrown in a page reaches ERR, with a triage entry.
-  await main.evaluate(() => setTimeout(() => { throw new TypeError("verify-logs page error"); }));
+  await main.evaluate(() =>
+    setTimeout(() => {
+      throw new TypeError("verify-logs page error");
+    }),
+  );
   await wait(800);
   const err = read("ERR").find((e) => e.msg === "verify-logs page error");
   assert.ok(err, "the page error is in ERR");
@@ -55,22 +69,47 @@ try {
   await call("settings", { debugLogging: true });
   await call("state");
   await wait(300);
-  assert.ok(read("DEG").some((e) => e.msg === "state"), "requests are timed while on");
+  assert.ok(
+    read("DEG").some((e) => e.msg === "state"),
+    "requests are timed while on",
+  );
   await call("settings", { debugLogging: false });
 
   // A secret in a message is masked.
   await main.evaluate(() =>
-    window.yami.invoke("log.report", { message: "key AIzaSyD0notreal0123456789abcdefghijklmn", stack: "" }),
+    window.yami.invoke("log.report", {
+      message: "key AIzaSyD0notreal0123456789abcdefghijklmn",
+      stack: "",
+    }),
   );
   await wait(300);
-  assert.ok(!JSON.stringify(read("ERR")).includes("0123456789abcdefghijklmn"), "the key is masked");
+  assert.ok(
+    !JSON.stringify(read("ERR")).includes("0123456789abcdefghijklmn"),
+    "the key is masked",
+  );
 
-  const { file } = await call("log.collect", { note: "verify-logs", reveal: false });
+  const { file } = await call("log.collect", {
+    note: "verify-logs",
+    reveal: false,
+  });
   const text = fs.readFileSync(file, "utf8");
-  for (const part of ["## system", "## problems", "## errors", "## log", "verify-logs page error", "## settings"])
+  for (const part of [
+    "## system",
+    "## problems",
+    "## errors",
+    "## log",
+    "verify-logs page error",
+    "## settings",
+  ])
     assert.ok(text.includes(part), "the report has " + part);
   assert.ok((await call("log.read", { channel: "ERR", limit: 5 })).length >= 1);
-  console.log(JSON.stringify({ passed: true, report: path.basename(file), sizeKB: Math.round(text.length / 1024) }));
+  console.log(
+    JSON.stringify({
+      passed: true,
+      report: path.basename(file),
+      sizeKB: Math.round(text.length / 1024),
+    }),
+  );
 } finally {
   await app.close();
 }

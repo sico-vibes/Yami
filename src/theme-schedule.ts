@@ -28,5 +28,7 @@ export function nextSwitch(now: Date, lightAt: string, darkFrom: string) {
   };
   const toLight = at(lightAt),
     toDark = at(darkFrom);
-  return toDark < toLight ? { at: toDark, dark: true } : { at: toLight, dark: false };
+  return toDark < toLight
+    ? { at: toDark, dark: true }
+    : { at: toLight, dark: false };
 }

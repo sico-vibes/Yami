@@ -296,6 +296,7 @@ export function Loadout({
                         : card.description}
                     </p>
                     <button
+                      type="button"
                       disabled={active || locked}
                       className={locked || active ? "" : "buy-button"}
                       onClick={(e) => {
@@ -348,6 +349,7 @@ export function Loadout({
                 <p>Click, then press any key or mouse button. Esc cancels.</p>
               </div>
               <button
+                type="button"
                 className="soft-button"
                 aria-label="Change ability trigger"
                 onClick={() => setBinding(true)}

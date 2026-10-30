@@ -21,7 +21,12 @@ export function log(): LogCore {
       packaged: app.isPackaged,
       windows: BrowserWindow.getAllWindows()
         .filter((w) => !w.isDestroyed())
-        .map((w) => new URL(w.webContents.getURL() || "about:blank").searchParams.get("window") || "other"),
+        .map(
+          (w) =>
+            new URL(w.webContents.getURL() || "about:blank").searchParams.get(
+              "window",
+            ) || "other",
+        ),
       ...context(),
     }),
     debug: () => debug(),
@@ -33,14 +38,20 @@ export function log(): LogCore {
  * Facts the main process adds to every triage entry (such as modules on),
  * and whether debug logging is on.
  */
-export function setLogContext(get: () => Record<string, unknown>, debugOn: () => boolean) {
+export function setLogContext(
+  get: () => Record<string, unknown>,
+  debugOn: () => boolean,
+) {
   context = get;
   debug = debugOn;
 }
 
 // Errors that mean a bug in Yami, rather than a message for the user.
 const bug = (e: unknown) =>
-  e instanceof TypeError || e instanceof ReferenceError || e instanceof RangeError || e instanceof SyntaxError;
+  e instanceof TypeError ||
+  e instanceof ReferenceError ||
+  e instanceof RangeError ||
+  e instanceof SyntaxError;
 
 /** Hooks crash and failure events. Call once, right after the data folder is set. */
 export function installLogging() {
@@ -56,22 +67,36 @@ export function installLogging() {
       app.exit(1);
     }
   });
-  process.on("unhandledRejection", (e) => log().error("main", e, { kind: "unhandled rejection" }));
+  process.on("unhandledRejection", (e) =>
+    log().error("main", e, { kind: "unhandled rejection" }),
+  );
   app.on("render-process-gone", (_e, contents, details) =>
-    log().error("renderer", new Error(`A window's page stopped: ${details.reason}`), {
-      window: windowName(contents.getURL()),
-      exitCode: details.exitCode,
-    }),
+    log().error(
+      "renderer",
+      new Error(`A window's page stopped: ${details.reason}`),
+      {
+        window: windowName(contents.getURL()),
+        exitCode: details.exitCode,
+      },
+    ),
   );
   app.on("child-process-gone", (_e, details) => {
     if (details.reason !== "clean-exit")
-      log().error("process", new Error(`${details.type} process stopped: ${details.reason}`), {
-        name: details.name,
-        exitCode: details.exitCode,
-      });
+      log().error(
+        "process",
+        new Error(`${details.type} process stopped: ${details.reason}`),
+        {
+          name: details.name,
+          exitCode: details.exitCode,
+        },
+      );
   });
   app.on("browser-window-created", (_e, w) => {
-    w.on("unresponsive", () => log().info("window", "A window stopped responding", { window: windowName(w.webContents.getURL()) }));
+    w.on("unresponsive", () =>
+      log().info("window", "A window stopped responding", {
+        window: windowName(w.webContents.getURL()),
+      }),
+    );
   });
   app.whenReady().then(() => {
     ready = true;
@@ -100,9 +125,17 @@ const windowName = (url: string) => {
  * ones are noted in LOG, refusals in LOG and bugs in ERR with triage.
  */
 export function logged<A extends unknown[]>(
-  handler: (event: Electron.IpcMainInvokeEvent, method: string, ...rest: A) => Promise<unknown>,
+  handler: (
+    event: Electron.IpcMainInvokeEvent,
+    method: string,
+    ...rest: A
+  ) => Promise<unknown>,
 ) {
-  return async (event: Electron.IpcMainInvokeEvent, method: string, ...rest: A) => {
+  return async (
+    event: Electron.IpcMainInvokeEvent,
+    method: string,
+    ...rest: A
+  ) => {
     const start = performance.now();
     try {
       const result = await handler(event, method, ...rest);
@@ -113,14 +146,21 @@ export function logged<A extends unknown[]>(
     } catch (e) {
       const ms = Math.round(performance.now() - start);
       if (bug(e)) log().error("request", e, { method, ms });
-      else log().info("request", `${method} failed`, { error: e instanceof Error ? e.message : String(e), ms });
+      else
+        log().info("request", `${method} failed`, {
+          error: e instanceof Error ? e.message : String(e),
+          ms,
+        });
       throw e;
     }
   };
 }
 
 /** Writes a CLT report (see core.ts) and returns its path. */
-export async function collectReport(note: string | undefined, settings: unknown) {
+export async function collectReport(
+  note: string | undefined,
+  settings: unknown,
+) {
   const l = log();
   await l.flush();
   return l.collect({
@@ -166,11 +206,21 @@ export async function logRequest(
       const r = reports.get(sender.id);
       const now = Date.now();
       if (r && now - r.at < 60_000 && r.count >= 20) return false;
-      reports.set(sender.id, r && now - r.at < 60_000 ? { at: r.at, count: r.count + 1 } : { at: now, count: 1 });
-      const e = new Error(String(a?.message || "Error in a window").slice(0, 1000));
+      reports.set(
+        sender.id,
+        r && now - r.at < 60_000
+          ? { at: r.at, count: r.count + 1 }
+          : { at: now, count: 1 },
+      );
+      const e = new Error(
+        String(a?.message || "Error in a window").slice(0, 1000),
+      );
       e.name = String(a?.name || "Error").slice(0, 60);
       e.stack = String(a?.stack || e.stack).slice(0, 6000);
-      l.error("page", e, { window: windowName(sender.getURL()), source: String(a?.source || "").slice(0, 200) });
+      l.error("page", e, {
+        window: windowName(sender.getURL()),
+        source: String(a?.source || "").slice(0, 200),
+      });
       return true;
     }
     case "log.open":
@@ -185,9 +235,17 @@ export async function logRequest(
       return { file };
     }
     case "log.read": {
-      const channel = (["LOG", "ERR", "DEG", "TRG"] as Channel[]).includes(a?.channel) ? a.channel : "ERR";
+      const channel = (["LOG", "ERR", "DEG", "TRG"] as Channel[]).includes(
+        a?.channel,
+      )
+        ? a.channel
+        : "ERR";
       await l.flush();
-      return l.read(channel, Math.min(500, Math.max(1, Number(a?.limit) || 100)), typeof a?.since === "string" ? a.since : undefined);
+      return l.read(
+        channel,
+        Math.min(500, Math.max(1, Number(a?.limit) || 100)),
+        typeof a?.since === "string" ? a.since : undefined,
+      );
     }
     case "log.problems":
       return l.problems();

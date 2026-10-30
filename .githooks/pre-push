@@ -1,0 +1,6 @@
+#!/bin/sh
+# Runs Yami's checks before every push: lines, UI rules, Biome lint and
+# format, secrets, types, the native build and the tests. Skip once, at your
+# own risk, with: git push --no-verify
+echo "Yami pre-push: npm run verify"
+npm run verify

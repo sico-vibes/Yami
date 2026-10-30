@@ -89,8 +89,7 @@ export function stateEnergy(state: string) {
 }
 
 // A pointed bump: 1 at the tongue's centre, 0 at its edges.
-const bump = (s: number) =>
-  Math.abs(s) >= 1 ? 0 : Math.pow(1 - Math.abs(s), 1.7);
+const bump = (s: number) => (Math.abs(s) >= 1 ? 0 : (1 - Math.abs(s)) ** 1.7);
 
 // Outline points for one layer. Every time-varying term is scaled by
 // `energy`, so energy 0 gives the same still flame at any time.
@@ -135,7 +134,7 @@ export function layerPoints(
           curl = g.bend * (k * k + 0.25 * Math.sin(k * Math.PI));
         }
       }
-      reach = belly * Math.pow(below, 1.5) + best;
+      reach = belly * below ** 1.5 + best;
     }
     // Flames sweep downward and inward, so the bottom tapers like an
     // upside-down flame instead of fanning out sideways.
@@ -144,7 +143,7 @@ export function layerPoints(
       fy = Math.sin(a) * 0.3 + 0.7,
       fl = Math.hypot(fx, fy),
       squeeze = 1 - 0.22 * Math.min(1, reach / longest),
-      pull = Math.pow(reach / (longest + belly), 1.5) * 9;
+      pull = (reach / (longest + belly)) ** 1.5 * 9;
     const x = CENTER.x + Math.cos(a) * r + (fx / fl) * reach,
       y = CENTER.y + Math.sin(a) * r + (fy / fl) * reach;
     points.push({

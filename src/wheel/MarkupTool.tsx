@@ -15,7 +15,6 @@ type Mark = {
   color: string;
 };
 
-
 export function MarkupTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const { image, note, setNote } = useStill(files[0]);
@@ -39,13 +38,21 @@ export function MarkupTool({ files }: { files: WheelFile[] }) {
     };
   };
   return (
-    <ToolShell title="Markup" note={note || "Arrows, shapes, labels, and a magnifier are drawn on a new PNG."}>
+    <ToolShell
+      title="Markup"
+      note={
+        note ||
+        "Arrows, shapes, labels, and a magnifier are drawn on a new PNG."
+      }
+    >
       <div className="tool-preview">
         <canvas
           ref={canvas}
           onPointerDown={(event) => {
             const point = at(event);
-            const label = String(marks.filter((mark) => mark.kind === "label").length + 1);
+            const label = String(
+              marks.filter((mark) => mark.kind === "label").length + 1,
+            );
             draft.current = {
               kind,
               ...point,
@@ -65,43 +72,74 @@ export function MarkupTool({ files }: { files: WheelFile[] }) {
             drawMark(ctx, canvas.current, draft.current);
           }}
           onPointerUp={() => {
-            if (draft.current) setMarks((current) => [...current, draft.current as Mark]);
+            if (draft.current)
+              setMarks((current) => [...current, draft.current as Mark]);
             draft.current = null;
           }}
         />
       </div>
       <div className="markup-tools">
-        {(["arrow", "box", "ellipse", "text", "label", "lens"] as Kind[]).map((item) => (
-          <button key={item} type="button" aria-pressed={kind === item} onClick={() => setKind(item)}>
-            {item}
-          </button>
-        ))}
+        {(["arrow", "box", "ellipse", "text", "label", "lens"] as Kind[]).map(
+          (item) => (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={kind === item}
+              onClick={() => setKind(item)}
+            >
+              {item}
+            </button>
+          ),
+        )}
       </div>
       <label className="tool-row">
         Text
-        <input aria-label="Markup text" value={text} onChange={(event) => setText(event.target.value.slice(0, 80))} />
+        <input
+          aria-label="Markup text"
+          value={text}
+          onChange={(event) => setText(event.target.value.slice(0, 80))}
+        />
         <span />
       </label>
       <div className="swatches" aria-label="Ink">
         {inks.map((ink) => (
-          <button key={ink.name} type="button" aria-label={ink.name} data-tip={ink.name} aria-pressed={color === ink.color} style={{ background: ink.color }} onClick={() => setColor(ink.color)} />
+          <button
+            key={ink.name}
+            type="button"
+            aria-label={ink.name}
+            data-tip={ink.name}
+            aria-pressed={color === ink.color}
+            style={{ background: ink.color }}
+            onClick={() => setColor(ink.color)}
+          />
         ))}
       </div>
       <div className="tool-actions">
-        <button type="button" onClick={() => setMarks((current) => current.slice(0, -1))}>
+        <button
+          type="button"
+          onClick={() => setMarks((current) => current.slice(0, -1))}
+        >
           Undo
         </button>
         <span />
       </div>
       <Save
         label="Save annotated copy"
-        onClick={() => savePng(canvas.current, "tool:markup").catch((error: Error) => setNote(error.message))}
+        onClick={() =>
+          savePng(canvas.current, "tool:markup").catch((error: Error) =>
+            setNote(error.message),
+          )
+        }
       />
     </ToolShell>
   );
 }
 
-function drawMark(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, mark: Mark) {
+function drawMark(
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  mark: Mark,
+) {
   const x = mark.x * canvas.width;
   const y = mark.y * canvas.height;
   const x2 = mark.x2 * canvas.width;
@@ -113,7 +151,16 @@ function drawMark(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, mark
   if (mark.kind === "box" || mark.kind === "ellipse") {
     ctx.beginPath();
     if (mark.kind === "box") ctx.strokeRect(x, y, x2 - x, y2 - y);
-    else ctx.ellipse((x + x2) / 2, (y + y2) / 2, Math.abs(x2 - x) / 2, Math.abs(y2 - y) / 2, 0, 0, Math.PI * 2);
+    else
+      ctx.ellipse(
+        (x + x2) / 2,
+        (y + y2) / 2,
+        Math.abs(x2 - x) / 2,
+        Math.abs(y2 - y) / 2,
+        0,
+        0,
+        Math.PI * 2,
+      );
     ctx.stroke();
   } else if (mark.kind === "arrow") {
     ctx.beginPath();
@@ -123,8 +170,14 @@ function drawMark(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, mark
     const angle = Math.atan2(y2 - y, x2 - x);
     ctx.beginPath();
     ctx.moveTo(x2, y2);
-    ctx.lineTo(x2 - 12 * Math.cos(angle - 0.4), y2 - 12 * Math.sin(angle - 0.4));
-    ctx.lineTo(x2 - 12 * Math.cos(angle + 0.4), y2 - 12 * Math.sin(angle + 0.4));
+    ctx.lineTo(
+      x2 - 12 * Math.cos(angle - 0.4),
+      y2 - 12 * Math.sin(angle - 0.4),
+    );
+    ctx.lineTo(
+      x2 - 12 * Math.cos(angle + 0.4),
+      y2 - 12 * Math.sin(angle + 0.4),
+    );
     ctx.closePath();
     ctx.fill();
   } else if (mark.kind === "lens") {

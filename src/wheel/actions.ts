@@ -2,7 +2,8 @@ import { extensionOf } from "./catalog.ts";
 import { allocateFile, stemOf } from "./naming.ts";
 
 export function quotePowerShell(value: string) {
-  if (/[\r\n\0]/.test(value)) throw new Error("That path cannot be sent to PowerShell.");
+  if (/[\r\n\0]/.test(value))
+    throw new Error("That path cannot be sent to PowerShell.");
   return `'${value.replace(/'/g, "''")}'`;
 }
 
@@ -24,10 +25,24 @@ export function pathText(paths: string[]) {
 export function terminalLaunch(directory: string) {
   return {
     command: "powershell.exe",
-    args: ["-NoExit", "-NoProfile", "-Command", `Set-Location -LiteralPath ${quotePowerShell(directory)}`],
+    args: [
+      "-NoExit",
+      "-NoProfile",
+      "-Command",
+      `Set-Location -LiteralPath ${quotePowerShell(directory)}`,
+    ],
   };
 }
 
-export function destinationFor(directory: string, name: string, exists: (value: string) => boolean) {
-  return allocateFile(directory, stemOf(name), extensionOf(name) || "dat", exists);
+export function destinationFor(
+  directory: string,
+  name: string,
+  exists: (value: string) => boolean,
+) {
+  return allocateFile(
+    directory,
+    stemOf(name),
+    extensionOf(name) || "dat",
+    exists,
+  );
 }

@@ -74,7 +74,10 @@ try {
           session,
         ),
       ),
-      await fetch(`http://localhost:${port}/`).then((r) => r.text(), (e) => e.message),
+      await fetch(`http://localhost:${port}/`).then(
+        (r) => r.text(),
+        (e) => e.message,
+      ),
     );
   }
   assert.ok(shown, "the tab's server is listed");

@@ -15,8 +15,10 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const image = useRef<CanvasImageSource | null>(null);
   const backdrop = useRef<CanvasImageSource | null>(null);
-  const [settings, setSettings] = useState<BackgroundSettings>(backgroundDefaults);
-  const [choices, setChoices] = useState<BackgroundChoice[]>(BACKGROUND_PRESETS);
+  const [settings, setSettings] =
+    useState<BackgroundSettings>(backgroundDefaults);
+  const [choices, setChoices] =
+    useState<BackgroundChoice[]>(BACKGROUND_PRESETS);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
   const file = files[0];
@@ -24,16 +26,24 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
     let cancelled = false;
     const draw = () => {
       if (canvas.current)
-        paintBackground(canvas.current, image.current, settings, choices, backdrop.current);
+        paintBackground(
+          canvas.current,
+          image.current,
+          settings,
+          choices,
+          backdrop.current,
+        );
     };
     void (async () => {
       const extra = await api("wheel.backgrounds").catch(() => []);
       if (cancelled) return;
-      const wallpapers = (extra as { id: string; url: string }[]).map((item) => ({
-        id: item.id,
-        kind: "image" as const,
-        url: item.url,
-      }));
+      const wallpapers = (extra as { id: string; url: string }[]).map(
+        (item) => ({
+          id: item.id,
+          kind: "image" as const,
+          url: item.url,
+        }),
+      );
       setChoices([...BACKGROUND_PRESETS, ...wallpapers]);
       if (!file || file.path.startsWith("preview://")) {
         image.current = sampleStill();
@@ -49,7 +59,9 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
         };
         loaded.src = url;
       } catch (error) {
-        setNote(error instanceof Error ? error.message : "Preview unavailable.");
+        setNote(
+          error instanceof Error ? error.message : "Preview unavailable.",
+        );
         image.current = sampleStill();
         draw();
       }
@@ -70,11 +82,18 @@ export function BackgroundTool({ files }: { files: WheelFile[] }) {
     loaded.onload = () => {
       backdrop.current = loaded;
       if (canvas.current)
-        paintBackground(canvas.current, image.current, settings, choices, loaded);
+        paintBackground(
+          canvas.current,
+          image.current,
+          settings,
+          choices,
+          loaded,
+        );
     };
     loaded.src = choice.url;
   }, [settings, choices]);
-  const patch = (next: Partial<BackgroundSettings>) => setSettings((current) => ({ ...current, ...next }));
+  const patch = (next: Partial<BackgroundSettings>) =>
+    setSettings((current) => ({ ...current, ...next }));
   return (
     <ToolShell title="Background" note={note}>
       <div className="tool-preview">

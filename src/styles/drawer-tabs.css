@@ -384,7 +384,11 @@
 }
 .clipboard-item[data-pinned="true"] {
   border-color: var(--selected-line);
-  background: linear-gradient(150deg, rgba(188, 170, 255, 0.1), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(
+    150deg,
+    rgba(188, 170, 255, 0.1),
+    rgba(255, 255, 255, 0.02)
+  );
 }
 .clipboard-item .icon-button {
   width: 30px;

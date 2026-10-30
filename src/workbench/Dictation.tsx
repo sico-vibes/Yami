@@ -33,7 +33,7 @@ export function Dictation({
     0,
   );
   // Choosing Whistle is consent to turn it on and fetch its two pinned files.
-  const useWhistle = () =>
+  const enableWhistle = () =>
     void api("modules.set", { id: "whistle", enabled: true })
       .then(() => api("packs.install", { id: "needle" }))
       .then(() => api("packs.install", { id: "whistle" }))
@@ -63,7 +63,7 @@ export function Dictation({
             value={data.settings.dictationEngine}
             onChange={(dictationEngine) => {
               patch({ dictationEngine });
-              if (dictationEngine === "whistle") useWhistle();
+              if (dictationEngine === "whistle") enableWhistle();
             }}
             options={[
               { value: "gemini", label: "Gemini", icon: "sparkle" },
@@ -94,7 +94,11 @@ export function Dictation({
               )}
             </div>
             {!ready && !busy && (
-              <button className="soft-button" onClick={useWhistle}>
+              <button
+                type="button"
+                className="soft-button"
+                onClick={enableWhistle}
+              >
                 <Icon name="download-simple" size={16} />
                 {failed ? "Try again" : "Download"}
               </button>
@@ -118,6 +122,7 @@ export function Dictation({
             </p>
           </div>
           <button
+            type="button"
             className="soft-button"
             onClick={() =>
               void api("speech.recognizers")
@@ -164,7 +169,11 @@ export function Dictation({
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
           />
-          <button className="primary-button" disabled={!heard.trim()}>
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={!heard.trim()}
+          >
             <Icon name="plus" size={16} />
             Add
           </button>
@@ -235,7 +244,11 @@ export function Dictation({
               { value: "polished", label: "Polished" },
             ]}
           />
-          <button className="primary-button" disabled={!appName.trim()}>
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={!appName.trim()}
+          >
             <Icon name="plus" size={16} />
             Add app rule
           </button>
@@ -269,6 +282,7 @@ export function Dictation({
             "Your next completed dictation will appear here."}
         </p>
         <button
+          type="button"
           className="soft-button"
           disabled={!data.settings.lastDictation}
           onClick={() =>

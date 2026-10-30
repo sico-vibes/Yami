@@ -16,7 +16,17 @@ export type MeasuredLoudness = Loudness & { thresh: number; offset: number };
 function ffmpeg(input: string, extra: string[], output: string): EngineCommand {
   return {
     engine: "ffmpeg",
-    args: ["-hide_banner", "-y", "-i", input, ...extra, "-progress", "pipe:1", "-nostats", output],
+    args: [
+      "-hide_banner",
+      "-y",
+      "-i",
+      input,
+      ...extra,
+      "-progress",
+      "pipe:1",
+      "-nostats",
+      output,
+    ],
   };
 }
 
@@ -38,14 +48,23 @@ export function muteCommand(input: string, output: string): EngineCommand {
   return ffmpeg(input, ["-an", "-c:v", "copy"], output);
 }
 
-export function trimCommand(input: string, output: string, start: number, end: number): EngineCommand {
+export function trimCommand(
+  input: string,
+  output: string,
+  start: number,
+  end: number,
+): EngineCommand {
   const from = text(start, "Start", 0, 86_400);
   const to = text(end, "End", 0, 86_400);
-  if (Number(to) <= Number(from)) throw new Error("The end must be after the start.");
+  if (Number(to) <= Number(from))
+    throw new Error("The end must be after the start.");
   return ffmpeg(input, ["-ss", from, "-to", to], output);
 }
 
-export function silenceTrimCommand(input: string, output: string): EngineCommand {
+export function silenceTrimCommand(
+  input: string,
+  output: string,
+): EngineCommand {
   return ffmpeg(
     input,
     [
@@ -65,10 +84,18 @@ export function videoCropCommand(
   const y = whole(box.y, "Y", 0, 16_000);
   const w = whole(box.w, "Width", 2, 16_000);
   const h = whole(box.h, "Height", 2, 16_000);
-  return ffmpeg(input, ["-vf", `crop=${w}:${h}:${x}:${y}`, "-c:a", "copy"], output);
+  return ffmpeg(
+    input,
+    ["-vf", `crop=${w}:${h}:${x}:${y}`, "-c:a", "copy"],
+    output,
+  );
 }
 
-export function speedCommand(input: string, output: string, rate: number): EngineCommand {
+export function speedCommand(
+  input: string,
+  output: string,
+  rate: number,
+): EngineCommand {
   const speed = range(rate, "Speed", 0.5, 2);
   const video = (1 / speed).toFixed(4);
   return ffmpeg(
@@ -116,12 +143,20 @@ export function joinCommand(listFile: string, output: string): EngineCommand {
   };
 }
 
-export function snapshotCommand(input: string, pattern: string, everySeconds: number): EngineCommand {
+export function snapshotCommand(
+  input: string,
+  pattern: string,
+  everySeconds: number,
+): EngineCommand {
   const step = text(everySeconds, "Interval", 0.2, 3600);
   return ffmpeg(input, ["-vf", `fps=1/${step}`], pattern);
 }
 
-export function splitCommand(input: string, pattern: string, seconds: number): EngineCommand {
+export function splitCommand(
+  input: string,
+  pattern: string,
+  seconds: number,
+): EngineCommand {
   const step = text(seconds, "Clip length", 1, 3600);
   return {
     engine: "ffmpeg",
@@ -143,7 +178,11 @@ export function splitCommand(input: string, pattern: string, seconds: number): E
   };
 }
 
-export function videoRedactCommand(input: string, output: string, boxes: RedactBox[]): EngineCommand {
+export function videoRedactCommand(
+  input: string,
+  output: string,
+  boxes: RedactBox[],
+): EngineCommand {
   if (!boxes.length) throw new Error("Draw a box to hide.");
   if (boxes.length > 6) throw new Error("Six boxes is the limit for one pass.");
   const parts: string[] = [];
@@ -155,7 +194,8 @@ export function videoRedactCommand(input: string, output: string, boxes: RedactB
     const h = whole(box.h, "Height", 2, 16_000);
     const start = text(box.start, "Start", 0, 86_400);
     const end = text(box.end, "End", 0, 86_400);
-    if (Number(end) <= Number(start)) throw new Error("The end must be after the start.");
+    if (Number(end) <= Number(start))
+      throw new Error("The end must be after the start.");
     const next = index === boxes.length - 1 ? "[v]" : `[v${index}]`;
     if (box.mode === "solid") {
       parts.push(
@@ -163,17 +203,27 @@ export function videoRedactCommand(input: string, output: string, boxes: RedactB
       );
     } else {
       parts.push(`${current}split=2[base${index}][crop${index}]`);
-      parts.push(`[crop${index}]crop=${w}:${h}:${x}:${y},boxblur=8:1[blur${index}]`);
+      parts.push(
+        `[crop${index}]crop=${w}:${h}:${x}:${y},boxblur=8:1[blur${index}]`,
+      );
       parts.push(
         `[base${index}][blur${index}]overlay=${x}:${y}:enable='between(t,${start},${end})'${next}`,
       );
     }
     current = next;
   });
-  return ffmpeg(input, ["-filter_complex", parts.join(";"), "-map", "[v]", "-map", "0:a?"], output);
+  return ffmpeg(
+    input,
+    ["-filter_complex", parts.join(";"), "-map", "[v]", "-map", "0:a?"],
+    output,
+  );
 }
 
-export function normalizeCommand(input: string, output: string, loudness: Loudness): EngineCommand {
+export function normalizeCommand(
+  input: string,
+  output: string,
+  loudness: Loudness,
+): EngineCommand {
   const target = loudnessText(loudness);
   return ffmpeg(input, ["-af", `loudnorm=${target}`], output);
 }
@@ -225,7 +275,10 @@ export function parseLoudnorm(stderr: string): MeasuredLoudness | null {
   const end = stderr.lastIndexOf("}");
   if (start < 0 || end <= start) return null;
   try {
-    const json = JSON.parse(stderr.slice(start, end + 1)) as Record<string, string>;
+    const json = JSON.parse(stderr.slice(start, end + 1)) as Record<
+      string,
+      string
+    >;
     const measured = {
       i: Number(json.input_i),
       lra: Number(json.input_lra),
@@ -233,7 +286,8 @@ export function parseLoudnorm(stderr: string): MeasuredLoudness | null {
       thresh: Number(json.input_thresh),
       offset: Number(json.target_offset),
     };
-    if (Object.values(measured).some((value) => !Number.isFinite(value))) return null;
+    if (Object.values(measured).some((value) => !Number.isFinite(value)))
+      return null;
     return measured;
   } catch {
     return null;
@@ -250,7 +304,11 @@ export function channelsCommand(
   const l = text(left, "Left", 0, 2);
   const r = text(right, "Right", 0, 2);
   if (layout === "mono")
-    return ffmpeg(input, ["-ac", "1", "-af", `volume=${text((left + right) / 2, "Volume", 0, 2)}`], output);
+    return ffmpeg(
+      input,
+      ["-ac", "1", "-af", `volume=${text((left + right) / 2, "Volume", 0, 2)}`],
+      output,
+    );
   return ffmpeg(input, ["-af", `pan=stereo|c0=${l}*c0|c1=${r}*c1`], output);
 }
 
@@ -263,7 +321,8 @@ export function bleepCommand(
 ): EngineCommand {
   const from = text(start, "Start", 0, 86_400);
   const to = text(end, "End", 0, 86_400);
-  if (Number(to) <= Number(from)) throw new Error("The end must be after the start.");
+  if (Number(to) <= Number(from))
+    throw new Error("The end must be after the start.");
   const tone = text(hz, "Tone", 200, 4000);
   const filter = [
     `[0:a]volume=0:enable='between(t,${from},${to})'[voice]`,
@@ -273,7 +332,10 @@ export function bleepCommand(
   return ffmpeg(input, ["-filter_complex", filter], output);
 }
 
-export function visualizerCommand(input: string, output: string): EngineCommand {
+export function visualizerCommand(
+  input: string,
+  output: string,
+): EngineCommand {
   return ffmpeg(
     input,
     [

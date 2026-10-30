@@ -77,6 +77,7 @@ export function SpotifyPanel({ report }: { report: (m: string) => void }) {
               onChange={(e) => setClientId(e.target.value)}
             />
             <button
+              type="button"
               className="primary-button"
               disabled={busy || !/^[0-9a-f]{32}$/i.test(clientId.trim())}
               onClick={() => {
@@ -128,6 +129,7 @@ export function SpotifyPanel({ report }: { report: (m: string) => void }) {
             onClick={() => act("repeat")}
           />
           <button
+            type="button"
             className="soft-button"
             onClick={() => act(now?.playing ? "pause" : "play")}
           >
@@ -187,6 +189,7 @@ export function SpotifyPanel({ report }: { report: (m: string) => void }) {
           <p>Yami forgets its Spotify sign-in.</p>
         </div>
         <button
+          type="button"
           className="text-button"
           onClick={() =>
             void api("spotify.disconnect")

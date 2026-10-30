@@ -12,7 +12,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Lines, UI rules, Biome, secrets, types, native build and tests.
       - run: npm run check
       - run: npm run build
       - run: npm run docs
       - run: git diff --exit-code -- docs/internal/viewer
+      # Known advisories are reported here; updates wait two weeks (see
+      # docs/internal/security-and-providers.md), so this does not fail the run.
+      - run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true

@@ -141,7 +141,13 @@
   place-items: center;
   background:
     radial-gradient(closest-side, var(--ink-1) 82%, transparent 84%),
-    conic-gradient(from 0deg, #93a9ff, #bcaaff calc(var(--progress) * 180deg), #f1a7d6 calc(var(--progress) * 360deg), #ffffff12 0);
+    conic-gradient(
+      from 0deg,
+      #93a9ff,
+      #bcaaff calc(var(--progress) * 180deg),
+      #f1a7d6 calc(var(--progress) * 360deg),
+      #ffffff12 0
+    );
   box-shadow: 0 0 24px rgba(188, 170, 255, 0.14);
 }
 .focus-dial b {

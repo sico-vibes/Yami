@@ -147,10 +147,14 @@ export function DnsSection({
             here any time.
           </p>
           <div className="dialog-actions">
-            <button className="soft-button" onClick={() => setPending(null)}>
+            <button
+              type="button"
+              className="soft-button"
+              onClick={() => setPending(null)}
+            >
               Cancel
             </button>
-            <button className="primary-button" onClick={apply}>
+            <button type="button" className="primary-button" onClick={apply}>
               {pending.profile === pending.adapter.profile
                 ? pending.encrypted
                   ? "Encrypt"

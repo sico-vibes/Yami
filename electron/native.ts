@@ -48,7 +48,10 @@ export class Native {
     this.process.on("error", (e) => this.fail(e));
     this.process.on("exit", (code) => {
       if (!this.closing)
-        log().error("native", new Error(`The Windows helper stopped (code ${code}).`));
+        log().error(
+          "native",
+          new Error(`The Windows helper stopped (code ${code}).`),
+        );
       this.fail(
         new Error("Windows integration stopped. Restart Yami to reconnect."),
       );

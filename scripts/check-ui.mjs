@@ -31,7 +31,11 @@ function titleAttributes(text) {
       if (c === "{") depth++;
       else if (c === "}") depth--;
       else if (depth === 0 && c === ">") break;
-      else if (depth === 0 && /\stitle=/.test(text.slice(i - 1, i + 6)) && c === "t") {
+      else if (
+        depth === 0 &&
+        /\stitle=/.test(text.slice(i - 1, i + 6)) &&
+        c === "t"
+      ) {
         hits++;
         break;
       }
@@ -40,7 +44,11 @@ function titleAttributes(text) {
   return hits;
 }
 const rules = [
-  { name: "native <select>", count: (t) => t.match(/<select[\s>]/g)?.length || 0, ext: [".tsx"] },
+  {
+    name: "native <select>",
+    count: (t) => t.match(/<select[\s>]/g)?.length || 0,
+    ext: [".tsx"],
+  },
   { name: "title tooltip", count: titleAttributes, ext: [".tsx"] },
   {
     name: "window.confirm",
@@ -56,7 +64,8 @@ function walk(dir, found = []) {
     const file = path.join(dir, e.name);
     if (e.isDirectory()) {
       if (e.name !== "preview") walk(file, found);
-    } else if (/\.(tsx?|css)$/.test(e.name)) found.push(file.split(path.sep).join("/"));
+    } else if (/\.(tsx?|css)$/.test(e.name))
+      found.push(file.split(path.sep).join("/"));
   }
   return found;
 }
@@ -83,6 +92,8 @@ if (update) {
   fs.writeFileSync(baselineFile, JSON.stringify(counts, null, 2) + "\n");
   console.log(`Updated ${baselineFile}.`);
 } else if (failures.length) {
-  console.error("Nightglow check failed:\n" + failures.map((f) => "  " + f).join("\n"));
+  console.error(
+    "Nightglow check failed:\n" + failures.map((f) => "  " + f).join("\n"),
+  );
   process.exit(1);
 } else console.log("Nightglow check passed.");

@@ -25,6 +25,7 @@ export function Connections({
           </p>
         </div>
         <button
+          type="button"
           className="soft-button"
           onClick={() => {
             setEdit({
@@ -59,6 +60,7 @@ export function Connections({
                 {c.enabled ? r?.status || "Ready to refresh" : "Disabled"}
               </span>
               <button
+                type="button"
                 className="soft-button"
                 disabled={!c.enabled || busy}
                 onClick={() => {
@@ -193,6 +195,7 @@ export function Connections({
           <div className="dialog-actions">
             {edit.id && (
               <button
+                type="button"
                 className="text-button"
                 onClick={() =>
                   void api("connections.remove", { id: edit.id })
@@ -204,6 +207,7 @@ export function Connections({
               </button>
             )}
             <button
+              type="button"
               className="primary-button"
               disabled={busy}
               onClick={() => {
@@ -269,6 +273,7 @@ export function LocalServer({
         </label>
       </div>
       <button
+        type="button"
         className="soft-button"
         disabled={busy}
         onClick={() => {
@@ -286,6 +291,7 @@ export function LocalServer({
         Connect and discover models
       </button>
       <button
+        type="button"
         className="text-button"
         disabled={busy}
         onClick={() =>
@@ -330,6 +336,7 @@ export function LocalServer({
           </label>
           <div className="workbench-actions">
             <button
+              type="button"
               className="soft-button"
               disabled={busy || !text.trim()}
               onClick={() => {
@@ -347,6 +354,7 @@ export function LocalServer({
             </button>
             {busy && (
               <button
+                type="button"
                 className="text-button"
                 onClick={() => void api("local.cancel", { id })}
               >

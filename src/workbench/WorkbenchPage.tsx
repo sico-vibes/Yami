@@ -74,6 +74,7 @@ export default function WorkbenchPage({
           <nav aria-label="AI sections">
             {pages.map(([label, icon]) => (
               <button
+                type="button"
                 key={label}
                 className={page === label ? "selected" : ""}
                 aria-current={page === label ? "page" : undefined}
@@ -143,6 +144,7 @@ export default function WorkbenchPage({
             <div className="drawer-ai-side">
               <section className="drawer-card drawer-ai-actions">
                 <button
+                  type="button"
                   className="primary-button"
                   onClick={() =>
                     void api("terminal.open").catch((e) => report(e.message))
@@ -152,6 +154,7 @@ export default function WorkbenchPage({
                   Open Yami Terminal
                 </button>
                 <button
+                  type="button"
                   className="soft-button"
                   onClick={() => void api("show", { tab: "ai" })}
                 >

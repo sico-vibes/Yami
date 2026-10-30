@@ -1,4 +1,5 @@
-import React, { lazy, Suspense } from "react";
+import type React from "react";
+import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/rubik";
 import "@phosphor-icons/web/regular";
@@ -7,9 +8,17 @@ import "./style.css";
 const mode = new URLSearchParams(location.search).get("window") || "main";
 document.documentElement.dataset.window = mode;
 // Errors in any window go to Yami's ERR log (the main process limits them).
-const report = (e: { message?: string; name?: string; stack?: string }, source: string) =>
+const report = (
+  e: { message?: string; name?: string; stack?: string },
+  source: string,
+) =>
   void window.yami
-    ?.invoke("log.report", { message: e.message, name: e.name, stack: e.stack, source })
+    ?.invoke("log.report", {
+      message: e.message,
+      name: e.name,
+      stack: e.stack,
+      source,
+    })
     .catch(() => {});
 addEventListener("error", (e) =>
   report(e.error || { message: e.message }, `${e.filename}:${e.lineno}`),

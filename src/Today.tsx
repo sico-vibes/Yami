@@ -145,6 +145,7 @@ export function Today({
             </>
           ) : (
             <button
+              type="button"
               className="weather-enable"
               onClick={() =>
                 state.settings.weatherEnabled
@@ -185,6 +186,7 @@ export function Today({
           <div className="week-strip">
             {week.map((d) => (
               <button
+                type="button"
                 key={d.toDateString()}
                 className={`${sameDay(d, now) ? "today" : ""} ${sameDay(d, picked) ? "picked" : ""}`}
                 aria-pressed={sameDay(d, picked)}
@@ -223,6 +225,7 @@ export function Today({
             )}
             {!state.settings.holidaysEnabled && (
               <button
+                type="button"
                 className="text-button"
                 onClick={() =>
                   void api("settings", { holidaysEnabled: true }).catch((e) =>
@@ -251,6 +254,7 @@ export function Today({
             <div className="focus-presets">
               {PRESETS.map((m) => (
                 <button
+                  type="button"
                   key={m}
                   className={!timer.endsAt && minutes === m ? "selected" : ""}
                   disabled={!!timer.endsAt}
@@ -263,6 +267,7 @@ export function Today({
             <FocusOptions focus={focus} running={!!timer.endsAt} />
             <div className="focus-actions">
               <button
+                type="button"
                 className="gold-button"
                 onClick={() =>
                   void (
@@ -280,6 +285,7 @@ export function Today({
                 {timer.endsAt ? "Stop" : "Start"}
               </button>
               <button
+                type="button"
                 onClick={() => {
                   setMinutes(5);
                   if (timer.endsAt) void api("timer.stop").then(setTimer);
@@ -302,6 +308,7 @@ export function Today({
           {state.todos.map((t) => (
             <div className="todo-row" key={t.id}>
               <button
+                type="button"
                 className={`check-circle ${t.done ? "checked" : ""}`}
                 aria-label={t.done ? "Mark incomplete" : "Complete to-do"}
                 onClick={() => void api("todo.toggle", { id: t.id })}
