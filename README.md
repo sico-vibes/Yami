@@ -1,57 +1,47 @@
 # Yami
 
-Yami is a Windows desktop companion with a small spirit island, voice conversation, dictation, screen selection, local Windows controls, and an optional Gemini-powered assistant. It is a community reconstruction inspired by supplied visual references. It does not claim exact Hitodama behavior or affiliation.
-
-The application is free and open source under the MIT License. The repository is private while development continues. A key requirement applies to online AI features: you bring your own provider keys, and provider pricing, free quotas, geography, eligibility, and terms can change. “Free tier” does not mean unlimited or universally available.
-
-## Screenshots
+Yami is a free, open-source desktop companion for Windows. A small spirit lives in an island at the top of your screen, and from there you can talk to her, dictate into any app, convert files with a drag, tune Windows, control your music, keep plans, and hand work to coding agents. Every feature is optional: you choose what Yami does when you first start her, and anything you leave off costs nothing.
 
 | Home | Loadout | Spirit island |
 | --- | --- | --- |
 | ![Yami home](docs/internal/assets/screenshots/home.png) | ![Yami loadout](docs/internal/assets/screenshots/loadout.png) | ![Yami island](docs/internal/assets/screenshots/island.png) |
 
-| Settings | Web preview |
-| --- | --- |
-| ![Yami settings](docs/internal/assets/screenshots/settings.png) | ![Yami web preview](docs/internal/assets/screenshots/preview.png) |
+## Highlights
 
-## Starter wallpapers
+- **Talk and dictate.** Hold a shortcut to talk to Yami, or to dictate into any text field, online with your own free Gemini key or fully offline.
+- **The island.** Media controls, a calendar and timers, system stats, clipboard history, apps, wallpapers, radio and power, one hover away.
+- **File wheel.** Drag a file and tap a key to convert, compress, rename or edit it, without opening another app.
+- **Tune Windows.** Tweaks with exact undo, startup apps, DNS and a local ad-blocking network shield, cleanup, disk space, and more.
+- **For developers.** Projects, a terminal, one-click coding agents, agent status in the island, and an MCP endpoint so agents can call Yami.
+- **Your desktop, your way.** A dock, a desk clock widget, a light private browser, a download manager with a new-tab extension, and a phone remote.
 
-![Yami Starter landscape collection](docs/internal/assets/wallpapers/starter-pack.jpg)
+## Get Yami
 
-Ten original, character-free Japanese landscapes in one 1920 × 1280 pack. [Browse the pack and provenance](docs/internal/wallpapers.md).
+Download the portable `.exe` from [Releases](https://github.com/sico-vibes/Yami/releases) and run it. It is not signed yet, so Windows SmartScreen asks first: choose **More info**, then **Run anyway**. Yami runs on Windows 10 and 11.
 
-## Start here
+Start with [Getting started](docs/getting-started.md), then browse the [documentation](docs/README.md).
 
-- [Documentation index](docs/internal/index.md) — guided map of all project docs.
-- [Standalone documentation viewer](docs/internal/index.html) — a local browser reader built from the Markdown guides.
-- [Getting started](docs/internal/getting-started.md) — install, launch, configure provider keys, and try the main workflows.
-- [Feature and settings guide](docs/internal/features-and-settings.md) — shipped capabilities and current defaults.
-- [Security and provider data flow](docs/internal/security-and-providers.md) — exact network destinations, local storage, permissions, and confirmation rules.
-- [Architecture](docs/internal/architecture.md) — renderer, Electron main process, IPC, and native Windows host.
-- [Development, build, and release](docs/internal/development.md) — local workflow, checks, package targets, and contribution rules.
-- [Performance goals](docs/internal/performance.md) — Windows-first idle behavior and measurement gates.
-- [Roadmap](docs/internal/roadmap.md) — ideas that are planned rather than shipped.
-- [Asset and third-party provenance](docs/internal/assets-and-licenses.md) — artwork, data, fonts, icons, and bundled dependencies.
+## Privacy in one paragraph
 
-## Development at a glance
+Yami keeps your data on your PC. Online features use accounts you connect yourself (for example a free Gemini API key), and keys are encrypted with Windows. Nothing is sent anywhere until you turn on a feature that needs it, and each one says what it sends. See [Providers and privacy](docs/providers-and-privacy.md).
 
-On Windows with Node.js/npm installed:
+## Found a bug?
+
+In Yami, open **Settings › Your data › Report a bug**. It collects a report with recent logs (secrets masked) and opens a GitHub issue for you to attach it to. Security problems: please [report them privately](SECURITY.md).
+
+## Build from source
+
+On Windows with Node.js 24:
 
 ```powershell
 npm install
 npm run dev
 ```
 
-For the full Windows build and portable package, see [Development, build, and release](docs/internal/development.md). Web preview is for renderer/UI work with a fixture bridge. It does not provide Windows controls, microphone capture, screen capture, or native actions.
-
-## Project status
-
-The packaged idle sample used about **166 MB private RAM** across the process tree (about **536 MB including shared pages**). The 50–100 MB idle target is not met, and the active-task ceiling has not been verified. [Conditions, samples, and optimization priorities](docs/internal/performance.md).
-
-Yami is a reconstruction. Unknown original prompts, hidden screens, custom voice mappings, reward rules, and animation timings cannot be recovered from the references. Current features and limitations are described from the code that ships in this repository. Future ideas are marked **Planned** in the roadmap.
-
-An initial short idle sample of the production-source Electron build recorded 165–168 MB summed private working set and 706–708 MB including shared pages across eight Yami processes. It used three snapshots after a 10-second settle with clipboard, app context, and weather off; the packaged build and sustained behavior remain to be measured. The 50–100 MB idle aspiration is **not met** in this sample. See [Performance goals](docs/internal/performance.md) for hardware, CPU readings, method, and limits.
+`npm install` also turns on the pre-push checks. See [CONTRIBUTING.md](CONTRIBUTING.md) for the code standards, and [docs/internal](docs/internal/index.md) for the full developer reference: architecture, security, performance and the release process.
 
 ## License
 
-Yami-authored source is licensed under MIT; third-party libraries and data retain their own licenses. Bundled starter wallpapers and other artwork have asset-specific provenance documented in [Asset and third-party provenance](docs/internal/assets-and-licenses.md). Do not assume the reference wallpapers are Yami-owned or redistributable.
+Yami's own code is [MIT licensed](LICENSE). Third-party libraries, fonts, icons and data keep their own licenses, listed in [assets and licenses](docs/internal/assets-and-licenses.md). The starter wallpapers were made for Yami.
+
+Yami is an independent project inspired by other desktop companions. It is not affiliated with, or endorsed by, any of them.

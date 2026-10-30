@@ -1,9 +1,9 @@
 {
   "name": "yami",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "A Windows voice companion",
+  "description": "A free, open-source desktop companion for Windows",
   "author": "Yami contributors",
   "main": "dist-electron/main.cjs",
   "scripts": {
