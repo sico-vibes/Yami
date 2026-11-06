@@ -108,7 +108,7 @@
     "marked": "^18.1.1",
     "qrcode": "^1.5.4",
     "typescript": "^7.0.2",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   },
   "license": "MIT",
   "repository": {
